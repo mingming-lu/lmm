@@ -3,6 +3,7 @@ package main
 import (
     "log"
     "net/http"
+    "os"
 )
 
 const ImageResPath = "image/res"
