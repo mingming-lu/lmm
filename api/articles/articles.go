@@ -27,9 +27,9 @@ func HandleArticles(w http.ResponseWriter, r *http.Request) {
 		StatusCode: http.StatusOK,
 		Result: Result{
 			Articles: []Article{
-				{Title: "怒斥香港记者", Text: "吼啊"},
-				{Title: "与华莱士谈笑风生", Text: "喝茶"},
-				{Title: "视察国机二院", Text: "Excited"},
+				{Title: "怒斥香港记者", Text: "Too young too simple, sometimes naive."},
+				{Title: "与华莱士谈笑风生", Text: "不知道比你们搞到哪里去了"},
+				{Title: "视察国机二院", Text: "苟利国家生死以，岂因祸福避趋之"},
 			},
 		},
 		HasMore:    false,
