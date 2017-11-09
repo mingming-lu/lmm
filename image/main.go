@@ -9,7 +9,7 @@ import (
 const ImageResPath = "image/res"
 
 func handleImage(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, ImagePath + r.URL.Path)
+    http.ServeFile(w, r, ImageResPath + r.URL.Path)
 }
 
 func ensureRes() {
