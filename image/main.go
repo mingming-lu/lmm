@@ -5,10 +5,20 @@ import (
     "net/http"
 )
 
-const ImagePath = "image/res"
+const ImageResPath = "image/res"
 
 func handleImage(w http.ResponseWriter, r *http.Request) {
     http.ServeFile(w, r, ImagePath + r.URL.Path)
+}
+
+func ensureRes() {
+    if _, err := os.Stat(ImageResPath); os.IsNotExist(err) {
+        os.Mkdir(ImageResPath, os.ModePerm)
+    }
+}
+
+func init() {
+    ensureRes()
 }
 
 func main() {
