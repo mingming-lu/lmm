@@ -17,14 +17,13 @@
 
     <router-view/>
 
-    <footer class="w3-container w3-padding-64 w3-light-grey w3-center w3-large">
-      <i class="fa fa-facebook-official w3-hover-opacity"></i>
-      <i class="fa fa-instagram w3-hover-opacity"></i>
-      <i class="fa fa-snapchat w3-hover-opacity"></i>
-      <i class="fa fa-pinterest-p w3-hover-opacity"></i>
-      <i class="fa fa-twitter w3-hover-opacity"></i>
-      <i class="fa fa-linkedin w3-hover-opacity"></i>
-      <p>Powered by <router-link to="/profile" class="w3-hover-text-grey">Lu Mingming</router-link></p>
+    <footer class="lmm-container lmm-padding-64 lmm-light-grey lmm-center lmm-large">
+      <i class="fa fa-wechat lmm-hover-opacity"></i>
+      <i class="fa fa-qq lmm-hover-opacity"></i>
+      <i class="fa fa-weibo lmm-hover-opacity"></i>
+      <i class="fa fa-facebook-official lmm-hover-opacity"></i>
+      <i class="fa fa-twitter lmm-hover-opacity"></i>
+      <p>Powered by <router-link to="/profile" class="lmm-light-grey lmm-hover-light-grey">Lu Mingming</router-link></p>
     </footer>
   </div>
 </template>
@@ -36,12 +35,19 @@ export default {
 </script>
 
 <style>
+.lmm-large {
+  font-size: 18px !important;
+}
 .lmm-xlarge {
   font-size: 24px !important;
 }
 .lmm-padding-32 {
   padding-top: 32px !important;
   padding-bottom: 32px !important;
+}
+.lmm-padding-64 {
+  padding-top: 64px !important;
+  padding-bottom: 64px !important;
 }
 .lmm-penal {
   padding: 0.01em 16px;
@@ -59,7 +65,7 @@ export default {
   display: inline-block;
   width: auto;
 }
-.lmm-bar:before, .lmm-bar:after {
+.lmm-bar:before, .lmm-bar:after, .lmm-container:after, .lmm-container:before, {
   content: "";
   display: table;
   clear: both;
@@ -99,6 +105,9 @@ export default {
   color: #000 !important;
   background-color: #ccc !important;
 }
+.lmm-hover-opacity:hover {
+  opacity: 0.60;
+}
 .lmm-bar .lmm-button {
   white-space:normal;
 }
@@ -107,6 +116,13 @@ export default {
 }
 .lmm-opacity {
   opacity: 0.60;
+}
+.lmm-light-grey {
+  color: #000 !important;
+  background-color: #f1f1f1 !important;
+}
+.lmm-hover-light-grey:hover {
+  color: #757575 !important;
 }
 body {
   font-family: 'Lucida Grande', Helvetica, Arial,
