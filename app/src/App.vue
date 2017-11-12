@@ -75,7 +75,7 @@ export default {
 .lmm-border {
   border: 1px solid #ccc !important;
 }
-.w3-button {
+.lmm-button {
   border: none;
   display: inline-block;
   outline: 0;
