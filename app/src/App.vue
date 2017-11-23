@@ -49,7 +49,7 @@ export default {
   padding-top: 64px !important;
   padding-bottom: 64px !important;
 }
-.lmm-penal {
+.lmm-container, .lmm-penal {
   padding: 0.01em 16px;
   margin: 16px 0;
 }
@@ -60,11 +60,14 @@ export default {
 .lmm-border {
   border: 1px solid #ccc !important;
 }
+.lmm-card-4 {
+  box-shadow: 0 4px 10px 0 rgba(0,0,0,0.2),0 4px 20px 0 rgba(0,0,0,0.19)
+}
 .lmm-center .lmm-bar {
   display: inline-block;
   width: auto;
 }
-.lmm-bar:before, .lmm-bar:after, .lmm-container:after, .lmm-container:before, {
+.lmm-bar:before, .lmm-bar:after, .lmm-container:after, .lmm-container:before, .lmm-row:after, .lmm-row:before {
   content: "";
   display: table;
   clear: both;
@@ -120,6 +123,9 @@ export default {
   color: #000 !important;
   background-color: #f1f1f1 !important;
 }
+.lmm-margin {
+  margin: 16px !important;
+}
 .lmm-hover-light-grey:hover {
   color: #757575 !important;
 }
@@ -132,6 +138,16 @@ export default {
 .lmm-half>.lmm-box {
   width: 100%;
   margin: 4px 0;
+}
+.lmm-padding-large {
+  padding: 12px 24px !important;
+}
+.lmm-right {
+  float: right !important;
+}
+.lmm-white {
+  color: #000 !important;
+  background-color: #fff !important;
 }
 body {
   font-family: 'Lucida Grande', Helvetica, Arial,
