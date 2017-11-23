@@ -19,14 +19,7 @@ export default {
         this.photos.push(photo)
       })
     })
-    let width = window.innerWidth || document.body.clientWidth
-    let n = Math.floor(width / 256)
-    if (n < 1) {
-      n = 1
-    }
-    console.log(n)
     return {
-      columnNum: n,
       photos: []
     }
   }
