@@ -4,7 +4,7 @@
       <div class="lmm-card-4 lmm-margin lmm-white" style="width:66.6666%">
         <div class="lmm-container" style="text-align: left">
           <h2><b>{{ article.title }}</b></h2>
-          <p class="lmm-opacity">{{ article.posted_time }}</p>
+          <p class="lmm-opacity">{{ format(article.posted_time) }}</p>
           <p>{{ article.text }}</p>
           <p style="float: right"><button class="lmm-button lmm-padding-large lmm-white lmm-border"><b>READ MORE »</b></button></p>
         </div>
@@ -15,6 +15,7 @@
 
 <script>
 import * as request from '@/request'
+import * as utils from '@/utils'
 export default {
   data () {
     request.get('http://localhost:8081/articles', (response) => {
@@ -23,7 +24,8 @@ export default {
       })
     })
     return {
-      articles: []
+      articles: [],
+      format: utils.formattedTime
     }
   }
 }
