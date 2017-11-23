@@ -51,8 +51,7 @@ export default {
 }
 .lmm-penal {
   padding: 0.01em 16px;
-  margin-top: 16px;
-  margin-bottom: 16px;
+  margin: 16px 0;
 }
 .lmm-bar {
   width: 100%;
@@ -124,6 +123,16 @@ export default {
 .lmm-hover-light-grey:hover {
   color: #757575 !important;
 }
+.lmm-half {
+  display: inline-block;
+  width: 49%;
+  margin: 0 4px;
+  vertical-align: top;
+}
+.lmm-half>.lmm-box {
+  width: 100%;
+  margin: 4px 0;
+}
 body {
   font-family: 'Lucida Grande', Helvetica, Arial,
                'Microsoft Yahei', '微软雅黑', STXihei, '华文细黑',
@@ -138,6 +147,5 @@ h1 {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>

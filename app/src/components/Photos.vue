@@ -1,12 +1,12 @@
 <template>
-  <div class="w3-row-padding" style="margin-bottom:128px">
-    <div class="w3-half">
-      <img v-for="(photo, index) in photos.slice(0, Math.floor(photos.length/2))" :src="photo.url" :key="photo.url" style="width:100%">
-    </div>
-    <div class="w3-half">
-      <img v-for="(photo, index) in photos.slice(Math.floor(photos.length/2))" :src="photo.url" :key="photo.url" style="width:100%">
-    </div>
-  </div>
+  <ul>
+    <li class="lmm-half">
+      <img v-for="(photo, index) in photos.slice(0, photos.length/2)" :src="photo.url" :key="photo.url" class="lmm-box">
+    </li>
+    <li class="lmm-half">
+      <img v-for="(photo, index) in photos.slice(photos.length/2)" :src="photo.url" :key="photo.url" class="lmm-box">
+    </li>
+  </ul>
 </template>
 
 <script>
@@ -19,7 +19,14 @@ export default {
         this.photos.push(photo)
       })
     })
+    let width = window.innerWidth || document.body.clientWidth
+    let n = Math.floor(width / 256)
+    if (n < 1) {
+      n = 1
+    }
+    console.log(n)
     return {
+      columnNum: n,
       photos: []
     }
   }
