@@ -17,7 +17,7 @@
 
     <router-view/>
 
-    <footer class="lmm-container lmm-padding-64 lmm-light-grey lmm-center lmm-large">
+    <footer class="lmm-container lmm-padding-64 lmm-light-grey lmm-center lmm-opacity">
       <i class="fa fa-wechat lmm-hover-opacity"></i>
       <i class="fa fa-qq lmm-hover-opacity"></i>
       <i class="fa fa-weibo lmm-hover-opacity"></i>
@@ -112,6 +112,10 @@ export default {
 }
 .lmm-center {
   text-align: center !important;
+}
+.lmm-container {
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 .lmm-opacity {
   opacity: 0.60;
