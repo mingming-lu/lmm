@@ -1,8 +1,9 @@
 <template>
-  <div>
-    <div v-for="(article, index) in articles" :key="article.title">
-      <div class="lmm-card-4 lmm-margin lmm-white" style="width:66.6666%">
-        <div class="lmm-container" style="text-align: left">
+  <div class="lmm-row">
+    <!-- Posts -->
+    <div style="width:66.6666%; float:left; display:inline-block">
+      <div v-for="(article, index) in articles" :key="article.title">
+        <div class="lmm-card-4 lmm-container lmm-margin" style="text-align:left">
           <h2><b>{{ article.title }}</b></h2>
           <p class="lmm-opacity">{{ format(article.posted_time) }}</p>
           <p>{{ article.text }}</p>
@@ -10,6 +11,33 @@
         </div>
       </div>
     </div>
+
+    <!-- Category -->
+    <div style="width:33.3333%; float:right; display:inline-block; text-align:left">
+      <div class="lmm-card-4 lmm-container lmm-margin">
+        <h4>Category</h4>
+        <hr>
+        <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">哈三篇</router-link></p>
+        <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">番外篇</router-link></p>
+        <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">哈轶事</router-link></p>
+      </div>
+    </div>
+
+    <!-- Tags -->
+    <div style="width:33.3333%; float:right; display:inline-block; text-align:left">
+      <div class="lmm-card-4 lmm-container lmm-margin">
+        <h4>Tags</h4>
+        <hr>
+        <p>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">上海交通大学</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">夏威夷吉他</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">张宝华</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">Excited</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">高腰裤</router-link></span>
+        </p>
+      </div>
+    </div>
+
   </div>
 </template>
 

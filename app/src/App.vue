@@ -116,10 +116,6 @@ export default {
 .lmm-center {
   text-align: center !important;
 }
-.lmm-container {
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
 .lmm-opacity {
   opacity: 0.60;
 }
@@ -148,6 +144,11 @@ export default {
 }
 .lmm-right {
   float: right !important;
+}
+.lmm-tag {
+  display: inline-block;
+  text-align: center;
+  margin-bottom: 8px !important;
 }
 .lmm-white {
   color: #000 !important;
