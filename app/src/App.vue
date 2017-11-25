@@ -6,7 +6,7 @@
   
       <div class="lmm-padding-32">
         <div class="lmm-bar lmm-border">
-          <router-link to="/" class="lmm-bar-item lmm-button">Home</router-link>
+          <router-link to="/home" class="lmm-bar-item lmm-button">Home</router-link>
           <router-link to="/articles" class="lmm-bar-item lmm-button">Articles</router-link>
           <router-link to="/photos" class="lmm-bar-item lmm-button">Photographs</router-link>
           <router-link to="/projects" class="lmm-bar-item lmm-button">Projects</router-link>
