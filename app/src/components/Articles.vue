@@ -1,19 +1,19 @@
 <template>
   <div class="lmm-row">
     <!-- Posts -->
-    <div style="width:66.6666%; float:left; display:inline-block">
+    <div class="lmm-left" style="width:66.6666%; display:inline-block">
       <div v-for="(article, index) in articles" :key="article.title">
         <div class="lmm-card-4 lmm-container lmm-margin" style="text-align:left">
           <h2><b>{{ article.title }}</b></h2>
           <p class="lmm-opacity">{{ format(article.posted_time) }}</p>
           <p>{{ article.text }}</p>
-          <p style="float: right"><button class="lmm-button lmm-padding-large lmm-white lmm-border"><b>READ MORE »</b></button></p>
+          <p class="lmm-right"><button class="lmm-button lmm-padding-large lmm-white lmm-border"><b>READ MORE »</b></button></p>
         </div>
       </div>
     </div>
 
     <!-- Category -->
-    <div style="width:33.3333%; float:right; display:inline-block; text-align:left">
+    <div class="lmm-right" style="width:33.3333%; display:inline-block; text-align:left">
       <div class="lmm-card-4 lmm-container lmm-margin">
         <h4>Category</h4>
         <hr>
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Tags -->
-    <div style="width:33.3333%; float:right; display:inline-block; text-align:left">
+    <div class="lmm-right" style="width:33.3333%; display:inline-block; text-align:left">
       <div class="lmm-card-4 lmm-container lmm-margin">
         <h4>Tags</h4>
         <hr>

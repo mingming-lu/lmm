@@ -119,6 +119,9 @@ export default {
 .lmm-opacity {
   opacity: 0.60;
 }
+.lmm-left {
+  float: left;
+}
 .lmm-light-grey {
   color: #000 !important;
   background-color: #f1f1f1 !important;
