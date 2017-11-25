@@ -5,7 +5,7 @@
       <div v-for="(article, index) in articles" :key="article.title">
         <div class="lmm-card-4 lmm-container lmm-margin" style="text-align:left">
           <h2><b>{{ article.title }}</b></h2>
-          <p class="lmm-opacity">{{ format(article.posted_time) }}</p>
+          <p>{{ format(article.posted_time) }}</p>
           <p>{{ article.text }}</p>
           <p class="lmm-right"><button class="lmm-button lmm-padding-large lmm-white lmm-border"><b>READ MORE »</b></button></p>
         </div>
@@ -29,11 +29,11 @@
         <h4>Tags</h4>
         <hr>
         <p>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">上海交通大学</router-link></span>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">夏威夷吉他</router-link></span>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">张宝华</router-link></span>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">Excited</router-link></span>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">高腰裤</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">上海交通大学</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">夏威夷吉他</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">张宝华</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">Excited</router-link></span>
+          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">高腰裤</router-link></span>
         </p>
       </div>
     </div>

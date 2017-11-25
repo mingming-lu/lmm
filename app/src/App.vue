@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <header class="lmm-panel lmm-center lmm-opacity" style="padding:128px 16px">
+    <header class="lmm-panel lmm-center" style="padding:128px 16px">
       <h1 class="lmm-xlarge">一个一点也不萌的网站</h1>
       <h1>卢明鸣的博客</h1>
   
@@ -17,7 +17,7 @@
 
     <router-view/>
 
-    <footer class="lmm-container lmm-padding-64 lmm-light-grey lmm-center lmm-opacity">
+    <footer class="lmm-container lmm-padding-64 lmm-light-grey lmm-center">
       <i class="fa fa-wechat lmm-hover-opacity"></i>
       <i class="fa fa-qq lmm-hover-opacity"></i>
       <i class="fa fa-weibo lmm-hover-opacity"></i>
@@ -104,7 +104,6 @@ export default {
   user-select: none;
 }
 .lmm-button:hover {
-  color: #000 !important;
   background-color: #ccc !important;
 }
 .lmm-hover-opacity:hover {
@@ -116,15 +115,18 @@ export default {
 .lmm-center {
   text-align: center !important;
 }
-.lmm-opacity {
-  opacity: 0.60;
-}
+.lmm-grey {
+  color: #424949;
+  background-color:#9e9e9e!important}
 .lmm-left {
   float: left;
 }
 .lmm-light-grey {
-  color: #000 !important;
+  color: #424949;
   background-color: #f1f1f1 !important;
+}
+.lmm-link {
+  text-decoration:none;
 }
 .lmm-margin {
   margin: 16px !important;
@@ -154,7 +156,7 @@ export default {
   margin-bottom: 8px !important;
 }
 .lmm-white {
-  color: #000 !important;
+  color: #424949;
   background-color: #fff !important;
 }
 body {
@@ -170,6 +172,7 @@ h1 {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #424949;
+  background-color: #fff;
 }
 </style>
