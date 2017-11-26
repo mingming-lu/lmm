@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <header class="lmm-panel lmm-center" style="padding:128px 16px">
-      <h1 class="lmm-xlarge">一个一点也不萌的网站</h1>
+      <h1 class="lmm-xxxlarge">一个一点也不萌的网站</h1>
       <h1>卢明鸣的博客</h1>
   
       <div class="lmm-padding-32">
@@ -35,10 +35,16 @@ export default {
 </script>
 
 <style>
+.lmm-opacity {
+  opacity: 0.6;
+}
+.lmm-small {
+  font-size: 14px !important;
+}
 .lmm-large {
   font-size: 18px !important;
 }
-.lmm-xlarge {
+.lmm-xxxlarge {
   font-size: 24px !important;
 }
 .lmm-padding-32 {
