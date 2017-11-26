@@ -15,7 +15,7 @@ import * as request from '@/request'
 export default {
   data () {
     request.get('http://localhost:8081/photos', (response) => {
-      response.result.images.forEach((photo) => {
+      response.images.forEach((photo) => {
         this.photos.push(photo)
       })
     })
