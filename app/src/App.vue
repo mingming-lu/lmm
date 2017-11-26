@@ -115,6 +115,14 @@ export default {
 .lmm-center {
   text-align: center !important;
 }
+.lmm-display-bottomleft {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+.lmm-display-container {
+  position: relative;
+}
 .lmm-grey {
   color: #424949;
   background-color:#9e9e9e!important}
@@ -130,6 +138,9 @@ export default {
 }
 .lmm-margin {
   margin: 16px !important;
+}
+.lmm-margin-right {
+  margin-right: 16px !important;
 }
 .lmm-hover-light-grey:hover {
   color: #757575 !important;
@@ -149,6 +160,9 @@ export default {
 }
 .lmm-right {
   float: right !important;
+}
+.lmm-round-xlarge {
+  border-radius: 16px;
 }
 .lmm-tag {
   display: inline-block;
