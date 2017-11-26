@@ -47,7 +47,7 @@ import * as utils from '@/utils'
 export default {
   data () {
     request.get('http://localhost:8081/articles', (response) => {
-      response.result.articles.forEach((article) => {
+      response.articles.forEach((article) => {
         this.articles.push(article)
       })
     })
