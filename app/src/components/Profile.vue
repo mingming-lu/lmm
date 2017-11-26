@@ -6,9 +6,10 @@
       <div class="lmm-white lmm-margin lmm-card-4">
         <div class="lmm-display-container">
           <img :src="avatar_url" style="width:100%" alt="Avatar">
-          <div class="lmm-display-bottomleft lmm-container">
-            <h2>{{ name }}</h2>
-          </div>
+        </div>
+        <div class="lmm-container">
+          <p class="lmm-large"><b>{{ name }}</b></p>
+          <p>{{ bio }}</p>
         </div>
         <div class="lmm-container">
           <p><i class="fa fa-briefcase fa-fw lmm-margin-right lmm-large"></i>{{ profession }}</p>
@@ -39,10 +40,24 @@ import * as request from '@/request'
 export default {
   data () {
     request.get('http://localhost:8081/profile', (response) => {
-      this.profile = response
+      this.name = response.name
+      this.avatar_url = response.avatar_url
+      this.bio = response.bio
+      this.profession = response.profession
+      this.location = response.location
+      this.email = response.email
+      this.skills = this.skills.concat(response.skills)
+      this.languages = this.languages.concat(response.languages)
     })
     return {
-      profile: undefined
+      name: undefined,
+      avatar_url: undefined,
+      bio: undefined,
+      profession: undefined,
+      location: undefined,
+      email: undefined,
+      skills: [],
+      languages: []
     }
   }
 }

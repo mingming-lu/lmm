@@ -115,11 +115,6 @@ export default {
 .lmm-center {
   text-align: center !important;
 }
-.lmm-display-bottomleft {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-}
 .lmm-display-container {
   position: relative;
 }
