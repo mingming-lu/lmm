@@ -14,10 +14,15 @@ type Response struct {
 	Profession     string           `json:"profession"`
 	Email          string           `json:"email"`
 	Skills         []string         `json:"skills"`
-	Languages      []string         `json:"languages"`
+	Languages      []Language       `json:"languages"`
 	Education      []Education      `json:"education"`
 	WorkExperience []WorkExperience `json:"work_experience"`
 	Qualifications []Qualification  `json:"qualifications"`
+}
+
+type Language struct {
+	Name  string `json:"name"`
+	Level string `json:"level"`
 }
 
 type Education struct {
@@ -65,10 +70,19 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			"Android",
 			"Vue.js",
 		},
-		Languages: []string{
-			"Chinese",
-			"Japanese",
-			"English",
+		Languages: []Language{
+			{
+				Name:  "Chinese",
+				Level: "Native",
+			},
+			{
+				Name:  "Japanese",
+				Level: "Conversational",
+			},
+			{
+				Name:  "English",
+				Level: "Conversational",
+			},
 		},
 		Education: []Education{
 			{
