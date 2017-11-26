@@ -10,6 +10,7 @@ type Response struct {
 	Name           string           `json:"name"`
 	AvatarURL      string           `json:"avatar_url"`
 	Bio            string           `json:"bio"`
+	Location       string           `json:"location"`
 	Profession     string           `json:"profession"`
 	Email          string           `json:"email"`
 	Skills         []string         `json:"skills"`
@@ -55,6 +56,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		AvatarURL:  "http://localhost:8082/avatar",
 		Bio:        "吾輩が人間である",
 		Profession: "Server-side engineer",
+		Location:   "鎌倉, 日本",
 		Email:      "akinaru.lu@gmail.com",
 		Skills: []string{
 			"Golang",
