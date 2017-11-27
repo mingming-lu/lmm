@@ -38,6 +38,9 @@ export default {
 .lmm-opacity {
   opacity: 0.6;
 }
+.lmm-level-opacity {
+  opacity: 0.25;
+}
 .lmm-small {
   font-size: 14px !important;
 }
