@@ -13,11 +13,16 @@ type Response struct {
 	Location       string           `json:"location"`
 	Profession     string           `json:"profession"`
 	Email          string           `json:"email"`
-	Skills         []string         `json:"skills"`
+	Skills         []Skill          `json:"skills"`
 	Languages      []Language       `json:"languages"`
 	Education      []Education      `json:"education"`
 	WorkExperience []WorkExperience `json:"work_experience"`
 	Qualifications []Qualification  `json:"qualifications"`
+}
+
+type Skill struct {
+	Name  string `json:"name"`
+	Level string `json:"level"`
 }
 
 type Language struct {
