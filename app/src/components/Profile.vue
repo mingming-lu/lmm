@@ -22,7 +22,13 @@
         <div class="lmm-container">
           <p><b><i class="fa fa-asterisk fa-fw lmm-margin-right"></i>Skills</b></p>
           <div v-for="(skill, index) in skills" :key="index">
-            <p>{{ skill }}</p>
+            <p>
+              <div style="width: 100%; height: 16px; border: 1px solid white;">
+                <div class="lmm-left" style="margin-right:8px">{{ skill.name }}</div>
+                <div class="lmm-small lmm-right lmm-opacity" style="margin-left:8px;">{{ skill.level }}</div>
+                <hr class="lmm-opacity" style="display: block">
+              </div>
+            </p>
           </div>
         </div>
       </div>
