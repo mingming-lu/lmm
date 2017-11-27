@@ -68,12 +68,35 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 		Profession: "Server-side engineer",
 		Location:   "鎌倉, 日本",
 		Email:      "akinaru.lu@gmail.com",
-		Skills: []string{
-			"Golang",
-			"Perl",
-			"Java",
-			"Android",
-			"Vue.js",
+		Skills: []Skill{
+			{
+				Name:  "Golang",
+				Level: "Beginner",
+			},
+			{
+				Name:  "Perl",
+				Level: "Beginner",
+			},
+			{
+				Name:  "Java",
+				Level: "Advanced",
+			},
+			{
+				Name:  "Python",
+				Level: "Beginner",
+			},
+			{
+				Name:  "Android",
+				Level: "Beginner",
+			},
+			{
+				Name:  "Vue.js",
+				Level: "Beginner",
+			},
+			{
+				Name:  "C++",
+				Level: "Beginner",
+			},
 		},
 		Languages: []Language{
 			{
