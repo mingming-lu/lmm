@@ -36,6 +36,8 @@ type Education struct {
 	YearTo      int    `json:"year_to"`
 	MonthTo     int    `json:"month_to"`
 	Institution string `json:"institution"`
+	Department  string `json:"department"`
+	Major       string `json:"major"`
 	Degree      string `json:"degree"`
 	Current     bool   `json:"current"`
 	Order       int    `json:"order"`
@@ -120,6 +122,8 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				MonthTo:     6,
 				Institution: "绿头蘑菇学校",
 				Degree:      "工学学士",
+				Department:  "生物医学工程学院",
+				Major:       "生物学工程专业",
 				Current:     false,
 				Order:       2,
 			},
@@ -130,6 +134,8 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				MonthTo:     9,
 				Institution: "帝国杜王町大学",
 				Degree:      "工学硕士",
+				Department:  "工学研究科",
+				Major:       "バイオロボティクス専攻",
 				Current:     false,
 				Order:       1,
 			},
