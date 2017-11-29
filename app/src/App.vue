@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <header class="lmm-panel lmm-center" style="padding:128px 16px">
-      <h1 class="lmm-xlarge">一个一点也不萌的网站</h1>
+      <h1 class="lmm-xxxlarge">一个一点也不萌的网站</h1>
       <h1>卢明鸣的博客</h1>
   
       <div class="lmm-padding-32">
@@ -35,11 +35,30 @@ export default {
 </script>
 
 <style>
+.lmm-opacity {
+  opacity: 0.6;
+}
+.lmm-level-opacity {
+  opacity: 0.25;
+}
+.lmm-small {
+  font-size: 14px !important;
+}
 .lmm-large {
   font-size: 18px !important;
 }
 .lmm-xlarge {
+  font-size: 20px !important;
+}
+.lmm-xxlarge {
+  font-size: 22px !important;
+}
+.lmm-xxxlarge {
   font-size: 24px !important;
+}
+.lmm-padding-16 {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
 }
 .lmm-padding-32 {
   padding-top: 32px !important;
@@ -115,6 +134,9 @@ export default {
 .lmm-center {
   text-align: center !important;
 }
+.lmm-display-container {
+  position: relative;
+}
 .lmm-grey {
   color: #424949;
   background-color:#9e9e9e!important}
@@ -130,6 +152,9 @@ export default {
 }
 .lmm-margin {
   margin: 16px !important;
+}
+.lmm-margin-right {
+  margin-right: 16px !important;
 }
 .lmm-hover-light-grey:hover {
   color: #757575 !important;
@@ -149,6 +174,9 @@ export default {
 }
 .lmm-right {
   float: right !important;
+}
+.lmm-round-xlarge {
+  border-radius: 16px;
 }
 .lmm-tag {
   display: inline-block;
