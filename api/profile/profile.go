@@ -38,7 +38,7 @@ type Education struct {
 	Institution string `json:"institution"`
 	Degree      string `json:"degree"`
 	Current     bool   `json:"current"`
-	Sort        int    `json:"sort"`
+	Order       int    `json:"order"`
 }
 
 type WorkExperience struct {
@@ -50,14 +50,14 @@ type WorkExperience struct {
 	Position  string `json:"position"`
 	Status    string `json:"status"`
 	Current   bool   `json:"current"`
-	Sort      int    `json:"sort"`
+	Order     int    `json:"order"`
 }
 
 type Qualification struct {
 	Year  int    `json:"year"`
 	Month int    `json:"month"`
 	Name  string `json:"name"`
-	Sort  int    `json:"sort"`
+	Order int    `json:"order"`
 }
 
 func HandleProfile(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +121,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				Institution: "绿头蘑菇学校",
 				Degree:      "工学学士",
 				Current:     false,
-				Sort:        2,
+				Order:       2,
 			},
 			{
 				YearFrom:    2015,
@@ -131,7 +131,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				Institution: "帝国杜王町大学",
 				Degree:      "工学硕士",
 				Current:     false,
-				Sort:        1,
+				Order:       1,
 			},
 		},
 		WorkExperience: []WorkExperience{
@@ -144,7 +144,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				Position:  "Research",
 				Status:    "Internship",
 				Current:   false,
-				Sort:      3,
+				Order:     3,
 			},
 			{
 				YearFrom:  2016,
@@ -155,7 +155,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				Position:  "IoT R&D",
 				Status:    "Internship",
 				Current:   false,
-				Sort:      2,
+				Order:     2,
 			},
 			{
 				YearFrom:  2017,
@@ -163,7 +163,7 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				Company:   "とある面白法人",
 				Position:  "Internship",
 				Current:   true,
-				Sort:      1,
+				Order:     1,
 			},
 		},
 		Qualifications: []Qualification{
@@ -171,13 +171,13 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 				Year:  2014,
 				Month: 1,
 				Name:  "JLPT N2",
-				Sort:  2,
+				Order: 2,
 			},
 			{
 				Year:  2014,
 				Month: 7,
 				Name:  "JLPT N1",
-				Sort:  1,
+				Order: 1,
 			},
 		},
 	}
