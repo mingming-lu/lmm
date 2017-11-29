@@ -53,11 +53,16 @@
         <p class="lmm-large"><b><i class="fa fa-suitcase fa-fw lmm-margin-right"></i>Work Experience</b></p>
         <br>
         <div v-for="(we, index) in workExperience" :key="index">
-          <p v-if=" we.current === true" class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ we.year_from }}/{{ we.month_from }} ~ current</p>
-          <p v-else class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ we.year_from }}/{{ we.month_from }} ~ {{ we.year_to }}/{{ we.month_to }}</p>
-          <p><b>{{ we.company }}</b> - {{ we.position }} ({{ we.status }})</p>
-          <br v-if="index === workExperience.length - 1">
-          <hr v-else class="lmm-level-opacity">
+          <p>
+            <div style="width: 100%; height: 16px; border: 1px solid white;">
+              <div class="lmm-left" style="margin-right:8px"><b>{{ we.company }}</b></div>
+              <div v-if="we.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.year_from }}/{{ we.month_from }} ~ current</div>
+              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.year_from }}/{{ we.month_from}} ~ {{ we.year_to }}/{{ we.month_to }}</div>
+              <hr class="lmm-level-opacity" style="display: block">
+            </div>
+            <p>{{ we.position }}</p>
+            <br>
+          </p>
         </div>
       </div>
 
@@ -65,12 +70,16 @@
         <p class="lmm-large"><i class="fa fa-certificate fa-fw lmm-margin-right"></i><b>Education</b></p>
         <br>
         <div v-for="(e, index) in education" :key="index">
-          <p v-if=" e.current === true" class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ e.year_from }}/{{ e.month_from }} ~ current</p>
-          <p v-else class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ e.year_from }}/{{ e.month_from }} ~ {{ e.year_to }}/{{ e.month_to }}</p>
-          <p><b>{{ e.institution }}</b> ({{ e.degree }})</p>
-          <p>{{ e.department }} {{ e.major }}</p>
-          <br v-if="index === education.length - 1">
-          <hr v-else class="lmm-level-opacity">
+          <p>
+            <div style="width: 100%; height: 16px; border: 1px solid white;">
+              <div class="lmm-left" style="margin-right:8px"><b>{{ e.institution }}</b> ({{ e.degree }})</div>
+              <div v-if="e.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.year_from }}/{{ e.month_from }} ~ current</div>
+              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.year_from }}/{{ e.month_from}} ~ {{ e.year_to }}/{{ e.month_to }}</div>
+              <hr class="lmm-level-opacity" style="display: block">
+            </div>
+            <p>{{ e.department }} {{ e.major }}</p>
+            <br>
+          </p>
         </div>
       </div>
 
@@ -78,10 +87,14 @@
         <p class="lmm-large"><i class="fa fa-certificate fa-fw lmm-margin-right"></i><b>Qualifications</b></p>
         <br>
         <div v-for="(q, index) in qualifications" :key="index">
-          <p class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ q.year }}/{{ q.month }}</p>
-          <p><b>{{ q.name }}</b></p>
-          <br v-if="index === qualifications.length - 1">
-          <hr v-else class="lmm-level-opacity">
+          <p>
+            <div style="width: 100%; height: 16px; border: 1px solid white;">
+              <div class="lmm-left" style="margin-right:8px"><b>{{ q.name }}</b></div>
+              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ q.year }}/{{ q.month }}</div>
+              <hr class="lmm-level-opacity" style="display: block">
+            </div>
+            <br>
+          </p>
         </div>
       </div>
 
