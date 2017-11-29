@@ -47,8 +47,18 @@ export default {
 .lmm-large {
   font-size: 18px !important;
 }
+.lmm-xlarge {
+  font-size: 20px !important;
+}
+.lmm-xxlarge {
+  font-size: 22px !important;
+}
 .lmm-xxxlarge {
   font-size: 24px !important;
+}
+.lmm-padding-16 {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
 }
 .lmm-padding-32 {
   padding-top: 32px !important;
