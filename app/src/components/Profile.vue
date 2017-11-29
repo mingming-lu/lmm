@@ -53,8 +53,8 @@
         <p class="lmm-large"><b><i class="fa fa-suitcase fa-fw lmm-margin-right"></i>Work Experience</b></p>
         <br>
         <div v-for="(we, index) in workExperience" :key="index">
-          <p v-if=" we.current === true" class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ we.year_from }}/{{ we.month_from }} ~ <span>current</span></p>
-          <p v-else class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ we.year_from }}/{{ we.month_from }} ~ <span>{{ we.year_to }}/{{ we.month_to }}</span></p>
+          <p v-if=" we.current === true" class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ we.year_from }}/{{ we.month_from }} ~ current</p>
+          <p v-else class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ we.year_from }}/{{ we.month_from }} ~ {{ we.year_to }}/{{ we.month_to }}</p>
           <p><b>{{ we.company }}</b> - {{ we.position }} ({{ we.status }})</p>
           <br v-if="index === workExperience.length - 1">
           <hr v-else class="lmm-level-opacity">
@@ -65,9 +65,10 @@
         <p class="lmm-large"><i class="fa fa-certificate fa-fw lmm-margin-right"></i><b>Education</b></p>
         <br>
         <div v-for="(e, index) in education" :key="index">
-          <p v-if=" e.current === true" class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ e.year_from }}/{{ e.month_from }} ~ <span>current</span></p>
-          <p v-else class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ e.year_from }}/{{ e.month_from }} ~ <span>{{ e.year_to }}/{{ e.month_to }}</span></p>
+          <p v-if=" e.current === true" class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ e.year_from }}/{{ e.month_from }} ~ current</p>
+          <p v-else class="lmm-opacity"><i class="fa fa-calendar fa-fw lmm-margin-right"></i>{{ e.year_from }}/{{ e.month_from }} ~ {{ e.year_to }}/{{ e.month_to }}</p>
           <p><b>{{ e.institution }}</b> ({{ e.degree }})</p>
+          <p>{{ e.department }} {{ e.major }}</p>
           <br v-if="index === education.length - 1">
           <hr v-else class="lmm-level-opacity">
         </div>
