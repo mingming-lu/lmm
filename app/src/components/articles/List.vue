@@ -7,7 +7,7 @@
           <h2><b>{{ article.title }}</b></h2>
           <p>{{ format(article.posted_time) }}</p>
           <p>{{ article.text }}</p>
-          <p class="lmm-right"><button class="lmm-button lmm-padding-large lmm-white lmm-border"><b>READ MORE »</b></button></p>
+          <router-link :to="'/articles/' + article.id" class="lmm-right lmm-button lmm-border" tag="button">READ MORE >></router-link>
         </div>
       </div>
     </div>
@@ -37,6 +37,7 @@
         </p>
       </div>
     </div>
+    <router-view/>
 
   </div>
 </template>
@@ -48,6 +49,7 @@ export default {
   data () {
     request.get('http://localhost:8081/articles', (response) => {
       response.articles.forEach((article) => {
+        article.id = 1
         this.articles.push(article)
       })
     })
