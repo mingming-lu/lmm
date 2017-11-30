@@ -7,7 +7,13 @@
           <h2><b>{{ article.title }}</b></h2>
           <p>{{ format(article.posted_time) }}</p>
           <p>{{ article.text }}</p>
-          <router-link :to="'/articles/' + article.id" class="lmm-right lmm-button lmm-border" tag="button">READ MORE >></router-link>
+          <p class="lmm-right">
+            <router-link :to="'/articles/' + article.id">
+              <button class="lmm-button lmm-padding-large lmm-white lmm-border">
+                <b>READ MORE >></b>
+              </button>
+            </router-link>
+          </p>
         </div>
       </div>
     </div>
