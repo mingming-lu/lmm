@@ -7,6 +7,8 @@ import (
 	"./articles"
 	"./image"
 	"./profile"
+
+    _ "github.com/astaxie/beego"
 )
 
 type Router map[string]func(w http.ResponseWriter, r *http.Request)
