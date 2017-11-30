@@ -4,6 +4,7 @@ all:
 	make run -j
 
 install:
+	cd api && dep ensure
 	npm --prefix app install
 
 run: app api image
