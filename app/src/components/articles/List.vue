@@ -55,7 +55,6 @@ export default {
   data () {
     request.get('http://localhost:8081/articles', (response) => {
       response.articles.forEach((article) => {
-        article.id = 1
         this.articles.push(article)
       })
     })
