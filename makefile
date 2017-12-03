@@ -4,8 +4,7 @@ all:
 	make run -j
 
 install:
-	cd api && dep ensure
-	cd image && dep ensure
+	go get github.com/akinaru-lu/elesion
 	npm --prefix app install
 
 run: app api image
