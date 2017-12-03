@@ -1,9 +1,9 @@
 package profile
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
+
+	"github.com/akinaru-lu/elesion"
 )
 
 type Response struct {
@@ -62,8 +62,8 @@ type Qualification struct {
 	Order int    `json:"order"`
 }
 
-func HandleProfile(w http.ResponseWriter, r *http.Request) {
-	resp := Response{
+func Handler(c *elesion.Context) {
+	data := Response{
 		Name:       "卢明鸣",
 		AvatarURL:  "http://localhost:8082/avatar",
 		Bio:        "吾輩が人間である",
@@ -187,10 +187,5 @@ func HandleProfile(w http.ResponseWriter, r *http.Request) {
 			},
 		},
 	}
-	b, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	fmt.Fprint(w, string(b))
+	c.Status(http.StatusOK).JSON(data)
 }

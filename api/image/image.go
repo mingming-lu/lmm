@@ -1,10 +1,10 @@
 package image
 
 import (
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/akinaru-lu/elesion"
 )
 
 type Response struct {
@@ -19,10 +19,11 @@ type Image struct {
 const Host = "http://localhost:8082/"
 const Path = "image/res/"
 
-func HandlePhotos(w http.ResponseWriter, r *http.Request) {
+func Handler(c *elesion.Context) {
 	files, err := ioutil.ReadDir(Path)
 	if err != nil {
-		fmt.Println(err)
+		c.Status(http.StatusInternalServerError)
+		return
 	}
 
 	var photos []Image
@@ -34,13 +35,8 @@ func HandlePhotos(w http.ResponseWriter, r *http.Request) {
 		photos = append(photos, Image{URL: u})
 	}
 
-	resp := Response{
+	data := Response{
 		Images: photos,
 	}
-	b, err := json.Marshal(resp)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	fmt.Fprint(w, string(b))
+	c.Status(http.StatusOK).JSON(data)
 }
