@@ -1,20 +1,20 @@
 package main
 
 import (
-    "log"
-    "net/http"
     "os"
+
+    "github.com/akinaru-lu/elesion"
 )
 
 const Res = "image/res"
 const Special = "image/special"
 
-func handleImage(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, Res + r.URL.Path)
+func handler(c *elesion.Context) {
+    c.File(Res + c.Request.URL.Path)
 }
 
-func avatar(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, Special + "/avatar.jpg")
+func avatar(c *elesion.Context) {
+	c.File(Special + "/avatar.jpg")
 }
 
 func ensureDir(path string) {
@@ -29,7 +29,9 @@ func init() {
 }
 
 func main() {
-    http.HandleFunc("/", handleImage)
-    http.HandleFunc("/avatar", avatar)
-    log.Fatal(http.ListenAndServe(":8082", nil))
+    el := elesion.New()
+    el.AddPlugin("logger", elesion.NewLogger("[image]", os.Stdout))
+    el.Handle("/", handler)
+    el.Handle("/avatar", avatar)
+    el.Run(":8082")
 }

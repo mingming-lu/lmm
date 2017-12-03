@@ -1,25 +1,17 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"./articles"
 	"./image"
 	"./profile"
+
+	"github.com/akinaru-lu/elesion"
 )
 
-type Router map[string]func(w http.ResponseWriter, r *http.Request)
-
-var router = Router{
-	"/articles": articles.HandleArticles,
-	"/photos":   image.HandlePhotos,
-	"/profile":  profile.HandleProfile,
-}
-
 func main() {
-	for path, handler := range router {
-		http.HandleFunc(path, handler)
-	}
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	el := elesion.Default()
+	el.Handle("/articles", articles.Handler)
+	el.Handle("/photos", image.Handler)
+	el.Handle("/profile", profile.Handler)
+	el.Run(":8081")
 }
