@@ -5,6 +5,7 @@ all:
 
 install:
 	cd api && dep ensure
+	cd image && dep ensure
 	npm --prefix app install
 
 run: app api image
