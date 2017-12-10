@@ -29,8 +29,7 @@ func init() {
 }
 
 func main() {
-    el := elesion.New()
-    el.AddPlugin("logger", elesion.NewLogger("[image]", os.Stdout))
+    el := elesion.Default("[image]")
     el.Handle("/", handler)
     el.Handle("/avatar", avatar)
     el.Run(":8082")
