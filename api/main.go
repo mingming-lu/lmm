@@ -1,12 +1,17 @@
 package main
 
 import (
-	"./articles"
-	"./image"
-	"./profile"
+	"lmm/api/articles"
+	"lmm/api/image"
+	"lmm/api/profile"
 
 	"github.com/akinaru-lu/elesion"
+	"lmm/api/db"
 )
+
+func init() {
+	db.New().Create("lmm").Close()
+}
 
 func Allowed(c *elesion.Context) {
 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
