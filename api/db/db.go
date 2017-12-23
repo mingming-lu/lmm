@@ -1,11 +1,11 @@
 package db
 
-
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"fmt"
 	"strings"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type DB struct {

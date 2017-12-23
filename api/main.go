@@ -2,11 +2,11 @@ package main
 
 import (
 	"lmm/api/articles"
+	"lmm/api/db"
 	"lmm/api/image"
 	"lmm/api/profile"
 
 	"github.com/akinaru-lu/elesion"
-	"lmm/api/db"
 )
 
 func init() {
