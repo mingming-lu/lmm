@@ -56,8 +56,8 @@
           <p>
             <div style="width: 100%; height: 16px; border: 1px solid white;">
               <div class="lmm-left" style="margin-right:8px"><b>{{ we.company }}</b></div>
-              <div v-if="we.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.year_from }}/{{ we.month_from }} ~ current</div>
-              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.year_from }}/{{ we.month_from}} ~ {{ we.year_to }}/{{ we.month_to }}</div>
+              <div v-if="we.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.date_from.slice(0, 7) }} ~ Current</div>
+              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</div>
               <hr class="lmm-level-opacity" style="display: block">
             </div>
             <p>{{ we.position }}</p>
@@ -73,8 +73,8 @@
           <p>
             <div style="width: 100%; height: 16px; border: 1px solid white;">
               <div class="lmm-left" style="margin-right:8px"><b>{{ e.institution }}</b> ({{ e.degree }})</div>
-              <div v-if="e.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.year_from }}/{{ e.month_from }} ~ current</div>
-              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.year_from }}/{{ e.month_from}} ~ {{ e.year_to }}/{{ e.month_to }}</div>
+              <div v-if="e.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.date_from.slice(0, 7) }} ~ Current</div>
+              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</div>
               <hr class="lmm-level-opacity" style="display: block">
             </div>
             <p>{{ e.department }} {{ e.major }}</p>
@@ -90,7 +90,7 @@
           <p>
             <div style="width: 100%; height: 16px; border: 1px solid white;">
               <div class="lmm-left" style="margin-right:8px"><b>{{ q.name }}</b></div>
-              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ q.year }}/{{ q.month }}</div>
+              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ q.date.slice(0, 7) }}</div>
               <hr class="lmm-level-opacity" style="display: block">
             </div>
             <br>
@@ -115,19 +115,29 @@ export default {
       this.profession = response.profession
       this.location = response.location
       this.email = response.email
-      this.skills = this.skills.concat(response.skills)
-      this.languages = this.languages.concat(response.languages)
-      this.workExperience = this.workExperience.concat(response.work_experience)
-      this.education = this.education.concat(response.education)
-      this.qualifications = this.qualifications.concat(response.qualifications)
+      if (response.skills) {
+        this.skills = this.skills.concat(response.skills)
+      }
+      if (response.languages) {
+        this.languages = this.languages.concat(response.languages)
+      }
+      if (response.work_experience) {
+        this.workExperience = this.workExperience.concat(response.work_experience)
+      }
+      if (response.education) {
+        this.education = this.education.concat(response.education)
+      }
+      if (response.qualifications) {
+        this.qualifications = this.qualifications.concat(response.qualifications)
+      }
     })
     return {
-      name: undefined,
-      avatar_url: undefined,
-      bio: undefined,
-      profession: undefined,
-      location: undefined,
-      email: undefined,
+      name: '',
+      avatar_url: '//:0',
+      bio: '',
+      profession: '',
+      location: '',
+      email: '',
       skills: [],
       languages: [],
       workExperience: [],
