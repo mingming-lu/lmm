@@ -1,12 +1,116 @@
 package profile
 
 import (
+	"log"
 	"net/http"
+	"lmm/api/db"
 
 	"github.com/akinaru-lu/elesion"
 )
 
-type Response struct {
+const createProfile = `
+CREATE TABLE IF NOT EXISTS profile (
+	id int NOT NULL AUTO_INCREMENT,
+	name varchar(255) NOT NULL,
+	avatar_url varchar(255),
+	bio text,
+	location varchar(255),
+	profession varchar(32),
+	email varchar(255),
+	PRIMARY KEY (id)
+);
+`
+
+const createSkill = `
+CREATE TABLE IF NOT EXISTS skill (
+	id int NOT NULL AUTO_INCREMENT,
+	user_id int NOT NULL,
+	name varchar(32) NOT NULL,
+	level varchar(32) NOT NULL,
+	sort tinyint NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (sort)
+);
+`
+
+const createLanguage = `
+CREATE TABLE IF NOT EXISTS language (
+	id int NOT NULL AUTO_INCREMENT,
+	user_id int NOT NULL,
+	name varchar(32) NOT NULL,
+	level varchar(32) NOT NULL,
+	sort tinyint NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (sort)
+)
+`
+
+const createEducation = `
+CREATE TABLE IF NOT EXISTS education (
+	id int NOT NULL AUTO_INCREMENT,
+	user_id int NOT NULL,
+	date_from date NOT NULL,
+	date_to date NOT NULL,
+	institution varchar(255) NOT NULL,
+	department varchar(255),
+	major varchar(255),
+	degree varchar(32) NOT NULL,
+	current bit NOT NULL,
+	sort tinyint NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (sort)
+)
+`
+
+const createWorkExperience = `
+CREATE TABLE IF NOT EXISTS work_experience (
+	id int NOT NULL AUTO_INCREMENT,
+	user_id int NOT NULL,
+	date_from date NOT NULL,
+	date_to date NOT NULL,
+	company varchar(255) NOT NULL,
+	position varchar(32),
+	status varchar(32),
+	current bit NOT NULL,
+	sort tinyint NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (sort)
+)
+`
+
+const createQualification = `
+CREATE TABLE IF NOT EXISTS qualification (
+	id int NOT NULL AUTO_INCREMENT,
+	user_id int NOT NULL,
+	date date NOT NULL,
+	name varchar(255) NOT NULL,
+	sort tinyint NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (sort)
+)
+`
+
+var dbQuery = []string{
+	createProfile,
+	createSkill,
+	createLanguage,
+	createEducation,
+	createWorkExperience,
+	createQualification,
+}
+
+func init() {
+	d := db.New().Use("lmm")
+
+	for _, query := range dbQuery {
+		_, err := d.Exec(query)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+type Profile struct {
 	Name           string           `json:"name"`
 	AvatarURL      string           `json:"avatar_url"`
 	Bio            string           `json:"bio"`
@@ -25,167 +129,206 @@ type Skill struct {
 	Level string `json:"level"`
 }
 
+func skillsByUserID(id int) ([]Skill, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	itr, err := d.Query("SELECT name, level FROM skill WHERE user_id = ? ORDER BY sort", id)
+	if err != nil {
+		return nil, err
+	}
+	defer itr.Close()
+
+	skills := make([]Skill, 0)
+
+	for itr.Next() {
+		skill := Skill{}
+		if e := itr.Scan(&skill.Name, &skill.Level); e != nil {
+			return skills, err
+		}
+		skills = append(skills, skill)
+	}
+	return skills, nil
+}
+
 type Language struct {
 	Name  string `json:"name"`
 	Level string `json:"level"`
 }
 
+func languagesByUserID(id int) ([]Language, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	itr, err := d.Query("SELECT name, level FROM language WHERE user_id = ? ORDER BY sort", id)
+	if err != nil {
+		return nil, err
+	}
+	defer itr.Close()
+
+	languages := make([]Language, 0)
+
+	for itr.Next() {
+		language := Language{}
+		if e := itr.Scan(&language.Name, &language.Level); e != nil {
+			return languages, err
+		}
+		languages = append(languages, language)
+	}
+	return languages, nil
+}
+
 type Education struct {
-	YearFrom    int    `json:"year_from"`
-	MonthFrom   int    `json:"month_from"`
-	YearTo      int    `json:"year_to"`
-	MonthTo     int    `json:"month_to"`
+	DateFrom    string `json:"date_from"`
+	DateTo      string `json:"date_to"`
 	Institution string `json:"institution"`
 	Department  string `json:"department"`
 	Major       string `json:"major"`
 	Degree      string `json:"degree"`
 	Current     bool   `json:"current"`
-	Order       int    `json:"order"`
+}
+
+func educationByUserID(id int) ([]Education, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	itr, err := d.Query("SELECT date_from, date_to, institution, department, major, degree, current+0 FROM education WHERE user_id = ? ORDER BY sort", id)
+	if err != nil {
+		return nil, err
+	}
+	defer itr.Close()
+
+	education := make([]Education, 0)
+	var current int
+	for itr.Next() {
+		edu := Education{}
+		err = itr.Scan(&edu.DateFrom, &edu.DateTo, &edu.Institution, &edu.Department, &edu.Major, &edu.Degree, &current)
+		if err != nil {
+			return education, err
+		}
+		if current == 1 {
+			edu.Current = true
+		}
+		education = append(education, edu)
+	}
+	return education, nil
 }
 
 type WorkExperience struct {
-	YearFrom  int    `json:"year_from"`
-	MonthFrom int    `json:"month_from"`
-	YearTo    int    `json:"year_to"`
-	MonthTo   int    `json:"month_to"`
-	Company   string `json:"company"`
-	Position  string `json:"position"`
-	Status    string `json:"status"`
-	Current   bool   `json:"current"`
-	Order     int    `json:"order"`
+	DateFrom string `json:"date_from"`
+	DateTo   string `json:"date_to"`
+	Company  string `json:"company"`
+	Position string `json:"position"`
+	Status   string `json:"status"`
+	Current  bool   `json:"current"`
+}
+
+func workExperienceByUserID(id int) ([]WorkExperience, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	itr, err := d.Query("SELECT date_from, date_to, company, position, status, current+0 FROM work_experience WHERE user_id = ? ORDER BY sort", id)
+	if err != nil {
+		return nil, err
+	}
+	defer itr.Close()
+
+	workExperience := make([]WorkExperience, 0)
+	var current int
+	for itr.Next() {
+		we := WorkExperience{}
+		if e := itr.Scan(&we.DateFrom, &we.DateTo, &we.Company, &we.Position, &we.Status, &current); e != nil {
+			return workExperience, err
+		}
+		if current == 1 {
+			we.Current = true
+		}
+		workExperience = append(workExperience, we)
+	}
+	return workExperience, nil
 }
 
 type Qualification struct {
-	Year  int    `json:"year"`
-	Month int    `json:"month"`
-	Name  string `json:"name"`
-	Order int    `json:"order"`
+	Name string `json:"name"`
+	Date string `json:"date"`
+}
+
+func qualificationByUserID(id int) ([]Qualification, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	itr, err := d.Query("SELECT name, date FROM qualification WHERE user_id = ? ORDER BY sort", id)
+	if err != nil {
+		return nil, err
+	}
+	defer itr.Close()
+
+	qualification := make([]Qualification, 0)
+	for itr.Next() {
+		q := Qualification{}
+		err := itr.Scan(&q.Name, &q.Date)
+		if err != nil {
+			return qualification, err
+		}
+		qualification = append(qualification, q)
+	}
+	return qualification, nil
+}
+
+func getProfile(c *elesion.Context) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	profile := Profile{}
+	err := d.QueryRow("SELECT name, avatar_url, bio, location, profession, email from profile where id = 1").Scan(
+		&profile.Name, &profile.AvatarURL, &profile.Bio, &profile.Location, &profile.Profession, &profile.Email)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+
+	skills, err := skillsByUserID(1)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	profile.Skills = skills
+
+	languages, err := languagesByUserID(1)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	profile.Languages = languages
+
+	workExperience, err := workExperienceByUserID(1)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	profile.WorkExperience = workExperience
+
+	education, err := educationByUserID(1)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	profile.Education = education
+
+	qualifications, err := qualificationByUserID(1)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	profile.Qualifications = qualifications
+
+	c.Status(200).JSON(profile)
 }
 
 func Handler(c *elesion.Context) {
-	data := Response{
-		Name:       "卢明鸣",
-		AvatarURL:  "http://localhost:8082/avatar",
-		Bio:        "吾輩が人間である",
-		Profession: "Server-side engineer",
-		Location:   "鎌倉, 日本",
-		Email:      "akinaru.lu@gmail.com",
-		Skills: []Skill{
-			{
-				Name:  "Golang",
-				Level: "Beginner",
-			},
-			{
-				Name:  "Perl",
-				Level: "Beginner",
-			},
-			{
-				Name:  "Java",
-				Level: "Advanced",
-			},
-			{
-				Name:  "Python",
-				Level: "Beginner",
-			},
-			{
-				Name:  "Android",
-				Level: "Beginner",
-			},
-			{
-				Name:  "Vue.js",
-				Level: "Beginner",
-			},
-			{
-				Name:  "C++",
-				Level: "Beginner",
-			},
-		},
-		Languages: []Language{
-			{
-				Name:  "Chinese",
-				Level: "Native",
-			},
-			{
-				Name:  "Japanese",
-				Level: "Conversational",
-			},
-			{
-				Name:  "English",
-				Level: "Conversational",
-			},
-		},
-		Education: []Education{
-			{
-				YearFrom:    2010,
-				MonthFrom:   9,
-				YearTo:      2014,
-				MonthTo:     6,
-				Institution: "绿头蘑菇学校",
-				Degree:      "工学学士",
-				Department:  "生物医学工程学院",
-				Major:       "生物学工程专业",
-				Current:     false,
-				Order:       2,
-			},
-			{
-				YearFrom:    2015,
-				MonthFrom:   10,
-				YearTo:      2017,
-				MonthTo:     9,
-				Institution: "帝国杜王町大学",
-				Degree:      "工学硕士",
-				Department:  "工学研究科",
-				Major:       "バイオロボティクス専攻",
-				Current:     false,
-				Order:       1,
-			},
-		},
-		WorkExperience: []WorkExperience{
-			{
-				YearFrom:  2016,
-				MonthFrom: 8,
-				YearTo:    2016,
-				MonthTo:   9,
-				Company:   "富士通研究所",
-				Position:  "Research",
-				Status:    "Internship",
-				Current:   false,
-				Order:     3,
-			},
-			{
-				YearFrom:  2016,
-				MonthFrom: 11,
-				YearTo:    2016,
-				MonthTo:   12,
-				Company:   "Toshiba",
-				Position:  "IoT R&D",
-				Status:    "Internship",
-				Current:   false,
-				Order:     2,
-			},
-			{
-				YearFrom:  2017,
-				MonthFrom: 10,
-				Company:   "とある面白法人",
-				Position:  "Internship",
-				Current:   true,
-				Order:     1,
-			},
-		},
-		Qualifications: []Qualification{
-			{
-				Year:  2014,
-				Month: 1,
-				Name:  "JLPT N2",
-				Order: 2,
-			},
-			{
-				Year:  2014,
-				Month: 7,
-				Name:  "JLPT N1",
-				Order: 1,
-			},
-		},
+	if c.Request.Method == http.MethodGet {
+		getProfile(c)
+	} else {
+		c.Status(http.StatusMethodNotAllowed)
 	}
-	c.Status(http.StatusOK).JSON(data)
 }
