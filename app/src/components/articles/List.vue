@@ -2,7 +2,7 @@
   <div class="lmm-row">
     <!-- Posts -->
     <div class="lmm-left" style="width:66.6666%; display:inline-block">
-      <div v-for="(article, index) in articles" :key="article.title">
+      <div v-for="article in articles" :key="article.title">
         <div class="lmm-card-4 lmm-container lmm-margin" style="text-align:left">
           <h2><b>{{ article.title }}</b></h2>
           <p>{{ format(article.posted_time) }}</p>
