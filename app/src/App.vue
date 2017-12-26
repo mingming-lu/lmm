@@ -70,7 +70,6 @@ export default {
 }
 .lmm-container, .lmm-penal {
   padding: 0.01em 16px;
-  margin: 16px 0;
 }
 .lmm-bar {
   width: 100%;
@@ -150,6 +149,12 @@ export default {
 .lmm-link {
   text-decoration:none;
 }
+.lmm-left .lmm-margin {
+  margin: 16px 8px 16px 8px !important;
+}
+.lmm-right .lmm-margin {
+  margin: 16px 8px 16px 8px !important;
+}
 .lmm-margin {
   margin: 16px !important;
 }
@@ -159,13 +164,11 @@ export default {
 .lmm-hover-light-grey:hover {
   color: #757575 !important;
 }
-.lmm-half {
-  display: inline-block;
-  width: 49%;
-  margin: 0 4px;
-  vertical-align: top;
+.lmm-left .lmm-box {
+  width: 100%;
+  margin: 4px 0;
 }
-.lmm-half>.lmm-box {
+.lmm-right .lmm-box {
   width: 100%;
   margin: 4px 0;
 }
