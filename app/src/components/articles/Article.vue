@@ -13,7 +13,7 @@
 import * as request from '@/request'
 export default {
   data () {
-    let url = 'http://localhost:8081' + this.$route.path
+    let url = 'http://api.lmm.local' + this.$route.path
     request.get(url, (response) => {
       this.title = response.title
       this.text = response.text

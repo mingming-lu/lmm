@@ -14,7 +14,7 @@ import * as request from '@/request'
 
 export default {
   data () {
-    request.get('http://localhost:8081/photos', (response) => {
+    request.get('http://api.lmm.local/photos', (response) => {
       response.images.forEach((photo) => {
         this.photos.push(photo)
       })
