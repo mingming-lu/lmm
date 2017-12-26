@@ -2,7 +2,7 @@
   <div class="lmm-row">
     <!-- Posts -->
     <div class="lmm-left" style="width:66.6666%; display:inline-block">
-      <div v-for="(article, index) in articles" :key="article.title">
+      <div v-for="article in articles" :key="article.title">
         <div class="lmm-card-4 lmm-container lmm-margin" style="text-align:left">
           <h2><b>{{ article.title }}</b></h2>
           <p>{{ format(article.posted_time) }}</p>
@@ -20,18 +20,16 @@
 
     <!-- Category -->
     <div class="lmm-right" style="width:33.3333%; display:inline-block; text-align:left">
-      <div class="lmm-card-4 lmm-container lmm-margin">
+      <div class="lmm-container lmm-margin lmm-card-4">
         <h4>Category</h4>
         <hr>
         <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">哈三篇</router-link></p>
         <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">番外篇</router-link></p>
         <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">哈轶事</router-link></p>
       </div>
-    </div>
 
     <!-- Tags -->
-    <div class="lmm-right" style="width:33.3333%; display:inline-block; text-align:left">
-      <div class="lmm-card-4 lmm-container lmm-margin">
+      <div class="lmm-container lmm-margin lmm-card-4">
         <h4>Tags</h4>
         <hr>
         <p>

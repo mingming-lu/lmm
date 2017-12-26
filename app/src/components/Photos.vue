@@ -1,12 +1,20 @@
 <template>
-  <ul>
-    <li class="lmm-half">
-      <img v-for="(photo, index) in photos.slice(0, photos.length/2)" :src="photo.url" :key="photo.url" class="lmm-box">
-    </li>
-    <li class="lmm-half">
-      <img v-for="(photo, index) in photos.slice(photos.length/2)" :src="photo.url" :key="photo.url" class="lmm-box">
-    </li>
-  </ul>
+  <div class="lmm-row">
+    <div class="lmm-left" style="width:50%">
+      <div style="margin:8px">
+        <div v-for="photo in photos.slice(0, photos.length/2)" :key="photo.url" class="lmm-box">
+          <img :src="photo.url" class="lmm-box">
+        </div>
+      </div>
+    </div>
+    <div class="lmm-right" style="width:50%">
+      <div style="margin:8px">
+        <div v-for="photo in photos.slice(photos.length/2)" :key="photo.url" class="lmm-box">
+          <img :src="photo.url" class="lmm-box">
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
