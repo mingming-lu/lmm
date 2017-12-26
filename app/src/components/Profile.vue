@@ -108,7 +108,7 @@
 import * as request from '@/request'
 export default {
   data () {
-    request.get('http://localhost:8081/profile', (response) => {
+    request.get('http://api.lmm.local/profile', (response) => {
       this.name = response.name
       this.avatar_url = response.avatar_url
       this.bio = response.bio
