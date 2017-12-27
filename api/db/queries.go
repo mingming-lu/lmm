@@ -82,6 +82,18 @@ CREATE TABLE IF NOT EXISTS qualification (
 )
 `
 
+const createArticle = `
+CREATE TABLE IF NOT EXISTS article (
+	id int NOT NULL AUTO_INCREMENT,
+	user_id int NOT NULL,
+	created_date date NOT NULL,
+	edited_date date NOT NULL,
+	title varchar(255) NOT NULL,
+	text text NOT NULL,
+	PRIMARY KEY (id)
+)
+`
+
 var CreateSQL = []string{
 	createProfile,
 	createSkill,
@@ -89,4 +101,5 @@ var CreateSQL = []string{
 	createEducation,
 	createWorkExperience,
 	createQualification,
+	createArticle,
 }

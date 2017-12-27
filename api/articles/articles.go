@@ -31,3 +31,7 @@ func Handler(c *elesion.Context) {
 	}
 	c.Status(http.StatusOK).JSON(data)
 }
+
+func allArticles() []Article {
+	return nil
+}
