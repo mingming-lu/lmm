@@ -5,7 +5,7 @@
       <div v-for="article in articles" :key="article.title">
         <div class="lmm-card-4 lmm-container lmm-margin" style="text-align:left">
           <h2><b>{{ article.title }}</b></h2>
-          <p>{{ format(article.posted_time) }}</p>
+          <p class="lmm-small lmm-opacity">{{ article.created_date }}</p>
           <p>{{ article.text }}</p>
           <p class="lmm-right">
             <router-link :to="'/articles/' + article.id">
@@ -51,8 +51,8 @@ import * as request from '@/request'
 import * as utils from '@/utils'
 export default {
   data () {
-    request.get('http://localhost:8081/articles', (response) => {
-      response.articles.forEach((article) => {
+    request.get('http://api.lmm.local/articles', (response) => {
+      response.forEach((article) => {
         this.articles.push(article)
       })
     })
