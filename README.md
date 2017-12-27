@@ -8,3 +8,5 @@ cd lmm
 make install
 make
 ```
+
+The lmm derectory should be put in $GOPATH/src
