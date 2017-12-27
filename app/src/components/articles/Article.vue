@@ -4,8 +4,8 @@
     <br>
     <p style="text-align:justify">{{ text }}</p>
     <br>
-    <p v-if="editedDate" class="lmm-right lmm-opacity">Edited {{ editedDate }} at {{ editedTime }}</p>
-    <p v-else class="lmm-right lmm-opacity">Posted {{ postedDate }} at {{ postedTime }}</p>
+    <p v-if="editedDate" class="lmm-right lmm-opacity">Edited {{ editedDate }}</p>
+    <p v-else class="lmm-right lmm-opacity">Created {{ createdDate }}</p>
   </div>
 </template>
 
@@ -21,10 +21,8 @@ export default {
     return {
       title: '',
       text: '',
-      postedDate: '',
-      postedTime: '',
-      editedDate: '',
-      editedTime: ''
+      createdDate: '',
+      editedDate: ''
     }
   }
 }
