@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	db.New().Create("lmm").Close()
+	db.Init()
 }
 
 func Allowed(c *elesion.Context) {
