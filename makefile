@@ -4,7 +4,8 @@ all:
 	make run -j
 
 install:
-	go get github.com/akinaru-lu/elesion
+	go get -u github.com/akinaru-lu/elesion
+	go get -u github.com/go-sql-driver/mysql
 	npm --prefix app install
 
 run: app api image
