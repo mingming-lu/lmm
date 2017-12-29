@@ -35,7 +35,7 @@ func allArticlesByUserID(id int) ([]Article, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	itr, err := d.Query("SELECT id, title, text, created_date, edited_date FROM article WHERE user_id = ?", 1)
+	itr, err := d.Query("SELECT id, title, text, created_date, edited_date FROM articles WHERE user_id = ?", 1)
 	if err != nil {
 		return nil, err
 	}
