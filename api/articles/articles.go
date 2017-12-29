@@ -23,19 +23,41 @@ type Article struct {
 	EditedTime  string `json:"edited_date"`
 }
 
-func Handler(c *elesion.Context) {
-	articles, err := allArticlesByUserID(1)
+func GetArticles(c *elesion.Context) {
+	userID := c.Query().Get("user_id")
+	if userID == "" {
+		c.Status(http.StatusBadRequest).String("missing user_id")
+		return
+	}
+
+	articles, err := getAllArticles(userID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
 	}
 	c.Status(http.StatusOK).JSON(articles)
 }
 
-func allArticlesByUserID(id int) ([]Article, error) {
+func GetArticle(c *elesion.Context) {
+	id := c.Query().Get("id")
+	if id == "" {
+		c.Status(http.StatusBadRequest).String("missing id")
+		return
+	}
+
+	article, err := getArticle(id)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).JSON(article)
+}
+
+func getAllArticles(userID string) ([]Article, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	itr, err := d.Query("SELECT id, title, text, created_date, edited_date FROM articles WHERE user_id = ?", 1)
+	itr, err := d.Query("SELECT id, title, text, created_date, edited_date FROM articles WHERE user_id = ?", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -49,4 +71,18 @@ func allArticlesByUserID(id int) ([]Article, error) {
 		articles = append(articles, article)
 	}
 	return articles, nil
+}
+
+func getArticle(id string) (*Article, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	article := Article{}
+	err := d.QueryRow("SELECT id, title, text, created_date, edited_date FROM articles WHERE id = ?", id).Scan(
+		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedTime,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &article, err
 }
