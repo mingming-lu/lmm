@@ -20,7 +20,8 @@ func Allowed(c *elesion.Context) {
 func main() {
 	el := elesion.Default()
 	el.Use(Allowed)
-	el.Handle("/articles", articles.Handler)
+	el.Handle("/articles", articles.GetArticles)
+	el.Handle("/article", articles.GetArticle)
 	el.Handle("/photos", image.Handler)
 	el.Handle("/profile", profile.Handler)
 	el.Run(":8081")
