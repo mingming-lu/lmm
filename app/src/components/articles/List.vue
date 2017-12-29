@@ -51,7 +51,7 @@ import * as request from '@/request'
 import * as utils from '@/utils'
 export default {
   data () {
-    request.get('http://api.lmm.local/articles', (response) => {
+    request.get('http://api.lmm.local/articles?user_id=1', (response) => {
       response.forEach((article) => {
         this.articles.push(article)
       })
