@@ -22,6 +22,7 @@ func main() {
 	el.Use(Allowed)
 	el.Handle("/articles", articles.GetArticles)
 	el.Handle("/article", articles.GetArticle)
+	el.Handle("/articles/categories", articles.GetCategories)
 	el.Handle("/photos", image.Handler)
 	el.Handle("/profile", profile.Handler)
 	el.Run(":8081")
