@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <header class="lmm-panel lmm-center" style="padding:128px 16px">
+    <header class="lmm-panel lmm-center" style="padding:128px 16px 32px 16px">
       <h1 class="lmm-xxxlarge">一个一点也不萌的网站</h1>
       <h1>卢明鸣的博客</h1>
   
