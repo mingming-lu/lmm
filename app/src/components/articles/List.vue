@@ -18,14 +18,14 @@
       </div>
     </div>
 
-    <!-- Category -->
+    <!-- Categories -->
     <div class="lmm-right" style="width:33.3333%; display:inline-block; text-align:left">
       <div class="lmm-container lmm-margin lmm-card-4">
         <h4>Category</h4>
         <hr>
-        <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">哈三篇</router-link></p>
-        <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">番外篇</router-link></p>
-        <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">哈轶事</router-link></p>
+        <div v-for="category in categories" :key="category.id">
+          <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">{{ category.name }}</router-link></p>
+        </div>
       </div>
 
     <!-- Tags -->
@@ -51,13 +51,23 @@ import * as request from '@/request'
 import * as utils from '@/utils'
 export default {
   data () {
+    // article list
     request.get('http://api.lmm.local/articles?user_id=1', (response) => {
       response.forEach((article) => {
         this.articles.push(article)
       })
     })
+
+    // article categories
+    request.get('http://api.lmm.local/articles/categories?user_id=1', (response) => {
+      response.forEach((category) => {
+        this.categories.push(category)
+      })
+    })
+
     return {
       articles: [],
+      categories: [],
       format: utils.formattedTime
     }
   }

@@ -1,6 +1,7 @@
 package articles
 
 import (
+	"database/sql"
 	"lmm/api/db"
 	"net/http"
 
@@ -20,17 +21,19 @@ type Article struct {
 	Title       string `json:"title"`
 	Text        string `json:"text"`
 	CreatedDate string `json:"created_date"`
-	EditedTime  string `json:"edited_date"`
+	EditedDate  string `json:"edited_date"`
+	CategoryID  int    `json:"category_id"`
 }
 
 func GetArticles(c *elesion.Context) {
 	userID := c.Query().Get("user_id")
+	categoryID := c.Query().Get("category_id")
 	if userID == "" {
 		c.Status(http.StatusBadRequest).String("missing user_id")
 		return
 	}
 
-	articles, err := getAllArticles(userID)
+	articles, err := getAllArticles(userID, categoryID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).Error(err.Error())
 		return
@@ -53,11 +56,18 @@ func GetArticle(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(article)
 }
 
-func getAllArticles(userID string) ([]Article, error) {
+func getAllArticles(userID, categoryID string) ([]Article, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	itr, err := d.Query("SELECT id, title, text, created_date, edited_date FROM articles WHERE user_id = ?", userID)
+	var itr *sql.Rows
+	var err error
+	query := `SELECT id, title, text, created_date, edited_date, category_id FROM articles WHERE user_id = ?`
+	if categoryID == "" {
+		itr, err = d.Query(query, userID)
+	} else {
+		itr, err = d.Query(query+` AND category_id = ?`, userID, categoryID)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +76,7 @@ func getAllArticles(userID string) ([]Article, error) {
 	articles := make([]Article, 0)
 	for itr.Next() {
 		article := Article{}
-		itr.Scan(&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedTime)
+		itr.Scan(&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedDate, &article.CategoryID)
 
 		articles = append(articles, article)
 	}
@@ -78,8 +88,8 @@ func getArticle(id string) (*Article, error) {
 	defer d.Close()
 
 	article := Article{}
-	err := d.QueryRow("SELECT id, title, text, created_date, edited_date FROM articles WHERE id = ?", id).Scan(
-		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedTime,
+	err := d.QueryRow("SELECT id, title, text, created_date, edited_date, category_id FROM articles WHERE id = ?", id).Scan(
+		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedDate, &article.CategoryID,
 	)
 	if err != nil {
 		return nil, err
