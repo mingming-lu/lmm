@@ -90,7 +90,18 @@ CREATE TABLE IF NOT EXISTS articles (
 	edited_date date NOT NULL,
 	title varchar(255) NOT NULL,
 	text text NOT NULL,
+	category_id int,
 	PRIMARY KEY (id)
+)
+`
+
+const createArticleCategories = `
+CREATE TABLE IF NOT EXISTS categories (
+	id int NOT NULL AUTO_INCREMENT,
+	user_id int NOT NULL,
+	name varchar(32) NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name)
 )
 `
 
@@ -102,4 +113,5 @@ var CreateSQL = []string{
 	createWorkExperience,
 	createQualification,
 	createArticles,
+	createArticleCategories,
 }
