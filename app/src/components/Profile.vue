@@ -105,32 +105,9 @@
 </template>
 
 <script>
-import * as request from '@/request'
+import axios from 'axios'
 export default {
   data () {
-    request.get('http://api.lmm.local/profile', (response) => {
-      this.name = response.name
-      this.avatar_url = response.avatar_url
-      this.bio = response.bio
-      this.profession = response.profession
-      this.location = response.location
-      this.email = response.email
-      if (response.skills) {
-        this.skills = this.skills.concat(response.skills)
-      }
-      if (response.languages) {
-        this.languages = this.languages.concat(response.languages)
-      }
-      if (response.work_experience) {
-        this.workExperience = this.workExperience.concat(response.work_experience)
-      }
-      if (response.education) {
-        this.education = this.education.concat(response.education)
-      }
-      if (response.qualifications) {
-        this.qualifications = this.qualifications.concat(response.qualifications)
-      }
-    })
     return {
       name: '',
       avatar_url: '//:0',
@@ -144,6 +121,34 @@ export default {
       education: [],
       qualifications: []
     }
+  },
+  created () {
+    axios.get('http://api.lmm.local/profile').then((res) => {
+      let profile = res.data
+      this.name = profile.name
+      this.avatar_url = profile.avatar_url
+      this.bio = profile.bio
+      this.profession = profile.profession
+      this.location = profile.location
+      this.email = profile.email
+      if (profile.skills) {
+        this.skills = this.skills.concat(profile.skills)
+      }
+      if (profile.languages) {
+        this.languages = this.languages.concat(profile.languages)
+      }
+      if (profile.work_experience) {
+        this.workExperience = this.workExperience.concat(profile.work_experience)
+      }
+      if (profile.education) {
+        this.education = this.education.concat(profile.education)
+      }
+      if (profile.qualifications) {
+        this.qualifications = this.qualifications.concat(profile.qualifications)
+      }
+    }).catch((e) => {
+      console.log(e)
+    })
   }
 }
 </script>

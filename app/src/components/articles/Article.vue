@@ -10,24 +10,29 @@
 </template>
 
 <script>
-import * as request from '@/request'
+import axios from 'axios'
 export default {
   data () {
-    let pattern = /^\/articles\/(\d)$/g
-    let match = pattern.exec(this.$route.path)
-    let url = 'http://api.lmm.local' + this.$route.path.replace(/^\/articles\/\d$/, '/article?id=' + match[1])
-    request.get(url, (response) => {
-      this.title = response.title
-      this.text = response.text
-      this.createdDate = response.created_date
-      this.editedDate = response.edited_date
-    })
     return {
       title: '',
       text: '',
       createdDate: '',
       editedDate: ''
     }
+  },
+  created () {
+    let pattern = /^\/articles\/(\d)$/g
+    let match = pattern.exec(this.$route.path)
+    let url = 'http://api.lmm.local' + this.$route.path.replace(/^\/articles\/\d$/, '/article?id=' + match[1])
+    axios.get(url).then((res) => {
+      let article = res.data
+      this.title = article.title
+      this.text = article.text
+      this.createdDate = article.createdDate
+      this.editedDate = article.editedDate
+    }).catch((e) => {
+      console.log(e)
+    })
   }
 }
 </script>
