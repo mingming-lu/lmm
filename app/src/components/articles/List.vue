@@ -58,8 +58,8 @@ export default {
   created () {
     axios.all([
       axios.get('http://api.lmm.local/articles?user_id=1'),
-      axios.get('http://api.lmm.local/a/categories?user_id=1')
-    ]).then(axios.spread(function (articles, categories, profile) {
+      axios.get('http://api.lmm.local/articles/categories?user_id=1')
+    ]).then(axios.spread((articles, categories) => {
       this.articles = articles.data
       this.categories = categories.data
     })).catch((e) => {
