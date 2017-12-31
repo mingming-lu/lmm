@@ -47,29 +47,24 @@
 </template>
 
 <script>
-import * as request from '@/request'
-import * as utils from '@/utils'
+import axios from 'axios'
 export default {
   data () {
-    // article list
-    request.get('http://api.lmm.local/articles?user_id=1', (response) => {
-      response.forEach((article) => {
-        this.articles.push(article)
-      })
-    })
-
-    // article categories
-    request.get('http://api.lmm.local/articles/categories?user_id=1', (response) => {
-      response.forEach((category) => {
-        this.categories.push(category)
-      })
-    })
-
     return {
       articles: [],
-      categories: [],
-      format: utils.formattedTime
+      categories: []
     }
+  },
+  created () {
+    axios.all([
+      axios.get('http://api.lmm.local/articles?user_id=1'),
+      axios.get('http://api.lmm.local/a/categories?user_id=1')
+    ]).then(axios.spread(function (articles, categories, profile) {
+      this.articles = articles.data
+      this.categories = categories.data
+    })).catch((e) => {
+      console.log(e)
+    })
   }
 }
 </script>

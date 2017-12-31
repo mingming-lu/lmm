@@ -18,18 +18,19 @@
 </template>
 
 <script>
-import * as request from '@/request'
-
+import axios from 'axios'
 export default {
   data () {
-    request.get('http://api.lmm.local/photos', (response) => {
-      response.images.forEach((photo) => {
-        this.photos.push(photo)
-      })
-    })
     return {
       photos: []
     }
+  },
+  created () {
+    axios.get('http://api.lmm.local/photos').then((res) => {
+      this.photos = res.data.images
+    }).catch((e) => {
+      console.log(e)
+    })
   }
 }
 </script>
