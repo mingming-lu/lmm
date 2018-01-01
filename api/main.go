@@ -5,6 +5,8 @@ import (
 	"lmm/api/db"
 	"lmm/api/image"
 	"lmm/api/profile"
+	"log"
+	"net/http"
 
 	"github.com/akinaru-lu/elesion"
 )
@@ -13,17 +15,12 @@ func init() {
 	db.Init()
 }
 
-func Allowed(c *elesion.Context) {
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-}
-
 func main() {
-	el := elesion.Default()
-	el.Use(Allowed)
-	el.Handle("/articles", articles.GetArticles)
-	el.Handle("/article", articles.GetArticle)
-	el.Handle("/articles/categories", articles.GetCategories)
-	el.Handle("/photos", image.Handler)
-	el.Handle("/profile", profile.Handler)
-	el.Run(":8081")
+	router := elesion.Default("[api]")
+	router.GET("/articles", articles.GetArticles)
+	router.GET("/article", articles.GetArticle)
+	router.GET("/articles/categories", articles.GetCategories)
+	router.GET("/photos", image.Handler)
+	router.GET("/profile", profile.Handler)
+	log.Fatal(http.ListenAndServe(":8081", router))
 }

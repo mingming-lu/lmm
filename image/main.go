@@ -1,16 +1,18 @@
 package main
 
 import (
-    "os"
+	"log"
+	"net/http"
+	"os"
 
-    "github.com/akinaru-lu/elesion"
+	"github.com/akinaru-lu/elesion"
 )
 
 const Res = "image/res"
 const Special = "image/special"
 
 func handler(c *elesion.Context) {
-    c.File(Res + c.Request.URL.Path)
+	c.File(Res + c.Request.URL.Path)
 }
 
 func avatar(c *elesion.Context) {
@@ -18,9 +20,9 @@ func avatar(c *elesion.Context) {
 }
 
 func ensureDir(path string) {
-    if _, err := os.Stat(path); os.IsNotExist(err) {
-        os.Mkdir(path, os.ModePerm)
-    }
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, os.ModePerm)
+	}
 }
 
 func init() {
@@ -29,8 +31,8 @@ func init() {
 }
 
 func main() {
-    el := elesion.Default("[image]")
-    el.Handle("/", handler)
-    el.Handle("/avatar", avatar)
-    el.Run(":8082")
+	router := elesion.Default("[image]")
+	router.GET("/", handler)
+	router.GET("/avatar", avatar)
+	log.Fatal(http.ListenAndServe(":8082", router))
 }
