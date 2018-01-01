@@ -199,9 +199,9 @@ body {
 h1 {
   letter-spacing: 6px;
 }
-code {
-  padding: 2px;
+pre, code {
   background-color: #f1f1f1 !important;
+  font-family: Menlo, Monaco, "Courier New", monospace;
 }
 #app {
   -webkit-font-smoothing: antialiased;
