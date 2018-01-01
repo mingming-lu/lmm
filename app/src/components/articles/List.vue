@@ -24,7 +24,9 @@
         <h4>Category</h4>
         <hr>
         <div v-for="category in categories" :key="category.id">
-          <p><router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">{{ category.name }}</router-link></p>
+          <p>
+            <router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">{{ category.name }}</router-link>
+          </p>
         </div>
       </div>
 
@@ -33,11 +35,10 @@
         <h4>Tags</h4>
         <hr>
         <p>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">上海交通大学</router-link></span>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">夏威夷吉他</router-link></span>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">张宝华</router-link></span>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">Excited</router-link></span>
-          <span class="lmm-tag"><router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">高腰裤</router-link></span>
+          <span v-for="tag in tags" :key=tag.id class="lmm-tag">
+            <router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">{{ tag.name }}</router-link>
+            <br>
+          </span>
         </p>
       </div>
     </div>
@@ -52,16 +53,19 @@ export default {
   data () {
     return {
       articles: [],
-      categories: []
+      categories: [],
+      tags: []
     }
   },
   created () {
     axios.all([
       axios.get('http://api.lmm.local/articles?user_id=1'),
-      axios.get('http://api.lmm.local/articles/categories?user_id=1')
-    ]).then(axios.spread((articles, categories) => {
+      axios.get('http://api.lmm.local/articles/categories?user_id=1'),
+      axios.get('http://api.lmm.local/articles/tags?user_id=1')
+    ]).then(axios.spread((articles, categories, tags) => {
       this.articles = articles.data
       this.categories = categories.data
+      this.tags = tags.data
     })).catch((e) => {
       console.log(e)
     })
