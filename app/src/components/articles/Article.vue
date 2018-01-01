@@ -2,7 +2,7 @@
   <div class="lmm-container lmm-margin" style="margin-left:auto !important; margin-right:auto !important; width:720px">
     <h2 class="lmm-center">{{ title }}</h2>
     <br>
-    <div v-html="text" style="text-align:justify"></div>
+    <div v-html="text" v-hljs style="text-align:justify"></div>
     <br>
     <p v-if="createdDate === editedDate" class="lmm-right lmm-opacity">Created {{ editedDate }}</p>
     <p v-else class="lmm-right lmm-opacity">Edited {{ createdDate }}</p>
