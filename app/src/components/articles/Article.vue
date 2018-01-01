@@ -2,10 +2,11 @@
   <div class="lmm-container lmm-margin" style="margin-left:auto !important; margin-right:auto !important; width:720px">
     <h2 class="lmm-center">{{ title }}</h2>
     <br>
-    <p style="text-align:justify">{{ text }}</p>
+    <div v-if="isHTML" v-html="text" style="text-align:justify"></div>
+    <div v-else style="text-align:justify">{{ text }}</div>
     <br>
-    <p v-if="createdDate === editedDate" class="lmm-right lmm-opacity">Created {{ editedDate }}</p>
-    <p v-else class="lmm-right lmm-opacity">Edited {{ createdDate }}</p>
+    <p v-if="createdDate === editedDate" class="lmm-right lmm-opacity">Created {{ createdDate }}</p>
+    <p v-else class="lmm-right lmm-opacity">Edited {{ editedDate }}</p>
   </div>
 </template>
 
@@ -17,7 +18,8 @@ export default {
       title: '',
       text: '',
       createdDate: '',
-      editedDate: ''
+      editedDate: '',
+      isHTML: 0
     }
   },
   created () {
@@ -28,8 +30,9 @@ export default {
       let article = res.data
       this.title = article.title
       this.text = article.text
-      this.createdDate = article.createdDate
-      this.editedDate = article.editedDate
+      this.createdDate = article.created_date
+      this.editedDate = article.edited_date
+      this.isHTML = article.is_html
     }).catch((e) => {
       console.log(e)
     })

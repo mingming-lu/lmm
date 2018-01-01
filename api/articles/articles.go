@@ -23,6 +23,7 @@ type Article struct {
 	CreatedDate string `json:"created_date"`
 	EditedDate  string `json:"edited_date"`
 	CategoryID  int    `json:"category_id"`
+	IsHTML      bool   `json:"is_html"`
 }
 
 func GetArticles(c *elesion.Context) {
@@ -88,11 +89,15 @@ func getArticle(id string) (*Article, error) {
 	defer d.Close()
 
 	article := Article{}
-	err := d.QueryRow("SELECT id, title, text, created_date, edited_date, category_id FROM articles WHERE id = ?", id).Scan(
-		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedDate, &article.CategoryID,
+	is_html := false
+	err := d.QueryRow("SELECT id, title, text, created_date, edited_date, category_id, is_html+0 FROM articles WHERE id = ?", id).Scan(
+		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedDate, &article.CategoryID, &is_html,
 	)
 	if err != nil {
 		return nil, err
+	}
+	if is_html {
+		article.IsHTML = true
 	}
 	return &article, err
 }
