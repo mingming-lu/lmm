@@ -199,6 +199,10 @@ body {
 h1 {
   letter-spacing: 6px;
 }
+pre, code {
+  background-color: #f1f1f1 !important;
+  font-family: Menlo, Monaco, "Courier New", monospace;
+}
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
