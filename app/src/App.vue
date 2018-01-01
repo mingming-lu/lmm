@@ -17,13 +17,12 @@
 
     <router-view/>
 
-    <footer class="lmm-container lmm-padding-64 lmm-light-grey lmm-center">
-      <i class="fa fa-wechat lmm-hover-opacity"></i>
-      <i class="fa fa-qq lmm-hover-opacity"></i>
-      <i class="fa fa-weibo lmm-hover-opacity"></i>
-      <i class="fa fa-facebook-official lmm-hover-opacity"></i>
-      <i class="fa fa-twitter lmm-hover-opacity"></i>
-      <p>Powered by <router-link to="/profile" class="lmm-light-grey lmm-hover-light-grey">Lu Mingming</router-link></p>
+    <footer>
+      <hr class="lmm-level-opacity">
+      <div class="lmm-container lmm-padding-16 lmm-center">
+        <a href="https://github.com/akinaru-lu" target="_blank"><i class="fa fa-github lmm-hover-opacity lmm-xxxlarge lmm-white"></i></a>
+        <p>Powered by <router-link to="/profile" class="mm-light-grey lmm-white lmm-hover-light-grey">Lu Mingming</router-link></p>
+      </div>
     </footer>
   </div>
 </template>
@@ -43,6 +42,9 @@ export default {
 }
 .lmm-small {
   font-size: 14px !important;
+}
+.lmm-medium {
+  font-size: 16px !important;
 }
 .lmm-large {
   font-size: 18px !important;
@@ -191,17 +193,15 @@ export default {
   background-color: #fff !important;
 }
 body {
-  font-family: 'Lucida Grande', Helvetica, Arial,
-               'Microsoft Yahei', '微软雅黑', STXihei, '华文细黑',
-               'Yu Gothic', YuGothic,
-               sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
 }
 h1 {
   letter-spacing: 6px;
 }
 pre, code {
+  padding: 0 4px;
   background-color: #f1f1f1 !important;
-  font-family: Menlo, Monaco, "Courier New", monospace;
+  font-family: Monaco, "Courier", monospace;
 }
 #app {
   -webkit-font-smoothing: antialiased;
