@@ -91,7 +91,6 @@ CREATE TABLE IF NOT EXISTS articles (
 	title varchar(255) NOT NULL,
 	text text NOT NULL,
 	category_id int,
-	is_html bit DEFAULT 0,
 	PRIMARY KEY (id)
 )
 `
