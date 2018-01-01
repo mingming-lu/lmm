@@ -32,7 +32,7 @@ export default {
     axios.get(url).then((res) => {
       let article = res.data
       this.title = article.title
-      this.text = md.render('This text is rendered as `markdown`')
+      this.text = md.render(article.text)
       this.createdDate = article.created_date
       this.editedDate = article.edited_date
     }).catch((e) => {
