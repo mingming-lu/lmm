@@ -199,6 +199,10 @@ body {
 h1 {
   letter-spacing: 6px;
 }
+code {
+  padding: 2px;
+  background-color: #f1f1f1 !important;
+}
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
