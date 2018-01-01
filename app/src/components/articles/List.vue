@@ -4,13 +4,13 @@
     <div class="lmm-left" style="width:66.6666%; display:inline-block">
       <div v-for="article in articles" :key="article.title">
         <div class="lmm-card-4 lmm-container lmm-margin" style="text-align:left">
-          <h2><b>{{ article.title }}</b></h2>
-          <p class="lmm-small lmm-opacity">{{ article.created_date }}</p>
+          <h2>{{ article.title }}</h2>
+          <p class="lmm-opacity">{{ article.created_date }}</p>
           <p>{{ article.text }}</p>
           <p class="lmm-right">
             <router-link :to="'/articles/' + article.id">
               <button class="lmm-button lmm-padding-large lmm-white lmm-border">
-                <b>READ MORE >></b>
+                <b>Read More >></b>
               </button>
             </router-link>
           </p>
@@ -21,7 +21,7 @@
     <!-- Categories -->
     <div class="lmm-right" style="width:33.3333%; display:inline-block; text-align:left">
       <div class="lmm-container lmm-margin lmm-card-4">
-        <h4>Category</h4>
+        <p><b>Categories</b></p>
         <hr>
         <div v-for="category in categories" :key="category.id">
           <p>
@@ -32,7 +32,7 @@
 
     <!-- Tags -->
       <div class="lmm-container lmm-margin lmm-card-4">
-        <h4>Tags</h4>
+        <p><b>Tags</b></p>
         <hr>
         <p>
           <span v-for="tag in tags" :key=tag.id class="lmm-tag">
