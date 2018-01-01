@@ -20,6 +20,7 @@ func main() {
 	router.GET("/articles", articles.GetArticles)
 	router.GET("/article", articles.GetArticle)
 	router.GET("/articles/categories", articles.GetCategories)
+	router.GET("/articles/tags", articles.GetTags)
 	router.GET("/photos", image.Handler)
 	router.GET("/profile", profile.Handler)
 	log.Fatal(http.ListenAndServe(":8081", router))

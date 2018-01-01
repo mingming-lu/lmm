@@ -105,6 +105,16 @@ CREATE TABLE IF NOT EXISTS categories (
 )
 `
 
+const createArticleTags = `
+CREATE TABLE IF NOT EXISTS tags (
+	id int NOT NULL AUTO_INCREMENT,
+	user_id int NOT NULL,
+	name varchar(32) NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name)
+)
+`
+
 var CreateSQL = []string{
 	createProfile,
 	createSkill,
@@ -114,4 +124,5 @@ var CreateSQL = []string{
 	createQualification,
 	createArticles,
 	createArticleCategories,
+	createArticleTags,
 }
