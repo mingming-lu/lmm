@@ -47,3 +47,13 @@ func getCategories(userID string) ([]Category, error) {
 	}
 	return categories, nil
 }
+
+func getCategoryIDByName(name string) (string, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	id := ""
+	err := d.QueryRow("SELECT id FROM categories WHERE name = ?", name).Scan(&id)
+
+	return id, err
+}
