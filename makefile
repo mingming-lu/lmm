@@ -10,7 +10,7 @@ install:
 	npm --prefix manager install
 
 .PHONY: run
-run: app manager api image
+run: app api image manager
 
 .PHONY: app
 app: app/package.json
