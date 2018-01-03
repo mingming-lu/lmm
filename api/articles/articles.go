@@ -2,10 +2,13 @@ package articles
 
 import (
 	"database/sql"
+	"encoding/json"
 	"lmm/api/db"
 	"net/http"
+	"strings"
 
 	"github.com/akinaru-lu/elesion"
+	"github.com/akinaru-lu/errors"
 )
 
 type Response struct {
@@ -95,4 +98,61 @@ func getArticle(id string) (*Article, error) {
 		return nil, err
 	}
 	return &article, err
+}
+
+type postBody struct {
+	Title    string `json:"title"`
+	Text     string `json:"text"`
+	Category string `json:"category"`
+	Tags     string `json:"tags"`
+}
+
+func PostArticle(c *elesion.Context) {
+	// get user_id
+	userID := c.Query().Get("user_id")
+	if userID == "" {
+		c.Status(http.StatusBadRequest).String("missing user_id")
+		return
+	}
+
+	// parse body (should be json)
+	decoder := json.NewDecoder(c.Request.Body)
+
+	body := postBody{}
+	err := decoder.Decode(&body)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+
+	// insert into table
+	_, err = postArticle(userID, body)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).String("success")
+}
+
+func postArticle(userID string, body postBody) (int64, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	categoryID, err := getCategoryIDByName(body.Category)
+	if err != nil {
+		return -1, err
+	}
+
+	text := strings.TrimSpace(body.Text)
+
+	result, err := d.Exec("INSERT INTO articles (user_id, title, text, category_id) VALUES (?, ?, ?, ?)", userID, body.Title, text, categoryID)
+	if err != nil {
+		return -1, err
+	}
+	if rows, err := result.RowsAffected(); err != nil {
+		return -1, err
+	} else if rows != 1 {
+		return -1, errors.WithCaller("rows affected should be 1", 2)
+	}
+	return result.LastInsertId()
 }
