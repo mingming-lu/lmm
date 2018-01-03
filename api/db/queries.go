@@ -86,11 +86,11 @@ const createArticles = `
 CREATE TABLE IF NOT EXISTS articles (
 	id int NOT NULL AUTO_INCREMENT,
 	user_id int NOT NULL,
-	created_date date NOT NULL,
-	edited_date date NOT NULL,
+	created_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	edited_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	title varchar(255) NOT NULL,
 	text text NOT NULL,
-	category_id int,
+	category_id int NOT NULL DEFAULT 0,
 	PRIMARY KEY (id)
 )
 `
