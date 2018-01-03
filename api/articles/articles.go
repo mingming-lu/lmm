@@ -21,7 +21,7 @@ type Article struct {
 	Title       string `json:"title"`
 	Text        string `json:"text"`
 	CreatedDate string `json:"created_date"`
-	EditedDate  string `json:"edited_date"`
+	UpdatedDate string `json:"updated_date"`
 	CategoryID  int    `json:"category_id"`
 }
 
@@ -62,7 +62,7 @@ func getAllArticles(userID, categoryID string) ([]Article, error) {
 
 	var itr *sql.Rows
 	var err error
-	query := `SELECT id, title, text, created_date, edited_date, category_id FROM articles WHERE user_id = ? ORDER BY created_date DESC`
+	query := `SELECT id, title, text, created_date, updated_date, category_id FROM articles WHERE user_id = ? ORDER BY created_date DESC`
 	if categoryID == "" {
 		itr, err = d.Query(query, userID)
 	} else {
@@ -76,7 +76,7 @@ func getAllArticles(userID, categoryID string) ([]Article, error) {
 	articles := make([]Article, 0)
 	for itr.Next() {
 		article := Article{}
-		itr.Scan(&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedDate, &article.CategoryID)
+		itr.Scan(&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate, &article.CategoryID)
 
 		articles = append(articles, article)
 	}
@@ -88,8 +88,8 @@ func getArticle(id string) (*Article, error) {
 	defer d.Close()
 
 	article := Article{}
-	err := d.QueryRow("SELECT id, title, text, created_date, edited_date, category_id FROM articles WHERE id = ?", id).Scan(
-		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.EditedDate, &article.CategoryID,
+	err := d.QueryRow("SELECT id, title, text, created_date, updated_date, category_id FROM articles WHERE id = ?", id).Scan(
+		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate, &article.CategoryID,
 	)
 	if err != nil {
 		return nil, err
