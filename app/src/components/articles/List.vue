@@ -25,7 +25,7 @@
         <hr>
         <div v-for="category in categories" :key="category.id">
           <p>
-            <router-link to="" class="lmm-white lmm-hover-light-grey" style="text-decoration:none">{{ category.name }}</router-link>
+            <router-link to="" class="lmm-white lmm-link lmm-hover-light-grey">{{ category.name }}</router-link>
           </p>
         </div>
       </div>
