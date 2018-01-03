@@ -8,8 +8,8 @@
         <br>
         <div v-html="text" v-hljs style="text-align:justify"></div>
         <br>
-        <p v-if="createdDate === editedDate" class="lmm-right lmm-opacity">Created {{ createdDate }}</p>
-        <p v-else class="lmm-right lmm-opacity">Edited {{ editedDate }}</p>
+        <p v-if="createdDate === updatedDate" class="lmm-right lmm-opacity">Created at {{ createdDate }}</p>
+        <p v-else class="lmm-right lmm-opacity">Updated at {{ updatedDate }}</p>
       </div>
     </div>
 
@@ -35,7 +35,7 @@ export default {
       subtitles: [],
       text: '',
       createdDate: '',
-      editedDate: ''
+      updatedDate: ''
     }
   },
   created () {
@@ -50,7 +50,7 @@ export default {
       this.title = article.title
       this.text = md.render(article.text)
       this.createdDate = article.created_date
-      this.editedDate = article.edited_date
+      this.updatedDate = article.updated_date
 
       // prepare subtitles and their links
       let results = this.extractSubtitles(this.text, this.$route.path)
