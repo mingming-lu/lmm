@@ -20,7 +20,7 @@
     <footer>
       <hr class="lmm-level-opacity">
       <div class="lmm-container lmm-padding-16 lmm-center">
-        <a href="https://github.com/akinaru-lu" target="_blank"><i class="fa fa-github lmm-hover-opacity lmm-xxxlarge lmm-white"></i></a>
+        <a href="https://github.com/akinaru-lu" target="_blank"><i class="fa fa-github lmm-hover lmm-xxxlarge lmm-white"></i></a>
         <p>Powered by <router-link to="/profile" class="mm-light-grey lmm-white lmm-hover-light-grey">Lu Mingming</router-link></p>
       </div>
     </footer>

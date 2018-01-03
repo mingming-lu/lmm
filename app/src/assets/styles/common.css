@@ -90,7 +90,7 @@
 .lmm-button:hover {
   background-color: #ccc !important;
 }
-.lmm-hover-opacity:hover {
+.lmm-hover:hover {
   opacity: 0.60;
 }
 .lmm-bar .lmm-button {
@@ -113,7 +113,7 @@
   background-color: #f1f1f1 !important;
 }
 .lmm-link {
-  text-decoration:none;
+  text-decoration: none;
 }
 .lmm-left .lmm-margin {
   margin: 16px 8px 16px 8px !important;
@@ -155,6 +155,15 @@
 .lmm-white {
   color: #424949;
   background-color: #fff !important;
+}
+.lmm-white-trans {
+  color: #424949;
+  background-color: #fff !important;
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+  -ms-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 body {
   font-family: Helvetica, Arial, sans-serif;
