@@ -19,6 +19,7 @@ func main() {
 	router := elesion.Default("[api]")
 	router.GET("/articles", articles.GetArticles)
 	router.GET("/article", articles.GetArticle)
+	router.POST("/article", articles.PostArticle)
 	router.GET("/articles/categories", articles.GetCategories)
 	router.GET("/articles/tags", articles.GetTags)
 	router.GET("/photos", image.Handler)
