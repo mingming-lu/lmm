@@ -8,8 +8,8 @@
         <br>
         <div v-html="text" v-hljs style="text-align:justify"></div>
         <br>
-        <p v-if="createdDate === editedDate" class="lmm-right lmm-opacity">Created {{ editedDate }}</p>
-        <p v-else class="lmm-right lmm-opacity">Edited {{ createdDate }}</p>
+        <p v-if="createdDate === editedDate" class="lmm-right lmm-opacity">Created {{ createdDate }}</p>
+        <p v-else class="lmm-right lmm-opacity">Edited {{ editedDate }}</p>
       </div>
     </div>
 

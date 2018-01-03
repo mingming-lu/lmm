@@ -62,7 +62,7 @@ func getAllArticles(userID, categoryID string) ([]Article, error) {
 
 	var itr *sql.Rows
 	var err error
-	query := `SELECT id, title, text, created_date, edited_date, category_id FROM articles WHERE user_id = ?`
+	query := `SELECT id, title, text, created_date, edited_date, category_id FROM articles WHERE user_id = ? ORDER BY created_date DESC`
 	if categoryID == "" {
 		itr, err = d.Query(query, userID)
 	} else {
