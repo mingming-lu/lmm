@@ -3,8 +3,14 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github-gist.css'
 
-Vue.config.productionTip = false
+Vue.config.productionTip = true
+Vue.directive('hljs', el => {
+  let blocks = el.querySelectorAll('pre code')
+  Array.prototype.forEach.call(blocks, hljs.highlightBlock)
+})
 
 /* eslint-disable no-new */
 new Vue({
