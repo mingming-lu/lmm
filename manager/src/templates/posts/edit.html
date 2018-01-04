@@ -8,7 +8,6 @@
       <div align="right">
         <select v-model="category">
           <option disabled value="">Select one category</option>
-          <option>Default</option>
           <option v-for="ctg in categories" :key="ctg.id">{{ ctg.name }}</option>
           <option>New category</option>
         </select>
