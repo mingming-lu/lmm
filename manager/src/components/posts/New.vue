@@ -15,7 +15,7 @@ export default {
     return {
       title: '',
       text: '',
-      textPrview: '',
+      textPreview: '',
       category: 'Default',
       categories: [],
       tags: ''
