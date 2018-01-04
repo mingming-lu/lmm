@@ -31,6 +31,8 @@ func main() {
 
 	// /articles/category
 	router.POST("/articles/category", articles.NewCategory)
+	router.PUT("/articles/category", articles.UpdateCategory)
+	router.DELETE("/articles/category/:id", articles.DeleteCategory)
 
 	// /articles/tags
 	router.GET("/articles/tags", articles.GetTags)
