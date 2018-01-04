@@ -16,7 +16,7 @@ export default {
       title: '',
       text: '',
       textPreview: '',
-      category: 'Default',
+      categoryID: 0,
       categories: [],
       tags: ''
     }
@@ -34,10 +34,16 @@ export default {
       if (!confirm('Are you sure you want to submit?')) {
         return
       }
-      axios.post('http://api.lmm.local/article?user_id=1', {
+      if (this.categoryID === 0) {
+        alert('must select one category')
+        return
+      }
+
+      axios.post('http://api.lmm.local/article', {
+        user_id: 1,
         title: this.title,
         text: this.text,
-        category: this.category,
+        category_id: this.categoryID,
         tags: this.tags
       }).then((res) => {
         this.$router.push('/')
@@ -45,8 +51,8 @@ export default {
         console.log(e)
       })
     },
-    marked () {
-      this.textPreview = md.render(this.text)
+    marked: (text) => {
+      return md.render(text)
     }
   }
 }
