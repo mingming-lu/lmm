@@ -20,6 +20,8 @@ func main() {
 	router.GET("/articles", articles.GetArticles)
 	router.GET("/article", articles.GetArticle)
 	router.POST("/article", articles.PostArticle)
+	router.PUT("/article", articles.UpdateArticle)
+	router.GET("/articles/category", articles.GetCategoryByID)
 	router.GET("/articles/categories", articles.GetCategories)
 	router.GET("/articles/tags", articles.GetTags)
 	router.GET("/photos", image.Handler)

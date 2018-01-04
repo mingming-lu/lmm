@@ -48,6 +48,32 @@ func getCategories(userID string) ([]Category, error) {
 	return categories, nil
 }
 
+func GetCategoryByID(c *elesion.Context) {
+	id := c.Query().Get("id")
+	if id == "" {
+		c.Status(http.StatusBadRequest).String("missing id")
+		return
+	}
+
+	category, err := getCategoryByID(id)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).JSON(category)
+}
+
+func getCategoryByID(id string) (*Category, error) {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	category := new(Category)
+	err := d.QueryRow("SELECT id, user_id, name FROM categories WHERE id = ?", id).Scan(
+		&category.ID, &category.UserID, &category.Name,
+	)
+	return category, err
+}
+
 func getCategoryIDByName(name string) (string, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
