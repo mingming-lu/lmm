@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/akinaru-lu/errors"
 	_ "github.com/go-sql-driver/mysql"
 )
+
+var ErrAlreadyExists = errors.New("already exists")
 
 type DB struct {
 	*sql.DB
