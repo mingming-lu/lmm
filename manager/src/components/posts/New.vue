@@ -29,7 +29,7 @@ export default {
     })
   },
   methods: {
-    submit () {
+    onSubmit () {
       this.text = this.text.trim()
       if (!confirm('Are you sure you want to submit?')) {
         return
@@ -42,7 +42,7 @@ export default {
         category_id: this.categoryID,
         tags: this.tags
       }).then((res) => {
-        this.$router.push('/')
+        this.$router.push('/posts')
       }).catch((e) => {
         console.log(e)
       })

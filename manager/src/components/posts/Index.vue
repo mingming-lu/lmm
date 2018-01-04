@@ -48,7 +48,6 @@ export default {
         this.categories = categories.data
       })).catch((e) => {
         console.log(e)
-        alert(e.response.data)
       })
       this.newCategoryName = ''
     },

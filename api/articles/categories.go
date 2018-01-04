@@ -143,7 +143,7 @@ func updateCategory(body Category) error {
 func DeleteCategory(c *elesion.Context) {
 	idStr := c.Params.ByName("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
+	if err != nil || id <= 0 {
 		c.Status(http.StatusBadRequest).String("invalid id: " + idStr)
 		return
 	}

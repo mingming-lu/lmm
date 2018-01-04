@@ -50,27 +50,27 @@ export default {
     })
   },
   methods: {
-    submit () {
+    onSubmit () {
       this.text = this.text.trim()
-      if (!this.canUpdate()) {
+      if (!this.canSubmit()) {
         alert('no change')
         return
       }
 
       // update article
-      axios.put('http://api.lmm.local/article', {
-        id: this.id,
+      axios.put('http://api.lmm.local/article/' + this.id, {
+        user_id: 1,
         title: this.title,
         text: this.text,
         category_id: this.categoryID,
         tags: this.tags
       }).then((res) => {
-        this.$router.push('/')
+        this.$router.push('/posts')
       }).catch((e) => {
         console.log(e)
       })
     },
-    canUpdate () {
+    canSubmit () {
       if (!this.articleOriginal) {
         return false
       }
