@@ -16,11 +16,11 @@ export default {
       id: '',
       title: '',
       text: '',
-      textOriginal: '',
       textPreview: '',
       categoryID: 0,
       categories: [],
-      tags: ''
+      tags: '',
+      articleOriginal: null
     }
   },
   created () {
@@ -36,12 +36,14 @@ export default {
       if (id !== article.data.id.toString()) {
         throw new Error('id not equal! expected: ' + this.id + ', got: ' + article.data.id)
       }
-      this.id = article.data.id
-      this.title = article.data.title
-      this.text = article.data.text
-      this.textOriginal = article.data.text
-      this.textPreview = this.marked(article.data.text)
-      this.categoryID = article.data.category_id
+      this.articleOriginal = article.data
+
+      this.id = this.articleOriginal.id
+      this.title = this.articleOriginal.title
+      this.text = this.articleOriginal.text
+      this.textPreview = this.marked(this.articleOriginal.text)
+      this.categoryID = this.articleOriginal.category_id
+
       this.categories = categories.data
     })).catch((e) => {
       console.log(e)
@@ -50,15 +52,12 @@ export default {
   methods: {
     submit () {
       this.text = this.text.trim()
-      // update article
-      if (this.text === this.textOriginal) {
+      if (!this.canUpdate()) {
         alert('no change')
         return
       }
-      if (this.categoryID === 0) {
-        alert('must select one category')
-        return
-      }
+
+      // update article
       axios.put('http://api.lmm.local/article', {
         id: this.id,
         title: this.title,
@@ -70,6 +69,12 @@ export default {
       }).catch((e) => {
         console.log(e)
       })
+    },
+    canUpdate () {
+      let titleOK = this.articleOriginal.title !== this.title
+      let textOK = this.articleOriginal.text !== this.text
+      let categoryIDOK = this.articleOriginal.categoryID !== this.categoryID
+      return titleOK || textOK || categoryIDOK
     },
     marked: (text) => {
       return md.render(text)
