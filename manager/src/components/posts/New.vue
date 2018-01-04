@@ -34,10 +34,6 @@ export default {
       if (!confirm('Are you sure you want to submit?')) {
         return
       }
-      if (this.categoryID === 0) {
-        alert('must select one category')
-        return
-      }
 
       axios.post('http://api.lmm.local/article', {
         user_id: 1,
