@@ -16,11 +16,9 @@ type Response struct {
 	NextCursor string    `json:"next_cursor"`
 }
 
-type Result struct {
-}
-
 type Article struct {
 	ID          int    `json:"id"`
+	UserID      int    `json:"user_id"`
 	Title       string `json:"title"`
 	Text        string `json:"text"`
 	CreatedDate string `json:"created_date"`
@@ -100,24 +98,9 @@ func getArticle(id string) (*Article, error) {
 	return &article, err
 }
 
-type postBody struct {
-	Title    string `json:"title"`
-	Text     string `json:"text"`
-	Category string `json:"category"`
-	Tags     string `json:"tags"`
-}
-type putBody postBody
-
 func PostArticle(c *elesion.Context) {
-	// get user_id
-	userID := c.Query().Get("user_id")
-	if userID == "" {
-		c.Status(http.StatusBadRequest).String("missing user_id")
-		return
-	}
-
 	// parse body (should be json)
-	body := postBody{}
+	body := Article{}
 	err := json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).Error(err.Error())
@@ -126,7 +109,7 @@ func PostArticle(c *elesion.Context) {
 	defer c.Request.Body.Close()
 
 	// insert into table
-	_, err = postArticle(userID, body)
+	_, err = postArticle(body)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).Error(err.Error())
 		return
@@ -134,44 +117,36 @@ func PostArticle(c *elesion.Context) {
 	c.Status(http.StatusOK).String("success")
 }
 
-func postArticle(userID string, body postBody) (int64, error) {
+func postArticle(body Article) (int64, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	categoryID, err := getCategoryIDByName(body.Category)
-	if err != nil {
-		return -1, err
-	}
-
 	text := strings.TrimSpace(body.Text)
 
-	result, err := d.Exec("INSERT INTO articles (user_id, title, text, category_id) VALUES (?, ?, ?, ?)", userID, body.Title, text, categoryID)
+	result, err := d.Exec(
+		"INSERT INTO articles (user_id, title, text, category_id) VALUES (?, ?, ?, ?)",
+		body.UserID, body.Title, text, body.CategoryID,
+	)
 	if err != nil {
-		return -1, err
+		return 0, err
 	}
 	if rows, err := result.RowsAffected(); err != nil {
-		return -1, err
+		return 0, err
 	} else if rows != 1 {
-		return -1, errors.WithCaller("rows affected should be 1", 2)
+		return 0, errors.WithCaller("rows affected should be 1", 2)
 	}
 	return result.LastInsertId()
 }
 
 func UpdateArticle(c *elesion.Context) {
-	id := c.Query().Get("id")
-	if id == "" {
-		c.Status(http.StatusBadRequest).String("missing id")
-		return
-	}
-
-	body := putBody{}
+	body := Article{}
 	err := json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).Error(err.Error())
 		return
 	}
 
-	err = updateArticle(id, body)
+	err = updateArticle(body)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).Error(err.Error())
 		return
@@ -179,16 +154,12 @@ func UpdateArticle(c *elesion.Context) {
 	c.Status(http.StatusOK).String("success")
 }
 
-func updateArticle(id string, body putBody) error {
+func updateArticle(body Article) error {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	categoryID, err := getCategoryIDByName(body.Category)
-	if err != nil {
-		return err
-	}
 	res, err := d.Exec("UPDATE articles SET title = ?, text = ?, category_id = ? WHERE id = ?",
-		body.Title, body.Text, categoryID, id,
+		body.Title, body.Text, body.CategoryID, body.ID,
 	)
 	if rows, err := res.RowsAffected(); err != nil {
 		return err
