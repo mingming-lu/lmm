@@ -71,6 +71,9 @@ export default {
       })
     },
     canUpdate () {
+      if (!this.articleOriginal) {
+        return false
+      }
       let titleOK = this.articleOriginal.title !== this.title
       let textOK = this.articleOriginal.text !== this.text
       let categoryIDOK = this.articleOriginal.categoryID !== this.categoryID
