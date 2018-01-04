@@ -105,10 +105,6 @@ CREATE TABLE IF NOT EXISTS categories (
 )
 `
 
-const insertDefaultCategory = `
-INSERT IGNORE INTO categories (user_id, name) VALUES (1, "Default")
-`
-
 const createArticleTags = `
 CREATE TABLE IF NOT EXISTS tags (
 	id int NOT NULL AUTO_INCREMENT,
@@ -128,6 +124,5 @@ var CreateSQL = []string{
 	createQualification,
 	createArticles,
 	createArticleCategories,
-	insertDefaultCategory,
 	createArticleTags,
 }
