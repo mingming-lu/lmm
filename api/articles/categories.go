@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"lmm/api/db"
 	"net/http"
+	"strconv"
 
 	"github.com/akinaru-lu/elesion"
 	"github.com/akinaru-lu/errors"
@@ -58,16 +59,21 @@ func NewCategory(c *elesion.Context) {
 	body := Category{}
 	err := json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error())
+		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid body")
 		return
 	}
+	defer c.Request.Body.Close()
 
 	_, err = newCategory(body)
-	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error())
+	if err == nil {
+		c.Status(http.StatusOK).String("success")
 		return
 	}
-	c.Status(http.StatusOK).String("success")
+	if err == db.ErrAlreadyExists {
+		c.Status(http.StatusConflict).String(body.Name + " already exists")
+		return
+	}
+	c.Status(http.StatusInternalServerError).Error(err.Error()).String("unknown error")
 }
 
 func newCategory(body Category) (int64, error) {
@@ -77,8 +83,8 @@ func newCategory(body Category) (int64, error) {
 	// check if category already exists
 	var id int64
 	err := d.QueryRow("SELECT id FROM categories WHERE name = ?", body.Name).Scan(&id)
-	if err == nil {
-		return id, errors.New("category " + body.Name + "already exists")
+	if err == nil { // name already exists
+		return id, db.ErrAlreadyExists
 	}
 	if err != sql.ErrNoRows {
 		return id, err
@@ -96,4 +102,72 @@ func newCategory(body Category) (int64, error) {
 	}
 
 	return result.LastInsertId()
+}
+
+func UpdateCategory(c *elesion.Context) {
+	body := Category{}
+	err := json.NewDecoder(c.Request.Body).Decode(&body)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	defer c.Request.Body.Close()
+
+	err = updateCategory(body)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).String("success")
+}
+
+func updateCategory(body Category) error {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	result, err := d.Exec(
+		"UPDATE categories SET name = ? WHERE id = ? AND user_id = ?",
+		body.Name, body.ID, body.UserID,
+	)
+	if err != nil {
+		return err
+	}
+	if rows, err := result.RowsAffected(); err != nil {
+		return err
+	} else if rows != 1 {
+		return errors.WithCaller("rows affected should be 1", 2)
+	}
+	return nil
+}
+
+func DeleteCategory(c *elesion.Context) {
+	idStr := c.Params.ByName("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid id: " + idStr)
+		return
+	}
+
+	err = deleteCategory(id)
+	if err != nil {
+		c.Status(http.StatusNotFound).Error(err.Error()).String("not exists id: " + idStr)
+		return
+	}
+	c.Status(http.StatusOK).String("success")
+}
+
+func deleteCategory(id int64) error {
+	d := db.New().Use("lmm")
+	defer d.Close()
+
+	result, err := d.Exec("DELETE FROM categories WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	if rows, err := result.RowsAffected(); err != nil {
+		return err
+	} else if rows != 1 {
+		return errors.WithCaller("rows affected should be 1", 2)
+	}
+	return nil
 }
