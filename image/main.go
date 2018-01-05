@@ -4,19 +4,22 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
+	"runtime"
 
 	"github.com/akinaru-lu/elesion"
 )
 
-const Res = "image/res"
-const Special = "image/special"
-
-func handler(c *elesion.Context) {
-	c.File(Res + c.Request.URL.Path)
+func where() string {
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		log.Fatal("failed to get caller infomation")
+	}
+	return path.Dir(filename)
 }
 
-func avatar(c *elesion.Context) {
-	c.File(Special + "/avatar.jpg")
+func photos(c *elesion.Context) {
+	c.File(here + c.Request.URL.Path)
 }
 
 func ensureDir(path string) {
@@ -25,14 +28,16 @@ func ensureDir(path string) {
 	}
 }
 
+var here = "image"
+
 func init() {
-	ensureDir(Res)
-	ensureDir(Special)
+	here := where()
+	ensureDir(here + "/photos")
+	ensureDir(here + "/special")
 }
 
 func main() {
 	router := elesion.Default("[image]")
-	router.GET("/", handler)
-	router.GET("/avatar", avatar)
+	router.GET("/photos/:name", photos)
 	log.Fatal(http.ListenAndServe(":8082", router))
 }
