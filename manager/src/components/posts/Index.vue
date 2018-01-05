@@ -41,8 +41,8 @@ export default {
   methods: {
     fetchData () {
       axios.all([
-        axios.get('http://api.lmm.local/articles?user_id=1'),
-        axios.get('http://api.lmm.local/articles/categories?user_id=1')
+        axios.get('http://api.lmm.local/articles/1'),
+        axios.get('http://api.lmm.local/articles/1/categories')
       ]).then(axios.spread((articles, categories) => {
         this.articles = articles.data
         this.categories = categories.data
@@ -83,7 +83,7 @@ export default {
       }
 
       // update category name by id
-      axios.put('http://api.lmm.local/articles/category', {
+      axios.put('http://api.lmm.local/articles/category/' + category.id, {
         id: category.id,
         user_id: 1,
         name: name

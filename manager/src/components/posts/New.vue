@@ -22,7 +22,7 @@ export default {
     }
   },
   created () {
-    axios.get('http://api.lmm.local/articles/categories?user_id=1').then((res) => {
+    axios.get('http://api.lmm.local/articles/1/categories').then((res) => {
       this.categories = res.data
     }).catch((e) => {
       console.log(e)

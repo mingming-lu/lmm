@@ -27,11 +27,11 @@ export default {
     let pattern = /^\/posts\/(\d)\/edit$/g
     let match = pattern.exec(this.$route.path)
     let id = match[1]
-    let urlArticle = 'http://api.lmm.local' + this.$route.path.replace(pattern, '/article?id=' + id)
+    let urlArticle = 'http://api.lmm.local' + this.$route.path.replace(pattern, '/article/' + id)
 
     axios.all([
       axios.get(urlArticle),
-      axios.get('http://api.lmm.local/articles/categories?user_id=1')
+      axios.get('http://api.lmm.local/articles/1/categories')
     ]).then(axios.spread((article, categories) => {
       if (id !== article.data.id.toString()) {
         throw new Error('id not equal! expected: ' + this.id + ', got: ' + article.data.id)
@@ -52,6 +52,11 @@ export default {
   methods: {
     onSubmit () {
       this.text = this.text.trim()
+
+      if (!confirm('Are you sure you want to submit?')) {
+        return
+      }
+
       if (!this.canSubmit()) {
         alert('no change')
         return

@@ -28,13 +28,22 @@ type Article struct {
 }
 
 func GetArticles(c *elesion.Context) {
-	userID := c.Query().Get("user_id")
-	categoryID := c.Query().Get("category_id")
-	if userID == "" {
-		c.Status(http.StatusBadRequest).String("missing user_id")
+	userIDStr := c.Params.ByName("userID")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil || userID <= 0 {
+		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
 		return
 	}
-	// TODO convert userID and categoryID to int64
+
+	categoryIDStr := c.Query().Get("category_id")
+	if categoryIDStr == "" {
+		categoryIDStr = "0"
+	}
+	categoryID, err := strconv.ParseInt(categoryIDStr, 10, 64)
+	if err != nil || categoryID < 0 { // allow zero ID (for all categories)
+		c.Status(http.StatusBadRequest).String("invalid category id: " + categoryIDStr)
+		return
+	}
 
 	articles, err := getArticles(userID, categoryID)
 	if err != nil {
@@ -44,14 +53,14 @@ func GetArticles(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(articles)
 }
 
-func getArticles(userID, categoryID string) ([]Article, error) {
+func getArticles(userID, categoryID int64) ([]Article, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
 	var itr *sql.Rows
 	var err error
 	query := `SELECT id, title, text, created_date, updated_date, category_id FROM articles WHERE user_id = ? ORDER BY created_date DESC`
-	if categoryID == "" {
+	if categoryID == 0 {
 		itr, err = d.Query(query, userID)
 	} else {
 		itr, err = d.Query(query+` AND category_id = ?`, userID, categoryID)
@@ -64,7 +73,10 @@ func getArticles(userID, categoryID string) ([]Article, error) {
 	articles := make([]Article, 0)
 	for itr.Next() {
 		article := Article{}
-		itr.Scan(&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate, &article.CategoryID)
+		err = itr.Scan(&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate, &article.CategoryID)
+		if err != nil {
+			return nil, err
+		}
 
 		articles = append(articles, article)
 	}
@@ -72,26 +84,28 @@ func getArticles(userID, categoryID string) ([]Article, error) {
 }
 
 func GetArticle(c *elesion.Context) {
-	id := c.Query().Get("id")
-	if id == "" {
-		c.Status(http.StatusBadRequest).String("missing id")
+	idStr := c.Params.ByName("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid id: " + idStr)
 		return
 	}
 
 	article, err := getArticle(id)
 	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error())
+		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
 		return
 	}
 	c.Status(http.StatusOK).JSON(article)
 }
 
-func getArticle(id string) (*Article, error) {
+func getArticle(id int64) (*Article, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
 	article := Article{}
-	err := d.QueryRow("SELECT id, title, text, created_date, updated_date, category_id FROM articles WHERE id = ?", id).Scan(
+	err := d.QueryRow(
+		"SELECT id, title, text, created_date, updated_date, category_id FROM articles WHERE id = ?", id).Scan(
 		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate, &article.CategoryID,
 	)
 	if err != nil {

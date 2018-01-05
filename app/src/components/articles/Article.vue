@@ -40,7 +40,7 @@ export default {
   },
   created () {
     let match = /^\/articles\/(\d)$/g.exec(this.$route.path)
-    let url = 'http://api.lmm.local' + this.$route.path.replace(/^\/articles\/\d$/, '/article?id=' + match[1])
+    let url = 'http://api.lmm.local' + this.$route.path.replace(/^\/articles\/\d$/, '/article/' + match[1])
     let md = new Markdownit({
       html: true,
       typographer: true
