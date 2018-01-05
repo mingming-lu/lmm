@@ -112,6 +112,9 @@
   color: #424949;
   background-color: #f1f1f1 !important;
 }
+.lmm-highlighted {
+  background-color: #FFFACD; /* lemon chiffon */
+}
 .lmm-link {
   text-decoration: none;
 }

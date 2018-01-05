@@ -69,7 +69,7 @@ export default {
       if (match !== null && match.length >= 2) {
         let id = match[1]
         console.log(id)
-        document.getElementById(id).className = 'lmm-light-grey'
+        document.getElementById(id).className = 'lmm-highlighted'
         setTimeout(() => {
           document.getElementById(id).className = 'lmm-white-trans'
         }, 500)
