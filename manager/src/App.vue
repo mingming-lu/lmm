@@ -9,7 +9,3 @@ export default {
   name: 'app'
 }
 </script>
-
-<style>
-  @import '@/../../app/src/assets/styles/common.css'
-</style>

@@ -17,11 +17,29 @@ func init() {
 
 func main() {
 	router := elesion.Default("[api]")
+
+	// /articles
 	router.GET("/articles", articles.GetArticles)
-	router.GET("/article", articles.GetArticle)
+
+	// /article
+	router.GET("/article/:id", articles.GetArticle)
+	router.POST("/article", articles.PostArticle)
+	router.PUT("/article/:id", articles.UpdateArticle)
+
+	// /articles/categories
 	router.GET("/articles/categories", articles.GetCategories)
+
+	// /articles/category
+	router.POST("/articles/category", articles.NewCategory)
+	router.PUT("/articles/category/:id", articles.UpdateCategory)
+	router.DELETE("/articles/category/:id", articles.DeleteCategory)
+
+	// /articles/tags
 	router.GET("/articles/tags", articles.GetTags)
+
 	router.GET("/photos", image.Handler)
+
 	router.GET("/profile", profile.Handler)
+
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
