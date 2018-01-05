@@ -18,21 +18,22 @@ type Category struct {
 }
 
 func GetCategories(c *elesion.Context) {
-	userID := c.Query().Get("user_id")
-	if userID == "" {
-		c.Status(http.StatusBadRequest).String("missing user_id")
+	userIDStr := c.Params.ByName("userID")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil || userID <= 0 {
+		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
 		return
 	}
 
 	categories, err := getCategories(userID)
 	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error())
+		c.Status(http.StatusNotFound).Error(err.Error()).String("categories not found")
 		return
 	}
 	c.Status(http.StatusOK).JSON(categories)
 }
 
-func getCategories(userID string) ([]Category, error) {
+func getCategories(userID int64) ([]Category, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
@@ -48,7 +49,10 @@ func getCategories(userID string) ([]Category, error) {
 	categories := make([]Category, 0)
 	for itr.Next() {
 		category := Category{}
-		itr.Scan(&category.ID, &category.UserID, &category.Name)
+		err = itr.Scan(&category.ID, &category.UserID, &category.Name)
+		if err != nil {
+			return nil, err
+		}
 
 		categories = append(categories, category)
 	}

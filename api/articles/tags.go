@@ -3,6 +3,7 @@ package articles
 import (
 	"lmm/api/db"
 	"net/http"
+	"strconv"
 
 	"github.com/akinaru-lu/elesion"
 )
@@ -14,21 +15,22 @@ type Tag struct {
 }
 
 func GetTags(c *elesion.Context) {
-	userID := c.Query().Get("user_id")
-	if userID == "" {
-		c.Status(http.StatusBadRequest).String("missing user_id")
+	userIDStr := c.Params.ByName("userID")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
 		return
 	}
 
 	tags, err := getTags(userID)
 	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error())
+		c.Status(http.StatusNotFound).Error(err.Error()).String("tags not found")
 		return
 	}
 	c.Status(http.StatusOK).JSON(tags)
 }
 
-func getTags(userID string) ([]Tag, error) {
+func getTags(userID int64) ([]Tag, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
@@ -41,7 +43,10 @@ func getTags(userID string) ([]Tag, error) {
 	tags := make([]Tag, 0)
 	for itr.Next() {
 		tag := Tag{}
-		itr.Scan(&tag.ID, &tag.UserID, &tag.Name)
+		err = itr.Scan(&tag.ID, &tag.UserID, &tag.Name)
+		if err != nil {
+			return nil, err
+		}
 
 		tags = append(tags, tag)
 	}
