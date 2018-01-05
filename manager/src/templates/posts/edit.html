@@ -1,0 +1,32 @@
+<div>
+  <div class="lmm-row">
+
+    <!-- left (edit) -->
+    <div class="lmm-left" style="width:50%">
+      <div class="lmm-container">
+      <input v-model="title" placeholder="title">
+      <div align="right">
+        <select v-model="categoryID">
+          <option disabled value="">Select one category</option>
+          <option v-for="ctg in categories" :key="ctg.id" :value="ctg.id">{{ ctg.name }}</option>
+        </select>
+      </div>
+      <br>
+      <textarea v-model="text" v-on:input="textPreview = marked(text)" placeholder="text"></textarea>
+      </div>
+    </div>
+
+    <!-- right (preview) -->
+    <div class="lmm-right" style="width:50%">
+      <div class="lmm-container">
+      <span id="title-preview">{{ title }}</span>
+      <br>
+      <br>
+      <div id="text-preview" v-html="textPreview" v-hljs style="text-align:left"></div>
+      </div>
+    </div>
+
+  </div>
+  <br>
+  <button v-on:click="onSubmit">Submit</button>
+</div>

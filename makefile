@@ -7,13 +7,18 @@ install:
 	go get -u github.com/akinaru-lu/elesion
 	go get -u github.com/go-sql-driver/mysql
 	npm --prefix app install
+	npm --prefix manager install
 
 .PHONY: run
-run: app api image
+run: app api image manager
 
 .PHONY: app
 app: app/package.json
 	npm --prefix app run dev
+
+.PHONY: manager
+manager: manager/package.json
+	npm --prefix manager run dev
 
 .PHONY: api
 api: api/main.go

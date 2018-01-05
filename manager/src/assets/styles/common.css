@@ -1,0 +1,15 @@
+textarea {
+  width: 100%;
+  height: 128px;
+  max-width: 100%;
+  resize: vertical;
+  overflow-y: scroll;
+}
+#title-preview:before {
+  content: 'title: ';
+  opacity: 0.4;
+}
+#text-preview:before {
+  content: 'text: ';
+  opacity: 0.4;
+}
