@@ -31,7 +31,6 @@ import Markdownit from 'markdown-it'
 export default {
   data () {
     return {
-      changed: false,
       title: '',
       subtitles: [],
       text: '',
