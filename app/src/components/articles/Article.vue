@@ -14,8 +14,8 @@
     </div>
 
     <!-- Article chapters navigation -->
-    <div class="lmm-right" style="width:25%; display:inline-block">
-      <div class="lmm-container lmm-margin" style="text-align: left">
+    <div class="lmm-right lmm-nav" style="width:25%; display:inline-block;">
+      <div class="lmm-container lmm-margin" style="text-align:left;">
         <p><b>Chapters</b></p>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
           <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="lmm-white lmm-link lmm-hover">{{ subtitle.name }}</router-link>
@@ -68,7 +68,6 @@ export default {
       let match = /^#(.+)$/g.exec(hash)
       if (match !== null && match.length >= 2) {
         let id = match[1]
-        console.log(id)
         document.getElementById(id).className = 'lmm-highlighted'
         setTimeout(() => {
           document.getElementById(id).className = 'lmm-white-trans'
