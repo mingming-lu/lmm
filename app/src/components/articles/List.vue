@@ -59,9 +59,9 @@ export default {
   },
   created () {
     axios.all([
-      axios.get('http://api.lmm.local/articles?user_id=1'),
-      axios.get('http://api.lmm.local/articles/categories?user_id=1'),
-      axios.get('http://api.lmm.local/articles/tags?user_id=1')
+      axios.get('http://api.lmm.local/articles/1'),
+      axios.get('http://api.lmm.local/articles/1/categories'),
+      axios.get('http://api.lmm.local/articles/1/tags')
     ]).then(axios.spread((articles, categories, tags) => {
       this.articles = articles.data
       this.categories = categories.data
