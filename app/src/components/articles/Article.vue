@@ -14,8 +14,8 @@
     </div>
 
     <!-- Article chapters navigation -->
-    <div v-nav class="lmm-right lmm-nav-container" style="width:25%; display:inline-block; position:relative;">
-      <div class="lmm-container lmm-margin lmm-nav" style="text-align:left;">
+    <div class="lmm-right lmm-nav" style="width:25%; display:inline-block;">
+      <div class="lmm-container lmm-margin" style="text-align:left;">
         <p><b>Chapters</b></p>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
           <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="lmm-white lmm-link lmm-hover">{{ subtitle.name }}</router-link>
@@ -60,11 +60,6 @@ export default {
     }).catch((e) => {
       console.log(e)
     })
-
-    window.addEventListener('scroll', this.onScroll)
-  },
-  destroyed () {
-    window.removeEventListener('scroll', this.onScroll)
   },
   methods: {
     jumpToHash: (hash) => {
@@ -97,17 +92,7 @@ export default {
         }
       })
       return [lines.join('\n'), subtitles]
-    }// ,
-    // onScroll () {
-    //   let el = document.getElementById('navigation')
-    //   let elc = document.getElementById('navigation-container')
-    //   if (elc.getBoundingClientRect().top <= 0) {
-    //     this.changed = true
-    //     el.classList.add('lmm-navigation')
-    //   } else {
-    //     el.classList.remove('lmm-navigation')
-    //   }
-    // }
+    }
   }
 }
 </script>

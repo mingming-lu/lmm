@@ -13,29 +13,6 @@ Vue.directive('hljs', (el) => {
   Array.prototype.forEach.call(codeBlocks, hljs.highlightBlock)
 })
 
-function findAncestor (el, cls) {
-  while ((el = el.parentElement) && !el.classList.contains(cls)) {
-  }
-  return el
-}
-
-Vue.directive('nav', (el) => {
-  let navs = el.querySelectorAll('.lmm-nav-container .lmm-nav')
-  Array.prototype.forEach.call(navs, (el) => {
-    let container = findAncestor(el, 'lmm-nav-container')
-    if (!container) {
-      return
-    }
-    el.addEventListener('scroll', () => {
-      if (container.getBoundingClientRect().top <= 0) {
-        el.style = 'position:fixed;'
-      } else {
-        el.style = 'position:inherit;'
-      }
-    })
-  })
-})
-
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
