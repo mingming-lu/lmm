@@ -105,29 +105,35 @@ func newCategory(body Category) (int64, error) {
 }
 
 func UpdateCategory(c *elesion.Context) {
+	idStr := c.Params.ByName("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		c.Status(http.StatusBadRequest).String("invalid id: " + idStr)
+	}
+
 	body := Category{}
-	err := json.NewDecoder(c.Request.Body).Decode(&body)
+	err = json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error())
+		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid body")
 		return
 	}
 	defer c.Request.Body.Close()
 
-	err = updateCategory(body)
+	err = updateCategory(id, body)
 	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error())
+		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid input")
 		return
 	}
 	c.Status(http.StatusOK).String("success")
 }
 
-func updateCategory(body Category) error {
+func updateCategory(id int64, body Category) error {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
 	result, err := d.Exec(
 		"UPDATE categories SET name = ? WHERE id = ? AND user_id = ?",
-		body.Name, body.ID, body.UserID,
+		body.Name, id, body.UserID,
 	)
 	if err != nil {
 		return err
