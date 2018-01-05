@@ -14,6 +14,12 @@ export default new Router({
   mode: 'history',
   routes: [
     {
+      path: '*',
+      component: {
+        template: '<p>404 Not Found</p>'
+      }
+    },
+    {
       path: '/',
       redirect: {
         path: '/home'
