@@ -103,9 +103,10 @@ const createArticleTags = `
 CREATE TABLE IF NOT EXISTS tags (
 	id int NOT NULL AUTO_INCREMENT,
 	user_id int NOT NULL,
+	article_id int NOT NULL,
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (name)
+	UNIQUE (name, article_id)
 )
 `
 
