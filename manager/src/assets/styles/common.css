@@ -5,6 +5,9 @@ textarea {
   resize: vertical;
   overflow-y: scroll;
 }
+body {
+  text-align: center;
+}
 #title-preview:before {
   content: 'title: ';
   opacity: 0.4;
