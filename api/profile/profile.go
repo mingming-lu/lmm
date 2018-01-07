@@ -90,7 +90,7 @@ func educationByUserID(id int) ([]Education, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	itr, err := d.Query("SELECT date_from, date_to, institution, department, major, degree, current+0 FROM education WHERE user_id = ? ORDER BY sort", id)
+	itr, err := d.Query("SELECT date_from, date_to, institution, department, major, degree, current+0 FROM education WHERE user_id = ? ORDER BY date_from DESC", id)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func workExperienceByUserID(id int) ([]WorkExperience, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	itr, err := d.Query("SELECT date_from, date_to, company, position, status, current+0 FROM work_experience WHERE user_id = ? ORDER BY sort", id)
+	itr, err := d.Query("SELECT date_from, date_to, company, position, status, current+0 FROM work_experience WHERE user_id = ? ORDER BY date_from DESC", id)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func qualificationByUserID(id int) ([]Qualification, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	itr, err := d.Query("SELECT name, date FROM qualification WHERE user_id = ? ORDER BY sort", id)
+	itr, err := d.Query("SELECT name, date FROM qualification WHERE user_id = ? ORDER BY date DESC", id)
 	if err != nil {
 		return nil, err
 	}
