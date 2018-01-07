@@ -1,18 +1,10 @@
 <template>
-  <div class="lmm-row">
-    <div class="lmm-left" style="width:50%">
-      <div style="margin:8px">
-        <div v-for="photo in photos.slice(0, photos.length/2)" :key="photo.url" class="lmm-box">
-          <img :src="photo.url" class="lmm-box">
-        </div>
-      </div>
+  <div class="container">
+    <div class="left" style="width:50%">
+        <img v-for="photo in left" :key="photo.url" :src="photo.url" class="picture">
     </div>
-    <div class="lmm-right" style="width:50%">
-      <div style="margin:8px">
-        <div v-for="photo in photos.slice(photos.length/2)" :key="photo.url" class="lmm-box">
-          <img :src="photo.url" class="lmm-box">
-        </div>
-      </div>
+    <div class="right" style="width:50%">
+        <img v-for="photo in right" :key="photo.url" :src="photo.url" class="picture">
     </div>
   </div>
 </template>
@@ -22,15 +14,30 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      photos: []
+      left: [],
+      right: []
     }
   },
   created () {
     axios.get('http://api.lmm.local/photos').then((res) => {
-      this.photos = res.data.images
+      for (let i = 0; i < res.data.images.length; i++) {
+        if (i % 2 === 0) {
+          this.left.push(res.data.images[i])
+        } else {
+          this.right.push(res.data.images[i])
+        }
+      }
     }).catch((e) => {
       console.log(e)
     })
   }
 }
 </script>
+
+<style scoped>
+div {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+</style>
+

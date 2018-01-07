@@ -1,101 +1,87 @@
 <template>
-  <div class="lmm-row">
-      
+  <div class="container">
     <!-- Left Column -->
-    <div class="lmm-left" style="text-align:left; width:33.3333%; display:inline-block">
-      <div class="lmm-margin lmm-card-4">
-        <div class="lmm-display-container">
-          <img :src="avatar_url" style="width:100%" alt="Avatar">
-        </div>
-        <div class="lmm-container">
-          <p class="lmm-xlarge"><b>{{ name }}</b></p>
-          <p>{{ bio }}</p>
-        </div>
-        <div class="lmm-container">
-          <p><i class="fa fa-briefcase fa-fw lmm-margin-right lmm-large"></i>{{ profession }}</p>
-          <p><i class="fa fa-home fa-fw lmm-margin-right lmm-large"></i>{{ location }}</p>
-          <p><i class="fa fa-envelope fa-fw lmm-margin-right lmm-large"></i>{{ email }}</p>
-        </div>
+    <div class="left" style="width:33.3333%;">
+
+      <!-- profile -->
+      <div class="container">
+        <img :src="avatar_url" style="width:100%" alt="Avatar" @error="setDefaultAvatar">
+        <h3>{{ name }}</h3>
+        <p>{{ bio }}</p>
+        <p><i class="fa fa-briefcase fa-fw"></i>{{ profession }}</p>
+        <p><i class="fa fa-home fa-fw"></i>{{ location }}</p>
+        <p><i class="fa fa-envelope fa-fw"></i>{{ email }}</p>
       </div>
 
-      <div class="lmm-container lmm-white lmm-margin lmm-card-4">
-        <p class="lmm-large"><b><i class="fa fa-asterisk fa-fw lmm-margin-right"></i>Skills</b></p>
-        <div v-for="(skill, index) in skills" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px">{{ skill.name }}</div>
-              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ skill.level }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-          </p>
-        </div>
+      <!-- skills -->
+      <div class="container">
+        <h3><i class="fa fa-asterisk fa-fw"></i>Skills</h3>
+        <span v-for="skill in skills" :key="skill.name" class="link">
+          {{ skill.name }}
+        </span>
+        <hr class="transparent">
       </div>
 
-      <div class="lmm-container lmm-white lmm-margin lmm-card-4">
-        <p class="lmm-large"><b><i class="fa fa-globe fa-fw lmm-margin-right"></i>Languages</b></p>
-        <div v-for="(language, index) in languages" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px">{{ language.name }}</div>
-              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ language.level }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-          </p>
-        </div>
+      <div class="container">
+        <h3><i class="fa fa-globe fa-fw"></i>Languages</h3>
+        <span v-for="language in languages" :key="language.name">
+          {{ language.name }}
+        </span>
+        <hr class="transparent">
       </div>
     </div>
     <!-- End Left Column -->
 
     <!-- Right Column -->
-    <div class="lmm-right" style="text-align:left; width:66.6666%; display:inline-block">
-    
-      <div class="lmm-container lmm-white lmm-margin lmm-card-4">
-        <p class="lmm-large"><b><i class="fa fa-suitcase fa-fw lmm-margin-right"></i>Work Experience</b></p>
+    <div class="right" style="width:66.6666%;">
+
+      <!-- work experience -->
+      <div class="container">
+        <h3><i class="fa fa-suitcase fa-fw"></i>Work Experience</h3>
         <br>
-        <div v-for="(we, index) in workExperience" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px"><b>{{ we.company }}</b></div>
-              <div v-if="we.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.date_from.slice(0, 7) }} ~ Current</div>
-              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-            <p>{{ we.position }}</p>
-            <br>
-          </p>
+        <div v-for="we in workExperience" :key="we.company">
+          <div class="row">
+            <div class="left h">{{ we.company }}</div>
+            <div v-if="we.current === true" class="right opacity">{{ we.date_from.slice(0, 7) }} ~ Current</div>
+            <div v-else class="right opacity">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</div>
+            <hr class="opacity-plus connection">
+          </div>
+          <p class="opacity">{{ we.position }}</p>
+          <br>
         </div>
       </div>
 
-      <div class="lmm-container lmm-card-4 lmm-margin lmm-white">
-        <p class="lmm-large"><i class="fa fa-certificate fa-fw lmm-margin-right"></i><b>Education</b></p>
+      <div class="container">
+        <h3><i class="fa fa-book fa-fw"></i>Education</h3>
         <br>
         <div v-for="(e, index) in education" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px"><b>{{ e.institution }}</b> ({{ e.degree }})</div>
-              <div v-if="e.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.date_from.slice(0, 7) }} ~ Current</div>
-              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-            <p>{{ e.department }} {{ e.major }}</p>
-            <br>
-          </p>
+          <div class="row">
+            <div class="left h">{{ e.institution }}</div>
+            <div v-if="e.current === true" class="right opacity">{{ e.date_from.slice(0, 7) }} ~ Current</div>
+            <div v-else class="right opacity">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</div>
+            <hr class="opacity-plus connection">
+          </div>
+          <div class="opacity">
+            <p>{{ e.degree }}</p>
+            <p>{{ e.department }}</p>
+            <p>{{ e.major }}</p>
+          </div>
+          <br>
         </div>
       </div>
 
-      <div class="lmm-container lmm-card-4 lmm-margin lmm-white">
-        <p class="lmm-large"><i class="fa fa-certificate fa-fw lmm-margin-right"></i><b>Qualifications</b></p>
+      <div class="container">
+        <h3><i class="fa fa-certificate fa-fw"></i>Qualifications</h3>
         <br>
         <div v-for="(q, index) in qualifications" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px"><b>{{ q.name }}</b></div>
-              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ q.date.slice(0, 7) }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-            <br>
-          </p>
+          <div class="row">
+            <div class="left h">{{ q.name }}</div>
+            <div class="right opacity">{{ q.date.slice(0, 7) }}</div>
+            <hr class="opacity-plus connection">
+          </div>
+          <br>
         </div>
+        <br>
       </div>
 
     </div>
@@ -110,7 +96,7 @@ export default {
   data () {
     return {
       name: '',
-      avatar_url: '//:0',
+      avatar_url: '',
       bio: '',
       profession: '',
       location: '',
@@ -149,6 +135,31 @@ export default {
     }).catch((e) => {
       console.log(e)
     })
+  },
+  methods: {
+    setDefaultAvatar () {
+      this.avatar_url = 'https://avatars3.githubusercontent.com/u/17140497?s=400&u=636be90e7798e07230fa5f37af1a0f5070fa23a6&v=4'
+    }
   }
 }
 </script>
+
+<style scoped>
+.row {
+  width: 100%;
+  border: 1px solid white;
+}
+.row .left {
+  margin-right:8px;
+}
+.row .right {
+  margin-left:8px;
+}
+.connection {
+  display: block;
+}
+.h {
+  font-size: 1.17em;
+}
+</style>
+

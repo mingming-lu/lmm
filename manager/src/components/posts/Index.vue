@@ -7,7 +7,7 @@
     <div v-for="article in articles" :key="article.id"> 
       <router-link :to="'/posts/' + article.id + '/edit'">{{ article.title }}</router-link>
     </div>
-    <hr class="lmm-opacity">
+    <hr class="opacity">
 
     <!-- categories list -->
     <h3>Categories List</h3>

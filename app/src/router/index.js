@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/components/Home'
-import ArticlesIndex from '@/components/articles/Index'
+import Index from '@/components/Index'
 import Article from '@/components/articles/Article'
 import ArticlesList from '@/components/articles/List'
 import Photos from '@/components/Photos'
@@ -31,7 +31,7 @@ export default new Router({
     },
     {
       path: '/articles',
-      component: ArticlesIndex,
+      component: Index,
       children: [
         {
           path: '',

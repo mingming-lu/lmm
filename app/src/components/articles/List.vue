@@ -1,47 +1,36 @@
 <template>
-  <div class="lmm-row">
+  <div class="container">
     <!-- Posts -->
-    <div class="lmm-left" style="width:66.6666%; display:inline-block">
-      <div v-for="article in articles" :key="article.title">
-        <div class="lmm-card-4 lmm-container lmm-margin" style="text-align:left">
-          <h2>{{ article.title }}</h2>
-          <p class="lmm-opacity">{{ article.created_date }}</p>
-          <p>{{ article.text }}</p>
-          <p class="lmm-right">
-            <router-link :to="'/articles/' + article.id">
-              <button class="lmm-button lmm-padding-large lmm-white lmm-border">
-                <b>Read More >></b>
-              </button>
-            </router-link>
-          </p>
+    <div class="left" style="width:75%;">
+      <div v-for="(article, index) in articles" :key="article.id">
+        <div class="container">
+          <h2>
+            <router-link :to="'/articles/' + article.id" class="link white">{{ article.title }}</router-link>
+          </h2>
+          <p class="text-right opacity">{{ article.created_date }}</p>
         </div>
+        <hr v-if="index !== articles.length - 1" class="opacity-plus">
       </div>
     </div>
 
-    <!-- Categories -->
-    <div class="lmm-right" style="width:33.3333%; display:inline-block; text-align:left">
-      <div class="lmm-container lmm-margin lmm-card-4">
-        <p><b>Categories</b></p>
-        <hr>
-        <div v-for="category in categories" :key="category.id">
-          <p>
-            <router-link to="" class="lmm-white lmm-link lmm-hover-light-grey">{{ category.name }}</router-link>
-          </p>
-        </div>
+    <div class="right nav" style="width:25%;">
+      <!-- Categories -->
+      <div class="container">
+        <h4>Categories</h4>
+        <router-link to="" v-for="category in categories" :key="category.id" class="white link">
+          <p>{{ category.name }}</p>
+        </router-link>
       </div>
 
-    <!-- Tags -->
-      <div class="lmm-container lmm-margin lmm-card-4">
-        <p><b>Tags</b></p>
-        <hr>
-        <p>
-          <span v-for="tag in tags" :key=tag.id class="lmm-tag">
-            <router-link to="" class="lmm-white lmm-hover-light-grey lmm-link">{{ tag.name }}</router-link>
-            <br>
-          </span>
-        </p>
+      <!-- Tags -->
+      <div class="container">
+        <h4>Tags</h4>
+          <router-link to="" v-for="tag in tags" :key="tag.id" class="white link">
+            {{ tag.name }}
+          </router-link>
       </div>
     </div>
+
     <router-view/>
 
   </div>
