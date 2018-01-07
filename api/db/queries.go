@@ -48,9 +48,7 @@ CREATE TABLE IF NOT EXISTS education (
 	major varchar(255),
 	degree varchar(32) NOT NULL,
 	current bit NOT NULL,
-	sort tinyint NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (sort)
+	PRIMARY KEY (id)
 );
 `
 
@@ -64,9 +62,7 @@ CREATE TABLE IF NOT EXISTS work_experience (
 	position varchar(32),
 	status varchar(32),
 	current bit NOT NULL,
-	sort tinyint NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (sort)
+	PRIMARY KEY (id)
 )
 `
 
@@ -76,9 +72,7 @@ CREATE TABLE IF NOT EXISTS qualification (
 	user_id int NOT NULL,
 	date date NOT NULL,
 	name varchar(255) NOT NULL,
-	sort tinyint NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (sort)
+	PRIMARY KEY (id)
 )
 `
 
