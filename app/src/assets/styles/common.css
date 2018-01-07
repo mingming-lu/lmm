@@ -1,8 +1,14 @@
+.card { /* for debug */
+  border: 1px solid red;
+}
 .opacity {
   opacity: 0.6;
 }
 .opacity-plus {
   opacity: 0.25;
+}
+.transparent {
+  opacity: 0;
 }
 .container {
   padding: 0.01em 16px;
@@ -78,7 +84,7 @@ nav .nav-item {
   color: #424949;
   background-color: #fff;
 }
-.row:after, .row:before {
+.container:after, .container:before {
   content: "";
   display: table;
   clear: both;
