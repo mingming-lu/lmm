@@ -1,35 +1,54 @@
 <template>
   <div id="app">
-    <header class="lmm-panel lmm-center" style="padding:128px 16px 32px 16px">
-      <h1 class="lmm-xxxlarge">一个一点也不萌的网站</h1>
-      <h1>卢明鸣的博客</h1>
-
-      <div class="lmm-padding-32">
-        <div class="lmm-bar lmm-border">
-          <router-link to="/home" class="lmm-bar-item lmm-button">Home</router-link>
-          <router-link to="/articles" class="lmm-bar-item lmm-button">Articles</router-link>
-          <router-link to="/photos" class="lmm-bar-item lmm-button">Photographs</router-link>
-          <router-link to="/projects" class="lmm-bar-item lmm-button">Projects</router-link>
-          <router-link to="/profile" class="lmm-bar-item lmm-button">Profile</router-link>
-        </div>
-      </div>
+    <header class="white center">
+      <nav>
+        <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="nav-item-active" class="nav-item">
+          {{ item.name }}
+        </router-link>
+      </nav>
     </header>
 
-    <router-view/>
+    <router-view style="margin-bottom:86px;" />
 
-    <footer>
-      <hr class="lmm-level-opacity">
-      <div class="lmm-container lmm-padding-16 lmm-center">
-        <a href="https://github.com/akinaru-lu" target="_blank"><i class="fa fa-github lmm-hover lmm-xxxlarge lmm-white"></i></a>
-        <p>Powered by <router-link to="/profile" class="mm-light-grey lmm-white lmm-hover-light-grey">Lu Mingming</router-link></p>
-      </div>
+    <footer class="center">
+      <hr class="opacity-plus">
+      <a href="https://github.com/akinaru-lu" target="_blank">
+        <i class="fa fa-github link white"></i>
+      </a>
+      <p>&copy; <router-link to="/profile" class="link white">Lu Mingming</router-link></p>
     </footer>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'app'
+  name: 'app',
+  data () {
+    return {
+      items: [
+        {
+          link: '/home',
+          name: 'Home'
+        },
+        {
+          link: '/articles',
+          name: 'Articles'
+        },
+        {
+          link: '/photos',
+          name: 'Photographs'
+        },
+        {
+          link: '/projects',
+          name: 'Projects'
+        },
+        {
+          link: '/profile',
+          name: 'Profile'
+        }
+      ]
+    }
+  }
 }
 </script>
 

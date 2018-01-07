@@ -1,100 +1,68 @@
 <template>
-  <div class="lmm-row">
-      
+  <div class="row">
     <!-- Left Column -->
-    <div class="lmm-left" style="text-align:left; width:33.3333%; display:inline-block">
-      <div class="lmm-margin lmm-card-4">
-        <div class="lmm-display-container">
-          <img :src="avatar_url" style="width:100%" alt="Avatar">
-        </div>
-        <div class="lmm-container">
-          <p class="lmm-xlarge"><b>{{ name }}</b></p>
+    <div class="left" style="width:33.3333%;">
+
+      <!-- profile -->
+      <div>
+        <img :src="avatar_url" style="width:100%" alt="Avatar" @error="setDefaultAvatar">
+        <div class="container">
+          <h3>{{ name }}</h3>
           <p>{{ bio }}</p>
-        </div>
-        <div class="lmm-container">
-          <p><i class="fa fa-briefcase fa-fw lmm-margin-right lmm-large"></i>{{ profession }}</p>
-          <p><i class="fa fa-home fa-fw lmm-margin-right lmm-large"></i>{{ location }}</p>
-          <p><i class="fa fa-envelope fa-fw lmm-margin-right lmm-large"></i>{{ email }}</p>
+          <p><i class="fa fa-briefcase fa-fw"></i>{{ profession }}</p>
+          <p><i class="fa fa-home fa-fw"></i>{{ location }}</p>
+          <p><i class="fa fa-envelope fa-fw"></i>{{ email }}</p>
         </div>
       </div>
 
-      <div class="lmm-container lmm-white lmm-margin lmm-card-4">
-        <p class="lmm-large"><b><i class="fa fa-asterisk fa-fw lmm-margin-right"></i>Skills</b></p>
-        <div v-for="(skill, index) in skills" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px">{{ skill.name }}</div>
-              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ skill.level }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-          </p>
-        </div>
+      <!-- skills -->
+      <div class="container">
+        <h3><i class="fa fa-asterisk fa-fw"></i>Skills</h3>
+        <span v-for="skill in skills" :key="skill.name">
+          {{ skill.name }}
+        </span>
       </div>
 
-      <div class="lmm-container lmm-white lmm-margin lmm-card-4">
-        <p class="lmm-large"><b><i class="fa fa-globe fa-fw lmm-margin-right"></i>Languages</b></p>
-        <div v-for="(language, index) in languages" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px">{{ language.name }}</div>
-              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ language.level }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-          </p>
-        </div>
+      <div class="container">
+        <h3><i class="fa fa-globe fa-fw"></i>Languages</h3>
+        <span v-for="language in languages" :key="language.name">
+          {{ language.name }}
+        </span>
       </div>
     </div>
     <!-- End Left Column -->
 
     <!-- Right Column -->
-    <div class="lmm-right" style="text-align:left; width:66.6666%; display:inline-block">
-    
-      <div class="lmm-container lmm-white lmm-margin lmm-card-4">
-        <p class="lmm-large"><b><i class="fa fa-suitcase fa-fw lmm-margin-right"></i>Work Experience</b></p>
-        <br>
-        <div v-for="(we, index) in workExperience" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px"><b>{{ we.company }}</b></div>
-              <div v-if="we.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.date_from.slice(0, 7) }} ~ Current</div>
-              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-            <p>{{ we.position }}</p>
-            <br>
-          </p>
+    <div class="right" style="width:66.6666%;">
+
+      <!-- work experience -->
+      <div class="container">
+        <h3><i class="fa fa-suitcase fa-fw"></i>Work Experience</h3>
+        <div v-for="(we, index) in workExperience" :key="we.company">
+          <h3 class="span">{{ we.company }}</h3>
+          <p v-if="we.current === true" class="span right text-right opacity-plus">{{ we.date_from.slice(0, 7) }} ~ Current</p>
+          <p v-else class="span right text-right opacity-plus">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</p>
+          <p>{{ we.position }}</p>
+          <hr v-if="index !== workExperience.length-1" class="opacity-plus">
         </div>
       </div>
 
-      <div class="lmm-container lmm-card-4 lmm-margin lmm-white">
-        <p class="lmm-large"><i class="fa fa-certificate fa-fw lmm-margin-right"></i><b>Education</b></p>
-        <br>
+      <div class="container">
+        <h3><i class="fa fa-book fa-fw"></i>Education</h3>
         <div v-for="(e, index) in education" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px"><b>{{ e.institution }}</b> ({{ e.degree }})</div>
-              <div v-if="e.current === true" class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.date_from.slice(0, 7) }} ~ Current</div>
-              <div v-else class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-            <p>{{ e.department }} {{ e.major }}</p>
-            <br>
-          </p>
+          <h3 class="span">{{ e.institution }} <div class="span no-weight">({{ e.degree }})</div></h3>
+          <p v-if="e.current === true" class="span right text-right opacity-plus">{{ e.date_from.slice(0, 7) }} ~ Current</p>
+          <p v-else class="span right text-right opacity-plus">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</p>
+          <p>{{ e.department }} {{ e.major }}</p>
+          <hr v-if="index !== workExperience.length-1" class="opacity-plus">
         </div>
       </div>
 
-      <div class="lmm-container lmm-card-4 lmm-margin lmm-white">
-        <p class="lmm-large"><i class="fa fa-certificate fa-fw lmm-margin-right"></i><b>Qualifications</b></p>
-        <br>
+      <div class="container">
+        <h3><i class="fa fa-certificate fa-fw"></i>Qualifications</h3>
         <div v-for="(q, index) in qualifications" :key="index">
-          <p>
-            <div style="width: 100%; height: 16px; border: 1px solid white;">
-              <div class="lmm-left" style="margin-right:8px"><b>{{ q.name }}</b></div>
-              <div class="lmm-small lmm-right lmm-level-opacity" style="margin-left:8px;">{{ q.date.slice(0, 7) }}</div>
-              <hr class="lmm-level-opacity" style="display: block">
-            </div>
-            <br>
-          </p>
+          <h3 class="span left">{{ q.name }}</h3>
+          <p class="span right text-right opacity-plus">{{ q.date.slice(0, 7) }}</p>
         </div>
       </div>
 
@@ -110,7 +78,7 @@ export default {
   data () {
     return {
       name: '',
-      avatar_url: '//:0',
+      avatar_url: '',
       bio: '',
       profession: '',
       location: '',
@@ -149,6 +117,11 @@ export default {
     }).catch((e) => {
       console.log(e)
     })
+  },
+  methods: {
+    setDefaultAvatar () {
+      this.avatar_url = 'https://avatars3.githubusercontent.com/u/17140497?s=400&u=636be90e7798e07230fa5f37af1a0f5070fa23a6&v=4'
+    }
   }
 }
 </script>

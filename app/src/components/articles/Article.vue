@@ -1,24 +1,37 @@
 <template>
-  <div class="lmm-row">
-
+  <div class="row">
     <!-- Article text -->
-    <div class="lmm-left" style="width:75%; display:inline-block">
-      <div class="lmm-container lmm-margin lmm-card-4">
-        <h2 class="lmm-center">{{ title }}</h2>
-        <br>
-        <div v-html="text" v-hljs style="text-align:justify"></div>
-        <br>
-        <p v-if="createdDate === updatedDate" class="lmm-right lmm-opacity">Created at {{ createdDate }}</p>
-        <p v-else class="lmm-right lmm-opacity">Updated at {{ updatedDate }}</p>
+    <div class="left" style="width:75%;">
+      <div class="container">
+        <h2 class="center">{{ title }}</h2>
+        <div v-html="text" v-hljs class="text"></div>
+        <p v-if="createdDate === updatedDate" class="text-right opacity">Created at {{ createdDate }}</p>
+        <p v-else class="text-right opacity">Updated at {{ updatedDate }}</p>
+      </div>
+    </div>
+
+    <div class="right" style="width:25%;">
+      <div class="container">
+        <h4>Category</h4>
+        <p>{{ category }}</p>
+      </div>
+    </div>
+
+    <div class="right" style="width:25%;">
+      <div class="container">
+        <h4>Tags</h4>
+          <router-link to="" v-for="tag in tags" :key="tag.id" class="white link">
+            {{ tag.name }}
+          </router-link> 
       </div>
     </div>
 
     <!-- Article chapters navigation -->
-    <div class="lmm-right lmm-nav" style="width:25%; display:inline-block;">
-      <div class="lmm-container lmm-margin" style="text-align:left;">
-        <p><b>Chapters</b></p>
+    <div class="right nav" style="width:25%;">
+      <div class="container">
+        <h4>Chapters</h4>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
-          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="lmm-white lmm-link lmm-hover">{{ subtitle.name }}</router-link>
+          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link">{{ subtitle.name }}</router-link>
         </p>
       </div>
     </div>
@@ -35,7 +48,18 @@ export default {
       subtitles: [],
       text: '',
       createdDate: '',
-      updatedDate: ''
+      updatedDate: '',
+      tags: [
+        {
+          id: 1,
+          name: '莫哈'
+        },
+        {
+          id: 2,
+          name: '闷声发大财'
+        }
+      ],
+      category: '论如何考虑到历史的行程'
     }
   },
   created () {
@@ -68,9 +92,9 @@ export default {
       let match = /^#(.+)$/g.exec(hash)
       if (match !== null && match.length >= 2) {
         let id = match[1]
-        document.getElementById(id).className = 'lmm-highlighted'
+        document.getElementById(id).className = 'highlighted'
         setTimeout(() => {
-          document.getElementById(id).className = 'lmm-white-trans'
+          document.getElementById(id).className = 'white-trans'
         }, 500)
       }
     },
