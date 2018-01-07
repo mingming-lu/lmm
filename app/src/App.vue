@@ -15,7 +15,7 @@
       <a href="https://github.com/akinaru-lu" target="_blank">
         <i class="fa fa-github link white"></i>
       </a>
-      <p>&copy; <router-link to="/profile" class="link white">Lu Mingming</router-link></p>
+      <p>&copy; 2018 <router-link to="/profile" class="link white"><u>Lu Mingming</u></router-link></p>
     </footer>
   </div>
 </template>

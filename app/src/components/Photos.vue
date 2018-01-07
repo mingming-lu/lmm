@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div class="container">
     <div class="left" style="width:50%">
         <img v-for="photo in left" :key="photo.url" :src="photo.url" class="picture">
     </div>
@@ -33,3 +33,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+div {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+</style>
+

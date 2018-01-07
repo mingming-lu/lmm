@@ -1,26 +1,25 @@
 <template>
-  <div class="row">
+  <div class="container">
     <!-- Left Column -->
     <div class="left" style="width:33.3333%;">
 
       <!-- profile -->
-      <div>
+      <div class="container">
         <img :src="avatar_url" style="width:100%" alt="Avatar" @error="setDefaultAvatar">
-        <div class="container">
-          <h3>{{ name }}</h3>
-          <p>{{ bio }}</p>
-          <p><i class="fa fa-briefcase fa-fw"></i>{{ profession }}</p>
-          <p><i class="fa fa-home fa-fw"></i>{{ location }}</p>
-          <p><i class="fa fa-envelope fa-fw"></i>{{ email }}</p>
-        </div>
+        <h3>{{ name }}</h3>
+        <p>{{ bio }}</p>
+        <p><i class="fa fa-briefcase fa-fw"></i>{{ profession }}</p>
+        <p><i class="fa fa-home fa-fw"></i>{{ location }}</p>
+        <p><i class="fa fa-envelope fa-fw"></i>{{ email }}</p>
       </div>
 
       <!-- skills -->
       <div class="container">
         <h3><i class="fa fa-asterisk fa-fw"></i>Skills</h3>
-        <span v-for="skill in skills" :key="skill.name">
+        <span v-for="skill in skills" :key="skill.name" class="link">
           {{ skill.name }}
         </span>
+        <hr class="transparent">
       </div>
 
       <div class="container">
@@ -28,6 +27,7 @@
         <span v-for="language in languages" :key="language.name">
           {{ language.name }}
         </span>
+        <hr class="transparent">
       </div>
     </div>
     <!-- End Left Column -->
@@ -38,32 +38,50 @@
       <!-- work experience -->
       <div class="container">
         <h3><i class="fa fa-suitcase fa-fw"></i>Work Experience</h3>
-        <div v-for="(we, index) in workExperience" :key="we.company">
-          <h3 class="span">{{ we.company }}</h3>
-          <p v-if="we.current === true" class="span right text-right opacity-plus">{{ we.date_from.slice(0, 7) }} ~ Current</p>
-          <p v-else class="span right text-right opacity-plus">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</p>
-          <p>{{ we.position }}</p>
-          <hr v-if="index !== workExperience.length-1" class="opacity-plus">
+        <br>
+        <div v-for="we in workExperience" :key="we.company">
+          <div class="row">
+            <div class="left h">{{ we.company }}</div>
+            <div v-if="we.current === true" class="right opacity">{{ we.date_from.slice(0, 7) }} ~ Current</div>
+            <div v-else class="right opacity">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</div>
+            <hr class="opacity-plus connection">
+          </div>
+          <p class="opacity">{{ we.position }}</p>
+          <br>
         </div>
       </div>
 
       <div class="container">
         <h3><i class="fa fa-book fa-fw"></i>Education</h3>
+        <br>
         <div v-for="(e, index) in education" :key="index">
-          <h3 class="span">{{ e.institution }} <div class="span no-weight">({{ e.degree }})</div></h3>
-          <p v-if="e.current === true" class="span right text-right opacity-plus">{{ e.date_from.slice(0, 7) }} ~ Current</p>
-          <p v-else class="span right text-right opacity-plus">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</p>
-          <p>{{ e.department }} {{ e.major }}</p>
-          <hr v-if="index !== workExperience.length-1" class="opacity-plus">
+          <div class="row">
+            <div class="left h">{{ e.institution }}</div>
+            <div v-if="e.current === true" class="right opacity">{{ e.date_from.slice(0, 7) }} ~ Current</div>
+            <div v-else class="right opacity">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</div>
+            <hr class="opacity-plus connection">
+          </div>
+          <div class="opacity">
+            <p>{{ e.degree }}</p>
+            <p>{{ e.department }}</p>
+            <p>{{ e.major }}</p>
+          </div>
+          <br>
         </div>
       </div>
 
       <div class="container">
         <h3><i class="fa fa-certificate fa-fw"></i>Qualifications</h3>
+        <br>
         <div v-for="(q, index) in qualifications" :key="index">
-          <h3 class="span left">{{ q.name }}</h3>
-          <p class="span right text-right opacity-plus">{{ q.date.slice(0, 7) }}</p>
+          <div class="row">
+            <div class="left h">{{ q.name }}</div>
+            <div class="right opacity">{{ q.date.slice(0, 7) }}</div>
+            <hr class="opacity-plus connection">
+          </div>
+          <br>
         </div>
+        <br>
       </div>
 
     </div>
@@ -125,3 +143,23 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.row {
+  width: 100%;
+  border: 1px solid white;
+}
+.row .left {
+  margin-right:8px;
+}
+.row .right {
+  margin-left:8px;
+}
+.connection {
+  display: block;
+}
+.h {
+  font-size: 1.17em;
+}
+</style>
+

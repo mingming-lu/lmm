@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div class="container">
     <!-- Posts -->
     <div class="left" style="width:75%;">
       <div v-for="(article, index) in articles" :key="article.id">

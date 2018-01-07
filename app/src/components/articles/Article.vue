@@ -1,5 +1,5 @@
 <template>
-  <div class="row">
+  <div class="container">
     <!-- Article text -->
     <div class="left" style="width:75%;">
       <div class="container">
@@ -7,22 +7,6 @@
         <div v-html="text" v-hljs class="text"></div>
         <p v-if="createdDate === updatedDate" class="text-right opacity">Created at {{ createdDate }}</p>
         <p v-else class="text-right opacity">Updated at {{ updatedDate }}</p>
-      </div>
-    </div>
-
-    <div class="right" style="width:25%;">
-      <div class="container">
-        <h4>Category</h4>
-        <p>{{ category }}</p>
-      </div>
-    </div>
-
-    <div class="right" style="width:25%;">
-      <div class="container">
-        <h4>Tags</h4>
-          <router-link to="" v-for="tag in tags" :key="tag.id" class="white link">
-            {{ tag.name }}
-          </router-link> 
       </div>
     </div>
 
