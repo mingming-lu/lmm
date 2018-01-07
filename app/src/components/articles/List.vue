@@ -25,7 +25,7 @@
       <!-- Tags -->
       <div class="container">
         <h4>Tags</h4>
-          <router-link to="" v-for="tag in tags" :key="tag.id" class="white link">
+          <router-link to="" v-for="tag in tags" :key="tag.name" class="white link">
             {{ tag.name }}
           </router-link>
       </div>
@@ -56,7 +56,7 @@ export default {
       this.categories = categories.data
       this.tags = tags.data
     })).catch((e) => {
-      console.log(e)
+      console.log(e.response.data)
     })
   }
 }
