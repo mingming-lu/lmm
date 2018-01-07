@@ -80,13 +80,13 @@ func NewCategory(c *elesion.Context) {
 	c.Status(http.StatusInternalServerError).Error(err.Error()).String("unknown error")
 }
 
-func newCategory(body Category) (int64, error) {
+func newCategory(category Category) (int64, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
 	// check if category already exists
 	var id int64
-	err := d.QueryRow("SELECT id FROM categories WHERE name = ?", body.Name).Scan(&id)
+	err := d.QueryRow("SELECT id FROM categories WHERE name = ?", category.Name).Scan(&id)
 	if err == nil { // name already exists
 		return id, db.ErrAlreadyExists
 	}
@@ -95,7 +95,7 @@ func newCategory(body Category) (int64, error) {
 	}
 	// continue if no such row
 
-	result, err := d.Exec("INSERT INTO categories (user_id, name) VALUES (?, ?)", body.UserID, body.Name)
+	result, err := d.Exec("INSERT INTO categories (user_id, name) VALUES (?, ?)", category.UserID, category.Name)
 	if err != nil {
 		return 0, err
 	}
