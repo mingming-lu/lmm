@@ -18,13 +18,14 @@ type Response struct {
 }
 
 type Article struct {
-	ID          int    `json:"id"`
-	UserID      int    `json:"user_id"`
+	ID          int64  `json:"id"`
+	UserID      int64  `json:"user_id"`
 	Title       string `json:"title"`
 	Text        string `json:"text"`
 	CreatedDate string `json:"created_date"`
 	UpdatedDate string `json:"updated_date"`
-	CategoryID  int    `json:"category_id"`
+	CategoryID  int64  `json:"category_id"`
+	Tags        []Tag  `json:"tags"`
 }
 
 func GetArticles(c *elesion.Context) {
@@ -125,10 +126,16 @@ func PostArticle(c *elesion.Context) {
 	defer c.Request.Body.Close()
 
 	// insert into table
-	_, err = postArticle(body)
+	id, err := postArticle(body)
 	if err != nil {
-		c.Status(http.StatusBadRequest).Error(err.Error()).String("failed")
+		c.Status(http.StatusBadRequest).Error(err.Error()).String("failed to post article")
 		return
+	}
+
+	fillTags(body.Tags, body.UserID, id)
+	_, err = newTags(body.Tags)
+	if err != nil {
+		c.Status(http.StatusBadRequest).Error(err.Error()).String("success to post article but failed when post tags")
 	}
 	c.Status(http.StatusOK).String("success")
 }
@@ -150,6 +157,13 @@ func postArticle(body Article) (int64, error) {
 		return 0, errors.WithCaller("rows affected should be 1", 2)
 	}
 	return result.LastInsertId()
+}
+
+func fillTags(tags []Tag, userID, articleID int64) {
+	for index, _ := range tags {
+		tags[index].UserID = userID
+		tags[index].ArticleID = articleID
+	}
 }
 
 func UpdateArticle(c *elesion.Context) {
