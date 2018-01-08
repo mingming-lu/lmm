@@ -1,10 +1,10 @@
 package articles
 
 import (
-	"encoding/json"
 	"lmm/api/db"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/akinaru-lu/elesion"
 	"github.com/akinaru-lu/errors"
@@ -56,19 +56,6 @@ func getTags(userID int64) ([]Tag, error) {
 	return tags, nil
 }
 
-func NewTags(c *elesion.Context) {
-	var tags []Tag
-	err := json.NewDecoder(c.Request.Body).Decode(&tags)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid body")
-		return
-	}
-	defer c.Request.Body.Close()
-
-	newTags(tags)
-	c.Status(http.StatusInternalServerError).Error("not implemented")
-}
-
 func newTags(tags []Tag) (int64, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
@@ -79,7 +66,7 @@ func newTags(tags []Tag) (int64, error) {
 		query += "(?, ?, ?), "
 		values = append(values, tag.UserID, tag.ArticleID, tag.Name)
 	}
-	query += "ON DUPLICATE KEY UPDATE"
+	query = strings.TrimSuffix(query, ", ")
 
 	stmtIns, err := d.Prepare(query)
 	if err != nil {
@@ -87,7 +74,7 @@ func newTags(tags []Tag) (int64, error) {
 	}
 	defer stmtIns.Close()
 
-	result, err := stmtIns.Exec(values)
+	result, err := stmtIns.Exec(values...)
 	if err != nil {
 		return 0, err
 	}
