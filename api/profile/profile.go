@@ -23,15 +23,17 @@ type Profile struct {
 }
 
 type Skill struct {
-	Name  string `json:"name"`
-	Level string `json:"level"`
+	ID     int64  `json:"id"`
+	UserID int64  `json:"user_id"`
+	Name   string `json:"name"`
+	Sort   int64  `json:"sort"`
 }
 
-func skillsByUserID(id int) ([]Skill, error) {
+func skillsByUserID(userID int) ([]Skill, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	itr, err := d.Query("SELECT name, level FROM skill WHERE user_id = ? ORDER BY sort", id)
+	itr, err := d.Query("SELECT id, user_id, name, sort FROM skill WHERE user_id = ? ORDER BY sort", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +43,7 @@ func skillsByUserID(id int) ([]Skill, error) {
 
 	for itr.Next() {
 		skill := Skill{}
-		if e := itr.Scan(&skill.Name, &skill.Level); e != nil {
+		if e := itr.Scan(&skill.ID, &skill.UserID, &skill.Name, &skill.Sort); e != nil {
 			return skills, err
 		}
 		skills = append(skills, skill)
@@ -50,15 +52,17 @@ func skillsByUserID(id int) ([]Skill, error) {
 }
 
 type Language struct {
-	Name  string `json:"name"`
-	Level string `json:"level"`
+	ID     int64  `json:"id"`
+	UserID int64  `json:"user_id"`
+	Name   string `json:"name"`
+	Sort   int64  `json:"sort"`
 }
 
 func languagesByUserID(id int) ([]Language, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	itr, err := d.Query("SELECT name, level FROM language WHERE user_id = ? ORDER BY sort", id)
+	itr, err := d.Query("SELECT id, user_id, name, sort FROM language WHERE user_id = ? ORDER BY sort", id)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +72,7 @@ func languagesByUserID(id int) ([]Language, error) {
 
 	for itr.Next() {
 		language := Language{}
-		if e := itr.Scan(&language.Name, &language.Level); e != nil {
+		if e := itr.Scan(&language.ID, &language.UserID, &language.Name, &language.Sort); e != nil {
 			return languages, err
 		}
 		languages = append(languages, language)
