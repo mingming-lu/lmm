@@ -18,7 +18,8 @@ export default {
       textPreview: '',
       categoryID: 0,
       categories: [],
-      tags: ''
+      newTagName: '',
+      tags: []
     }
   },
   created () {
@@ -42,13 +43,27 @@ export default {
         category_id: this.categoryID,
         tags: this.tags
       }).then((res) => {
+        alert(res.data)
         this.$router.push('/posts')
       }).catch((e) => {
+        alert(e.response.data)
         console.log(e)
       })
     },
     marked: (text) => {
       return md.render(text)
+    },
+    onAddTag (name) {
+      if (!name.trim()) {
+        return
+      }
+      this.tags.push({
+        name: name
+      })
+      this.newTagName = ''
+    },
+    onRemoveTag (tag) {
+      this.tags = this.tags.filter(t => t.name !== tag.name)
     }
   }
 }

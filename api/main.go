@@ -37,7 +37,11 @@ func main() {
 
 	// /articles/tags
 	router.GET("/articles/:userID/tags", articles.GetTags)
-	router.POST("/articles/tags", articles.NewTags)
+
+	// /article/tags
+	router.GET("/article/:id/tags", articles.GetArticleTags)
+	router.POST("/article/tags", articles.NewTags)
+	router.DELETE("/article/tags/:id", articles.DeleteTag)
 
 	router.GET("/photos", image.Handler)
 

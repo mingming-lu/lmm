@@ -1,5 +1,5 @@
 <div>
-  <div class="row">
+  <div class="container">
     <!-- left (edit) -->
     <div class="left" style="width:50%">
       <div class="container">
@@ -13,6 +13,18 @@
         <br>
         <textarea v-model="text" v-on:input="textPreview = marked(text)" placeholder="text"></textarea>
       </div>
+
+      <div class="text-left container">
+        <p>Tags</p>
+        <form v-for="tag in tags" :key="tag.name">
+          {{ tag.name }}<input type="submit" value="Delete" @click.prevent="onRemoveTag(tag)">
+        </form>
+        <form>
+          <input size="32" v-model="newTagName" placeholder="input new tag here">
+          <input type="submit" value="Add" @click.prevent="onAddTag(newTagName)">
+        </form>
+      </div>
+
     </div>
 
     <!-- right (preview) -->
