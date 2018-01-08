@@ -76,8 +76,12 @@ export default {
       }]).then((res) => {
         alert(res.data)
         this.fetchData()
+        this.newTagName = ''
       }).catch((e) => {
         console.log(e)
+        if (e.response) {
+          console.log(e.response)
+        }
       })
     },
     onRemoveTag (tag) {
