@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- Article text -->
-    <div class="left" style="width:75%;">
+    <div class="left">
       <div class="container">
         <h2 class="center">{{ title }}</h2>
         <div v-html="text" v-hljs class="text"></div>
@@ -10,8 +10,17 @@
       </div>
     </div>
 
+    <div class="right">
+      <div class="container">
+        <h4>Tags</h4>
+        <router-link to="" v-for="tag in tags" :key="tag.id" class="white link">
+          {{ tag.name }}
+        </router-link>
+      </div>
+    </div>
+
     <!-- Article chapters navigation -->
-    <div class="right nav" style="width:25%;">
+    <div class="right nav">
       <div class="container">
         <h4>Chapters</h4>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
@@ -33,39 +42,36 @@ export default {
       text: '',
       createdDate: '',
       updatedDate: '',
-      tags: [
-        {
-          id: 1,
-          name: '莫哈'
-        },
-        {
-          id: 2,
-          name: '闷声发大财'
-        }
-      ],
-      category: '论如何考虑到历史的行程'
+      category: '',
+      tags: []
     }
   },
   created () {
     const pattern = /^\/articles\/(\d+)$/g
     const match = pattern.exec(this.$route.path)
-    const url = 'http://api.lmm.local' + this.$route.path.replace(pattern, '/article/' + match[1])
+    const id = match[1]
+    const baseURL = 'http://api.lmm.local/article/' + id
     let md = new Markdownit({
       html: true,
       typographer: true
     })
-    axios.get(url).then((res) => {
-      const article = res.data
-      this.title = article.title
-      this.text = md.render(article.text)
-      this.createdDate = article.created_date
-      this.updatedDate = article.updated_date
+    axios.all([
+      axios.get(baseURL),
+      // axios.get(baseURL + '/category'),
+      axios.get(baseURL + '/tags')
+    ]).then(axios.spread((article /* , category */, tags) => {
+      this.title = article.data.title
+      this.text = md.render(article.data.text)
+      this.createdDate = article.data.created_date
+      this.updatedDate = article.data.updated_date
+      // this.category = category.data
+      this.tags = tags.data
 
       // prepare subtitles and their links
       const results = this.extractSubtitles(this.text, this.$route.path)
       this.text = results[0]
       this.subtitles = results[1]
-    }).catch((e) => {
+    })).catch((e) => {
       console.log(e)
     })
   },
@@ -104,3 +110,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.container .left {
+  width: 75%;
+}
+.container .right {
+  width: 25%;
+}
+</style>
+
