@@ -177,7 +177,7 @@ func deleteCategory(id int64) error {
 	if rows, err := result.RowsAffected(); err != nil {
 		return err
 	} else if rows != 1 {
-		return errors.WithCaller("rows affected should be 1", 2)
+		return errors.Newf("rows affected should be 1 but got", rows)
 	}
 	return nil
 }

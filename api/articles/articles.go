@@ -132,10 +132,14 @@ func PostArticle(c *elesion.Context) {
 		return
 	}
 
-	fillTags(body.Tags, body.UserID, id)
+	for i := range body.Tags {
+		body.Tags[i].UserID = body.UserID
+		body.Tags[i].ArticleID = id
+	}
 	_, err = newTags(body.Tags)
 	if err != nil {
 		c.Status(http.StatusBadRequest).Error(err.Error()).String("success to post article but failed when post tags")
+		return
 	}
 	c.Status(http.StatusOK).String("success")
 }
@@ -157,13 +161,6 @@ func postArticle(body Article) (int64, error) {
 		return 0, errors.WithCaller("rows affected should be 1", 2)
 	}
 	return result.LastInsertId()
-}
-
-func fillTags(tags []Tag, userID, articleID int64) {
-	for index, _ := range tags {
-		tags[index].UserID = userID
-		tags[index].ArticleID = articleID
-	}
 }
 
 func UpdateArticle(c *elesion.Context) {
