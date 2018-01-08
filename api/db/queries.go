@@ -17,11 +17,9 @@ const createSkill = `
 CREATE TABLE IF NOT EXISTS skill (
 	id int NOT NULL AUTO_INCREMENT,
 	user_id int NOT NULL,
-	name varchar(32) NOT NULL,
-	level varchar(32) NOT NULL,
-	sort tinyint NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (sort)
+	name varchar(32) NOT NULL UNIQUE,
+	sort int NOT NULL UNIQUE,
+	PRIMARY KEY (id)
 );
 `
 
@@ -29,11 +27,9 @@ const createLanguage = `
 CREATE TABLE IF NOT EXISTS language (
 	id int NOT NULL AUTO_INCREMENT,
 	user_id int NOT NULL,
-	name varchar(32) NOT NULL,
-	level varchar(32) NOT NULL,
-	sort tinyint NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (sort)
+	name varchar(32) NOT NULL UNIQUE,
+	sort int NOT NULL UNIQUE,
+	PRIMARY KEY (id)
 );
 `
 
