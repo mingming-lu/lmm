@@ -47,21 +47,22 @@ export default {
     }
   },
   created () {
-    let match = /^\/articles\/(\d)$/g.exec(this.$route.path)
-    let url = 'http://api.lmm.local' + this.$route.path.replace(/^\/articles\/\d$/, '/article/' + match[1])
+    const pattern = /^\/articles\/(\d+)$/g
+    const match = pattern.exec(this.$route.path)
+    const url = 'http://api.lmm.local' + this.$route.path.replace(pattern, '/article/' + match[1])
     let md = new Markdownit({
       html: true,
       typographer: true
     })
     axios.get(url).then((res) => {
-      let article = res.data
+      const article = res.data
       this.title = article.title
       this.text = md.render(article.text)
       this.createdDate = article.created_date
       this.updatedDate = article.updated_date
 
       // prepare subtitles and their links
-      let results = this.extractSubtitles(this.text, this.$route.path)
+      const results = this.extractSubtitles(this.text, this.$route.path)
       this.text = results[0]
       this.subtitles = results[1]
     }).catch((e) => {
@@ -73,9 +74,9 @@ export default {
       location.href = hash
 
       // change background color of subtitle for 0.5s
-      let match = /^#(.+)$/g.exec(hash)
+      const match = /^#(.+)$/g.exec(hash)
       if (match !== null && match.length >= 2) {
-        let id = match[1]
+        const id = match[1]
         document.getElementById(id).className = 'highlighted'
         setTimeout(() => {
           document.getElementById(id).className = 'white-trans'
@@ -88,7 +89,7 @@ export default {
 
       // regard all h3 as subtitle
       lines.forEach((line, index) => {
-        let match = /^<h3>(.+)<\/h3>$/g.exec(line)
+        const match = /^<h3>(.+)<\/h3>$/g.exec(line)
         if (match && match.length >= 2) {
           let subtitle = {
             name: match[1],
