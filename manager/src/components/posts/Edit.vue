@@ -19,35 +19,13 @@ export default {
       textPreview: '',
       categoryID: 0,
       categories: [],
-      tags: '',
+      newTagName: '',
+      tags: [],
       articleOriginal: null
     }
   },
   created () {
-    let pattern = /^\/posts\/(\d)\/edit$/g
-    let match = pattern.exec(this.$route.path)
-    let id = match[1]
-    let urlArticle = 'http://api.lmm.local' + this.$route.path.replace(pattern, '/article/' + id)
-
-    axios.all([
-      axios.get(urlArticle),
-      axios.get('http://api.lmm.local/articles/1/categories')
-    ]).then(axios.spread((article, categories) => {
-      if (id !== article.data.id.toString()) {
-        throw new Error('id not equal! expected: ' + this.id + ', got: ' + article.data.id)
-      }
-      this.articleOriginal = article.data
-
-      this.id = this.articleOriginal.id
-      this.title = this.articleOriginal.title
-      this.text = this.articleOriginal.text
-      this.textPreview = this.marked(this.articleOriginal.text)
-      this.categoryID = this.articleOriginal.category_id
-
-      this.categories = categories.data
-    })).catch((e) => {
-      console.log(e)
-    })
+    this.fetchData()
   },
   methods: {
     onSubmit () {
@@ -86,6 +64,57 @@ export default {
     },
     marked: (text) => {
       return md.render(text)
+    },
+    onAddTag (name) {
+      if (!name.trim()) {
+        return
+      }
+      axios.post('http://api.lmm.local/article/tags', [{
+        user_id: 1,
+        article_id: this.id,
+        name: this.newTagName
+      }]).then((res) => {
+        alert(res.data)
+        this.fetchData()
+      }).catch((e) => {
+        console.log(e)
+      })
+    },
+    onRemoveTag (tag) {
+      axios.delete('http://api.lmm.local/article/tags/' + tag.id).then((res) => {
+        alert(res.data)
+        this.fetchData()
+      }).catch((e) => {
+        console.log(e)
+      })
+    },
+    fetchData () {
+      const pattern = /^\/posts\/(\d+)\/edit$/g
+      const match = pattern.exec(this.$route.path)
+      const id = match[1]
+      const urlArticle = 'http://api.lmm.local' + this.$route.path.replace(pattern, '/article/' + id)
+
+      axios.all([
+        axios.get(urlArticle),
+        axios.get('http://api.lmm.local/articles/1/categories'),
+        axios.get('http://api.lmm.local/article/' + id + '/tags')
+      ]).then(axios.spread((article, categories, tags) => {
+        if (id !== article.data.id.toString()) {
+          throw new Error('id not equal! expected: ' + this.id + ', got: ' + article.data.id)
+        }
+        this.articleOriginal = article.data
+
+        this.id = this.articleOriginal.id
+        this.title = this.articleOriginal.title
+        this.text = this.articleOriginal.text
+        this.textPreview = this.marked(this.articleOriginal.text)
+        this.categoryID = this.articleOriginal.category_id
+
+        this.categories = categories.data
+        this.tags = tags.data
+      })).catch((e) => {
+        console.log(e)
+      })
     }
   }
 }
