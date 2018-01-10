@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	db.Init()
+	db.Init("lmm")
 }
 
 func main() {
