@@ -3,7 +3,7 @@ package db
 const createUser = `
 CREATE TABLE IF NOT EXISTS user (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	guid varchar(32) NOT NULL UNIQUE,
+	uid varchar(32) NOT NULL UNIQUE,
 	token varchar(32) NOT NULL UNIQUE,
 	created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	name varchar(32) NOT NULL,
