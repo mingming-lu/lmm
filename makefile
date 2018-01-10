@@ -6,6 +6,8 @@ all:
 install:
 	go get -u github.com/akinaru-lu/elesion
 	go get -u github.com/go-sql-driver/mysql
+	go get -u github.com/google/uuid
+	go get -u github.com/stretchr/testify/assert
 	npm --prefix app install
 	npm --prefix manager install
 
