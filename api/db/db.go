@@ -3,13 +3,27 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/akinaru-lu/errors"
 	_ "github.com/go-sql-driver/mysql"
+	"sync"
 )
 
-var ErrAlreadyExists = errors.New("already exists")
+var (
+	ErrAlreadyExists = errors.New("already exists")
+	ErrEmptyValues = errors.New("empty values")
+)
+
+var defaultDatabaseName = ""
+var mux sync.Mutex
+
+func SetDefaultDatabaseName(name string) {
+	mux.Lock()
+	defaultDatabaseName = name
+	mux.Unlock()
+}
 
 type DB struct {
 	*sql.DB
@@ -47,8 +61,23 @@ func New() *DB {
 	return &DB{DB: super}
 }
 
-func (db *DB) Create(database string) *DB {
-	_, err := db.Exec("CREATE DATABASE IF NOT EXISTS " + database)
+func UseDefault() *DB {
+	if defaultDatabaseName == "" {
+		panic("Default database has not been set")
+	}
+	return New().Use(defaultDatabaseName)
+}
+
+func (db *DB) CreateDatabase(name string) *DB {
+	_, err := db.Exec("CREATE DATABASE IF NOT EXISTS " + name)
+	if err != nil {
+		panic(err)
+	}
+	return db
+}
+
+func (db *DB) DropDatabase(name string) *DB {
+	_, err := db.Exec("DROP DATABASE IF EXISTS " + name)
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +92,25 @@ func (db *DB) Use(database string) *DB {
 	return db
 }
 
-func (db *DB) Insert(table string, values Values) (sql.Result, error) {
-	query := "INSERT INTO " + table + values.String()
-	return db.Exec(query)
+func (db *DB) Insert(table string, values ...Values) (sql.Result, error) {
+	if len(values) == 0 {
+		return nil, ErrEmptyValues
+	} else if len(values) == 1 {
+		return db.Exec("INSERT INTO " + table + values[0].String())
+	} else {
+		return nil, nil
+	}
+}
+
+func Init(name string) {
+	defaultDatabaseName = name
+	d := New().CreateDatabase(defaultDatabaseName).Use(defaultDatabaseName)
+	defer d.Close()
+
+	for _, query := range CreateSQL {
+		_, err := d.Exec(query)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 }
