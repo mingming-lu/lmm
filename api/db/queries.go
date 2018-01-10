@@ -7,11 +7,12 @@ CREATE TABLE IF NOT EXISTS user (
 	token varchar(36) NOT NULL UNIQUE,
 	created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	name varchar(32) NOT NULL,
-	avatar_url varchar(255),
-	description text,
-	profession varchar(32),
-	location varchar(255),
-	email varchar(255),
+	nickname varchar(32) NOT NULL UNIQUE,
+	avatar_url varchar(127) NOT NULL DEFAULT '',
+	description varchar(400) NOT NULL DEFAULT '',
+	profession varchar(32) NOT NULL DEFAULT '',
+	location varchar(127) NOT NULL DEFAULT '',
+	email varchar(127) NOT NULL DEFAULT '',
 	PRIMARY KEY (id)
 )
 `
