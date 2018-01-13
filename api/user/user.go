@@ -101,3 +101,21 @@ func newUser(user User) (int64, error) {
 
 	return result.LastInsertId()
 }
+
+// NewTestUser create a user for testing
+// Expected no error, so panic when error occurs
+func NewTestUser() *User {
+	usr := &User{
+		Name: "test",
+		Nickname: "testy",
+	}
+	id, err := newUser(*usr)
+	if err != nil {
+		panic(err)
+	}
+	usr, err = getUser(id)
+	if err != nil {
+		panic(err)
+	}
+	return usr
+}
