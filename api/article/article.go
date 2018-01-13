@@ -13,11 +13,6 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-type Response struct {
-	Articles   []Article `json:"article"`
-	NextCursor string    `json:"next_cursor"`
-}
-
 type Article struct {
 	ID          int64  `json:"id"`
 	User        string `json:"user"`
