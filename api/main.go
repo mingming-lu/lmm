@@ -22,16 +22,10 @@ func main() {
 
 	// article
 	router.GET("/users/:user/articles", article.GetArticles)
-	router.POST("/users/articles", article.NewArticle)
 	router.GET("/users/:user/articles/:article", article.GetArticle)
-
-	// tag
-
-	// /article
-	// router.GET("/article/:id", article.GetArticle)
-	// router.POST("/article", article.NewArticle)
-	// router.PUT("/article/:id", article.UpdateArticle)
-	// router.DELETE("/article/:id", article.DeleteArticle)
+	router.POST("/users/:user/articles", article.NewArticle)
+	router.PUT("/users/:user/articles/:article", article.UpdateArticle)
+	router.DELETE("/users/:user/articles/:article", article.DeleteArticle)
 
 	// /article/categories
 	// router.GET("/article/:userID/categories", article.GetCategories)
