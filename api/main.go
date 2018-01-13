@@ -1,14 +1,12 @@
 package main
 
 import (
-	"lmm/api/articles"
+	"lmm/api/article"
 	"lmm/api/db"
-	"lmm/api/image"
-	"lmm/api/profile"
 	"log"
 	"net/http"
-
 	"github.com/akinaru-lu/elesion"
+	"lmm/api/user"
 )
 
 func init() {
@@ -18,34 +16,42 @@ func init() {
 func main() {
 	router := elesion.Default("[api]")
 
-	// /articles
-	router.GET("/articles/:userID", articles.GetArticles)
+	// users
+	router.GET("/users/:user", user.GetUser)
+	router.POST("/users", user.NewUser)
+
+	// article
+	router.GET("/users/:user/articles", article.GetArticles)
+	router.POST("/users/articles", article.NewArticle)
+	router.GET("/users/:user/articles/:article", article.GetArticle)
+
+	// tag
 
 	// /article
-	router.GET("/article/:id", articles.GetArticle)
-	router.POST("/article", articles.PostArticle)
-	router.PUT("/article/:id", articles.UpdateArticle)
-	// router.DELETE("/article/:id", articles.DeleteArticle)
+	// router.GET("/article/:id", article.GetArticle)
+	// router.POST("/article", article.NewArticle)
+	// router.PUT("/article/:id", article.UpdateArticle)
+	// router.DELETE("/article/:id", article.DeleteArticle)
 
-	// /articles/categories
-	router.GET("/articles/:userID/categories", articles.GetCategories)
+	// /article/categories
+	// router.GET("/article/:userID/categories", article.GetCategories)
 
-	// /articles/category
-	router.POST("/articles/category", articles.NewCategory)
-	router.PUT("/articles/category/:id", articles.UpdateCategory)
-	router.DELETE("/articles/category/:id", articles.DeleteCategory)
-
-	// /articles/tags
-	router.GET("/articles/:userID/tags", articles.GetTags)
+	// /article/category
+	// router.POST("/article/category", article.NewCategory)
+	// router.PUT("/article/category/:id", article.UpdateCategory)
+	// router.DELETE("/article/category/:id", article.DeleteCategory)
 
 	// /article/tags
-	router.GET("/article/:id/tags", articles.GetArticleTags)
-	router.POST("/article/tags", articles.NewTags)
-	router.DELETE("/article/tags/:id", articles.DeleteTag)
+	// router.GET("/article/:userID/tags", article.GetTags)
 
-	router.GET("/photos", image.Handler)
+	// /article/tags
+	// router.GET("/article/:id/tags", article.GetArticleTags)
+	// router.POST("/article/tags", article.NewTags)
+	// router.DELETE("/article/tags/:id", article.DeleteTag)
 
-	router.GET("/profile", profile.Handler)
+	// router.GET("/photos", image.Handler)
+
+	// router.GET("/profile", profile.Handler)
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
