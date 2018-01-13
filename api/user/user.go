@@ -27,52 +27,52 @@ type User struct {
 func GetUser(c *elesion.Context) {
 	name := c.Params.ByName("user")
 
-	user, err := getUser(name)
+	u, err := getUser(name)
 	if err != nil {
 		c.Status(http.StatusNotFound).String("user not found")
 		return
 	}
-	c.Status(http.StatusOK).JSON(user)
+	c.Status(http.StatusOK).JSON(u)
 }
 
 func getUser(name string) (*User, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
-	user := User{}
+	u := User{}
 	err := d.QueryRow(
-		"SELECT id, guid, token, created_date, name, nickname, avatar_url, description, profession, location, email FROM user WHERE name = ?", name,
+		"SELECT id, guid, token, created_date, name, nickname, avatar_url, description, profession, location, email FROM u WHERE name = ?", name,
 	).Scan(
-		&user.ID, &user.GUID, &user.Token, &user.CreatedDate, &user.Name, &user.Nickname, &user.AvatarURL, &user.Description, &user.Profession, &user.Location, &user.Email,
+		&u.ID, &u.GUID, &u.Token, &u.CreatedDate, &u.Name, &u.Nickname, &u.AvatarURL, &u.Description, &u.Profession, &u.Location, &u.Email,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return &u, nil
 }
 
 // POST /users
 // body : name, nickname
 func NewUser(c *elesion.Context) {
-	user := User{}
-	err := json.NewDecoder(c.Request.Body).Decode(&user)
+	u := User{}
+	err := json.NewDecoder(c.Request.Body).Decode(&u)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("invalid body")
 		return
 	}
 	defer c.Request.Body.Close()
 
-	if user.Name == "" || user.Nickname == "" {
+	if u.Name == "" || u.Nickname == "" {
 		c.Status(http.StatusBadRequest).String("empty name or nickname")
 		return
 	}
 
-	_, err = newUser(user)
+	_, err = newUser(u)
 	if err != nil {
 		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid input")
 		return
 	}
-	newUser, err := getUser(user.Name)
+	newUser, err := getUser(u.Name)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).Error(err.Error()).String("something is wrong")
 		return
