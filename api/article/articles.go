@@ -1,4 +1,4 @@
-package articles
+package article
 
 import (
 	"database/sql"
@@ -13,7 +13,7 @@ import (
 )
 
 type Response struct {
-	Articles   []Article `json:"articles"`
+	Articles   []Article `json:"article"`
 	NextCursor string    `json:"next_cursor"`
 }
 
@@ -60,7 +60,7 @@ func getArticles(userID, categoryID int64) ([]Article, error) {
 
 	var itr *sql.Rows
 	var err error
-	query := `SELECT id, title, text, created_date, updated_date, category_id FROM articles WHERE user_id = ? ORDER BY created_date DESC`
+	query := `SELECT id, title, text, created_date, updated_date, category_id FROM article WHERE user_id = ? ORDER BY created_date DESC`
 	if categoryID == 0 {
 		itr, err = d.Query(query, userID)
 	} else {
@@ -106,7 +106,7 @@ func getArticle(id int64) (*Article, error) {
 
 	article := Article{}
 	err := d.QueryRow(
-		"SELECT id, title, text, created_date, updated_date, category_id FROM articles WHERE id = ?", id).Scan(
+		"SELECT id, title, text, created_date, updated_date, category_id FROM article WHERE id = ?", id).Scan(
 		&article.ID, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate, &article.CategoryID,
 	)
 	if err != nil {
@@ -115,7 +115,7 @@ func getArticle(id int64) (*Article, error) {
 	return &article, err
 }
 
-func PostArticle(c *elesion.Context) {
+func NewArticle(c *elesion.Context) {
 	// parse body (should be json)
 	body := Article{}
 	err := json.NewDecoder(c.Request.Body).Decode(&body)
@@ -149,7 +149,7 @@ func postArticle(body Article) (int64, error) {
 	defer d.Close()
 
 	result, err := d.Exec(
-		"INSERT INTO articles (user_id, title, text, category_id) VALUES (?, ?, ?, ?)",
+		"INSERT INTO article (user_id, title, text, category_id) VALUES (?, ?, ?, ?)",
 		body.UserID, body.Title, strings.TrimSpace(body.Text), body.CategoryID,
 	)
 	if err != nil {
@@ -190,7 +190,7 @@ func updateArticle(id int64, body Article) error {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	res, err := d.Exec("UPDATE articles SET title = ?, text = ?, category_id = ? WHERE id = ? AND user_id = ?",
+	res, err := d.Exec("UPDATE article SET title = ?, text = ?, category_id = ? WHERE id = ? AND user_id = ?",
 		body.Title, body.Text, body.CategoryID, id, body.UserID,
 	)
 	if rows, err := res.RowsAffected(); err != nil {

@@ -1,4 +1,4 @@
-package articles
+package article
 
 import (
 	"encoding/json"
