@@ -25,10 +25,15 @@ type Article struct {
 // GetArticles gets all articles according to user name or more information given by query parameters
 // GET /users/:user/articles
 func GetArticles(c *elesion.Context) {
-	name := c.Params.ByName("user")
+	id := c.Params.ByName("user")
+	_, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid id: " + id)
+		return
+	}
 
 	values := c.Query()
-	values.Set("user", name)
+	values.Set("id", id)
 	articles, err := getArticles(values)
 	if err != nil {
 		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
