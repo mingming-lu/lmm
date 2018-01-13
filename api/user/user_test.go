@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
+	"testing"
+
 	"github.com/akinaru-lu/elesion"
 	"github.com/stretchr/testify/assert"
+
 	"lmm/api/db"
 	"lmm/api/utils/httptest"
-	"net/http"
-	"testing"
-	"os"
 )
 
 var router *elesion.Router
@@ -78,7 +80,7 @@ func TestNewUser_DuplicateName(t *testing.T) {
 
 func TestPost_ResponseLocation(t *testing.T) {
 	user := User{
-		Name: "Van Darkholme",
+		Name:     "Van Darkholme",
 		Nickname: "van sama",
 	}
 
