@@ -4,16 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/akinaru-lu/errors"
 	_ "github.com/go-sql-driver/mysql"
-	"sync"
 )
 
 var (
 	ErrAlreadyExists = errors.New("already exists")
-	ErrEmptyValues = errors.New("empty values")
+	ErrEmptyValues   = errors.New("empty values")
 )
 
 var defaultDatabaseName = ""
@@ -29,28 +30,23 @@ type DB struct {
 	*sql.DB
 }
 
-type Values map[string]interface{}
+type Values struct {
+	url.Values
+}
 
-func (values Values) String() string {
-	cs := " ("
-	vs := " VALUES ("
-	for k, v := range values {
-		cs += k + ","
-		if _, ok := v.(string); ok {
-			vs += fmt.Sprintf(`"%s",`, v.(string))
-		} else {
-			vs += fmt.Sprintf(`%v,`, v)
-		}
+func NewValues(values url.Values) *Values {
+	return &Values{values}
+}
+
+func (values *Values) Where() string {
+	s := ""
+	for k := range values.Values {
+		s += fmt.Sprintf(`%s="%v" AND `, k, values.Get(k))
 	}
-	if strings.HasSuffix(cs, ",") {
-		cs = cs[:len(cs)-1]
+	if s != "" {
+		s = "WHERE " + strings.TrimSuffix(s, " AND ")
 	}
-	if strings.HasSuffix(vs, ",") {
-		vs = vs[:len(vs)-1]
-	}
-	cs += ")"
-	vs += ")"
-	return cs + vs
+	return s
 }
 
 func New() *DB {
@@ -90,16 +86,6 @@ func (db *DB) Use(database string) *DB {
 		panic(err)
 	}
 	return db
-}
-
-func (db *DB) Insert(table string, values ...Values) (sql.Result, error) {
-	if len(values) == 0 {
-		return nil, ErrEmptyValues
-	} else if len(values) == 1 {
-		return db.Exec("INSERT INTO " + table + values[0].String())
-	} else {
-		return nil, nil
-	}
 }
 
 func Init(name string) {
