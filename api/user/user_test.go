@@ -5,16 +5,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/akinaru-lu/elesion"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"lmm/api/db"
 	"lmm/api/utils/httptest"
 	"net/http"
 	"strings"
 	"testing"
-	"github.com/google/uuid"
 )
 
+var router *elesion.Router
+
 func TestMain(m *testing.M) {
+	router = elesion.New()
+	router.GET("/users/:user", GetUser)
+	router.POST("/users", NewUser)
+
 	db.Init("lmm_test")
 	defer func() {
 		err := db.New().DropDatabase("lmm_test").Close()
@@ -22,11 +28,12 @@ func TestMain(m *testing.M) {
 			fmt.Println(err)
 		}
 	}()
+
 	m.Run()
 }
 
 var targetUser = User{
-	Name: "test name",
+	Name:     "test name",
 	Nickname: "test nickname",
 }
 
@@ -34,13 +41,12 @@ func TestNewUser(t *testing.T) {
 	b, err := json.Marshal(targetUser)
 	assert.NoError(t, err)
 
-	router := elesion.New()
-	router.POST("/user", NewUser)
-	r := httptest.POST("/user", bytes.NewReader(b))
+	r := httptest.POST("/users", bytes.NewReader(b))
 	w := httptest.NewResponseWriter()
 	router.ServeHTTP(w, r)
 
-	assert.Equal(t, http.StatusCreated, w.StatusCode())
+	assert.Equal(t, http.StatusCreated, w.StatusCode(), w.Body())
+	assert.Equal(t, w.Header().Get("Location"), "/users/1")
 }
 
 func TestNewUser_EmptyName(t *testing.T) {
@@ -48,9 +54,7 @@ func TestNewUser_EmptyName(t *testing.T) {
 	b, err := json.Marshal(user)
 	assert.NoError(t, err)
 
-	router := elesion.New()
-	router.POST("/user", NewUser)
-	r := httptest.POST("/user", bytes.NewReader(b))
+	r := httptest.POST("/users", bytes.NewReader(b))
 	w := httptest.NewResponseWriter()
 	router.ServeHTTP(w, r)
 
@@ -58,25 +62,18 @@ func TestNewUser_EmptyName(t *testing.T) {
 }
 
 func TestNewUser_DuplicateName(t *testing.T) {
-	user := User{
-		Name: "test name",
-	}
-	b, err := json.Marshal(user)
+	b, err := json.Marshal(targetUser)
 	assert.NoError(t, err)
 
-	router := elesion.New()
-	router.POST("/user", NewUser)
-	r := httptest.POST("/user", bytes.NewReader(b))
+	r := httptest.POST("/users", bytes.NewReader(b))
 	w := httptest.NewResponseWriter()
 	router.ServeHTTP(w, r)
 
-	assert.Equal(t, http.StatusBadRequest, w.StatusCode()) // TODO status code should be 409 Conflict
+	assert.Equal(t, http.StatusInternalServerError, w.StatusCode()) // TODO status code should be 409 Conflict
 }
 
 func TestGetUser(t *testing.T) {
-	router := elesion.New()
-	router.GET("/user/:id", GetUser)
-	r := httptest.GET("/user/1")
+	r := httptest.GET("/users/1")
 	w := httptest.NewResponseWriter()
 	router.ServeHTTP(w, r)
 
@@ -89,7 +86,7 @@ func TestGetUser(t *testing.T) {
 	assert.Equal(t, targetUser.Name, user.Name)
 	assert.Equal(t, targetUser.Nickname, user.Nickname)
 
-	_, err = uuid.Parse(user.UID)
+	_, err = uuid.Parse(user.GUID)
 	assert.NoError(t, err)
 
 	_, err = uuid.Parse(user.Token)
@@ -97,9 +94,7 @@ func TestGetUser(t *testing.T) {
 }
 
 func TestGetUser_InvalidID(t *testing.T) {
-	router := elesion.New()
-	router.GET("/user/:id", GetUser)
-	r := httptest.GET("/user/a")
+	r := httptest.GET("/users/a")
 	w := httptest.NewResponseWriter()
 	router.ServeHTTP(w, r)
 
@@ -108,9 +103,7 @@ func TestGetUser_InvalidID(t *testing.T) {
 }
 
 func TestGetUser_NotExist(t *testing.T) {
-	router := elesion.New()
-	router.GET("/user/:id", GetUser)
-	r := httptest.GET("/user/99999")
+	r := httptest.GET("/users/99999")
 	w := httptest.NewResponseWriter()
 	router.ServeHTTP(w, r)
 

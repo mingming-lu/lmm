@@ -2,10 +2,12 @@ package user
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/akinaru-lu/elesion"
 	"lmm/api/db"
 	"lmm/api/utils"
 	"net/http"
+	"strconv"
 )
 
 type User struct {
@@ -23,11 +25,16 @@ type User struct {
 }
 
 // GET /users/:user
-// user: user name
+// user: user id
 func GetUser(c *elesion.Context) {
-	name := c.Params.ByName("user")
+	idStr := c.Params.ByName("user")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid id: " + idStr)
+		return
+	}
 
-	u, err := getUser(name)
+	u, err := getUser(id)
 	if err != nil {
 		c.Status(http.StatusNotFound).String("user not found")
 		return
@@ -35,13 +42,13 @@ func GetUser(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(u)
 }
 
-func getUser(name string) (*User, error) {
+func getUser(id int64) (*User, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
 	u := User{}
 	err := d.QueryRow(
-		"SELECT id, guid, token, created_date, name, nickname, avatar_url, description, profession, location, email FROM u WHERE name = ?", name,
+		"SELECT id, guid, token, created_date, name, nickname, avatar_url, description, profession, location, email FROM user WHERE id = ?", id,
 	).Scan(
 		&u.ID, &u.GUID, &u.Token, &u.CreatedDate, &u.Name, &u.Nickname, &u.AvatarURL, &u.Description, &u.Profession, &u.Location, &u.Email,
 	)
@@ -54,29 +61,25 @@ func getUser(name string) (*User, error) {
 // POST /users
 // body : name, nickname
 func NewUser(c *elesion.Context) {
-	u := User{}
-	err := json.NewDecoder(c.Request.Body).Decode(&u)
+	usr := User{}
+	err := json.NewDecoder(c.Request.Body).Decode(&usr)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("invalid body")
 		return
 	}
 	defer c.Request.Body.Close()
 
-	if u.Name == "" || u.Nickname == "" {
+	if usr.Name == "" || usr.Nickname == "" {
 		c.Status(http.StatusBadRequest).String("empty name or nickname")
 		return
 	}
 
-	_, err = newUser(u)
+	id, err := newUser(usr)
 	if err != nil {
-		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid input")
+		c.Status(http.StatusInternalServerError).Error(err.Error()).String("invalid input")
 		return
 	}
-	newUser, err := getUser(u.Name)
-	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error()).String("something is wrong")
-		return
-	}
+	c.Writer.Header().Set("Location", fmt.Sprintf("/users/%d", id))
 	c.Status(http.StatusCreated).JSON(newUser)
 }
 
