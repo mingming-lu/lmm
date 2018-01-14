@@ -37,9 +37,8 @@ export default {
       }
 
       axios.post('http://api.lmm.local/users/1/articles', {
-        user: 1,
         title: this.title,
-        text: this.text,
+        text: this.text
       }).then((res) => {
         alert(res.data)
         this.$router.push('/posts')

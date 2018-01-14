@@ -43,7 +43,7 @@ export default {
       // update article
       axios.put('http://api.lmm.local/users/1/articles/' + this.id, {
         title: this.title,
-        text: this.text,
+        text: this.text
       }).then((res) => {
         this.$router.push('/posts')
       }).catch((e) => {
