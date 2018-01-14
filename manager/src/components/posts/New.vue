@@ -23,11 +23,11 @@ export default {
     }
   },
   created () {
-    axios.get('http://api.lmm.local/articles/1/categories').then((res) => {
-      this.categories = res.data
-    }).catch((e) => {
-      console.log(e)
-    })
+    // axios.get('http://api.lmm.local/articles/1/categories').then((res) => {
+    //   this.categories = res.data
+    // }).catch((e) => {
+    //   console.log(e)
+    // })
   },
   methods: {
     onSubmit () {
@@ -36,12 +36,10 @@ export default {
         return
       }
 
-      axios.post('http://api.lmm.local/article', {
-        user_id: 1,
+      axios.post('http://api.lmm.local/users/1/articles', {
+        user: 1,
         title: this.title,
         text: this.text,
-        category_id: this.categoryID,
-        tags: this.tags
       }).then((res) => {
         alert(res.data)
         this.$router.push('/posts')

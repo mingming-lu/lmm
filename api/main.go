@@ -1,11 +1,13 @@
 package main
 
 import (
-	"lmm/api/article"
-	"lmm/api/db"
 	"log"
 	"net/http"
+
 	"github.com/akinaru-lu/elesion"
+
+	"lmm/api/article"
+	"lmm/api/db"
 	"lmm/api/user"
 )
 
@@ -22,36 +24,30 @@ func main() {
 
 	// article
 	router.GET("/users/:user/articles", article.GetArticles)
-	router.POST("/users/articles", article.NewArticle)
 	router.GET("/users/:user/articles/:article", article.GetArticle)
-
-	// tag
-
-	// /article
-	// router.GET("/article/:id", article.GetArticle)
-	// router.POST("/article", article.NewArticle)
-	// router.PUT("/article/:id", article.UpdateArticle)
-	// router.DELETE("/article/:id", article.DeleteArticle)
+	router.POST("/users/:user/articles", article.NewArticle)
+	router.PUT("/users/:user/articles/:article", article.UpdateArticle)
+	router.DELETE("/users/:user/articles/:article", article.DeleteArticle)
 
 	// /article/categories
-	// router.GET("/article/:userID/categories", article.GetCategories)
+	// routing.GET("/article/:userID/categories", article.GetCategories)
 
 	// /article/category
-	// router.POST("/article/category", article.NewCategory)
-	// router.PUT("/article/category/:id", article.UpdateCategory)
-	// router.DELETE("/article/category/:id", article.DeleteCategory)
+	// routing.POST("/article/category", article.NewCategory)
+	// routing.PUT("/article/category/:id", article.UpdateCategory)
+	// routing.DELETE("/article/category/:id", article.DeleteCategory)
 
 	// /article/tags
-	// router.GET("/article/:userID/tags", article.GetTags)
+	// routing.GET("/article/:userID/tags", article.GetTags)
 
 	// /article/tags
-	// router.GET("/article/:id/tags", article.GetArticleTags)
-	// router.POST("/article/tags", article.NewTags)
-	// router.DELETE("/article/tags/:id", article.DeleteTag)
+	// routing.GET("/article/:id/tags", article.GetArticleTags)
+	// routing.POST("/article/tags", article.NewTags)
+	// routing.DELETE("/article/tags/:id", article.DeleteTag)
 
-	// router.GET("/photos", image.Handler)
+	// routing.GET("/photos", image.Handler)
 
-	// router.GET("/profile", profile.Handler)
+	// routing.GET("/profile", profile.Handler)
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }

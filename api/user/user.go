@@ -2,10 +2,12 @@ package user
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/akinaru-lu/elesion"
 	"lmm/api/db"
 	"lmm/api/utils"
 	"net/http"
+	"strconv"
 )
 
 type User struct {
@@ -23,61 +25,62 @@ type User struct {
 }
 
 // GET /users/:user
-// user: user name
+// user: user id
 func GetUser(c *elesion.Context) {
-	name := c.Params.ByName("user")
+	idStr := c.Params.ByName("user")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid id: " + idStr)
+		return
+	}
 
-	user, err := getUser(name)
+	u, err := getUser(id)
 	if err != nil {
 		c.Status(http.StatusNotFound).String("user not found")
 		return
 	}
-	c.Status(http.StatusOK).JSON(user)
+	c.Status(http.StatusOK).JSON(u)
 }
 
-func getUser(name string) (*User, error) {
+func getUser(id int64) (*User, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
-	user := User{}
+	u := User{}
 	err := d.QueryRow(
-		"SELECT id, guid, token, created_date, name, nickname, avatar_url, description, profession, location, email FROM user WHERE name = ?", name,
+		"SELECT id, guid, token, created_date, name, nickname, avatar_url, description, profession, location, email FROM user WHERE id = ?", id,
 	).Scan(
-		&user.ID, &user.GUID, &user.Token, &user.CreatedDate, &user.Name, &user.Nickname, &user.AvatarURL, &user.Description, &user.Profession, &user.Location, &user.Email,
+		&u.ID, &u.GUID, &u.Token, &u.CreatedDate, &u.Name, &u.Nickname, &u.AvatarURL, &u.Description, &u.Profession, &u.Location, &u.Email,
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return &u, nil
 }
 
 // POST /users
 // body : name, nickname
 func NewUser(c *elesion.Context) {
-	user := User{}
-	err := json.NewDecoder(c.Request.Body).Decode(&user)
+	usr := User{}
+	err := json.NewDecoder(c.Request.Body).Decode(&usr)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("invalid body")
 		return
 	}
 	defer c.Request.Body.Close()
 
-	if user.Name == "" || user.Nickname == "" {
+	if usr.Name == "" || usr.Nickname == "" {
 		c.Status(http.StatusBadRequest).String("empty name or nickname")
 		return
 	}
 
-	_, err = newUser(user)
+	id, err := newUser(usr)
 	if err != nil {
-		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid input")
+		c.Status(http.StatusInternalServerError).Error(err.Error()).String("invalid input")
 		return
 	}
-	newUser, err := getUser(user.Name)
-	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error()).String("something is wrong")
-		return
-	}
-	c.Status(http.StatusCreated).JSON(newUser)
+	c.Writer.Header().Set("Location", fmt.Sprintf("/users/%d", id))
+	c.Status(http.StatusCreated).String("success")
 }
 
 func newUser(user User) (int64, error) {
@@ -97,4 +100,22 @@ func newUser(user User) (int64, error) {
 	}
 
 	return result.LastInsertId()
+}
+
+// NewTestUser create a user for testing
+// Expected no error, so panic when error occurs
+func NewTestUser() *User {
+	usr := &User{
+		Name: "test",
+		Nickname: "testy",
+	}
+	id, err := newUser(*usr)
+	if err != nil {
+		panic(err)
+	}
+	usr, err = getUser(id)
+	if err != nil {
+		panic(err)
+	}
+	return usr
 }

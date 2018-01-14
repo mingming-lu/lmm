@@ -79,34 +79,32 @@ CREATE TABLE IF NOT EXISTS qualification (
 const createArticle = `
 CREATE TABLE IF NOT EXISTS article (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user_id int unsigned NOT NULL,
-	created_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	updated_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	user int unsigned NOT NULL,
 	title varchar(255) NOT NULL,
 	text text NOT NULL,
-	category_id int unsigned NOT NULL DEFAULT 0,
+	created_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (id)
 )
 `
 
-const createArticleCategory = `
+const createCategory = `
 CREATE TABLE IF NOT EXISTS category (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user_id int unsigned NOT NULL,
+	user varchar(32) NOT NULL,
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (name)
+	UNIQUE (user, name)
 )
 `
 
-const createArticleTag = `
+const createTag = `
 CREATE TABLE IF NOT EXISTS tag (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user_id int unsigned NOT NULL,
-	article_id int unsigned NOT NULL,
+	user varchar(32) NOT NULL,
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (name, article_id)
+	UNIQUE (user, name)
 )
 `
 
@@ -118,6 +116,6 @@ var CreateSQL = []string{
 	createWorkExperience,
 	createQualification,
 	createArticle,
-	createArticleCategory,
-	createArticleTag,
+	createCategory,
+	createTag,
 }

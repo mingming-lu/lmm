@@ -41,11 +41,11 @@ export default {
   methods: {
     fetchData () {
       axios.all([
-        axios.get('http://api.lmm.local/articles/1'),
-        axios.get('http://api.lmm.local/articles/1/categories')
-      ]).then(axios.spread((articles, categories) => {
+        axios.get('http://api.lmm.local/users/1/articles')
+        // axios.get('http://api.lmm.local/articles/1/categories')
+      ]).then(axios.spread((articles) => {
         this.articles = articles.data
-        this.categories = categories.data
+        // this.categories = categories.data
       })).catch((e) => {
         console.log(e)
       })

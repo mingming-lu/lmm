@@ -1,10 +1,10 @@
 package httptest
 
 import (
-	"io/ioutil"
-	"net/http/httptest"
-	"net/http"
 	"io"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 )
 
 type ResponseWriter struct {
