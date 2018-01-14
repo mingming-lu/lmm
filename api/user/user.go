@@ -80,7 +80,7 @@ func NewUser(c *elesion.Context) {
 		return
 	}
 	c.Writer.Header().Set("Location", fmt.Sprintf("/users/%d", id))
-	c.Status(http.StatusCreated).JSON(newUser)
+	c.Status(http.StatusCreated).String("success")
 }
 
 func newUser(user User) (int64, error) {

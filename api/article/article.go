@@ -35,7 +35,7 @@ func GetArticles(c *elesion.Context) {
 	}
 
 	values := c.Query()
-	values.Set("id", id)
+	values.Set("user", id)
 	articles, err := getArticles(values)
 	if err != nil {
 		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
