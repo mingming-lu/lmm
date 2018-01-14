@@ -31,22 +31,19 @@ export default {
     onSubmit () {
       this.text = this.text.trim()
 
-      if (!confirm('Are you sure you want to submit?')) {
-        return
-      }
-
       if (!this.canSubmit()) {
         alert('no change')
         return
       }
 
+      if (!confirm('Are you sure you want to submit?')) {
+        return
+      }
+
       // update article
-      axios.put('http://api.lmm.local/article/' + this.id, {
-        user_id: 1,
+      axios.put('http://api.lmm.local/users/1/articles/' + this.id, {
         title: this.title,
         text: this.text,
-        category_id: this.categoryID,
-        tags: this.tags
       }).then((res) => {
         this.$router.push('/posts')
       }).catch((e) => {
@@ -59,8 +56,7 @@ export default {
       }
       let titleOK = this.articleOriginal.title !== this.title
       let textOK = this.articleOriginal.text !== this.text
-      let categoryIDOK = this.articleOriginal.categoryID !== this.categoryID
-      return titleOK || textOK || categoryIDOK
+      return titleOK || textOK
     },
     marked: (text) => {
       return md.render(text)
@@ -96,13 +92,13 @@ export default {
       const pattern = /^\/posts\/(\d+)\/edit$/g
       const match = pattern.exec(this.$route.path)
       const id = match[1]
-      const urlArticle = 'http://api.lmm.local' + this.$route.path.replace(pattern, '/article/' + id)
+      const baseURL = 'http://api.lmm.local/users/1/articles/' + id
 
       axios.all([
-        axios.get(urlArticle),
-        axios.get('http://api.lmm.local/articles/1/categories'),
-        axios.get('http://api.lmm.local/article/' + id + '/tags')
-      ]).then(axios.spread((article, categories, tags) => {
+        axios.get(baseURL)
+        // axios.get('http://api.lmm.local/articles/1/categories'),
+        // axios.get('http://api.lmm.local/article/' + id + '/tags')
+      ]).then(axios.spread((article) => {
         if (id !== article.data.id.toString()) {
           throw new Error('id not equal! expected: ' + this.id + ', got: ' + article.data.id)
         }
@@ -112,10 +108,10 @@ export default {
         this.title = this.articleOriginal.title
         this.text = this.articleOriginal.text
         this.textPreview = this.marked(this.articleOriginal.text)
-        this.categoryID = this.articleOriginal.category_id
+        // this.categoryID = this.articleOriginal.category_id
 
-        this.categories = categories.data
-        this.tags = tags.data
+        // this.categories = categories.data
+        // this.tags = tags.data
       })).catch((e) => {
         console.log(e)
       })
