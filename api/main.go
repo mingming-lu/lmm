@@ -8,6 +8,7 @@ import (
 
 	"lmm/api/article"
 	"lmm/api/db"
+	"lmm/api/image"
 	"lmm/api/user"
 )
 
@@ -45,7 +46,7 @@ func main() {
 	// routing.POST("/article/tags", article.NewTags)
 	// routing.DELETE("/article/tags/:id", article.DeleteTag)
 
-	// routing.GET("/photos", image.Handler)
+	router.GET("/photos", image.Handler)
 
 	// routing.GET("/profile", profile.Handler)
 
