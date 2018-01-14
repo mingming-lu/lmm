@@ -50,32 +50,39 @@ export default {
     const pattern = /^\/articles\/(\d+)$/g
     const match = pattern.exec(this.$route.path)
     const id = match[1]
-    const baseURL = 'http://api.lmm.local/article/' + id
-    let md = new Markdownit({
-      html: true,
-      typographer: true
-    })
-    axios.all([
-      axios.get(baseURL),
-      // axios.get(baseURL + '/category'),
-      axios.get(baseURL + '/tags')
-    ]).then(axios.spread((article /* , category */, tags) => {
-      this.title = article.data.title
-      this.text = md.render(article.data.text)
-      this.createdDate = article.data.created_date
-      this.updatedDate = article.data.updated_date
-      // this.category = category.data
-      this.tags = tags.data
-
-      // prepare subtitles and their links
-      const results = this.extractSubtitles(this.text, this.$route.path)
-      this.text = results[0]
-      this.subtitles = results[1]
-    })).catch((e) => {
-      console.log(e)
-    })
+    this.baseURL = 'http://api.lmm.local/users/1/articles/' + id
+    this.fetchArticle()
+    this.fetchCategories()
+    this.fetchTags()
   },
   methods: {
+    fetchArticle: function () {
+      const md = new Markdownit({
+        html: true,
+        typographer: true
+      })
+      axios.get(this.baseURL).then(res => {
+        this.title = res.data.title
+        this.text = md.render(res.data.text)
+        this.createdDate = res.data.created_date
+        this.updatedDate = res.data.updated_date
+
+        // prepare subtitles and their links
+        const results = this.extractSubtitles(this.text, this.$route.path)
+        this.text = results[0]
+        this.subtitles = results[1]
+      }).catch(e => {
+        if (e.response) {
+          console.log(e.response.data)
+        } else {
+          console.log(e)
+        }
+      })
+    },
+    fetchCategories: function () {
+    },
+    fetchTags: function () {
+    },
     jumpToHash: (hash) => {
       location.href = hash
 

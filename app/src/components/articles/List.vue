@@ -47,17 +47,22 @@ export default {
     }
   },
   created () {
-    axios.all([
-      axios.get('http://api.lmm.local/articles/1'),
-      axios.get('http://api.lmm.local/articles/1/categories'),
-      axios.get('http://api.lmm.local/articles/1/tags')
-    ]).then(axios.spread((articles, categories, tags) => {
-      this.articles = articles.data
-      this.categories = categories.data
-      this.tags = tags.data
-    })).catch((e) => {
-      console.log(e.response.data)
-    })
+    this.fetchArticles()
+    this.fetchCategories()
+    this.fetchTags()
+  },
+  methods: {
+    fetchArticles () {
+      axios.get('http://api.lmm.local/users/1/articles').then(res => {
+        this.articles = res.data
+      }).catch(e => {
+        console.log(e.response.data)
+      })
+    },
+    fetchCategories () {
+    },
+    fetchTags () {
+    }
   }
 }
 </script>
