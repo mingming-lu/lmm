@@ -85,6 +85,7 @@ export default {
     },
     jumpToHash: (hash) => {
       location.href = hash
+      window.scrollTo(0, document.getElementById(hash.slice(1)).offsetTop - 64)
 
       // change background color of subtitle for 0.5s
       const match = /^#(.+)$/g.exec(hash)
@@ -126,4 +127,3 @@ export default {
   width: 25%;
 }
 </style>
-
