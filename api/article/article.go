@@ -102,7 +102,7 @@ func getArticle(userID, articleID int64) (*Article, error) {
 	article := Article{}
 	err := d.QueryRow(
 		"SELECT id, user, title, text, created_date, updated_date FROM article WHERE id = ? AND user = ?",
-		userID, articleID,
+		articleID, userID,
 	).Scan(
 		&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate,
 	)
@@ -168,9 +168,9 @@ func newArticle(body Article) (int64, error) {
 func NewTestArticle() (*Article, *user.User) {
 	usr := user.NewTestUser()
 	id, err := newArticle(Article{
-		ID: usr.ID,
+		ID:    usr.ID,
 		Title: "test",
-		Text: "This is a test article",
+		Text:  "This is a test article",
 	})
 	if err != nil {
 		panic(err)
