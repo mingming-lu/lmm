@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS qualification (
 const createArticle = `
 CREATE TABLE IF NOT EXISTS article (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user varchar(32) NOT NULL,
+	user int unsigned NOT NULL,
 	title varchar(255) NOT NULL,
 	text text NOT NULL,
 	created_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
