@@ -20,13 +20,13 @@ export default {
   },
   created () {
     axios.get('http://api.lmm.local/photos').then((res) => {
-      for (let i = 0; i < res.data.images.length; i++) {
-        if (i % 2 === 0) {
-          this.left.push(res.data.images[i])
+      res.data.images.forEach((image, index) => {
+        if (index % 2 === 0) {
+          this.left.push(image)
         } else {
-          this.right.push(res.data.images[i])
+          this.right.push(image)
         }
-      }
+      })
     }).catch((e) => {
       console.log(e)
     })

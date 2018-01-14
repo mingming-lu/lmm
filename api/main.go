@@ -9,6 +9,7 @@ import (
 	"lmm/api/article"
 	"lmm/api/db"
 	"lmm/api/image"
+	"lmm/api/profile"
 	"lmm/api/user"
 )
 
@@ -48,7 +49,7 @@ func main() {
 
 	router.GET("/photos", image.Handler)
 
-	// routing.GET("/profile", profile.Handler)
+	router.GET("/users/:user/profile", profile.GetProfile)
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }

@@ -20,27 +20,29 @@ CREATE TABLE IF NOT EXISTS user (
 const createSkill = `
 CREATE TABLE IF NOT EXISTS skill (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user_id int unsigned NOT NULL,
+	user int unsigned NOT NULL,
 	name varchar(32) NOT NULL UNIQUE,
 	sort int unsigned NOT NULL UNIQUE,
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	UNIQUE (user, name)
 );
 `
 
 const createLanguage = `
 CREATE TABLE IF NOT EXISTS language (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user_id int unsigned NOT NULL,
+	user int unsigned NOT NULL,
 	name varchar(32) NOT NULL UNIQUE,
 	sort int unsigned NOT NULL UNIQUE,
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	UNIQUE (user, name)
 );
 `
 
 const createEducation = `
 CREATE TABLE IF NOT EXISTS education (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user_id int unsigned NOT NULL,
+	user int unsigned NOT NULL,
 	date_from date NOT NULL,
 	date_to date NOT NULL,
 	institution varchar(255) NOT NULL,
@@ -55,7 +57,7 @@ CREATE TABLE IF NOT EXISTS education (
 const createWorkExperience = `
 CREATE TABLE IF NOT EXISTS work_experience (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user_id int unsigned NOT NULL,
+	user int unsigned NOT NULL,
 	date_from date NOT NULL,
 	date_to date NOT NULL,
 	company varchar(255) NOT NULL,
@@ -69,10 +71,11 @@ CREATE TABLE IF NOT EXISTS work_experience (
 const createQualification = `
 CREATE TABLE IF NOT EXISTS qualification (
 	id int unsigned NOT NULL AUTO_INCREMENT,
-	user_id int unsigned NOT NULL,
+	user int unsigned NOT NULL,
 	date date NOT NULL,
 	name varchar(255) NOT NULL,
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	UNIQUE (user, name)
 )
 `
 
