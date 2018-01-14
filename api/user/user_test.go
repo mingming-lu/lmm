@@ -92,7 +92,7 @@ func TestPost_ResponseLocation(t *testing.T) {
 	router.ServeHTTP(w, r)
 
 	assert.Equal(t, http.StatusCreated, w.StatusCode(), w.Body())
-	assert.Equal(t, "/users/3", w.Header().Get("Location"))
+	assert.Regexp(t, `^\/users\/(\d)+$`, w.Header().Get("Location"))
 }
 
 func TestGetUser_InvalidID(t *testing.T) {
