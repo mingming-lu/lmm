@@ -109,7 +109,7 @@ export default {
     }
   },
   created () {
-    axios.get('http://api.lmm.local/profile').then((res) => {
+    axios.get('http://api.lmm.local/users/1/profile').then((res) => {
       let profile = res.data
       this.name = profile.name
       this.avatar_url = profile.avatar_url
