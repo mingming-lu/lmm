@@ -3,7 +3,6 @@ package article
 import (
 	"encoding/json"
 	"fmt"
-	"lmm/api/db"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -11,11 +10,14 @@ import (
 
 	"github.com/akinaru-lu/elesion"
 	"github.com/akinaru-lu/errors"
+
+	"lmm/api/db"
+	"lmm/api/user"
 )
 
 type Article struct {
 	ID          int64  `json:"id"`
-	User        string `json:"user"`
+	User        int64  `json:"user"`
 	Title       string `json:"title"`
 	Text        string `json:"text"`
 	CreatedDate string `json:"created_date"`
@@ -72,15 +74,20 @@ func getArticles(values url.Values) ([]Article, error) {
 // GetArticle gets the article depending on user name and article id
 // GET /user/:user/articles/:article
 func GetArticle(c *elesion.Context) {
-	user := c.Params.ByName("user")
-	articleStr := c.Params.ByName("article")
-	article, err := strconv.ParseInt(articleStr, 10, 64)
+	userIDStr := c.Params.ByName("user")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid id: " + articleStr)
+		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
+		return
+	}
+	articleIDStr := c.Params.ByName("article")
+	articleID, err := strconv.ParseInt(articleIDStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid article id: " + articleIDStr)
 		return
 	}
 
-	a, err := getArticle(user, article)
+	a, err := getArticle(userID, articleID)
 	if err != nil {
 		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
 		return
@@ -88,14 +95,14 @@ func GetArticle(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(a)
 }
 
-func getArticle(user string, id int64) (*Article, error) {
+func getArticle(userID, articleID int64) (*Article, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
 	article := Article{}
 	err := d.QueryRow(
 		"SELECT id, user, title, text, created_date, updated_date FROM article WHERE id = ? AND user = ?",
-		id, user,
+		userID, articleID,
 	).Scan(
 		&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate,
 	)
@@ -108,17 +115,22 @@ func getArticle(user string, id int64) (*Article, error) {
 // NewArticle post new article to the user given by url path
 // POST /users/:user/articles
 func NewArticle(c *elesion.Context) {
-	user := c.Params.ByName("user")
+	userIDStr := c.Params.ByName("user")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
+		return
+	}
 
 	body := Article{}
-	err := json.NewDecoder(c.Request.Body).Decode(&body)
+	err = json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
 		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid body")
 		return
 	}
 	defer c.Request.Body.Close()
 
-	body.User = user
+	body.User = userID
 
 	_, err = newArticle(body)
 	if err != nil {
@@ -152,10 +164,35 @@ func newArticle(body Article) (int64, error) {
 	return result.LastInsertId()
 }
 
+// NewTestArticle creates a new user, and creates a new article by the created user
+func NewTestArticle() (*Article, *user.User) {
+	usr := user.NewTestUser()
+	id, err := newArticle(Article{
+		ID: usr.ID,
+		Title: "test",
+		Text: "This is a test article",
+	})
+	if err != nil {
+		panic(err)
+	}
+	article, err := getArticle(usr.ID, id)
+	if err != nil {
+		panic(err)
+	}
+	return article, usr
+}
+
 // UpdateArticle update the article where user name and article id are matched
 // PUT /users/:user/articles/:article
+// TODO params 'user' stands for user id
 func UpdateArticle(c *elesion.Context) {
-	user := c.Params.ByName("user")
+	userIDStr := c.Params.ByName("user")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
+		return
+	}
+
 	articleIDStr := c.Params.ByName("article")
 	articleID, err := strconv.ParseInt(articleIDStr, 10, 64)
 	if err != nil || articleID <= 0 {
@@ -164,7 +201,7 @@ func UpdateArticle(c *elesion.Context) {
 	}
 
 	body := Article{}
-	body.User = user
+	body.User = userID
 	err = json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
 		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid body")
