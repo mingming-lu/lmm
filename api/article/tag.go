@@ -1,27 +1,27 @@
 package article
 
 import (
-	"encoding/json"
-	"lmm/api/db"
 	"net/http"
+	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/akinaru-lu/elesion"
-	"github.com/akinaru-lu/errors"
+
+	"lmm/api/db"
 )
 
 type Tag struct {
-	ID        int64  `json:"id"`
-	UserID    int64  `json:"user_id"`
-	ArticleID int64  `json:"article_id"`
-	Name      string `json:"name"`
+	ID   int64  `json:"id"`
+	User int64  `json:"user"`
+	Name string `json:"name"`
 }
 
+// GetTags is the handler of GET /users/:user/tags
+// get all tags under the given user (id)
 func GetTags(c *elesion.Context) {
-	userIDStr := c.Params.ByName("userID")
+	userIDStr := c.Params.ByName("user")
 	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
+	if err != nil || userID <= 0 {
 		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
 		return
 	}
@@ -35,10 +35,10 @@ func GetTags(c *elesion.Context) {
 }
 
 func getTags(userID int64) ([]Tag, error) {
-	d := db.New().Use("lmm")
+	d := db.UseDefault()
 	defer d.Close()
 
-	itr, err := d.Query("SELECT name FROM tags WHERE user_id = ? GROUP BY name ORDER BY name", userID)
+	itr, err := d.Query("SELECT id, user, name FROM tag WHERE user = ? ORDER BY name", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func getTags(userID int64) ([]Tag, error) {
 	tags := make([]Tag, 0)
 	for itr.Next() {
 		tag := Tag{}
-		err = itr.Scan(&tag.Name)
+		err = itr.Scan(&tag.ID, &tag.User, &tag.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -57,15 +57,24 @@ func getTags(userID int64) ([]Tag, error) {
 	return tags, nil
 }
 
+// GetArticleTags get all tags under given article (id)
+// GET /users/:user/articles/:article/tags
 func GetArticleTags(c *elesion.Context) {
-	idStr := c.Params.ByName("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid id: " + idStr)
+	userIDStr := c.Params.ByName("user")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil || userID <= 0 {
+		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
 		return
 	}
 
-	tags, err := getArticleTags(id)
+	articleIDStr := c.Params.ByName("article")
+	articleID, err := strconv.ParseInt(articleIDStr, 10, 64)
+	if err != nil || articleID <= 0 {
+		c.Status(http.StatusBadRequest).String("invalid article id: " + articleIDStr)
+		return
+	}
+
+	tags, err := getArticleTags(userID, articleID)
 	if err != nil {
 		c.Status(http.StatusNotFound).Error(err.Error()).String("tags nout found")
 		return
@@ -73,29 +82,69 @@ func GetArticleTags(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(tags)
 }
 
-func getArticleTags(articleID int64) ([]Tag, error) {
-	d := db.New().Use("lmm")
+func getArticleTags(userID, articleID int64) ([]Tag, error) {
+	d := db.UseDefault()
 	defer d.Close()
 
-	itr, err := d.Query("SELECT id, user_id, article_id, name FROM tags WHERE article_id = ?", articleID)
+	itr, err := d.Query(
+		"SELECT tag FROM article_tag WHERE user = ? AND article = ?",
+		userID, articleID,
+	)
 	if err != nil {
 		return make([]Tag, 0), nil
 	}
 	defer itr.Close()
 
-	tags := make([]Tag, 0)
+	ids := make([]int64, 0)
 	for itr.Next() {
-		var tag Tag
-		err := itr.Scan(&tag.ID, &tag.UserID, &tag.ArticleID, &tag.Name)
+		var id int64
+		err := itr.Scan(&id)
 		if err != nil {
-			return make([]Tag, 0), nil
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return getTagsByIDs(ids...)
+}
+
+func getTagsByIDs(ids ...int64) ([]Tag, error) {
+	d := db.UseDefault()
+	defer d.Close()
+
+	stmt, err := d.Prepare("SELECT id, user, name FROM tag where id = ?")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	tags := make([]Tag, 0)
+	for _, id := range ids {
+		var tag Tag
+		err = stmt.QueryRow(id).Scan(&tag.ID, &tag.User, &tag.Name)
+		if err != nil {
+			return tags, err
 		}
 		tags = append(tags, tag)
 	}
-
+	sort.Sort(byTagName(tags))
 	return tags, nil
 }
 
+type byTagName []Tag
+
+func (tags byTagName) Len() int {
+	return len(tags)
+}
+
+func (tags byTagName) Swap(i, j int) {
+	tags[i], tags[j] = tags[j], tags[i]
+}
+
+func (tags byTagName) Less(i, j int) bool {
+	return tags[i].Name < tags[j].Name
+}
+
+/*
 func NewTags(c *elesion.Context) {
 	tags := make([]Tag, 0)
 	err := json.NewDecoder(c.Request.Body).Decode(&tags)
@@ -124,7 +173,7 @@ func newTags(tags []Tag) (int64, error) {
 	var values []interface{}
 	for _, tag := range tags {
 		query += "(?, ?, ?), "
-		values = append(values, tag.UserID, tag.ArticleID, tag.Name)
+		values = append(values, tag.User, tag.Name)
 	}
 	query = strings.TrimSuffix(query, ", ")
 
@@ -178,3 +227,4 @@ func deleteTag(id int64) error {
 	}
 	return nil
 }
+*/
