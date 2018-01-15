@@ -25,7 +25,7 @@
       <!-- Tags -->
       <div class="container">
         <h4>Tags</h4>
-          <router-link to="" v-for="tag in tags" :key="tag.name" class="white link">
+          <router-link to="" v-for="tag in tags" :key="tag.name" class="link tag">
             {{ tag.name }}
           </router-link>
       </div>
@@ -60,8 +60,18 @@ export default {
       })
     },
     fetchCategories () {
+      axios.get('http://api.lmm.local/users/1/categories').then(res => {
+        this.categories = res.data
+      }).catch(e => {
+        console.log(e.response.data)
+      })
     },
     fetchTags () {
+      axios.get('http://api.lmm.local/users/1/tags').then(res => {
+        this.tags = res.data
+      }).catch(e => {
+        console.log(e.response.data)
+      })
     }
   }
 }
