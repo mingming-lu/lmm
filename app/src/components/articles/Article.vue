@@ -13,7 +13,7 @@
     <div class="right">
       <div class="container">
         <h4>Tags</h4>
-        <router-link to="" v-for="tag in tags" :key="tag.id" class="white link">
+        <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
           {{ tag.name }}
         </router-link>
       </div>
@@ -82,6 +82,11 @@ export default {
     fetchCategories: function () {
     },
     fetchTags: function () {
+      axios.get(this.baseURL + '/tags').then(res => {
+        this.tags = res.data
+      }).catch(e => {
+        console.log(e.response.data)
+      })
     },
     jumpToHash: (hash) => {
       location.href = hash
