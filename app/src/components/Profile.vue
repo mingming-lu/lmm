@@ -16,17 +16,17 @@
       <!-- skills -->
       <div class="container">
         <h3><i class="fa fa-asterisk fa-fw"></i>Skills</h3>
-        <span v-for="skill in skills" :key="skill.name" class="link">
+        <div v-for="skill in skills" :key="skill.name" class="tag">
           {{ skill.name }}
-        </span>
+        </div>
         <hr class="transparent">
       </div>
 
       <div class="container">
         <h3><i class="fa fa-globe fa-fw"></i>Languages</h3>
-        <span v-for="language in languages" :key="language.name">
+        <div v-for="language in languages" :key="language.name" class="tag">
           {{ language.name }}
-        </span>
+        </div>
         <hr class="transparent">
       </div>
     </div>
