@@ -50,7 +50,7 @@ export default {
     const pattern = /^\/articles\/(\d+)$/g
     const match = pattern.exec(this.$route.path)
     const id = match[1]
-    this.baseURL = 'http://api.lmm.local/users/1/articles/' + id
+    this.baseURL = 'http://api.lmm.im/users/1/articles/' + id
     this.fetchArticle()
     this.fetchCategories()
     this.fetchTags()

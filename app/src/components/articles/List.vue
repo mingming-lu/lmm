@@ -53,21 +53,21 @@ export default {
   },
   methods: {
     fetchArticles () {
-      axios.get('http://api.lmm.local/users/1/articles').then(res => {
+      axios.get('http://api.lmm.im/users/1/articles').then(res => {
         this.articles = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchCategories () {
-      axios.get('http://api.lmm.local/users/1/categories').then(res => {
+      axios.get('http://api.lmm.im/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get('http://api.lmm.local/users/1/tags').then(res => {
+      axios.get('http://api.lmm.im/users/1/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)

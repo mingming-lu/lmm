@@ -41,7 +41,7 @@ export default {
       }
 
       // update article
-      axios.put('http://api.lmm.local/users/1/articles/' + this.id, {
+      axios.put('http://api.lmm.im/users/1/articles/' + this.id, {
         title: this.title,
         text: this.text
       }).then((res) => {
@@ -65,7 +65,7 @@ export default {
       if (!name.trim()) {
         return
       }
-      axios.post('http://api.lmm.local/article/tags', [{
+      axios.post('http://api.lmm.im/article/tags', [{
         user_id: 1,
         article_id: this.id,
         name: this.newTagName
@@ -81,7 +81,7 @@ export default {
       })
     },
     onRemoveTag (tag) {
-      axios.delete('http://api.lmm.local/article/tags/' + tag.id).then((res) => {
+      axios.delete('http://api.lmm.im/article/tags/' + tag.id).then((res) => {
         alert(res.data)
         this.fetchData()
       }).catch((e) => {
@@ -92,7 +92,7 @@ export default {
       const pattern = /^\/posts\/(\d+)\/edit$/g
       const match = pattern.exec(this.$route.path)
       const id = match[1]
-      const baseURL = 'http://api.lmm.local/users/1/articles/' + id
+      const baseURL = 'http://api.lmm.im/users/1/articles/' + id
 
       axios.all([
         axios.get(baseURL)
