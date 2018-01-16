@@ -33,6 +33,7 @@ func main() {
 
 	// /users/:user/categories
 	router.GET("/users/:user/categories", article.GetCategories)
+	router.GET("/users/:user/articles/:article/category", article.GetArticleCategory)
 
 	// /users/:user/tags
 	router.GET("/users/:user/tags", article.GetTags)
