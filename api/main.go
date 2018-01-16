@@ -31,21 +31,13 @@ func main() {
 	router.PUT("/users/:user/articles/:article", article.UpdateArticle)
 	router.DELETE("/users/:user/articles/:article", article.DeleteArticle)
 
-	// /article/categories
-	// routing.GET("/article/:userID/categories", article.GetCategories)
+	// /users/:user/categories
+	router.GET("/users/:user/categories", article.GetCategories)
+	router.GET("/users/:user/articles/:article/category", article.GetArticleCategory)
 
-	// /article/category
-	// routing.POST("/article/category", article.NewCategory)
-	// routing.PUT("/article/category/:id", article.UpdateCategory)
-	// routing.DELETE("/article/category/:id", article.DeleteCategory)
-
-	// /article/tags
-	// routing.GET("/article/:userID/tags", article.GetTags)
-
-	// /article/tags
-	// routing.GET("/article/:id/tags", article.GetArticleTags)
-	// routing.POST("/article/tags", article.NewTags)
-	// routing.DELETE("/article/tags/:id", article.DeleteTag)
+	// /users/:user/tags
+	router.GET("/users/:user/tags", article.GetTags)
+	router.GET("/users/:user/articles/:article/tags", article.GetArticleTags)
 
 	router.GET("/photos", image.Handler)
 

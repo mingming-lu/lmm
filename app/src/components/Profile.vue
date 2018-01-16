@@ -16,17 +16,17 @@
       <!-- skills -->
       <div class="container">
         <h3><i class="fa fa-asterisk fa-fw"></i>Skills</h3>
-        <div v-for="skill in skills" :key="skill.name" class="tag">
+        <router-link to="" v-for="skill in skills" :key="skill.name" class="link tag">
           {{ skill.name }}
-        </div>
+        </router-link>
         <hr class="transparent">
       </div>
 
       <div class="container">
         <h3><i class="fa fa-globe fa-fw"></i>Languages</h3>
-        <div v-for="language in languages" :key="language.name" class="tag">
+        <router-link to="" v-for="language in languages" :key="language.name" class="link tag">
           {{ language.name }}
-        </div>
+        </router-link>
         <hr class="transparent">
       </div>
     </div>

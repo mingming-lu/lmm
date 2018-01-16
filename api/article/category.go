@@ -1,24 +1,22 @@
 package article
 
 import (
-	"database/sql"
-	"encoding/json"
-	"lmm/api/db"
 	"net/http"
 	"strconv"
 
 	"github.com/akinaru-lu/elesion"
-	"github.com/akinaru-lu/errors"
+
+	"lmm/api/db"
 )
 
 type Category struct {
-	ID     int    `json:"id"`
-	UserID int    `json:"user_id"`
-	Name   string `json:"name"`
+	ID   int64  `json:"id"`
+	User int64  `json:"user"`
+	Name string `json:"name"`
 }
 
 func GetCategories(c *elesion.Context) {
-	userIDStr := c.Params.ByName("userID")
+	userIDStr := c.Params.ByName("user")
 	userID, err := strconv.ParseInt(userIDStr, 10, 64)
 	if err != nil || userID <= 0 {
 		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
@@ -38,7 +36,7 @@ func getCategories(userID int64) ([]Category, error) {
 	defer d.Close()
 
 	itr, err := d.Query(
-		`SELECT id, user_id, name FROM categories WHERE user_id = ? ORDER BY name`,
+		`SELECT id, user, name FROM category WHERE user = ? ORDER BY name`,
 		userID,
 	)
 	if err != nil {
@@ -49,7 +47,7 @@ func getCategories(userID int64) ([]Category, error) {
 	categories := make([]Category, 0)
 	for itr.Next() {
 		category := Category{}
-		err = itr.Scan(&category.ID, &category.UserID, &category.Name)
+		err = itr.Scan(&category.ID, &category.User, &category.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -59,6 +57,56 @@ func getCategories(userID int64) ([]Category, error) {
 	return categories, nil
 }
 
+func GetArticleCategory(c *elesion.Context) {
+	userIDStr := c.Params.ByName("user")
+	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
+		return
+	}
+
+	articleIDStr := c.Params.ByName("article")
+	articleID, err := strconv.ParseInt(articleIDStr, 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid article id: " + articleIDStr)
+		return
+	}
+
+	category, err := getArticleCategory(userID, articleID)
+	if err != nil {
+		c.Status(http.StatusNotFound).Error(err.Error()).String("no such category")
+		return
+	}
+	c.Status(http.StatusOK).JSON(category)
+}
+
+func getArticleCategory(userID, articleID int64) (*Category, error) {
+	d := db.UseDefault()
+	defer d.Close()
+
+	var id int64
+	err := d.QueryRow("SELECT category FROM article_category WHERE user = ? AND article = ?", userID, articleID).Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+	return getCategoryByID(id)
+}
+
+func getCategoryByID(id int64) (*Category, error) {
+	d := db.UseDefault()
+	defer d.Close()
+
+	category := Category{}
+	err := d.QueryRow("SELECT id, user, name FROM category WHERE id = ?", id).Scan(
+		&category.ID, &category.User, &category.Name,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &category, err
+}
+
+/*
 func NewCategory(c *elesion.Context) {
 	body := Category{}
 	err := json.NewDecoder(c.Request.Body).Decode(&body)
@@ -181,3 +229,4 @@ func deleteCategory(id int64) error {
 	}
 	return nil
 }
+*/
