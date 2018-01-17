@@ -41,11 +41,9 @@ export default {
   methods: {
     fetchData () {
       axios.all([
-        axios.get('http://api.lmm.local/users/1/articles')
-        // axios.get('http://api.lmm.local/articles/1/categories')
+        axios.get('http://api.lmm.im/users/1/articles')
       ]).then(axios.spread((articles) => {
         this.articles = articles.data
-        // this.categories = categories.data
       })).catch((e) => {
         console.log(e)
       })
@@ -59,7 +57,7 @@ export default {
       if (!confirm('add category: `' + name + '`?')) {
         return
       }
-      axios.post('http://api.lmm.local/articles/category', {
+      axios.post('http://api.lmm.im/articles/category', {
         user_id: 1,
         name: name
       }).then((res) => {
@@ -83,7 +81,7 @@ export default {
       }
 
       // update category name by id
-      axios.put('http://api.lmm.local/articles/category/' + category.id, {
+      axios.put('http://api.lmm.im/articles/category/' + category.id, {
         id: category.id,
         user_id: 1,
         name: name
@@ -98,7 +96,7 @@ export default {
       if (!confirm('delete `' + category.name + '`?')) {
         return
       }
-      axios.delete('http://api.lmm.local/articles/category/' + category.id).then((res) => {
+      axios.delete('http://api.lmm.im/articles/category/' + category.id).then((res) => {
         this.fetchData()
       }).catch((e) => {
         console.log(e)

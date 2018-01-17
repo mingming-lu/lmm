@@ -16,7 +16,7 @@ type Image struct {
 	URL string `json:"url"`
 }
 
-const Host = "http://image.lmm.local/photos/"
+const Host = "http://image.lmm.im/photos/"
 const Path = "image/photos/"
 
 func Handler(c *elesion.Context) {

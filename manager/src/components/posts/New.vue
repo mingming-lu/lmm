@@ -36,7 +36,7 @@ export default {
         return
       }
 
-      axios.post('http://api.lmm.local/users/1/articles', {
+      axios.post('http://api.lmm.im/users/1/articles', {
         title: this.title,
         text: this.text
       }).then((res) => {
