@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS user (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	guid varchar(36) NOT NULL UNIQUE,
 	token varchar(36) NOT NULL UNIQUE,
-	created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	name varchar(32) NOT NULL,
 	nickname varchar(32) NOT NULL UNIQUE,
 	avatar_url varchar(127) NOT NULL DEFAULT '',
@@ -85,8 +85,8 @@ CREATE TABLE IF NOT EXISTS article (
 	user int unsigned NOT NULL,
 	title varchar(255) NOT NULL,
 	text text NOT NULL,
-	created_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	updated_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (id)
 )
 `
