@@ -1,8 +1,0 @@
-{
-  "domain": {
-    "app": "www.im.local",
-    "api": "api.lmm.local",
-    "image": "image.lmm.local",
-    "manager": "manager.lmm.local"
-  }
-}
