@@ -165,7 +165,7 @@ func newArticle(body Article) (int64, error) {
 }
 
 // NewTestArticle creates a new user, and creates a new article by the created user
-func NewTestArticle() (*Article, *user.User) {
+func NewTestArticle() (*Article, *user.UserProfile) {
 	usr := user.NewTestUser()
 	id, err := newArticle(Article{
 		ID:    usr.ID,
