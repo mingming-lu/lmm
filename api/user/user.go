@@ -3,18 +3,16 @@ package user
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/akinaru-lu/elesion"
 	"lmm/api/db"
 	"lmm/api/utils"
 	"net/http"
 	"strconv"
+
+	"github.com/akinaru-lu/elesion"
 )
 
-type User struct {
-	ID          int64  `json:"id"`
-	GUID        string `json:"guid"`
-	Token       string `json:"token"`
-	CreatedDate string `json:"created_date"`
+type UserProfile struct {
+	ID          int64
 	Name        string `json:"name"`
 	Nickname    string `json:"nickname"`
 	AvatarURL   string `json:"avatar_url"`
@@ -22,6 +20,13 @@ type User struct {
 	Profession  string `json:"profession"`
 	Location    string `json:"location"`
 	Email       string `json:"email"`
+}
+
+type User struct {
+	GUID        string
+	Token       string
+	CreatedDate string
+	UserProfile
 }
 
 // GET /users/:user
@@ -42,15 +47,15 @@ func GetUser(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(u)
 }
 
-func getUser(id int64) (*User, error) {
+func getUser(id int64) (*UserProfile, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
-	u := User{}
+	u := UserProfile{}
 	err := d.QueryRow(
-		"SELECT id, guid, token, created_date, name, nickname, avatar_url, description, profession, location, email FROM user WHERE id = ?", id,
+		"SELECT id, name, nickname, avatar_url, description, profession, location, email FROM user WHERE id = ?", id,
 	).Scan(
-		&u.ID, &u.GUID, &u.Token, &u.CreatedDate, &u.Name, &u.Nickname, &u.AvatarURL, &u.Description, &u.Profession, &u.Location, &u.Email,
+		&u.ID, &u.Name, &u.Nickname, &u.AvatarURL, &u.Description, &u.Profession, &u.Location, &u.Email,
 	)
 	if err != nil {
 		return nil, err
@@ -104,18 +109,17 @@ func newUser(user User) (int64, error) {
 
 // NewTestUser create a user for testing
 // Expected no error, so panic when error occurs
-func NewTestUser() *User {
-	usr := &User{
-		Name: "test",
-		Nickname: "testy",
-	}
+func NewTestUser() *UserProfile {
+	usr := &User{}
+	usr.Name = "test"
+	usr.Nickname = "testy"
 	id, err := newUser(*usr)
 	if err != nil {
 		panic(err)
 	}
-	usr, err = getUser(id)
+	usrProfile, err := getUser(id)
 	if err != nil {
 		panic(err)
 	}
-	return usr
+	return usrProfile
 }

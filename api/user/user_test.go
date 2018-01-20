@@ -16,7 +16,7 @@ import (
 )
 
 var router *elesion.Router
-var targetUser *User
+var targetUser *UserProfile
 
 func setUp() {
 	db.Init("lmm_test")
@@ -79,7 +79,7 @@ func TestNewUser_DuplicateName(t *testing.T) {
 }
 
 func TestPost_ResponseLocation(t *testing.T) {
-	user := User{
+	user := UserProfile{
 		Name:     "Van Darkholme",
 		Nickname: "van sama",
 	}
