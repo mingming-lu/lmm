@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/akinaru-lu/elesion"
 
@@ -12,16 +11,10 @@ import (
 	"lmm/api/image"
 	"lmm/api/profile"
 	"lmm/api/user"
-	"lmm/api/utils/config"
 )
 
 func init() {
 	db.Init("lmm")
-	if len(os.Args) > 1 {
-		config.Init(os.Args[1])
-	} else {
-		config.Init("prod")
-	}
 }
 
 func main() {

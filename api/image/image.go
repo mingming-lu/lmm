@@ -5,8 +5,6 @@ import (
 	"net/http"
 
 	"github.com/akinaru-lu/elesion"
-
-	"lmm/api/utils/config"
 )
 
 type Response struct {
@@ -18,10 +16,8 @@ type Image struct {
 	URL string `json:"url"`
 }
 
-var (
-	Host = "http://image.lmm.im/photos/"
-	Path = "image/photos/"
-)
+const Host = "http://image.lmm.im/photos/"
+const Path = "image/photos/"
 
 func Handler(c *elesion.Context) {
 	files, err := ioutil.ReadDir(Path)
@@ -35,8 +31,7 @@ func Handler(c *elesion.Context) {
 		if file.IsDir() {
 			continue
 		}
-		host := "http://" + config.DomainImage + "/photos/"
-		u := host + file.Name()
+		u := Host + file.Name()
 		photos = append(photos, Image{URL: u})
 	}
 
