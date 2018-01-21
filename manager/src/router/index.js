@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/components/Index'
+import Login from '@/components/Login'
 import PageNotFound from '@/components/404'
 import PostsIndex from '@/components/posts/Index'
 import PostsNew from '@/components/posts/New'
@@ -20,6 +21,10 @@ export default new Router({
     {
       path: '/',
       component: Index
+    },
+    {
+      path: '/login',
+      component: Login
     },
     {
       path: '/posts',
