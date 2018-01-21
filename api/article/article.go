@@ -13,15 +13,16 @@ import (
 
 	"lmm/api/db"
 	"lmm/api/user"
+	"lmm/api/utils/token"
 )
 
 type Article struct {
-	ID          int64  `json:"id"`
-	User        int64  `json:"user"`
-	Title       string `json:"title"`
-	Text        string `json:"text"`
-	CreatedDate string `json:"created_date"`
-	UpdatedDate string `json:"updated_date"`
+	ID        int64  `json:"id"`
+	User      int64  `json:"user"`
+	Title     string `json:"title"`
+	Text      string `json:"text"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 // GetArticles gets all articles according to user name or more information given by query parameters
@@ -49,8 +50,8 @@ func getArticles(values url.Values) ([]Article, error) {
 	defer d.Close()
 
 	query := fmt.Sprintf(
-		`SELECT id, user, title, text, created_date, updated_date FROM article %s ORDER BY created_date DESC`,
-		db.NewValues(values).Where(),
+		`SELECT id, user, title, text, created_at, updated_at FROM article %s ORDER BY created_at DESC`,
+		db.NewValuesFromURL(values).Where(),
 	)
 
 	articles := make([]Article, 0)
@@ -62,7 +63,7 @@ func getArticles(values url.Values) ([]Article, error) {
 
 	for cursor.Next() {
 		article := Article{}
-		err = cursor.Scan(&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate)
+		err = cursor.Scan(&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedAt, &article.UpdatedAt)
 		if err != nil {
 			return articles, err // return all articles found with error
 		}
@@ -101,10 +102,10 @@ func getArticle(userID, articleID int64) (*Article, error) {
 
 	article := Article{}
 	err := d.QueryRow(
-		"SELECT id, user, title, text, created_date, updated_date FROM article WHERE id = ? AND user = ?",
+		"SELECT id, user, title, text, created_at, updated_at FROM article WHERE id = ? AND user = ?",
 		articleID, userID,
 	).Scan(
-		&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate,
+		&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedAt, &article.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -115,10 +116,24 @@ func getArticle(userID, articleID int64) (*Article, error) {
 // NewArticle post new article to the user given by url path
 // POST /users/:user/articles
 func NewArticle(c *elesion.Context) {
-	userIDStr := c.Params.ByName("user")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	// userIDStr := c.Params.ByName("user")
+	// userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	// if err != nil {
+	// 	c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
+	// 	return
+	// }
+	accessToken := c.Request.Header.Get("Authorization")
+	originToken, err := token.Decode(accessToken)
 	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
+		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
+		return
+	}
+
+	values := db.NewValues()
+	values["token"] = originToken
+	usr, err := user.GetUser(values)
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String("Unauthorized").Error(err.Error())
 		return
 	}
 
@@ -130,7 +145,7 @@ func NewArticle(c *elesion.Context) {
 	}
 	defer c.Request.Body.Close()
 
-	body.User = userID
+	body.User = usr.ID
 
 	_, err = newArticle(body)
 	if err != nil {
@@ -165,6 +180,7 @@ func newArticle(body Article) (int64, error) {
 }
 
 // NewTestArticle creates a new user, and creates a new article by the created user
+/*
 func NewTestArticle() (*Article, *user.UserProfile) {
 	usr := user.NewTestUser()
 	id, err := newArticle(Article{
@@ -181,6 +197,7 @@ func NewTestArticle() (*Article, *user.UserProfile) {
 	}
 	return article, usr
 }
+*/
 
 // UpdateArticle update the article where user name and article id are matched
 // PUT /users/:user/articles/:article
