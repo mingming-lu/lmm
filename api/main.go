@@ -28,10 +28,9 @@ func main() {
 
 	// article
 	router.GET("/articles", article.GetArticles)
-	router.GET("/articles/:article", article.GetArticle)
 	router.POST("/articles", article.NewArticle)
-	router.PUT("/articles/:article", article.UpdateArticle)
-	router.DELETE("/articles/:article", article.DeleteArticle)
+	router.PUT("/articles", article.UpdateArticle)
+	router.DELETE("/articles", article.DeleteArticle)
 
 	// category
 	router.GET("/categories", article.GetCategories)

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 
@@ -25,18 +24,16 @@ type Article struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-// GetArticles gets all articles according to user name or more information given by query parameters
-// GET /users/:user/articles
+// GetArticles gets all articles according to query parameters
+// GET /articles
 func GetArticles(c *elesion.Context) {
-	id := c.Params.ByName("user")
-	_, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid id: " + id)
+	queryParams := c.Query()
+	if len(queryParams) == 0 {
+		c.Status(http.StatusBadRequest).String("empty query parameter")
 		return
 	}
 
-	values := c.Query()
-	values.Set("user", id)
+	values := db.NewValuesFromURL(c.Query())
 	articles, err := getArticles(values)
 	if err != nil {
 		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
@@ -45,13 +42,13 @@ func GetArticles(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(articles)
 }
 
-func getArticles(values url.Values) ([]Article, error) {
+func getArticles(values db.Values) ([]Article, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
 	query := fmt.Sprintf(
 		`SELECT id, user, title, text, created_at, updated_at FROM article %s ORDER BY created_at DESC`,
-		db.NewValuesFromURL(values).Where(),
+		values.Where(),
 	)
 
 	articles := make([]Article, 0)
@@ -70,47 +67,6 @@ func getArticles(values url.Values) ([]Article, error) {
 		articles = append(articles, article)
 	}
 	return articles, nil
-}
-
-// GetArticle gets the article depending on user name and article id
-// GET /user/:user/articles/:article
-func GetArticle(c *elesion.Context) {
-	userIDStr := c.Params.ByName("user")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
-		return
-	}
-	articleIDStr := c.Params.ByName("article")
-	articleID, err := strconv.ParseInt(articleIDStr, 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid article id: " + articleIDStr)
-		return
-	}
-
-	a, err := getArticle(userID, articleID)
-	if err != nil {
-		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
-		return
-	}
-	c.Status(http.StatusOK).JSON(a)
-}
-
-func getArticle(userID, articleID int64) (*Article, error) {
-	d := db.UseDefault()
-	defer d.Close()
-
-	article := Article{}
-	err := d.QueryRow(
-		"SELECT id, user, title, text, created_at, updated_at FROM article WHERE id = ? AND user = ?",
-		articleID, userID,
-	).Scan(
-		&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedAt, &article.UpdatedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &article, err
 }
 
 // NewArticle post new article to the user given by url path
