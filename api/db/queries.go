@@ -3,16 +3,25 @@ package db
 const createUser = `
 CREATE TABLE IF NOT EXISTS user (
 	id int unsigned NOT NULL AUTO_INCREMENT,
+	name varchar(32) NOT NULL,
+	password varchar(128) NOT NULL,
 	guid varchar(36) NOT NULL UNIQUE,
 	token varchar(36) NOT NULL UNIQUE,
-	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	name varchar(32) NOT NULL,
+	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (id)
+)
+`
+
+const createProfile = `
+CREATE TABLE IF NOT EXISTS profile (
+	id int unsigned NOT NULL AUTO_INCREMENT,
+	user int unsigned NOT NULL UNIQUE,
 	nickname varchar(32) NOT NULL UNIQUE,
-	avatar_url varchar(127) NOT NULL DEFAULT '',
+	avatar_url varchar(128) NOT NULL DEFAULT '',
 	description varchar(400) NOT NULL DEFAULT '',
 	profession varchar(32) NOT NULL DEFAULT '',
-	location varchar(127) NOT NULL DEFAULT '',
-	email varchar(127) NOT NULL DEFAULT '',
+	location varchar(128) NOT NULL DEFAULT '',
+	email varchar(128) NOT NULL DEFAULT '',
 	PRIMARY KEY (id)
 )
 `
@@ -135,6 +144,7 @@ CREATE TABLE IF NOT EXISTS article_tag (
 
 var CreateSQL = []string{
 	createUser,
+	createProfile,
 	createSkill,
 	createLanguage,
 	createEducation,
