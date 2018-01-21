@@ -5,87 +5,39 @@ import (
 	"fmt"
 	"lmm/api/db"
 	"lmm/api/utils"
+	"lmm/api/utils/token"
 	"net/http"
-	"strconv"
 
 	"github.com/akinaru-lu/elesion"
+	"github.com/akinaru-lu/errors"
 )
 
-type UserProfile struct {
-	ID          int64
-	Name        string `json:"name"`
-	Nickname    string `json:"nickname"`
-	AvatarURL   string `json:"avatar_url"`
-	Description string `json:"description"`
-	Profession  string `json:"profession"`
-	Location    string `json:"location"`
-	Email       string `json:"email"`
-}
-
 type User struct {
+	ID          int64
+	Name        string
+	Password    string
 	GUID        string
 	Token       string
 	CreatedDate string
-	UserProfile
 }
 
-// GET /users/:user
-// user: user id
-func GetUser(c *elesion.Context) {
-	idStr := c.Params.ByName("user")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid id: " + idStr)
-		return
-	}
-
-	u, err := getUser(id)
-	if err != nil {
-		c.Status(http.StatusNotFound).String("user not found")
-		return
-	}
-	c.Status(http.StatusOK).JSON(u)
+type UserSmall struct {
+	ID    int64  `json:"id"`
+	Name  string `json:"name"`
+	Token string `json:"token"`
 }
 
-func getUser(id int64) (*UserProfile, error) {
+func GetUser(values db.Values) (*User, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
-	u := UserProfile{}
-	err := d.QueryRow(
-		"SELECT id, name, nickname, avatar_url, description, profession, location, email FROM user WHERE id = ?", id,
-	).Scan(
-		&u.ID, &u.Name, &u.Nickname, &u.AvatarURL, &u.Description, &u.Profession, &u.Location, &u.Email,
-	)
+	user := User{}
+	query := fmt.Sprintf("SELECT id, name, guid, token, created_at FROM user %s", values.Where())
+	err := d.QueryRow(query).Scan(&user.ID, &user.Name, &user.GUID, &user.Token, &user.CreatedDate)
 	if err != nil {
 		return nil, err
 	}
-	return &u, nil
-}
-
-// POST /users
-// body : name, nickname
-func NewUser(c *elesion.Context) {
-	usr := User{}
-	err := json.NewDecoder(c.Request.Body).Decode(&usr)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid body")
-		return
-	}
-	defer c.Request.Body.Close()
-
-	if usr.Name == "" || usr.Nickname == "" {
-		c.Status(http.StatusBadRequest).String("empty name or nickname")
-		return
-	}
-
-	id, err := newUser(usr)
-	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error()).String("invalid input")
-		return
-	}
-	c.Writer.Header().Set("Location", fmt.Sprintf("/users/%d", id))
-	c.Status(http.StatusCreated).String("success")
+	return &user, nil
 }
 
 func newUser(user User) (int64, error) {
@@ -98,8 +50,11 @@ func newUser(user User) (int64, error) {
 	if user.Token == "" {
 		user.Token = utils.NewUUID()
 	}
+	user.Password = utils.ToBase64([]byte(user.GUID + user.Password))
 
-	result, err := d.Exec(`INSERT INTO user (guid, token, name, nickname) VALUES (?, ?, ?, ?)`, user.GUID, user.Token, user.Name, user.Nickname)
+	result, err := d.Exec(`INSERT INTO user (name, password, guid, token) VALUES (?, ?, ?, ?)`,
+		user.Name, user.Password, user.GUID, user.Token,
+	)
 	if err != nil {
 		return 0, err
 	}
@@ -107,19 +62,107 @@ func newUser(user User) (int64, error) {
 	return result.LastInsertId()
 }
 
-// NewTestUser create a user for testing
-// Expected no error, so panic when error occurs
-func NewTestUser() *UserProfile {
-	usr := &User{}
-	usr.Name = "test"
-	usr.Nickname = "testy"
-	id, err := newUser(*usr)
+func SignUp(c *elesion.Context) {
+	user := User{}
+	err := json.NewDecoder(c.Request.Body).Decode(&user)
 	if err != nil {
-		panic(err)
+		c.Status(http.StatusBadRequest).String("invalid input").Error(err.Error())
+		return
 	}
-	usrProfile, err := getUser(id)
+
+	if user.Name == "" || user.Password == "" {
+		c.Status(http.StatusBadRequest).String("empty input")
+		return
+	}
+
+	id, err := newUser(user)
 	if err != nil {
-		panic(err)
+		c.Status(http.StatusInternalServerError).String(err.Error()).Error(err.Error())
+		return
 	}
-	return usrProfile
+	c.Writer.Header().Set("Location", fmt.Sprintf("/users/%d/login", id))
+	c.Status(http.StatusCreated).String("success")
 }
+
+func Login(c *elesion.Context) {
+	user := User{}
+	err := json.NewDecoder(c.Request.Body).Decode(&user)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("invalid body").Error(err.Error())
+		return
+	}
+	res, err := fetchUser(user.Name, user.Password)
+	if err != nil {
+		c.Status(http.StatusNotFound).String(err.Error()).Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).JSON(res)
+}
+
+func fetchUser(name, password string) (*UserSmall, error) {
+	d := db.UseDefault()
+	defer d.Close()
+
+	values := db.NewValues()
+	values["name"] = name
+	user, err := GetUser(values)
+	if err != nil {
+		return nil, err
+	}
+
+	pwEncoded := utils.ToBase64([]byte(user.GUID + password))
+	ok, err := d.Exists("SELECT 1 FROM user WHERE password = ? LIMIT 1", pwEncoded)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, errors.New("password error")
+	}
+
+	accessToken, err := token.Encode(user.Token)
+	if err != nil {
+		return nil, errors.Wrap(err, "refresh token failed")
+	}
+
+	return &UserSmall{ID: user.ID, Name: user.Name, Token: accessToken}, nil
+}
+
+func Logout(c *elesion.Context) {
+	Verify(c)
+}
+
+func Verify(c *elesion.Context) {
+	accessToken := c.Request.Header.Get("Authorization")
+	originToken, err := token.Decode(accessToken)
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token")
+		return
+	}
+
+	values := db.NewValues()
+	values["token"] = originToken
+	_, err = GetUser(values)
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token")
+		return
+	}
+	c.Status(http.StatusOK).String("success")
+}
+
+// NewTestUser create a user for testing
+/*
+func NewTestUser() (*User, error) {
+	user := User{}
+	user.Name = "test"
+	user.Password = "test password"
+	id, err := newUser(user)
+	if err != nil {
+		panic(err)
+	}
+
+	values := db.NewValues()
+	values["id"] = id
+	values["name"] = user.Name
+	return GetUser(values)
+}
+*/
