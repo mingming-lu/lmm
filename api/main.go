@@ -20,24 +20,24 @@ func init() {
 func main() {
 	router := elesion.Default("[api]")
 
-	// users
-	router.GET("/users/:user", user.GetUser)
-	router.POST("/users", user.NewUser)
+	// user
+	router.POST("/signup", user.SignUp)
+	router.POST("/login", user.Login)
+	router.GET("/logout", user.Logout)
+	router.GET("/verify", user.Verify)
 
 	// article
-	router.GET("/users/:user/articles", article.GetArticles)
-	router.GET("/users/:user/articles/:article", article.GetArticle)
-	router.POST("/users/:user/articles", article.NewArticle)
-	router.PUT("/users/:user/articles/:article", article.UpdateArticle)
-	router.DELETE("/users/:user/articles/:article", article.DeleteArticle)
+	router.GET("/articles", article.GetArticles)
+	router.GET("/articles/:article", article.GetArticle)
+	router.POST("/articles", article.NewArticle)
+	router.PUT("/articles/:article", article.UpdateArticle)
+	router.DELETE("/articles/:article", article.DeleteArticle)
 
-	// /users/:user/categories
-	router.GET("/users/:user/categories", article.GetCategories)
-	router.GET("/users/:user/articles/:article/category", article.GetArticleCategory)
+	// category
+	router.GET("/categories", article.GetCategories)
 
-	// /users/:user/tags
-	router.GET("/users/:user/tags", article.GetTags)
-	router.GET("/users/:user/articles/:article/tags", article.GetArticleTags)
+	// tag
+	router.GET("/tags", article.GetTags)
 
 	router.GET("/photos", image.Handler)
 
