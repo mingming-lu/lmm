@@ -30,18 +30,24 @@ type DB struct {
 	*sql.DB
 }
 
-type Values struct {
-	url.Values
+type Values map[string]interface{}
+
+func NewValues() Values {
+	return make(Values)
 }
 
-func NewValues(values url.Values) *Values {
-	return &Values{values}
+func NewValuesFromURL(values url.Values) Values {
+	ret := NewValues()
+	for k := range values {
+		ret[k] = values.Get(k)
+	}
+	return ret
 }
 
-func (values *Values) Where() string {
+func (values Values) Where() string {
 	s := ""
-	for k := range values.Values {
-		s += fmt.Sprintf(`%s="%v" AND `, k, values.Get(k))
+	for k, v := range values {
+		s += fmt.Sprintf(`%s="%v" AND `, k, v)
 	}
 	if s != "" {
 		s = "WHERE " + strings.TrimSuffix(s, " AND ")
@@ -99,4 +105,15 @@ func Init(name string) {
 			log.Println(err)
 		}
 	}
+}
+
+func (db *DB) Exists(query string, args ...interface{}) (bool, error) {
+	query = fmt.Sprintf("SELECT EXISTS (%s)", query)
+
+	var exists bool
+	err := db.QueryRow(query, args...).Scan(&exists)
+	if err != nil && err != sql.ErrNoRows {
+		return false, err
+	}
+	return exists, nil
 }
