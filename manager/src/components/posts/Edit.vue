@@ -41,7 +41,8 @@ export default {
       }
 
       // update article
-      axios.put('http://api.lmm.im/users/1/articles/' + this.id, {
+      axios.put('http://api.lmm.local/articles', {
+        id: this.articleID,
         title: this.title,
         text: this.text
       }).then((res) => {
@@ -91,8 +92,8 @@ export default {
     fetchData () {
       const pattern = /^\/posts\/(\d+)\/edit$/g
       const match = pattern.exec(this.$route.path)
-      const id = match[1]
-      const baseURL = 'http://api.lmm.im/users/1/articles/' + id
+      this.articleID = id
+      const baseURL = 'http://api.lmm.local/articles?user=1&id=' + id
 
       axios.all([
         axios.get(baseURL)
