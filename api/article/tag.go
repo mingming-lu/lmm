@@ -1,9 +1,8 @@
 package article
 
 import (
+	"fmt"
 	"net/http"
-	"sort"
-	"strconv"
 
 	"github.com/akinaru-lu/elesion"
 
@@ -19,14 +18,15 @@ type Tag struct {
 // GetTags is the handler of GET /users/:user/tags
 // get all tags under the given user (id)
 func GetTags(c *elesion.Context) {
-	userIDStr := c.Params.ByName("user")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil || userID <= 0 {
-		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
+	queryParams := c.Query()
+	if len(queryParams) == 0 {
+		c.Status(http.StatusBadRequest).String("empty query parameter")
 		return
 	}
 
-	tags, err := getTags(userID)
+	values := db.NewValuesFromURL(queryParams)
+
+	tags, err := getTags(values)
 	if err != nil {
 		c.Status(http.StatusNotFound).Error(err.Error()).String("tags not found")
 		return
@@ -34,11 +34,16 @@ func GetTags(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(tags)
 }
 
-func getTags(userID int64) ([]Tag, error) {
+func getTags(values db.Values) ([]Tag, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
-	itr, err := d.Query("SELECT id, user, name FROM tag WHERE user = ? ORDER BY name", userID)
+	query := fmt.Sprintf(
+		`SELECT MIN(id), user, name FROM tag %s GROUP BY name ORDER BY name`,
+		values.Where(),
+	)
+
+	itr, err := d.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -59,6 +64,7 @@ func getTags(userID int64) ([]Tag, error) {
 
 // GetArticleTags get all tags under given article (id)
 // GET /users/:user/articles/:article/tags
+/*
 func GetArticleTags(c *elesion.Context) {
 	userIDStr := c.Params.ByName("user")
 	userID, err := strconv.ParseInt(userIDStr, 10, 64)
