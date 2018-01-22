@@ -27,6 +27,22 @@ type UserSmall struct {
 	Token string `json:"token"`
 }
 
+func CheckAuth(accessToken string) (*User, error) {
+	originToken, err := token.Decode(accessToken)
+	if err != nil {
+		return nil, errors.New("Unauthorized, invalid token")
+	}
+
+	values := db.NewValues()
+	values["token"] = originToken
+	user, err := GetUser(values)
+	if err != nil {
+		return nil, errors.New("Unauthorized")
+	}
+
+	return user, nil
+}
+
 func GetUser(values db.Values) (*User, error) {
 	d := db.UseDefault()
 	defer d.Close()
@@ -132,18 +148,9 @@ func Logout(c *elesion.Context) {
 }
 
 func Verify(c *elesion.Context) {
-	accessToken := c.Request.Header.Get("Authorization")
-	originToken, err := token.Decode(accessToken)
+	_, err := CheckAuth(c.Request.Header.Get("Authorization"))
 	if err != nil {
-		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token")
-		return
-	}
-
-	values := db.NewValues()
-	values["token"] = originToken
-	_, err = GetUser(values)
-	if err != nil {
-		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token")
+		c.Status(http.StatusUnauthorized).String(err.Error())
 		return
 	}
 	c.Status(http.StatusOK).String("success")

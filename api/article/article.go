@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/akinaru-lu/elesion"
@@ -16,26 +14,24 @@ import (
 )
 
 type Article struct {
-	ID          int64  `json:"id"`
-	User        int64  `json:"user"`
-	Title       string `json:"title"`
-	Text        string `json:"text"`
-	CreatedDate string `json:"created_date"`
-	UpdatedDate string `json:"updated_date"`
+	ID        int64  `json:"id"`
+	User      int64  `json:"user"`
+	Title     string `json:"title"`
+	Text      string `json:"text"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
-// GetArticles gets all articles according to user name or more information given by query parameters
-// GET /users/:user/articles
+// GetArticles gets all articles according to query parameters
+// GET /articles
 func GetArticles(c *elesion.Context) {
-	id := c.Params.ByName("user")
-	_, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid id: " + id)
+	queryParams := c.Query()
+	if len(queryParams) == 0 {
+		c.Status(http.StatusBadRequest).String("empty query parameter")
 		return
 	}
 
-	values := c.Query()
-	values.Set("user", id)
+	values := db.NewValuesFromURL(c.Query())
 	articles, err := getArticles(values)
 	if err != nil {
 		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
@@ -44,13 +40,13 @@ func GetArticles(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(articles)
 }
 
-func getArticles(values url.Values) ([]Article, error) {
+func getArticles(values db.Values) ([]Article, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
 	query := fmt.Sprintf(
-		`SELECT id, user, title, text, created_date, updated_date FROM article %s ORDER BY created_date DESC`,
-		db.NewValues(values).Where(),
+		`SELECT id, user, title, text, created_at, updated_at FROM article %s ORDER BY created_at DESC`,
+		values.Where(),
 	)
 
 	articles := make([]Article, 0)
@@ -62,7 +58,7 @@ func getArticles(values url.Values) ([]Article, error) {
 
 	for cursor.Next() {
 		article := Article{}
-		err = cursor.Scan(&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate)
+		err = cursor.Scan(&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedAt, &article.UpdatedAt)
 		if err != nil {
 			return articles, err // return all articles found with error
 		}
@@ -71,54 +67,12 @@ func getArticles(values url.Values) ([]Article, error) {
 	return articles, nil
 }
 
-// GetArticle gets the article depending on user name and article id
-// GET /user/:user/articles/:article
-func GetArticle(c *elesion.Context) {
-	userIDStr := c.Params.ByName("user")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
-		return
-	}
-	articleIDStr := c.Params.ByName("article")
-	articleID, err := strconv.ParseInt(articleIDStr, 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid article id: " + articleIDStr)
-		return
-	}
-
-	a, err := getArticle(userID, articleID)
-	if err != nil {
-		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
-		return
-	}
-	c.Status(http.StatusOK).JSON(a)
-}
-
-func getArticle(userID, articleID int64) (*Article, error) {
-	d := db.UseDefault()
-	defer d.Close()
-
-	article := Article{}
-	err := d.QueryRow(
-		"SELECT id, user, title, text, created_date, updated_date FROM article WHERE id = ? AND user = ?",
-		articleID, userID,
-	).Scan(
-		&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedDate, &article.UpdatedDate,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &article, err
-}
-
 // NewArticle post new article to the user given by url path
-// POST /users/:user/articles
+// POST /articles
 func NewArticle(c *elesion.Context) {
-	userIDStr := c.Params.ByName("user")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	usr, err := user.CheckAuth(c.Request.Header.Get("Authorization"))
 	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
+		c.Status(http.StatusUnauthorized).String(err.Error())
 		return
 	}
 
@@ -130,7 +84,7 @@ func NewArticle(c *elesion.Context) {
 	}
 	defer c.Request.Body.Close()
 
-	body.User = userID
+	body.User = usr.ID
 
 	_, err = newArticle(body)
 	if err != nil {
@@ -165,6 +119,7 @@ func newArticle(body Article) (int64, error) {
 }
 
 // NewTestArticle creates a new user, and creates a new article by the created user
+/*
 func NewTestArticle() (*Article, *user.UserProfile) {
 	usr := user.NewTestUser()
 	id, err := newArticle(Article{
@@ -181,27 +136,19 @@ func NewTestArticle() (*Article, *user.UserProfile) {
 	}
 	return article, usr
 }
+*/
 
 // UpdateArticle update the article where user name and article id are matched
-// PUT /users/:user/articles/:article
-// TODO params 'user' stands for user id
+// PUT /articles
 func UpdateArticle(c *elesion.Context) {
-	userIDStr := c.Params.ByName("user")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	usr, err := user.CheckAuth(c.Request.Header.Get("Authorization"))
 	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid user id: " + userIDStr)
-		return
-	}
-
-	articleIDStr := c.Params.ByName("article")
-	articleID, err := strconv.ParseInt(articleIDStr, 10, 64)
-	if err != nil || articleID <= 0 {
-		c.Status(http.StatusBadRequest).String("invalid article id: " + articleIDStr)
+		c.Status(http.StatusUnauthorized).String(err.Error())
 		return
 	}
 
 	body := Article{}
-	body.User = userID
+	body.User = usr.ID
 	err = json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
 		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid body")
@@ -209,57 +156,97 @@ func UpdateArticle(c *elesion.Context) {
 	}
 	defer c.Request.Body.Close()
 
-	err = updateArticle(articleID, body)
-	if err != nil {
+	err = updateArticle(body)
+
+	switch err {
+	case nil:
+		c.Status(http.StatusOK).String("success")
+	case db.ErrNoChange:
+		c.Status(http.StatusAccepted).String("no change")
+	case db.ErrNoRows:
+		c.Status(http.StatusNotFound).String(fmt.Sprintf("no such article: %d", body.ID))
+	default:
 		c.Status(http.StatusInternalServerError).Error(err.Error()).String(err.Error())
-		return
 	}
-	c.Status(http.StatusOK).String("success")
 }
 
-func updateArticle(id int64, article Article) error {
+func updateArticle(article Article) error {
 	d := db.UseDefault()
 	defer d.Close()
 
+	ok, err := d.Exists("SELECT 1 FROM article WHERE id = ? AND user = ?", article.ID, article.User)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return db.ErrNoRows
+	}
+
 	res, err := d.Exec("UPDATE article SET title = ?, text = ? WHERE id = ? AND user = ?",
-		article.Title, article.Text, id, article.User,
+		article.Title, article.Text, article.ID, article.User,
 	)
+	if err != nil {
+		return err
+	}
 	if rows, err := res.RowsAffected(); err != nil {
 		return err
-	} else if rows != 1 {
-		return errors.WithCaller("rows affected should be 1", 2)
+	} else if rows == 0 {
+		return db.ErrNoChange
+	} else if rows > 1 {
+		return errors.Newf("rows affected should be larger than 1 but got ", rows)
 	}
-	return err
+	return nil
 }
 
 // DeleteArticle delete the article where user name and article id are matched
-// DELETE /users/:user/articles/:article
+// DELETE /articles
 func DeleteArticle(c *elesion.Context) {
-	user := c.Params.ByName("user")
-	articleStr := c.Params.ByName("article")
-	article, err := strconv.ParseInt(articleStr, 10, 64)
+	usr, err := user.CheckAuth(c.Request.Header.Get("Authorization"))
 	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid article id: " + articleStr)
+		c.Status(http.StatusUnauthorized).String(err.Error())
 		return
 	}
 
-	err = deleteArticle(user, article)
+	article := Article{}
+	err = json.NewDecoder(c.Request.Body).Decode(&article)
 	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error()).String(err.Error())
+		c.Status(http.StatusBadRequest).String("invald body")
 		return
 	}
-	c.Status(http.StatusOK).String("success")
+
+	err = deleteArticle(usr.ID, article.ID)
+	switch err {
+	case nil:
+		c.Status(http.StatusOK).String("success")
+	case db.ErrNoRows:
+		c.Status(http.StatusNotFound).Stringf("article not found")
+	default:
+		c.Status(http.StatusInternalServerError).Error(err.Error()).String(err.Error())
+	}
 }
 
-func deleteArticle(user string, id int64) error {
+func deleteArticle(user, id int64) error {
 	d := db.UseDefault()
 	defer d.Close()
 
+	ok, err := d.Exists("SELECT 1 FROM article WHERE id = ? AND user = ?", id, user)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return db.ErrNoRows
+	}
+
 	result, err := d.Exec("DELETE FROM article WHERE id = ? AND user = ?", id, user)
+	if err != nil {
+		return err
+	}
 	if rows, err := result.RowsAffected(); err != nil {
 		return err
-	} else if rows != 1 {
+	} else if rows == 0 {
+		return db.ErrNoChange
+	} else if rows > 1 {
 		return errors.Newf("rows affected shoulb be 1 but got %d", rows)
 	}
-	return err
+	return nil
 }
