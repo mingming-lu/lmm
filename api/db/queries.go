@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS user (
 	token varchar(36) NOT NULL UNIQUE,
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id)
-)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createProfile = `
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS profile (
 	location varchar(128) NOT NULL DEFAULT '',
 	email varchar(128) NOT NULL DEFAULT '',
 	PRIMARY KEY (id)
-)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createSkill = `
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS skill (
 	sort int unsigned NOT NULL UNIQUE,
 	PRIMARY KEY (id),
 	UNIQUE (user, name)
-);
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createLanguage = `
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS language (
 	sort int unsigned NOT NULL UNIQUE,
 	PRIMARY KEY (id),
 	UNIQUE (user, name)
-);
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createEducation = `
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS education (
 	degree varchar(32) NOT NULL,
 	current bit NOT NULL DEFAULT b'0',
 	PRIMARY KEY (id)
-);
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createWorkExperience = `
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS work_experience (
 	status varchar(32),
 	current bit NOT NULL DEFAULT b'0',
 	PRIMARY KEY (id)
-)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createQualification = `
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS qualification (
 	name varchar(255) NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE (user, name)
-)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createArticle = `
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS article (
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (id)
-)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createCategory = `
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS category (
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE (user, article)
-)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 const createTag = `
@@ -119,7 +119,7 @@ CREATE TABLE IF NOT EXISTS tag (
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE (user, article, name)
-)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 var CreateSQL = []string{
