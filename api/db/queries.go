@@ -104,20 +104,10 @@ const createCategory = `
 CREATE TABLE IF NOT EXISTS category (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
+	article int unsigned NOT NULL,
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (user, name)
-)
-`
-
-const createArticleCategory = `
-CREATE TABLE IF NOT EXISTS article_category (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	article int unsigned NOT NULL,
-	category int unsigned NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (user, article, category)
+	UNIQUE (user, article)
 )
 `
 
@@ -125,20 +115,10 @@ const createTag = `
 CREATE TABLE IF NOT EXISTS tag (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
+	article int unsigned NOT NULL,
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (user, name)
-)
-`
-
-const createAticleTag = `
-CREATE TABLE IF NOT EXISTS article_tag (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	article int unsigned NOT NULL,
-	tag int unsigned NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (user, article, tag)
+	UNIQUE (user, article, name)
 )
 `
 
@@ -152,7 +132,5 @@ var CreateSQL = []string{
 	createQualification,
 	createArticle,
 	createCategory,
-	createArticleCategory,
 	createTag,
-	createAticleTag,
 }
