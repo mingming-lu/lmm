@@ -7,7 +7,7 @@
           <h2>
             <router-link :to="'/articles/' + article.id" class="link white">{{ article.title }}</router-link>
           </h2>
-          <p class="text-right opacity">{{ article.created_date }}</p>
+          <p class="text-right opacity">{{ article.created_at }}</p>
         </div>
         <hr v-if="index !== articles.length - 1" class="opacity-plus">
       </div>
@@ -53,21 +53,21 @@ export default {
   },
   methods: {
     fetchArticles () {
-      axios.get('http://api.lmm.im/users/1/articles').then(res => {
+      axios.get('http://api.lmm.im/articles?user=1').then(res => {
         this.articles = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchCategories () {
-      axios.get('http://api.lmm.im/users/1/categories').then(res => {
+      axios.get('http://api.lmm.im/categories?user=1').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get('http://api.lmm.im/users/1/tags').then(res => {
+      axios.get('http://api.lmm.im/tags?user=1').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)

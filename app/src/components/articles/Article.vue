@@ -5,8 +5,8 @@
       <div class="container">
         <h2 class="center">{{ title }}</h2>
         <div v-html="text" v-hljs class="text"></div>
-        <p v-if="createdDate === updatedDate" class="text-right opacity">Created at {{ createdDate }}</p>
-        <p v-else class="text-right opacity">Updated at {{ updatedDate }}</p>
+        <p v-if="createdAt === updatedAt" class="text-right opacity">Created at {{ createdAt }}</p>
+        <p v-else class="text-right opacity">Updated at {{ updatedAt }}</p>
       </div>
     </div>
 
@@ -40,8 +40,8 @@ export default {
       title: '',
       subtitles: [],
       text: '',
-      createdDate: '',
-      updatedDate: '',
+      createdAt: '',
+      updatedAt: '',
       category: '',
       tags: []
     }
@@ -50,9 +50,9 @@ export default {
     const pattern = /^\/articles\/(\d+)$/g
     const match = pattern.exec(this.$route.path)
     const id = match[1]
-    this.baseURL = 'http://api.lmm.im/users/1/articles/' + id
+    this.articleID = id
     this.fetchArticle()
-    this.fetchCategories()
+    this.fetchCategory()
     this.fetchTags()
   },
   methods: {
@@ -61,11 +61,12 @@ export default {
         html: true,
         typographer: true
       })
-      axios.get(this.baseURL).then(res => {
-        this.title = res.data.title
-        this.text = md.render(res.data.text)
-        this.createdDate = res.data.created_date
-        this.updatedDate = res.data.updated_date
+      axios.get('http://api.lmm.im/articles?user=1&id=' + this.articleID).then(res => {
+        const article = res.data[0]
+        this.title = article.title
+        this.text = md.render(article.text)
+        this.createdAt = article.created_at
+        this.updatedAt = article.updated_at
 
         // prepare subtitles and their links
         const results = this.extractSubtitles(this.text, this.$route.path)
@@ -79,10 +80,15 @@ export default {
         }
       })
     },
-    fetchCategories: function () {
+    fetchCategory: function () {
+      axios.get('http://api.lmm.im/categories?user=1&article=' + this.articleID).then(res => {
+        this.category = res.data[0]
+      }).catch(e => {
+        console.log(e)
+      })
     },
     fetchTags: function () {
-      axios.get(this.baseURL + '/tags').then(res => {
+      axios.get('http://api.lmm.im/tags?user=1&article=' + this.articleID).then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
