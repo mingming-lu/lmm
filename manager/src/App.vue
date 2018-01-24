@@ -35,7 +35,7 @@ export default {
     logout () {
       axios.get('http://api.lmm.local/logout', {
         headers: {
-          'Authorization': localStorage.getItem('token')
+          Authorization: localStorage.getItem('token')
         }
       }).then(res => {
         alert('logout!')

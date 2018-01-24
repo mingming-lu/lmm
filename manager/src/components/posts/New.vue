@@ -23,44 +23,29 @@ export default {
     }
   },
   created () {
-    // axios.get('http://api.lmm.local/articles/1/categories').then((res) => {
-    //   this.categories = res.data
-    // }).catch((e) => {
-    //   console.log(e)
-    // })
   },
   methods: {
     onSubmit () {
-      this.text = this.text.trim()
-      if (!confirm('Are you sure you want to submit?')) {
-        return
-      }
-
-      axios.post('http://api.lmm.im/users/1/articles', {
+      axios.post('http://api.lmm.local/articles', {
         title: this.title,
         text: this.text
-      }).then((res) => {
+      }, {
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then(res => {
         alert(res.data)
         this.$router.push('/posts')
-      }).catch((e) => {
+      }).catch(e => {
         alert(e.response.data)
-        console.log(e)
       })
     },
     marked: (text) => {
       return md.render(text)
     },
     onAddTag (name) {
-      if (!name.trim()) {
-        return
-      }
-      this.tags.push({
-        name: name
-      })
-      this.newTagName = ''
     },
     onRemoveTag (tag) {
-      this.tags = this.tags.filter(t => t.name !== tag.name)
     }
   }
 }
