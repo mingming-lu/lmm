@@ -40,68 +40,29 @@ export default {
   },
   methods: {
     fetchData () {
-      axios.all([
-        axios.get('http://api.lmm.im/users/1/articles')
-      ]).then(axios.spread((articles) => {
-        this.articles = articles.data
-      })).catch((e) => {
-        console.log(e)
+      this.fetchBlogs()
+      this.fetchCategories()
+    },
+    fetchBlogs () {
+      axios.get('http://api.lmm.local/articles?user=1').then(res => {
+        this.articles = res.data
+      }).catch(e => {
+        console.log(e.response.data)
       })
       this.newCategoryName = ''
     },
-    onCreateCategory () {
-      let name = this.newCategoryName.trim()
-      if (!name) {
-        return
-      }
-      if (!confirm('add category: `' + name + '`?')) {
-        return
-      }
-      axios.post('http://api.lmm.im/articles/category', {
-        user_id: 1,
-        name: name
-      }).then((res) => {
-        this.fetchData()
-      }).catch((e) => {
-        console.log(e)
-        alert(e.response.data)
+    fetchCategories () {
+      axios.get('http://api.lmm.local/categories?user=1').then(res => {
+        this.categories = res.data
+      }).catch(e => {
+        console.log(e.response.data)
       })
+    },
+    onCreateCategory () {
     },
     onUpdateCategory (category) {
-      let name = document.getElementById(category.id).value.trim()
-      if (!name) {
-        return
-      }
-      if (name === category.name) {
-        alert('no change')
-        return
-      }
-      if (!confirm('change `' + category.name + '` to `' + name + '`?')) {
-        return
-      }
-
-      // update category name by id
-      axios.put('http://api.lmm.im/articles/category/' + category.id, {
-        id: category.id,
-        user_id: 1,
-        name: name
-      }).then((res) => {
-        this.fetchData()
-      }).catch((e) => {
-        console.log(e)
-        alert(e.response.data)
-      })
     },
     onDeleteCategory (category) {
-      if (!confirm('delete `' + category.name + '`?')) {
-        return
-      }
-      axios.delete('http://api.lmm.im/articles/category/' + category.id).then((res) => {
-        this.fetchData()
-      }).catch((e) => {
-        console.log(e)
-        alert(e.response.data)
-      })
     }
   }
 }
