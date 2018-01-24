@@ -1,18 +1,22 @@
 package article
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/akinaru-lu/elesion"
+	"github.com/akinaru-lu/errors"
 
 	"lmm/api/db"
+	"lmm/api/user"
 )
 
 type Category struct {
-	ID   int64  `json:"id"`
-	User int64  `json:"user"`
-	Name string `json:"name"`
+	ID      int64  `json:"id"`
+	User    int64  `json:"user"`
+	Article int64  `json:"article"`
+	Name    string `json:"name"`
 }
 
 // GET /categories
@@ -60,56 +64,65 @@ func getCategories(values db.Values) ([]Category, error) {
 	return categories, nil
 }
 
-/*
 func NewCategory(c *elesion.Context) {
+	usr, err := user.CheckAuth(c.Request.Header.Get("Authorization"))
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String(err.Error())
+		return
+	}
+
 	body := Category{}
-	err := json.NewDecoder(c.Request.Body).Decode(&body)
+	err = json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
 		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid body")
 		return
 	}
-	defer c.Request.Body.Close()
 
-	_, err = newCategory(body)
-	if err == nil {
-		c.Status(http.StatusOK).String("success")
+	if body.Article == 0 || body.Name == "" {
+		c.Status(http.StatusBadRequest).Error(err.Error()).String("empty name or article")
 		return
 	}
-	if err == db.ErrAlreadyExists {
-		c.Status(http.StatusConflict).String(body.Name + " already exists")
-		return
+
+	body.User = usr.ID
+	id, err := newCategory(body)
+	switch err {
+	case nil:
+		c.Status(http.StatusOK).Header("Location", fmt.Sprintf("/categories?id=%d", id)).String("success")
+	case db.ErrAlreadyExists:
+		c.Status(http.StatusConflict).String("category already exists: " + body.Name)
+	default:
+		c.Status(http.StatusInternalServerError).Error(err.Error()).String(err.Error())
 	}
-	c.Status(http.StatusInternalServerError).Error(err.Error()).String("unknown error")
 }
 
 func newCategory(category Category) (int64, error) {
 	d := db.New().Use("lmm")
 	defer d.Close()
 
-	// check if category already exists
-	var id int64
-	err := d.QueryRow("SELECT id FROM categories WHERE name = ?", category.Name).Scan(&id)
-	if err == nil { // name already exists
-		return id, db.ErrAlreadyExists
+	ok, err := d.Exists("SELECT 1 FROM category WHERE name = ?", category.Name)
+	if err != nil {
+		return 0, err
 	}
-	if err != sql.ErrNoRows {
-		return id, err
+	if ok {
+		return 0, db.ErrAlreadyExists
 	}
-	// continue if no such row
 
-	result, err := d.Exec("INSERT INTO categories (user_id, name) VALUES (?, ?)", category.UserID, category.Name)
+	result, err := d.Exec("INSERT INTO category (user, article, name) VALUES (?, ?, ?)",
+		category.User, category.Article, category.Name,
+	)
 	if err != nil {
 		return 0, err
 	}
 	if rows, err := result.RowsAffected(); err != nil {
 		return 0, err
 	} else if rows != 1 {
-		return 0, errors.WithCaller("rows affected should be 1", 2)
+		return 0, errors.Newf("rows affected are expected to be 1 but got %d", 2)
 	}
 
 	return result.LastInsertId()
 }
 
+/*
 func UpdateCategory(c *elesion.Context) {
 	idStr := c.Params.ByName("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
