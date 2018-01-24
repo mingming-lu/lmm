@@ -34,6 +34,7 @@ func main() {
 
 	// category
 	router.GET("/categories", article.GetCategories)
+	router.POST("/categories", article.NewCategory)
 
 	// tag
 	router.GET("/tags", article.GetTags)
