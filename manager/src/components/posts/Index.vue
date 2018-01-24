@@ -13,7 +13,7 @@
     <h3>Categories List</h3>
     <form>
       <input size="32" v-model="newCategoryName" placeholder="input new category here">
-      <input type="submit" value="Add" @click.prevent="onCreateCategory()">
+      <input type="submit" value="Add" @click.prevent="onSubmitCategory()">
     </form>
     <form v-for="category in categories" :key="category.name">
       {{ category.name }} <input size="32" :id="category.id">
@@ -58,7 +58,7 @@ export default {
         console.log(e.response.data)
       })
     },
-    onCreateCategory () {
+    onSubmitCategory () {
     },
     onUpdateCategory (category) {
     },
