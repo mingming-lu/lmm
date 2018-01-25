@@ -3,9 +3,9 @@ import Router from 'vue-router'
 import Index from '@/components/Index'
 import Login from '@/components/Login'
 import PageNotFound from '@/components/404'
-import PostsIndex from '@/components/posts/Index'
-import PostsNew from '@/components/posts/New'
-import PostsEdit from '@/components/posts/Edit'
+import BlogIndex from '@/components/blog/Index'
+import BlogNew from '@/components/blog/New'
+import BlogEdit from '@/components/blog/Edit'
 import Photographs from '@/components/Photographs'
 import Profile from '@/components/Profile'
 
@@ -27,18 +27,18 @@ export default new Router({
       component: Login
     },
     {
-      path: '/posts',
+      path: '/blog',
       component: {
         template: '<router-view/>'
       },
       children: [
         {
           path: '/',
-          component: PostsIndex
+          component: BlogIndex
         },
         {
           path: 'new',
-          component: PostsNew
+          component: BlogNew
         },
         {
           path: ':id',
@@ -51,7 +51,7 @@ export default new Router({
           children: [
             {
               path: 'edit',
-              component: PostsEdit
+              component: BlogEdit
             }
           ]
         }
