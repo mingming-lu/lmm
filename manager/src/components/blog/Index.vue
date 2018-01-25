@@ -1,11 +1,11 @@
 <template>
   <div>
 
-    <!-- articles list -->
-    <h3>Articles List</h3>
-    <router-link to="/posts/new" tag="button">post new article here</router-link>
-    <div v-for="article in articles" :key="article.id"> 
-      <router-link :to="'/posts/' + article.id + '/edit'">{{ article.title }}</router-link>
+    <!-- blog list -->
+    <h3>Blog List</h3>
+    <router-link to="/blog/new" tag="button">post new blog here</router-link>
+    <div v-for="blog in blogList" :key="blog.id"> 
+      <router-link :to="'/blog/' + blog.id + '/edit'">{{ blog.title }}</router-link>
     </div>
     <hr class="opacity">
 
@@ -30,7 +30,7 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      articles: [],
+      blogList: [],
       categories: [],
       newCategoryName: ''
     }
@@ -40,12 +40,12 @@ export default {
   },
   methods: {
     fetchData () {
-      this.fetchBlogs()
+      this.fetchBlogList()
       this.fetchCategories()
     },
-    fetchBlogs () {
-      axios.get('http://api.lmm.local/articles?user=1').then(res => {
-        this.articles = res.data
+    fetchBlogList () {
+      axios.get('http://api.lmm.local/blog?user=1').then(res => {
+        this.blogList = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
