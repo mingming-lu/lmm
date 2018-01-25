@@ -6,7 +6,7 @@ import (
 
 	"github.com/akinaru-lu/elesion"
 
-	"lmm/api/article"
+	"lmm/api/blog"
 	"lmm/api/db"
 	"lmm/api/image"
 	"lmm/api/profile"
@@ -26,18 +26,18 @@ func main() {
 	router.GET("/logout", user.Logout)
 	router.GET("/verify", user.Verify)
 
-	// article
-	router.GET("/articles", article.GetArticles)
-	router.POST("/articles", article.NewArticle)
-	router.PUT("/articles", article.UpdateArticle)
-	router.DELETE("/articles", article.DeleteArticle)
+	// blog
+	router.GET("/blog", blog.GetBlog)
+	router.POST("/blog", blog.NewBlog)
+	router.PUT("/blog", blog.UpdateBlog)
+	router.DELETE("/blog", blog.DeleteBlog)
 
 	// category
-	router.GET("/categories", article.GetCategories)
-	router.POST("/categories", article.NewCategory)
+	router.GET("/categories", blog.GetCategories)
+	router.POST("/categories", blog.NewCategory)
 
 	// tag
-	router.GET("/tags", article.GetTags)
+	router.GET("/tags", blog.GetTags)
 
 	router.GET("/photos", image.Handler)
 

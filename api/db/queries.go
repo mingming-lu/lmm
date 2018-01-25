@@ -88,8 +88,8 @@ CREATE TABLE IF NOT EXISTS qualification (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
-const createArticle = `
-CREATE TABLE IF NOT EXISTS article (
+const createBlog = `
+CREATE TABLE IF NOT EXISTS blog (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
 	title varchar(255) NOT NULL,
@@ -104,10 +104,10 @@ const createCategory = `
 CREATE TABLE IF NOT EXISTS category (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
-	article int unsigned NOT NULL,
+	blog int unsigned NOT NULL,
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (user, article)
+	UNIQUE (user, blog)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
@@ -115,10 +115,10 @@ const createTag = `
 CREATE TABLE IF NOT EXISTS tag (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
-	article int unsigned NOT NULL,
+	blog int unsigned NOT NULL,
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (user, article, name)
+	UNIQUE (user, blog, name)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
@@ -130,7 +130,7 @@ var CreateSQL = []string{
 	createEducation,
 	createWorkExperience,
 	createQualification,
-	createArticle,
+	createBlog,
 	createCategory,
 	createTag,
 }
