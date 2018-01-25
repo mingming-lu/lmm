@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <!-- Article text -->
+    <!-- Blog text -->
     <div class="left">
       <div class="container">
         <h2 class="center">{{ title }}</h2>
@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    <!-- Article chapters navigation -->
+    <!-- Blog chapters navigation -->
     <div class="right nav">
       <div class="container">
         <h4>Chapters</h4>
@@ -47,26 +47,26 @@ export default {
     }
   },
   created () {
-    const pattern = /^\/articles\/(\d+)$/g
+    const pattern = /^\/blog\/(\d+)$/g
     const match = pattern.exec(this.$route.path)
     const id = match[1]
-    this.articleID = id
-    this.fetchArticle()
+    this.blogID = id
+    this.fetchBlog()
     this.fetchCategory()
     this.fetchTags()
   },
   methods: {
-    fetchArticle: function () {
+    fetchBlog: function () {
       const md = new Markdownit({
         html: true,
         typographer: true
       })
-      axios.get('http://api.lmm.im/articles?user=1&id=' + this.articleID).then(res => {
-        const article = res.data[0]
-        this.title = article.title
-        this.text = md.render(article.text)
-        this.createdAt = article.created_at
-        this.updatedAt = article.updated_at
+      axios.get('http://api.lmm.im/blog?user=1&id=' + this.blogID).then(res => {
+        const blog = res.data[0]
+        this.title = blog.title
+        this.text = md.render(blog.text)
+        this.createdAt = blog.created_at
+        this.updatedAt = blog.updated_at
 
         // prepare subtitles and their links
         const results = this.extractSubtitles(this.text, this.$route.path)
@@ -81,14 +81,14 @@ export default {
       })
     },
     fetchCategory: function () {
-      axios.get('http://api.lmm.im/categories?user=1&article=' + this.articleID).then(res => {
+      axios.get('http://api.lmm.im/categories?user=1&blog=' + this.blogID).then(res => {
         this.category = res.data[0]
       }).catch(e => {
         console.log(e)
       })
     },
     fetchTags: function () {
-      axios.get('http://api.lmm.im/tags?user=1&article=' + this.articleID).then(res => {
+      axios.get('http://api.lmm.im/tags?user=1&blog=' + this.blogID).then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)

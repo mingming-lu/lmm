@@ -2,8 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/components/Home'
 import Index from '@/components/Index'
-import Article from '@/components/articles/Article'
-import ArticlesList from '@/components/articles/List'
+import Blog from '@/components/blog/Blog'
+import BlogList from '@/components/blog/List'
 import Photos from '@/components/Photos'
 import Projects from '@/components/Project'
 import Profile from '@/components/Profile'
@@ -30,16 +30,16 @@ export default new Router({
       component: Home
     },
     {
-      path: '/articles',
+      path: '/blog',
       component: Index,
       children: [
         {
           path: '',
-          component: ArticlesList
+          component: BlogList
         },
         {
           path: ':id',
-          component: Article
+          component: Blog
         }
       ]
     },

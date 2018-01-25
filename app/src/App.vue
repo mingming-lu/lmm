@@ -31,8 +31,8 @@ export default {
           name: 'Home'
         },
         {
-          link: '/articles',
-          name: 'Articles'
+          link: '/blog',
+          name: 'Blog'
         },
         {
           link: '/photos',

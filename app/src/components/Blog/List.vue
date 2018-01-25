@@ -2,14 +2,14 @@
   <div class="container">
     <!-- Posts -->
     <div class="left" style="width:75%;">
-      <div v-for="(article, index) in articles" :key="article.id">
+      <div v-for="(blog, index) in blog" :key="blog.id">
         <div class="container">
           <h2>
-            <router-link :to="'/articles/' + article.id" class="link white">{{ article.title }}</router-link>
+            <router-link :to="'/blog/' + blog.id" class="link white">{{ blog.title }}</router-link>
           </h2>
-          <p class="text-right opacity">{{ article.created_at }}</p>
+          <p class="text-right opacity">{{ blog.created_at }}</p>
         </div>
-        <hr v-if="index !== articles.length - 1" class="opacity-plus">
+        <hr v-if="index !== blog.length - 1" class="opacity-plus">
       </div>
     </div>
 
@@ -41,20 +41,20 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      articles: [],
+      blog: [],
       categories: [],
       tags: []
     }
   },
   created () {
-    this.fetchArticles()
+    this.fetchBlog()
     this.fetchCategories()
     this.fetchTags()
   },
   methods: {
-    fetchArticles () {
-      axios.get('http://api.lmm.im/articles?user=1').then(res => {
-        this.articles = res.data
+    fetchBlog () {
+      axios.get('http://api.lmm.im/blog?user=1').then(res => {
+        this.blog = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
