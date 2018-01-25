@@ -1,4 +1,4 @@
-package article
+package blog
 
 import (
 	"encoding/json"
@@ -13,10 +13,10 @@ import (
 )
 
 type Category struct {
-	ID      int64  `json:"id"`
-	User    int64  `json:"user"`
-	Article int64  `json:"article"`
-	Name    string `json:"name"`
+	ID   int64  `json:"id"`
+	User int64  `json:"user"`
+	Blog int64  `json:"blog"`
+	Name string `json:"name"`
 }
 
 // GET /categories
@@ -78,8 +78,8 @@ func NewCategory(c *elesion.Context) {
 		return
 	}
 
-	if body.Article == 0 || body.Name == "" {
-		c.Status(http.StatusBadRequest).Error(err.Error()).String("empty name or article")
+	if body.Blog == 0 || body.Name == "" {
+		c.Status(http.StatusBadRequest).Error(err.Error()).String("empty name or blog")
 		return
 	}
 
@@ -107,8 +107,8 @@ func newCategory(category Category) (int64, error) {
 		return 0, db.ErrAlreadyExists
 	}
 
-	result, err := d.Exec("INSERT INTO category (user, article, name) VALUES (?, ?, ?)",
-		category.User, category.Article, category.Name,
+	result, err := d.Exec("INSERT INTO category (user, blog, name) VALUES (?, ?, ?)",
+		category.User, category.Blog, category.Name,
 	)
 	if err != nil {
 		return 0, err
