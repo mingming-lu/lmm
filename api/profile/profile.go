@@ -46,7 +46,7 @@ func getProfile(userID int64) (*Profile, error) {
 	defer d.Close()
 
 	profile := Profile{}
-	err := d.QueryRow("SELECT name, avatar_url, description, profession, location, email from user where id = 1").Scan(
+	err := d.QueryRow("SELECT nickname, avatar_url, description, profession, location, email from profile where id = 1").Scan(
 		&profile.Name, &profile.AvatarURL, &profile.Description, &profile.Profession, &profile.Location, &profile.Email)
 	if err != nil {
 		return nil, err
