@@ -88,7 +88,7 @@ export default {
         axios.get('http://api.lmm.local/categories?user=1&blog=' + this.blogID)
       ]).then(axios.spread((categories, category) => {
         this.categories = categories.data
-        this.categoryID = category.data[0]
+        this.categoryID = category.data[0].id
       })).catch(e => {
         console.log(e.response.data)
       })
