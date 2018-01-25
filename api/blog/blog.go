@@ -1,4 +1,4 @@
-package article
+package blog
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 	"lmm/api/user"
 )
 
-type Article struct {
+type Blog struct {
 	ID        int64  `json:"id"`
 	User      int64  `json:"user"`
 	Title     string `json:"title"`
@@ -22,9 +22,9 @@ type Article struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-// GetArticles gets all articles according to query parameters
-// GET /articles
-func GetArticles(c *elesion.Context) {
+// GetBlog gets all blog according to query parameters
+// GET /blog
+func GetBlog(c *elesion.Context) {
 	queryParams := c.Query()
 	if len(queryParams) == 0 {
 		c.Status(http.StatusBadRequest).String("empty query parameter")
@@ -32,51 +32,51 @@ func GetArticles(c *elesion.Context) {
 	}
 
 	values := db.NewValuesFromURL(c.Query())
-	articles, err := getArticles(values)
+	blog, err := getBlog(values)
 	if err != nil {
-		c.Status(http.StatusNotFound).Error(err.Error()).String("article not found")
+		c.Status(http.StatusNotFound).Error(err.Error()).String("blog not found")
 		return
 	}
-	c.Status(http.StatusOK).JSON(articles)
+	c.Status(http.StatusOK).JSON(blog)
 }
 
-func getArticles(values db.Values) ([]Article, error) {
+func getBlog(values db.Values) ([]Blog, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
 	query := fmt.Sprintf(
-		`SELECT id, user, title, text, created_at, updated_at FROM article %s ORDER BY created_at DESC`,
+		`SELECT id, user, title, text, created_at, updated_at FROM blog %s ORDER BY created_at DESC`,
 		values.Where(),
 	)
 
-	articles := make([]Article, 0)
+	blogList := make([]Blog, 0)
 	cursor, err := d.Query(query)
 	if err != nil {
-		return articles, err
+		return blogList, err
 	}
 	defer cursor.Close()
 
 	for cursor.Next() {
-		article := Article{}
-		err = cursor.Scan(&article.ID, &article.User, &article.Title, &article.Text, &article.CreatedAt, &article.UpdatedAt)
+		blog := Blog{}
+		err = cursor.Scan(&blog.ID, &blog.User, &blog.Title, &blog.Text, &blog.CreatedAt, &blog.UpdatedAt)
 		if err != nil {
-			return articles, err // return all articles found with error
+			return blogList, err // return all blogList found with error
 		}
-		articles = append(articles, article)
+		blogList = append(blogList, blog)
 	}
-	return articles, nil
+	return blogList, nil
 }
 
-// NewArticle post new article to the user given by url path
-// POST /articles
-func NewArticle(c *elesion.Context) {
+// NewBlog post new blog to the user given by url path
+// POST /blog
+func NewBlog(c *elesion.Context) {
 	usr, err := user.CheckAuth(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String(err.Error())
 		return
 	}
 
-	body := Article{}
+	body := Blog{}
 	err = json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
 		c.Status(http.StatusBadRequest).Error(err.Error()).String("invalid body")
@@ -86,26 +86,26 @@ func NewArticle(c *elesion.Context) {
 
 	body.User = usr.ID
 
-	_, err = newArticle(body)
+	_, err = newBlog(body)
 	if err != nil {
-		c.Status(http.StatusInternalServerError).Error(err.Error()).String("failed to post article")
+		c.Status(http.StatusInternalServerError).Error(err.Error()).String("failed to post blog")
 		return
 	}
 
 	if err != nil {
-		c.Status(http.StatusBadRequest).Error(err.Error()).String("success to post article but failed when post tags")
+		c.Status(http.StatusBadRequest).Error(err.Error()).String("success to post blog but failed when post tags")
 		return
 	}
 	c.Status(http.StatusOK).String("success")
 }
 
-func newArticle(body Article) (int64, error) {
+func newBlog(blog Blog) (int64, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
 	result, err := d.Exec(
-		"INSERT INTO article (user, title, text) VALUES (?, ?, ?)",
-		body.User, strings.TrimSpace(body.Title), strings.TrimSpace(body.Text),
+		"INSERT INTO blog (user, title, text) VALUES (?, ?, ?)",
+		blog.User, strings.TrimSpace(blog.Title), strings.TrimSpace(blog.Text),
 	)
 	if err != nil {
 		return 0, err
@@ -118,36 +118,19 @@ func newArticle(body Article) (int64, error) {
 	return result.LastInsertId()
 }
 
-// NewTestArticle creates a new user, and creates a new article by the created user
-/*
-func NewTestArticle() (*Article, *user.UserProfile) {
-	usr := user.NewTestUser()
-	id, err := newArticle(Article{
-		ID:    usr.ID,
-		Title: "test",
-		Text:  "This is a test article",
-	})
-	if err != nil {
-		panic(err)
-	}
-	article, err := getArticle(usr.ID, id)
-	if err != nil {
-		panic(err)
-	}
-	return article, usr
-}
-*/
+// TODO
+// NewTestBlog creates a new user, and creates a new blog by the created user
 
-// UpdateArticle update the article where user name and article id are matched
-// PUT /articles
-func UpdateArticle(c *elesion.Context) {
+// UpdateBlog update the blog where user name and blog id are matched
+// PUT /blog
+func UpdateBlog(c *elesion.Context) {
 	usr, err := user.CheckAuth(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String(err.Error())
 		return
 	}
 
-	body := Article{}
+	body := Blog{}
 	body.User = usr.ID
 	err = json.NewDecoder(c.Request.Body).Decode(&body)
 	if err != nil {
@@ -156,7 +139,7 @@ func UpdateArticle(c *elesion.Context) {
 	}
 	defer c.Request.Body.Close()
 
-	err = updateArticle(body)
+	err = updateBlog(body)
 
 	switch err {
 	case nil:
@@ -164,17 +147,17 @@ func UpdateArticle(c *elesion.Context) {
 	case db.ErrNoChange:
 		c.Status(http.StatusAccepted).String("no change")
 	case db.ErrNoRows:
-		c.Status(http.StatusNotFound).String(fmt.Sprintf("no such article: %d", body.ID))
+		c.Status(http.StatusNotFound).String(fmt.Sprintf("no such blog: %d", body.ID))
 	default:
 		c.Status(http.StatusInternalServerError).Error(err.Error()).String(err.Error())
 	}
 }
 
-func updateArticle(article Article) error {
+func updateBlog(blog Blog) error {
 	d := db.UseDefault()
 	defer d.Close()
 
-	ok, err := d.Exists("SELECT 1 FROM article WHERE id = ? AND user = ?", article.ID, article.User)
+	ok, err := d.Exists("SELECT 1 FROM blog WHERE id = ? AND user = ?", blog.ID, blog.User)
 	if err != nil {
 		return err
 	}
@@ -182,8 +165,8 @@ func updateArticle(article Article) error {
 		return db.ErrNoRows
 	}
 
-	res, err := d.Exec("UPDATE article SET title = ?, text = ? WHERE id = ? AND user = ?",
-		article.Title, article.Text, article.ID, article.User,
+	res, err := d.Exec("UPDATE blog SET title = ?, text = ? WHERE id = ? AND user = ?",
+		blog.Title, blog.Text, blog.ID, blog.User,
 	)
 	if err != nil {
 		return err
@@ -198,38 +181,38 @@ func updateArticle(article Article) error {
 	return nil
 }
 
-// DeleteArticle delete the article where user name and article id are matched
-// DELETE /articles
-func DeleteArticle(c *elesion.Context) {
+// DeleteBlog delete the blog where user name and blog id are matched
+// DELETE /blog
+func DeleteBlog(c *elesion.Context) {
 	usr, err := user.CheckAuth(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String(err.Error())
 		return
 	}
 
-	article := Article{}
-	err = json.NewDecoder(c.Request.Body).Decode(&article)
+	blog := Blog{}
+	err = json.NewDecoder(c.Request.Body).Decode(&blog)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("invald body")
 		return
 	}
 
-	err = deleteArticle(usr.ID, article.ID)
+	err = deleteBlog(usr.ID, blog.ID)
 	switch err {
 	case nil:
 		c.Status(http.StatusOK).String("success")
 	case db.ErrNoRows:
-		c.Status(http.StatusNotFound).Stringf("article not found")
+		c.Status(http.StatusNotFound).Stringf("blog not found")
 	default:
 		c.Status(http.StatusInternalServerError).Error(err.Error()).String(err.Error())
 	}
 }
 
-func deleteArticle(user, id int64) error {
+func deleteBlog(user, id int64) error {
 	d := db.UseDefault()
 	defer d.Close()
 
-	ok, err := d.Exists("SELECT 1 FROM article WHERE id = ? AND user = ?", id, user)
+	ok, err := d.Exists("SELECT 1 FROM blog WHERE id = ? AND user = ?", id, user)
 	if err != nil {
 		return err
 	}
@@ -237,7 +220,7 @@ func deleteArticle(user, id int64) error {
 		return db.ErrNoRows
 	}
 
-	result, err := d.Exec("DELETE FROM article WHERE id = ? AND user = ?", id, user)
+	result, err := d.Exec("DELETE FROM blog WHERE id = ? AND user = ?", id, user)
 	if err != nil {
 		return err
 	}

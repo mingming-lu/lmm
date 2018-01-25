@@ -1,4 +1,4 @@
-<template src="@/templates/posts/edit.html">
+<template src="@/templates/blog/edit.html">
 </template>
 
 <script>
@@ -21,13 +21,13 @@ export default {
       categories: [],
       newTagName: '',
       tags: [],
-      articleOriginal: null
+      blogOriginal: null
     }
   },
   created () {
-    const pattern = /^\/posts\/(\d+)\/edit$/g
+    const pattern = /^\/blog\/(\d+)\/edit$/g
     const match = pattern.exec(this.$route.path)
-    this.articleID = match[1]
+    this.blogID = match[1]
     this.fetchData()
   },
   methods: {
@@ -36,8 +36,8 @@ export default {
         alert('no change')
         return
       }
-      axios.put('http://api.lmm.local/articles', {
-        id: Number(this.articleID),
+      axios.put('http://api.lmm.local/blog', {
+        id: Number(this.blogID),
         title: this.title,
         text: this.text
       }, {
@@ -46,7 +46,7 @@ export default {
         }
       }).then(res => {
         alert(res.data)
-        this.$router.push('/posts')
+        this.$router.push('/blog')
       }).catch(e => {
         alert(e.response.data)
       })
@@ -54,8 +54,8 @@ export default {
     canSubmit () {
       this.title = this.title.trim()
       this.text = this.text.trim()
-      const isTitleOK = this.title !== this.articleOriginal.title
-      const isTextOK = this.text !== this.articleOriginal.text
+      const isTitleOK = this.title !== this.blogOriginal.title
+      const isTextOK = this.text !== this.blogOriginal.text
       return isTitleOK || isTextOK
     },
     marked: (text) => {
@@ -71,13 +71,13 @@ export default {
       this.fetchTags()
     },
     fetchBlog () {
-      axios.get('http://api.lmm.local/articles?user=1&id=' + this.articleID).then(res => {
-        this.articleOriginal = res.data[0]
+      axios.get('http://api.lmm.local/blog?user=1&id=' + this.blogID).then(res => {
+        this.blogOriginal = res.data[0]
 
-        this.id = this.articleOriginal.id
-        this.title = this.articleOriginal.title
-        this.text = this.articleOriginal.text
-        this.textPreview = this.marked(this.articleOriginal.text)
+        this.id = this.blogOriginal.id
+        this.title = this.blogOriginal.title
+        this.text = this.blogOriginal.text
+        this.textPreview = this.marked(this.blogOriginal.text)
       }).catch(e => {
         console.log(e.response.data)
       })
@@ -85,7 +85,7 @@ export default {
     fetchCategories () {
       axios.all([
         axios.get('http://api.lmm.local/categories?user=1'),
-        axios.get('http://api.lmm.local/categories?user=1&article=' + this.articleID)
+        axios.get('http://api.lmm.local/categories?user=1&blog=' + this.blogID)
       ]).then(axios.spread((categories, category) => {
         this.categories = categories.data
         this.categoryID = category.data[0]
@@ -94,7 +94,7 @@ export default {
       })
     },
     fetchTags () {
-      axios.get('http://api.lmm.local/tags?user=1&article=' + this.articleID).then(res => {
+      axios.get('http://api.lmm.local/tags?user=1&blog=' + this.blogID).then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)

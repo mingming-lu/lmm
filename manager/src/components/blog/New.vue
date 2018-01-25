@@ -1,4 +1,4 @@
-<template src="@/templates/posts/edit.html">
+<template src="@/templates/blog/edit.html">
 </template>
 
 <script>
@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     onSubmit () {
-      axios.post('http://api.lmm.local/articles', {
+      axios.post('http://api.lmm.local/blog', {
         title: this.title,
         text: this.text
       }, {
@@ -35,7 +35,7 @@ export default {
         }
       }).then(res => {
         alert(res.data)
-        this.$router.push('/posts')
+        this.$router.push('/blog')
       }).catch(e => {
         alert(e.response.data)
       })
