@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- Posts -->
-    <div class="left" style="width:75%;">
+    <div class="left" :class="{ 'mobile-left': isMobile }">
       <div v-for="(blog, index) in blog" :key="blog.id">
         <div class="container">
           <h2>
@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div class="right nav" style="width:25%;">
+    <div v-if="!isMobile" class="right nav">
       <!-- Categories -->
       <div class="container">
         <h4><i class="fa fa-fw fa-folder-o"></i>Categories</h4>
@@ -41,6 +41,7 @@ import axios from 'axios'
 export default {
   data () {
     return {
+      isMobile: false,
       blog: [],
       categories: [],
       tags: []
@@ -50,6 +51,11 @@ export default {
     this.fetchBlog()
     this.fetchCategories()
     this.fetchTags()
+    this.calcIsMobile()
+    window.addEventListener('resize', this.calcIsMobile)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.calcIsMobile)
   },
   methods: {
     fetchBlog () {
@@ -72,7 +78,21 @@ export default {
       }).catch(e => {
         console.log(e.response.data)
       })
+    },
+    calcIsMobile () {
+      this.isMobile = window.innerWidth <= 768
     }
   }
 }
 </script>
+<style scoped>
+.container .left {
+  width: 75%;
+}
+.container .right {
+  width: 25%;
+}
+.mobile-left {
+  width: 100% !important;
+}
+</style>
