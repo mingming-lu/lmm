@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- Blog text -->
-    <div class="left">
+    <div class="left" :class="{ 'mobile-left': isMobile }">
       <div class="container">
         <h2 class="center">{{ title }}</h2>
         <div v-html="text" v-hljs class="text"></div>
@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <div class="right">
+    <div v-if="!isMobile" class="right">
       <div class="container">
         <h4><i class="fa fa-fw fa-tags"></i>Tags</h4>
         <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
@@ -20,7 +20,7 @@
     </div>
 
     <!-- Blog chapters navigation -->
-    <div class="right nav">
+    <div v-if="!isMobile" class="right nav">
       <div class="container">
         <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
@@ -37,6 +37,7 @@ import Markdownit from 'markdown-it'
 export default {
   data () {
     return {
+      isMobile: false,
       title: '',
       subtitles: [],
       text: '',
@@ -54,6 +55,11 @@ export default {
     this.fetchBlog()
     this.fetchCategory()
     this.fetchTags()
+    this.calcIsMobile()
+    window.addEventListener('resize', this.calcIsMobile)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.calcIsMobile)
   },
   methods: {
     fetchBlog: function () {
@@ -125,6 +131,9 @@ export default {
         }
       })
       return [lines.join('\n'), subtitles]
+    },
+    calcIsMobile () {
+      this.isMobile = window.innerWidth <= 768
     }
   }
 }
@@ -136,5 +145,8 @@ export default {
 }
 .container .right {
   width: 25%;
+}
+.mobile-left {
+  width: 100% !important;
 }
 </style>
