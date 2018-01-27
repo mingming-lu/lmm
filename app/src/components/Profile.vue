@@ -9,7 +9,7 @@
         <h3>{{ name }}</h3>
         <p>{{ bio }}</p>
         <p><i class="fa fa-briefcase fa-fw"></i>{{ profession }}</p>
-        <p><i class="fa fa-home fa-fw"></i>{{ location }}</p>
+        <p><i class="fa fa-map-marker fa-fw"></i>{{ location }}</p>
         <p><i class="fa fa-envelope fa-fw"></i>{{ email }}</p>
       </div>
 
@@ -37,7 +37,7 @@
 
       <!-- work experience -->
       <div class="container">
-        <h3><i class="fa fa-suitcase fa-fw"></i>Work Experience</h3>
+        <h3><i class="fa fa-building fa-fw"></i>Work Experience</h3>
         <br>
         <div v-for="we in workExperience" :key="we.company">
           <div class="row">
@@ -52,7 +52,7 @@
       </div>
 
       <div class="container">
-        <h3><i class="fa fa-book fa-fw"></i>Education</h3>
+        <h3><i class="fa fa-graduation-cap fa-fw"></i>Education</h3>
         <br>
         <div v-for="(e, index) in education" :key="index">
           <div class="row">
