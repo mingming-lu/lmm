@@ -12,7 +12,7 @@
 
     <div class="right">
       <div class="container">
-        <h4>Tags</h4>
+        <h4><i class="fa fa-fw fa-tags"></i>Tags</h4>
         <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
           {{ tag.name }}
         </router-link>
@@ -22,7 +22,7 @@
     <!-- Blog chapters navigation -->
     <div class="right nav">
       <div class="container">
-        <h4>Chapters</h4>
+        <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
           <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link">{{ subtitle.name }}</router-link>
         </p>
