@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- Left Column -->
-    <div :class="{ 'left': !isMobile }">
+    <div :class="{ 'left': wideMode }">
 
       <!-- profile -->
       <div class="container">
@@ -33,18 +33,24 @@
     <!-- End Left Column -->
 
     <!-- Right Column -->
-    <div :class="{ 'right': !isMobile }">
+    <div :class="{ 'right': wideMode }">
 
       <!-- work experience -->
       <div class="container">
         <h3><i class="fa fa-building fa-fw"></i>Work Experience</h3>
         <br>
         <div v-for="we in workExperience" :key="we.company">
-          <div class="row">
+          <div v-if="wideMode" class="row">
             <div class="left h">{{ we.company }}</div>
             <div v-if="we.current === true" class="right opacity">{{ we.date_from.slice(0, 7) }} ~ Current</div>
             <div v-else class="right opacity">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</div>
             <hr class="opacity-plus connection">
+          </div>
+          <div v-else>
+            <div class="h">{{ we.company }}</div>
+            <br>
+            <div v-if="we.current === true" class="opacity">{{ we.date_from.slice(0, 7) }} ~ Current</div>
+            <div v-else class="opacity">{{ we.date_from.slice(0, 7) }} ~ {{ we.date_to.slice(0, 7) }}</div>
           </div>
           <p class="opacity">{{ we.position }}</p>
           <br>
@@ -55,11 +61,17 @@
         <h3><i class="fa fa-graduation-cap fa-fw"></i>Education</h3>
         <br>
         <div v-for="(e, index) in education" :key="index">
-          <div class="row">
+          <div v-if="wideMode" class="row">
             <div class="left h">{{ e.institution }}</div>
             <div v-if="e.current === true" class="right opacity">{{ e.date_from.slice(0, 7) }} ~ Current</div>
             <div v-else class="right opacity">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</div>
             <hr class="opacity-plus connection">
+          </div>
+          <div v-else>
+            <div class="h">{{ e.institution }}</div>
+            <br>
+            <div v-if="e.current === true" class="opacity">{{ e.date_from.slice(0, 7) }} ~ Current</div>
+            <div v-else class="opacity">{{ e.date_from.slice(0, 7) }} ~ {{ e.date_to.slice(0, 7) }}</div>
           </div>
           <div class="opacity">
             <p>{{ e.degree }}</p>
@@ -74,10 +86,16 @@
         <h3><i class="fa fa-certificate fa-fw"></i>Qualifications</h3>
         <br>
         <div v-for="(q, index) in qualifications" :key="index">
-          <div class="row">
+          <div v-if="wideMode" class="row">
             <div class="left h">{{ q.name }}</div>
             <div class="right opacity">{{ q.date.slice(0, 7) }}</div>
             <hr class="opacity-plus connection">
+          </div>
+          <div v-else>
+            <div class="h">{{ q.name }}</div>
+            <br>
+            <div class="opacity">{{ q.date.slice(0, 7) }}</div>
+            <br>
           </div>
           <br>
         </div>
@@ -106,12 +124,12 @@ export default {
       workExperience: [],
       education: [],
       qualifications: [],
-      isMobile: false
+      wideMode: false
     }
   },
   created () {
-    this.calcIsMobile()
-    window.addEventListener('resize', this.calcIsMobile)
+    this.calcIsWideMode()
+    window.addEventListener('resize', this.calcIsWideMode)
     axios.get('http://api.lmm.im/users/1/profile').then((res) => {
       let profile = res.data
       this.name = profile.name
@@ -140,14 +158,14 @@ export default {
     })
   },
   beforeDestroy () {
-    window.removeEventListener('resize', this.calcIsMobile)
+    window.removeEventListener('resize', this.calcIsWideMode)
   },
   methods: {
     setDefaultAvatar () {
       this.avatar_url = 'https://avatars3.githubusercontent.com/u/17140497?s=400&u=636be90e7798e07230fa5f37af1a0f5070fa23a6&v=4'
     },
-    calcIsMobile () {
-      this.isMobile = window.innerWidth <= 825
+    calcIsWideMode () {
+      this.wideMode = window.innerWidth > 825
     }
   }
 }
