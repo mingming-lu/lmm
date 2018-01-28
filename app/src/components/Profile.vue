@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- Left Column -->
-    <div class="left" style="width:33.3333%;">
+    <div :class="{ 'left': !isMobile }">
 
       <!-- profile -->
       <div class="container">
@@ -33,7 +33,7 @@
     <!-- End Left Column -->
 
     <!-- Right Column -->
-    <div class="right" style="width:66.6666%;">
+    <div :class="{ 'right': !isMobile }">
 
       <!-- work experience -->
       <div class="container">
@@ -105,10 +105,13 @@ export default {
       languages: [],
       workExperience: [],
       education: [],
-      qualifications: []
+      qualifications: [],
+      isMobile: false
     }
   },
   created () {
+    this.calcIsMobile()
+    window.addEventListener('resize', this.calcIsMobile)
     axios.get('http://api.lmm.im/users/1/profile').then((res) => {
       let profile = res.data
       this.name = profile.name
@@ -136,15 +139,27 @@ export default {
       console.log(e)
     })
   },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.calcIsMobile)
+  },
   methods: {
     setDefaultAvatar () {
       this.avatar_url = 'https://avatars3.githubusercontent.com/u/17140497?s=400&u=636be90e7798e07230fa5f37af1a0f5070fa23a6&v=4'
+    },
+    calcIsMobile () {
+      this.isMobile = window.innerWidth <= 825
     }
   }
 }
 </script>
 
 <style scoped>
+.container > .left {
+  width: 33.333333%;
+}
+.container > .right {
+  width: 66.666666%;
+}
 .row {
   width: 100%;
   border: 1px solid white;
