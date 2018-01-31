@@ -1,21 +1,26 @@
 <template>
   <div id="app">
-    <header class="white" :class="{'text-center': !isMobile, 'text-left': isMobile}">
+    <header class="white" :class="{'text-center': wideMode}">
       <nav>
-        <router-link v-if="!isMobile" v-for="item in items" :key="item.name" :to="item.link" active-class="nav-item-active" class="nav-item">
+        <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" active-class="nav-item-active" class="nav-item">
           {{ item.name }}
         </router-link>
-        <button v-if="isMobile" class="nav-item" @click="toggleDrawer">&#9776;</button>
-      </nav>
+        <button v-if="!wideMode" class="nav-item button" @click="toggleDrawer">&#9776;</button>
 
-      <div class="w3-sidebar w3-bar-block w3-animate-left container" style="display:none;z-index:5" id="mySidebar">
-        <router-link v-for="item in items" :key="item.name" :to="item.link" class="nav-item link" @click.native="toggleDrawer">
-          <p>{{ item.name }}</p>
-        </router-link>
-      </div>
+        <div class="drawer animate-left text-left" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']">
+          <button class="nav-item button close-button" @click="toggleDrawer">&times;</button>
+          <div class="container" style="margin-top: 44px; /* height of header */">
+            <router-link v-for="item in items" :key="item.name" :to="item.link" class="link white" @click.native="toggleDrawer">
+              <p>{{ item.name }}</p>
+            </router-link>
+          </div>
+        </div>
+      </nav>
+      <div class="overlay animate-opacity" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
     </header>
 
-    <div class="w3-overlay w3-animate-opacity" @click="toggleDrawer" style="cursor:pointer" id="myOverlay"></div>
+    <div class="overlay animate-opacity" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
+
     <router-view style="margin-bottom:86px;" />
 
     <footer class="center">
@@ -37,7 +42,7 @@ export default {
   data () {
     return {
       drawerShown: false,
-      isMobile: false,
+      wideMode: false,
       items: [
         {
           link: '/home',
@@ -63,26 +68,19 @@ export default {
     }
   },
   created () {
-    this.calcIsMobile()
-    window.addEventListener('resize', this.calcIsMobile)
+    this.calcIsWideMode()
+    window.addEventListener('resize', this.calcIsWideMode)
   },
   beforeDestroy () {
-    window.removeEventListener('resize', this.calcIsMobile)
+    window.removeEventListener('resize', this.calcIsWideMode)
   },
   methods: {
-    calcIsMobile () {
-      this.isMobile = window.innerWidth <= 450
+    calcIsWideMode () {
+      this.wideMode = window.innerWidth > 450
     },
     toggleDrawer () {
       this.drawerShown = !this.drawerShown
-
-      if (this.drawerShown) {
-        document.getElementById('mySidebar').style.display = 'block'
-        document.getElementById('myOverlay').style.display = 'block'
-      } else {
-        document.getElementById('mySidebar').style.display = 'none'
-        document.getElementById('myOverlay').style.display = 'none'
-      }
+      console.log(this.drawerShown)
     }
   }
 }
@@ -90,4 +88,32 @@ export default {
 
 <style>
   @import './assets/styles/common.css';
+</style>
+<style scoped>
+.drawer-show {
+  display: block;
+}
+.drawer-hide {
+  display: none;
+}
+.animate-left {
+  position: relative;
+  animation:animateleft 0.4s
+}
+@keyframes animateleft {
+  from {
+    left: -300px;
+    opacity:0
+  } to {
+    left:0;opacity:1
+  }
+}
+.close-button {
+  position: absolute;
+  right: 0;
+  padding: 14px;
+}
+.button {
+  font-size: 13px;
+}
 </style>
