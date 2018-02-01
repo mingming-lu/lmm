@@ -2,24 +2,32 @@
   <div id="app">
     <header class="white" :class="{'text-center': wideMode}">
       <nav>
-        <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" active-class="nav-item-active" class="nav-item">
-          {{ item.name }}
-        </router-link>
-        <button v-if="!wideMode" class="nav-item button" @click="toggleDrawer">&#9776;</button>
 
-        <div class="drawer animate-left text-left" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']">
-          <button class="nav-item button close-button" @click="toggleDrawer">&times;</button>
-          <div class="container" style="margin-top: 44px; /* height of header */">
-            <router-link v-for="item in items" :key="item.name" :to="item.link" class="link white" @click.native="toggleDrawer">
-              <p>{{ item.name }}</p>
-            </router-link>
+        <!-- wide mode-->
+        <div>
+          <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" active-class="nav-item-active" class="nav-item">
+            {{ item.name }}
+          </router-link>
+        </div>
+
+        <!-- narrow mode-->
+        <div class="text-left">
+          <router-link v-if="!wideMode" to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
+          <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
+            <router-link to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
+            <div class="container">
+              <router-link v-for="item in items" :key="item.name" :to="item.link" class="link white" @click.native="toggleDrawer">
+                <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
+              </router-link>
+            </div>
           </div>
         </div>
+
       </nav>
-      <div class="overlay animate-opacity" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
+      <div class="overlay animate-opacity" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
     </header>
 
-    <div class="overlay animate-opacity" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
+    <div class="overlay animate-opacity" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
 
     <router-view style="margin-bottom:86px;" />
 
@@ -37,6 +45,7 @@
 </template>
 
 <script>
+// TODO set drawer items margin-top equals to the height of header
 export default {
   name: 'app',
   data () {
@@ -46,23 +55,28 @@ export default {
       items: [
         {
           link: '/home',
-          name: 'Home'
+          name: 'Home',
+          icon: 'fa-home'
         },
         {
           link: '/blog',
-          name: 'Blog'
+          name: 'Blog',
+          icon: 'fa-pencil'
         },
         {
           link: '/photos',
-          name: 'Photographs'
+          name: 'Photographs',
+          icon: 'fa-camera-retro'
         },
         {
           link: '/projects',
-          name: 'Projects'
+          name: 'Projects',
+          icon: 'fa-star-half-o'
         },
         {
           link: '/profile',
-          name: 'Profile'
+          name: 'Profile',
+          icon: 'fa-user'
         }
       ]
     }
@@ -74,9 +88,16 @@ export default {
   beforeDestroy () {
     window.removeEventListener('resize', this.calcIsWideMode)
   },
+  watch: {
+    content () {
+      this.$nextTick(() => {
+        console.log('exo me?')
+      })
+    }
+  },
   methods: {
     calcIsWideMode () {
-      this.wideMode = window.innerWidth > 450
+      this.wideMode = window.innerWidth > 600
     },
     toggleDrawer () {
       this.drawerShown = !this.drawerShown
@@ -96,6 +117,9 @@ export default {
 .drawer-hide {
   display: none;
 }
+.drawer>.container {
+  border-top: 1px solid #f1f1f1;
+}
 .animate-left {
   position: relative;
   animation:animateleft 0.4s
@@ -107,13 +131,5 @@ export default {
   } to {
     left:0;opacity:1
   }
-}
-.close-button {
-  position: absolute;
-  right: 0;
-  padding: 14px;
-}
-.button {
-  font-size: 13px;
 }
 </style>
