@@ -64,7 +64,7 @@ nav .nav-item {
 }
 .tag {
   display: inline-block;
-  background-color: cadetblue;
+  background-color: #777;
   padding: 1px 8px;
   margin: 0 2px 3.36px 2px;
   border-radius: 2px;
