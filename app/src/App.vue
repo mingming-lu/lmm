@@ -13,7 +13,7 @@
         <!-- narrow mode-->
         <div class="text-left">
           <router-link v-if="!wideMode" to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
-          <div class="drawer animate-left" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']">
+          <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
             <router-link to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
             <div class="container">
               <router-link v-for="item in items" :key="item.name" :to="item.link" class="link white" @click.native="toggleDrawer">
@@ -24,10 +24,10 @@
         </div>
 
       </nav>
-      <div class="overlay animate-opacity" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
+      <div class="overlay animate-opacity" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
     </header>
 
-    <div class="overlay animate-opacity" :class="[drawerShown ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
+    <div class="overlay animate-opacity" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
 
     <router-view style="margin-bottom:86px;" />
 
