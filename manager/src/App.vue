@@ -29,6 +29,7 @@ export default {
         this.username = localStorage.getItem('username')
       }).catch(e => {
         // go to /login if 401 or other error catched
+        this.clearLocalStorage()
         this.$router.push('/login')
       })
     },
@@ -39,13 +40,15 @@ export default {
         }
       }).then(res => {
         alert('logout!')
-        localStorage.removeItem('token')
-        localStorage.removeItem('username')
-        this.username = ''
-        this.$router.push('/login')
       }).catch(e => {
-        alert(e, e.response.data)
+        alert(e.response.data)
+        alert('expired')
       })
+      this.clearLocalStorage()
+    },
+    clearLocalStorage () {
+      localStorage.removeItem('token')
+      localStorage.removeItem('username')
     }
   }
 }
