@@ -41,6 +41,7 @@ export default {
       }).then(res => {
         alert('logout!')
       }).catch(e => {
+        alert(e.response.data)
         alert('expired')
       })
       this.clearLocalStorage()
