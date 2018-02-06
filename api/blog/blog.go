@@ -86,7 +86,7 @@ func NewBlog(c *elesion.Context) {
 
 	body.User = usr.ID
 
-	_, err = newBlog(body)
+	id, err := newBlog(body)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).Error(err.Error()).String("failed to post blog")
 		return
@@ -96,7 +96,7 @@ func NewBlog(c *elesion.Context) {
 		c.Status(http.StatusBadRequest).Error(err.Error()).String("success to post blog but failed when post tags")
 		return
 	}
-	c.Status(http.StatusOK).String("success")
+	c.Header("location", fmt.Sprintf("blog/%d", id)).Status(http.StatusCreated).String("success")
 }
 
 func newBlog(blog Blog) (int64, error) {
