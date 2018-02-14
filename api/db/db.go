@@ -91,9 +91,17 @@ func (db *DB) DropDatabase(name string) *DB {
 func (db *DB) Use(database string) *DB {
 	_, err := db.Exec("USE " + database)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 	return db
+}
+
+func (db *DB) Must(query string) *sql.Stmt {
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		panic(err)
+	}
+	return stmt
 }
 
 func Init(name string) {

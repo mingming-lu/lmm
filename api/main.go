@@ -10,7 +10,8 @@ import (
 	"lmm/api/db"
 	"lmm/api/image"
 	"lmm/api/profile"
-	"lmm/api/user"
+
+	"lmm/api/controller/user"
 )
 
 func init() {
@@ -22,19 +23,18 @@ func main() {
 
 	// user
 	router.POST("/signup", user.SignUp)
-	router.POST("/login", user.Login)
-	router.GET("/logout", user.Logout)
+	router.POST("/signin", user.SignIn)
 	router.GET("/verify", user.Verify)
 
 	// blog
-	router.GET("/blog", blog.GetBlog)
-	router.POST("/blog", blog.NewBlog)
-	router.PUT("/blog", blog.UpdateBlog)
-	router.DELETE("/blog", blog.DeleteBlog)
+	// router.GET("/blog", blog.GetBlog)
+	// router.POST("/blog", blog.NewBlog)
+	// router.PUT("/blog", blog.UpdateBlog)
+	// router.DELETE("/blog", blog.DeleteBlog)
 
 	// category
-	router.GET("/categories", blog.GetCategories)
-	router.POST("/categories", blog.NewCategory)
+	// router.GET("/categories", blog.GetCategories)
+	// router.POST("/categories", blog.NewCategory)
 
 	// tag
 	router.GET("/tags", blog.GetTags)
