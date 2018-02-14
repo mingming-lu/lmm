@@ -25,7 +25,7 @@ func SignUp(c *elesion.Context) {
 		return
 	}
 
-	c.Header("location", fmt.Sprintf("/user/%d", id)).Status(http.StatusCreated).String("Success")
+	c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
 }
 
 func SignIn(c *elesion.Context) {
