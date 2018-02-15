@@ -67,8 +67,8 @@ export default {
         html: true,
         typographer: true
       })
-      axios.get('http://api.lmm.im/blog?user=1&id=' + this.blogID).then(res => {
-        const blog = res.data[0]
+      axios.get('http://api.lmm.local/blogs/' + this.blogID).then(res => {
+        const blog = res.data
         this.title = blog.title
         this.text = md.render(blog.text)
         this.createdAt = blog.created_at
