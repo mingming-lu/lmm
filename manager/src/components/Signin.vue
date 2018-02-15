@@ -6,7 +6,7 @@
       <input type="text" size="32" id="username" v-model="username"><br>
       <label for="password">Password</label>
       <input type="password" size="32" v-model="password"><br>
-      <input type="submit" value="Login" @click="login">
+      <input type="submit" value="Signin" @click="signin">
     </form>
   </div>
 </template>
@@ -26,13 +26,13 @@ export default {
     }
   },
   methods: {
-    login () {
-      axios.post('http://api.lmm.local/login', {
+    signin () {
+      axios.post('http://api.lmm.local/signin', {
         name: this.username,
         password: this.password
       }).then(res => {
         if (res.status !== 200) {
-          alert('login failed')
+          alert('signin failed')
           return
         }
         localStorage.setItem('username', res.data.name)
