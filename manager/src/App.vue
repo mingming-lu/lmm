@@ -2,7 +2,7 @@
   <div id="app">
     <div class="text-right">
       {{ username }}
-      <span v-if="username"><button @click="logout">Logout</button></span>
+      <span v-if="username"><button @click="signout">Signout</button></span>
     </div>
     <router-view/> </div>
 </template>
@@ -28,23 +28,14 @@ export default {
       }).then(res => {
         this.username = localStorage.getItem('username')
       }).catch(e => {
-        // go to /login if 401 or other error catched
+        // go to /signin if 401 or other error catched
         this.clearLocalStorage()
-        this.$router.push('/login')
+        this.$router.push('/signin')
       })
     },
-    logout () {
-      axios.get('http://api.lmm.local/logout', {
-        headers: {
-          Authorization: localStorage.getItem('token')
-        }
-      }).then(res => {
-        alert('logout!')
-      }).catch(e => {
-        alert(e.response.data)
-        alert('expired')
-      })
+    signout () {
       this.clearLocalStorage()
+      location.reload()
     },
     clearLocalStorage () {
       localStorage.removeItem('token')

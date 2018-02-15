@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Index from '@/components/Index'
-import Login from '@/components/Login'
+import Signin from '@/components/Signin'
 import PageNotFound from '@/components/404'
 import BlogIndex from '@/components/blog/Index'
 import BlogNew from '@/components/blog/New'
@@ -23,8 +23,8 @@ export default new Router({
       component: Index
     },
     {
-      path: '/login',
-      component: Login
+      path: '/signin',
+      component: Signin
     },
     {
       path: '/blog',
