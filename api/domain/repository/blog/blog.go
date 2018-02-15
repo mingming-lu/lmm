@@ -42,7 +42,7 @@ func ByUser(userID int64) ([]model.Blog, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
-	stmt := d.Must("SELECT id, user, title, text, created_at, updated_at FROM blog WHERE user = ?")
+	stmt := d.Must("SELECT id, user, title, text, created_at, updated_at FROM blog WHERE user = ? ORDER BY created_at DESC")
 	defer stmt.Close()
 
 	rows, err := stmt.Query(userID)
