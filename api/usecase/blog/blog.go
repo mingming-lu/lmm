@@ -20,12 +20,12 @@ func FetchByUser(userID int64) ([]model.Blog, error) {
 	return repo.ByUser(userID)
 }
 
-func Update(id int64, title, text string) (*model.Blog, error) {
+func Update(id int64, title, text string) error {
 	title = strings.TrimSpace(title)
 	text = strings.TrimSpace(text)
 	return repo.Update(id, title, text)
 }
 
-func Delete(id int64) (*model.Blog, error) {
+func Delete(id int64) error {
 	return repo.Delete(id)
 }

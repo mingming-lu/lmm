@@ -65,9 +65,28 @@ func GetByUser(c *elesion.Context) {
 }
 
 func Update(c *elesion.Context) {
+	// check token
+	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
+		return
+	}
+
 	id, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
+		return
+	}
+
+	blog, err := usecase.Fetch(id)
+	if err != nil {
+		c.Status(http.StatusNotFound).String("No such blog").Error(err.Error())
+		return
+	}
+
+	// check if blog is belong to user
+	if blog.User != usr.ID {
+		c.Status(http.StatusUnauthorized).String("User not allowed to edit blog").Error(err.Error())
 		return
 	}
 
@@ -78,8 +97,7 @@ func Update(c *elesion.Context) {
 		return
 	}
 
-	_, err = usecase.Update(id, m.Title, m.Text)
-	if err != nil {
+	if err = usecase.Update(id, m.Title, m.Text); err != nil {
 		c.Status(http.StatusNotFound).String("No such blog").Error(err.Error())
 		return
 	}
@@ -87,14 +105,32 @@ func Update(c *elesion.Context) {
 }
 
 func Delete(c *elesion.Context) {
+	// check token
+	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
+		return
+	}
+
 	id, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
 	}
 
-	_, err = usecase.Delete(id)
+	blog, err := usecase.Fetch(id)
 	if err != nil {
+		c.Status(http.StatusNotFound).String("No such blog").Error(err.Error())
+		return
+	}
+
+	// check if blog is belong to user
+	if blog.User != usr.ID {
+		c.Status(http.StatusUnauthorized).String("User not allowed to edit blog").Error(err.Error())
+		return
+	}
+
+	if err = usecase.Delete(id); err != nil {
 		c.Status(http.StatusNotFound).String("No such blog").Error(err.Error())
 		return
 	}
