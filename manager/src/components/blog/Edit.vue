@@ -36,8 +36,7 @@ export default {
         alert('no change')
         return
       }
-      axios.put('http://api.lmm.local/blog', {
-        id: Number(this.blogID),
+      axios.put('http://api.lmm.local/blogs/' + this.blogID, {
         title: this.title,
         text: this.text
       }, {
@@ -71,8 +70,8 @@ export default {
       this.fetchTags()
     },
     fetchBlog () {
-      axios.get('http://api.lmm.local/blog?user=1&id=' + this.blogID).then(res => {
-        this.blogOriginal = res.data[0]
+      axios.get('http://api.lmm.local/blogs/' + this.blogID).then(blog => {
+        this.blogOriginal = blog.data
 
         this.id = this.blogOriginal.id
         this.title = this.blogOriginal.title
