@@ -59,14 +59,14 @@ export default {
   },
   methods: {
     fetchBlog () {
-      axios.get('http://api.lmm.local/users/1/blogs').then(res => {
+      axios.get('http://api.lmm.im/users/1/blogs').then(res => {
         this.blog = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchCategories () {
-      axios.get('http://api.lmm.im/categories?user=1').then(res => {
+      axios.get('http://api.lmm.im/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)

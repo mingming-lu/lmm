@@ -43,7 +43,7 @@ export default {
       text: '',
       createdAt: '',
       updatedAt: '',
-      category: '',
+      category: null,
       tags: []
     }
   },
@@ -67,7 +67,7 @@ export default {
         html: true,
         typographer: true
       })
-      axios.get('http://api.lmm.local/blogs/' + this.blogID).then(res => {
+      axios.get('http://api.lmm.im/blogs/' + this.blogID).then(res => {
         const blog = res.data
         this.title = blog.title
         this.text = md.render(blog.text)
@@ -87,8 +87,8 @@ export default {
       })
     },
     fetchCategory: function () {
-      axios.get('http://api.lmm.im/categories?user=1&blog=' + this.blogID).then(res => {
-        this.category = res.data[0]
+      axios.get('http://api.lmm.im/blogs/' + this.blogID + '/category').then(res => {
+        this.category = res.data
       }).catch(e => {
         console.log(e)
       })
