@@ -86,7 +86,7 @@ func Update(c *elesion.Context) {
 
 	// check if blog is belong to user
 	if blog.User != usr.ID {
-		c.Status(http.StatusUnauthorized).String("User not allowed to edit blog").Error(err.Error())
+		c.Status(http.StatusForbidden).String("Access forbidden").Error(err.Error())
 		return
 	}
 
