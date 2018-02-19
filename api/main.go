@@ -7,6 +7,7 @@ import (
 	"github.com/akinaru-lu/elesion"
 
 	"lmm/api/controller/blog"
+	"lmm/api/controller/category"
 	"lmm/api/controller/user"
 	"lmm/api/db"
 	"lmm/api/image"
@@ -33,8 +34,10 @@ func main() {
 	router.DELETE("/blogs/:blog", blog.Delete)
 
 	// category
-	// router.GET("/categories", blog.GetCategories)
-	// router.POST("/categories", blog.NewCategory)
+	router.GET("/users/:user/categories", category.GetByUser)
+	router.GET("/blogs/:blog/category", category.GetByBlog)
+	router.POST("/blogs/:blog/category", category.Register)
+	router.PUT("/blogs/:blog/category", category.Update)
 
 	// tag
 	// router.GET("/tags", blog.GetTags)
