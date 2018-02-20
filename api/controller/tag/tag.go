@@ -21,7 +21,7 @@ func Register(c *elesion.Context) {
 	}
 
 	tags := make([]model.Minimal, 0)
-	err = json.NewDecoder(c.Request.Body).Decode(tags)
+	err = json.NewDecoder(c.Request.Body).Decode(&tags)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid body").Error(err.Error())
 		return
@@ -49,7 +49,7 @@ func Update(c *elesion.Context) {
 	}
 
 	m := model.Minimal{}
-	err = json.NewDecoder(c.Request.Body).Decode(m)
+	err = json.NewDecoder(c.Request.Body).Decode(&m)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid body").Error(err.Error())
 		return
