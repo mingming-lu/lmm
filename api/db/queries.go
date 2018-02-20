@@ -122,6 +122,17 @@ CREATE TABLE IF NOT EXISTS tag (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
+const createImage = `
+CREATE TABLE IF NOT EXISTS image (
+	id int unsigned NOT NULL AUTO_INCREMENT,
+	user int unsigned NOT NULL,
+	url varchar(127) NOT NULL,
+	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (id),
+	UNIQUE (url)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+`
+
 var CreateSQL = []string{
 	createUser,
 	createProfile,
@@ -133,4 +144,5 @@ var CreateSQL = []string{
 	createBlog,
 	createCategory,
 	createTag,
+	createImage,
 }
