@@ -73,7 +73,7 @@ export default {
       })
     },
     fetchTags () {
-      axios.get('http://api.lmm.im/tags?user=1').then(res => {
+      axios.get('http://api.lmm.im/users/1/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
