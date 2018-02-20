@@ -87,7 +87,7 @@ func bySingle(field string, value interface{}) ([]model.Tag, error) {
 	d := db.UseDefault()
 	defer d.Close()
 
-	stmt := d.Mustf("SELECT id, user, blog, name FROM tag WHERE %s = ?", field)
+	stmt := d.Mustf("SELECT MIN(id), MIN(user), MIN(blog), name FROM tag WHERE %s = ? GROUP BY name ORDER BY name", field)
 	defer stmt.Close()
 
 	tags := make([]model.Tag, 0)
