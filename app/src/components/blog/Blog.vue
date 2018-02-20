@@ -94,7 +94,7 @@ export default {
       })
     },
     fetchTags: function () {
-      axios.get('http://api.lmm.im/tags?user=1&blog=' + this.blogID).then(res => {
+      axios.get('http://api.lmm.im/blogs/' + this.blogID + '/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
