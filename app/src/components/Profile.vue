@@ -130,7 +130,7 @@ export default {
   created () {
     this.calcIsWideMode()
     window.addEventListener('resize', this.calcIsWideMode)
-    axios.get('http://api.lmm.im/users/1/profile').then((res) => {
+    axios.get('https://api.lmm.im/users/1/profile').then((res) => {
       let profile = res.data
       this.name = profile.name
       this.avatar_url = profile.avatar_url

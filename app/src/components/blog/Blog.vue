@@ -67,7 +67,7 @@ export default {
         html: true,
         typographer: true
       })
-      axios.get('http://api.lmm.im/blogs/' + this.blogID).then(res => {
+      axios.get('https://api.lmm.im/blogs/' + this.blogID).then(res => {
         const blog = res.data
         this.title = blog.title
         this.text = md.render(blog.text)
@@ -87,14 +87,14 @@ export default {
       })
     },
     fetchCategory: function () {
-      axios.get('http://api.lmm.im/blogs/' + this.blogID + '/category').then(res => {
+      axios.get('https://api.lmm.im/blogs/' + this.blogID + '/category').then(res => {
         this.category = res.data
       }).catch(e => {
         console.log(e)
       })
     },
     fetchTags: function () {
-      axios.get('http://api.lmm.im/blogs/' + this.blogID + '/tags').then(res => {
+      axios.get('https://api.lmm.im/blogs/' + this.blogID + '/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
