@@ -8,10 +8,59 @@ import (
 )
 
 func Add(userID, blogID int64, tags []model.Minimal) error {
-	return nil
+	d := db.UseDefault()
+	defer d.Close()
+
+	stmt := d.Must("INSERT INTO tag (user, blog, name) VALUES (?, ?, ?)")
+
+	tx, err := d.Begin()
+	stmt = tx.Stmt(stmt)
+	defer stmt.Close()
+
+	rowsAffected := int64(0)
+	for _, tag := range tags {
+		res, err := stmt.Exec(userID, blogID, tag.Name)
+		if err != nil {
+			break
+		}
+		rows, err := res.RowsAffected()
+		if err != nil {
+			break
+		}
+		rowsAffected += rows
+	}
+
+	if err != nil {
+		return errors.Wrap(err, errors.Wrap(tx.Rollback(), "").Error())
+	}
+	if rowsAffected == 0 {
+		return db.ErrNoChange
+	}
+	if rowsAffected != int64(len(tags)) {
+		return errors.Wrap(err, errors.Wrap(tx.Rollback(), "Rows inserted not equal to length of input array").Error())
+	}
+	return tx.Commit()
 }
 
 func Update(userID, blogID, tagID int64, name string) error {
+	d := db.UseDefault()
+	defer d.Close()
+
+	stmt := d.Must("UPDATE tag SET name = ? WHERE id = ? AND user = ? AND blog = ?")
+	defer stmt.Close()
+
+	res, err := stmt.Exec(name, tagID, userID, blogID)
+	if err != nil {
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return db.ErrNoChange
+	}
+
 	return nil
 }
 
@@ -39,6 +88,7 @@ func bySingle(field string, value interface{}) ([]model.Tag, error) {
 	defer d.Close()
 
 	stmt := d.Mustf("SELECT id, user, blog, name FROM tag WHERE %s = ?", field)
+	defer stmt.Close()
 
 	tags := make([]model.Tag, 0)
 
@@ -60,5 +110,23 @@ func bySingle(field string, value interface{}) ([]model.Tag, error) {
 }
 
 func Delete(userID, blogID, tagID int64) error {
+	d := db.UseDefault()
+	defer d.Close()
+
+	stmt := d.Must("DELETE FROM tag WHERE id = ? AND user = ? AND blog = ?")
+	defer stmt.Close()
+
+	res, err := stmt.Exec(tagID, userID, blogID)
+	if err != nil {
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return db.ErrNoChange
+	}
+
 	return nil
 }
