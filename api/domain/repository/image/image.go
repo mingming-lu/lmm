@@ -1,25 +1,17 @@
 package image
 
-func Add() {
+import (
+	model "lmm/api/domain/model/image"
+)
 
+func Add(userID int64, t model.ImageType, url string) error {
+	return nil
 }
 
-func ByID() {
-
+func ByType(userID int64, t model.ImageType) ([]model.Image, error) {
+	return nil, nil
 }
 
-func ByUser() {
-
-}
-
-func ByURL() {
-
-}
-
-func ByType() {
-
-}
-
-func Delete() {
-
+func Delete() error {
+	return nil
 }
