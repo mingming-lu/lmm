@@ -6,7 +6,7 @@ import (
 )
 
 func Add(userID, blogID int64, name string) (int64, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("INSERT INTO category (user, blog, name) VALUES (?, ?, ?)")
@@ -21,7 +21,7 @@ func Add(userID, blogID int64, name string) (int64, error) {
 }
 
 func Update(userID, blogID int64, name string) error {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("UPDATE category SET name = ? WHERE user = ? AND blog = ?")
@@ -40,7 +40,7 @@ func Update(userID, blogID int64, name string) error {
 }
 
 func ByUser(userID int64) ([]model.Category, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("SELECT MIN(id), MIN(user), MIN(blog), name FROM category WHERE user = ? GROUP BY name ORDER BY name")
@@ -64,7 +64,7 @@ func ByUser(userID int64) ([]model.Category, error) {
 }
 
 func ByBlog(blogID int64) (*model.Category, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("SELECT id, user, blog, name FROM category WHERE blog = ?")

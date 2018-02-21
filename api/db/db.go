@@ -65,7 +65,7 @@ func New() *DB {
 	return &DB{DB: super}
 }
 
-func UseDefault() *DB {
+func Default() *DB {
 	if defaultDatabaseName == "" {
 		panic("Default database has not been set")
 	}

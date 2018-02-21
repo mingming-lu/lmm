@@ -42,7 +42,7 @@ func GetProfile(c *elesion.Context) {
 }
 
 func getProfile(userID int64) (*Profile, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	profile := Profile{}
