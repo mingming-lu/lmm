@@ -48,7 +48,7 @@ func main() {
 	router.DELETE("/blogs/:blog/tags/:tag", tag.Delete)
 
 	// image
-	// router.GET("/users/:user/photos", image.Handler)
+	router.GET("/users/:user/photos", image.GetPhotos)
 	router.POST("/images", image.Upload)
 
 	router.GET("/users/:user/profile", profile.GetProfile)

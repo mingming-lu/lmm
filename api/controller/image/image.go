@@ -45,6 +45,6 @@ func Upload(c *elesion.Context) {
 	c.Status(http.StatusCreated).String("success")
 }
 
-func Get(c *elesion.Context) {
+func GetPhotos(c *elesion.Context) {
 	c.Status(http.StatusNotImplemented).String("Not implemented")
 }
