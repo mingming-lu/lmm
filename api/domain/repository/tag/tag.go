@@ -12,10 +12,10 @@ func Add(userID, blogID int64, tags []model.Minimal) error {
 	defer d.Close()
 
 	stmt := d.Must("INSERT INTO tag (user, blog, name) VALUES (?, ?, ?)")
+	defer stmt.Close()
 
 	tx, err := d.Begin()
 	stmt = tx.Stmt(stmt)
-	defer stmt.Close()
 
 	rowsAffected := int64(0)
 	for _, tag := range tags {
