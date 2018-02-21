@@ -57,6 +57,7 @@ func Fetch(userID int64, imageType model.ImageType) ([]model.Minimal, error) {
 		if err != nil {
 			return images, err
 		}
+		images = append(images, image)
 	}
 
 	return images, nil
