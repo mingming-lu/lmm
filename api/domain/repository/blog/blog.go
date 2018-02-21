@@ -6,7 +6,7 @@ import (
 )
 
 func Add(userID int64, title, text string) (int64, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("INSERT INTO blog (user, title, text) VALUES (?, ?, ?)")
@@ -21,7 +21,7 @@ func Add(userID int64, title, text string) (int64, error) {
 }
 
 func ById(id int64) (*model.Blog, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("SELECT id, user, title, text, created_at, updated_at FROM blog WHERE id = ?")
@@ -39,7 +39,7 @@ func ById(id int64) (*model.Blog, error) {
 }
 
 func ByUser(userID int64) ([]model.Blog, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("SELECT id, user, title, text, created_at, updated_at FROM blog WHERE user = ? ORDER BY created_at DESC")
@@ -64,7 +64,7 @@ func ByUser(userID int64) ([]model.Blog, error) {
 }
 
 func Update(id int64, title, text string) error {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("UPDATE blog SET title = ?, text = ? WHERE id = ?")
@@ -83,7 +83,7 @@ func Update(id int64, title, text string) error {
 }
 
 func Delete(id int64) error {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("DELETE FROM blog WHERE id = ?")

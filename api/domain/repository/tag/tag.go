@@ -8,7 +8,7 @@ import (
 )
 
 func Add(userID, blogID int64, tags []model.Minimal) error {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("INSERT INTO tag (user, blog, name) VALUES (?, ?, ?)")
@@ -43,7 +43,7 @@ func Add(userID, blogID int64, tags []model.Minimal) error {
 }
 
 func Update(userID, blogID, tagID int64, name string) error {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("UPDATE tag SET name = ? WHERE id = ? AND user = ? AND blog = ?")
@@ -84,7 +84,7 @@ func ByBlog(blogID int64) ([]model.Tag, error) {
 }
 
 func bySingle(field string, value interface{}) ([]model.Tag, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Mustf("SELECT MIN(id), MIN(user), MIN(blog), name FROM tag WHERE %s = ? GROUP BY name ORDER BY name", field)
@@ -110,7 +110,7 @@ func bySingle(field string, value interface{}) ([]model.Tag, error) {
 }
 
 func Delete(userID, blogID, tagID int64) error {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("DELETE FROM tag WHERE id = ? AND user = ? AND blog = ?")

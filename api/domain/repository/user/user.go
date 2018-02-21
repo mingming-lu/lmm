@@ -6,7 +6,7 @@ import (
 )
 
 func Add(name, password, guid, token string) (int64, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must(`INSERT INTO user (name, password, guid, token) values (?, ?, ?, ?)`)
@@ -21,7 +21,7 @@ func Add(name, password, guid, token string) (int64, error) {
 }
 
 func ByName(name string) (*model.User, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("SELECT id, name, password, guid, token, created_at FROM user WHERE name = ?")
@@ -36,7 +36,7 @@ func ByName(name string) (*model.User, error) {
 }
 
 func ByToken(token string) (*model.User, error) {
-	d := db.UseDefault()
+	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?")
