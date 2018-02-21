@@ -13,8 +13,9 @@ func Upload(userID int64, imageTypeStr string, data []byte) error {
 	return repo.Add(userID, imageType, name, data)
 }
 
-func Find(userID int64, t model.ImageType) ([]model.Image, error) {
-	return repo.Fetch(userID, t)
+func Find(userID int64, imageTypeStr string) ([]model.Image, error) {
+	imageType := toImageType(imageTypeStr)
+	return repo.Fetch(userID, imageType)
 }
 
 func toImageType(imageType string) model.ImageType {
