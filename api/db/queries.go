@@ -126,7 +126,7 @@ const createImage = `
 CREATE TABLE IF NOT EXISTS image (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
-	type varchar (15) NOT NULL,
+	type tinyint NOT NULL,
 	url varchar(127) NOT NULL,
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
