@@ -7,10 +7,12 @@ type Minimal struct {
 type ImageType int
 
 const (
-	TypeBlog ImageType = iota
-	TypeAvatar
+	TypeAvatar ImageType = iota
+	TypeBlog
 	TypePhoto
 )
+
+const BaseURL = "https://image.lmm.im/"
 
 type Image struct {
 	ID        int64
