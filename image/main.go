@@ -18,26 +18,35 @@ func where() string {
 	return path.Dir(filename)
 }
 
-func photos(c *elesion.Context) {
-	c.File(here + c.Request.URL.Path)
+func index(c *elesion.Context) {
+	// TODO handle query parameter `?thumbnail=true`
+	c.File(dirRaw + c.Request.URL.Path)
 }
 
-func ensureDir(path string) {
+func ensureDir(name string) string {
+	path := where() + "/" + name
+
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, os.ModePerm)
+	} else if err != nil {
+		log.Fatal(err)
 	}
+
+	return path
 }
 
-var here = "image"
+var (
+	dirRaw       string
+	dirThumbnail string
+)
 
 func init() {
-	here := where()
-	ensureDir(here + "/photos")
-	ensureDir(here + "/special")
+	dirRaw = ensureDir("raw")
+	dirThumbnail = ensureDir("thumbnail")
 }
 
 func main() {
 	router := elesion.Default("[image]")
-	router.GET("/photos/:name", photos)
+	router.GET("/:name", index)
 	log.Fatal(http.ListenAndServe(":8082", router))
 }
