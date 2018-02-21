@@ -8,10 +8,10 @@ import (
 
 	"lmm/api/controller/blog"
 	"lmm/api/controller/category"
+	"lmm/api/controller/image"
 	"lmm/api/controller/tag"
 	"lmm/api/controller/user"
 	"lmm/api/db"
-	"lmm/api/image"
 	"lmm/api/profile"
 )
 
@@ -47,7 +47,9 @@ func main() {
 	router.PUT("/blogs/:blog/tags/:tag", tag.Update)
 	router.DELETE("/blogs/:blog/tags/:tag", tag.Delete)
 
-	router.GET("/photos", image.Handler)
+	// image
+	router.GET("/users/:user/photos", image.GetPhotos)
+	router.POST("/images", image.Upload)
 
 	router.GET("/users/:user/profile", profile.GetProfile)
 
