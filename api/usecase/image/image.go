@@ -13,7 +13,7 @@ func Upload(userID int64, imageTypeStr string, data []byte) error {
 	return repo.Add(userID, imageType, name, data)
 }
 
-func Find(userID int64, imageTypeStr string) ([]model.Image, error) {
+func Find(userID int64, imageTypeStr string) ([]model.Minimal, error) {
 	imageType := toImageType(imageTypeStr)
 	return repo.Fetch(userID, imageType)
 }

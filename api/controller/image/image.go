@@ -5,6 +5,7 @@ import (
 	usecase "lmm/api/usecase/image"
 	"lmm/api/usecase/user"
 	"net/http"
+	"strconv"
 
 	"github.com/akinaru-lu/elesion"
 )
@@ -46,5 +47,16 @@ func Upload(c *elesion.Context) {
 }
 
 func GetPhotos(c *elesion.Context) {
-	c.Status(http.StatusNotImplemented).String("Not implemented")
+	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("Invalid user").Error(err.Error())
+		return
+	}
+
+	images, err := usecase.Find(userID, "photo")
+	if err != nil {
+		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).JSON(images)
 }

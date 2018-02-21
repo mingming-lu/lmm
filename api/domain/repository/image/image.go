@@ -37,6 +37,27 @@ func Add(userID int64, imageType model.ImageType, name string, data []byte) erro
 	return tx.Commit()
 }
 
-func Fetch(userID int64, t model.ImageType) ([]model.Image, error) {
-	return nil, nil
+func Fetch(userID int64, imageType model.ImageType) ([]model.Minimal, error) {
+	d := db.Default()
+	defer d.Close()
+
+	stmt := d.Must("SELECT url FROM image WHERE user = ? AND type = ? ORDER BY created_at")
+	defer stmt.Close()
+
+	images := make([]model.Minimal, 0)
+
+	itr, err := stmt.Query(userID, imageType)
+	if err != nil {
+		return images, err
+	}
+
+	for itr.Next() {
+		image := model.Minimal{}
+		err = itr.Scan(&image.URL)
+		if err != nil {
+			return images, err
+		}
+	}
+
+	return images, nil
 }
