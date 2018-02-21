@@ -7,9 +7,9 @@ type Minimal struct {
 type ImageType int
 
 const (
-	Blog ImageType = iota
-	Avatar
-	Photo
+	TypeBlog ImageType = iota
+	TypeAvatar
+	TypePhoto
 )
 
 type Image struct {
