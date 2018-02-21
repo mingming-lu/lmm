@@ -41,7 +41,7 @@ func Fetch(userID int64, imageType model.ImageType) ([]model.Minimal, error) {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("SELECT url FROM image WHERE user = ? AND type = ? ORDER BY created_at")
+	stmt := d.Must("SELECT url FROM image WHERE user = ? AND type = ? ORDER BY created_at desc")
 	defer stmt.Close()
 
 	images := make([]model.Minimal, 0)
