@@ -4,7 +4,8 @@
       {{ username }}
       <span v-if="username"><button @click="signout">Signout</button></span>
     </div>
-    <router-view/> </div>
+    <router-view/>
+  </div>
 </template>
 
 <script>
