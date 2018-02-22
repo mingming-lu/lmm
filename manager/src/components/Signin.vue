@@ -27,7 +27,7 @@ export default {
   },
   methods: {
     signin () {
-      axios.post('http://api.lmm.local/signin', {
+      axios.post('https://api.lmm.im/signin', {
         name: this.username,
         password: this.password
       }).then(res => {
