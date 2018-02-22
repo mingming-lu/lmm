@@ -7,7 +7,7 @@
           <h2>
             <router-link :to="'/blog/' + blog.id" class="link white">{{ blog.title }}</router-link>
           </h2>
-          <p class="opacity"><i class="fa fa-fw fa-calendar"></i>{{ blog.created_at }}</p>
+          <p class="opacity"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
         </div>
         <hr v-if="index !== blog.length - 1" class="opacity-plus">
       </div>
@@ -16,7 +16,7 @@
     <div v-if="!isMobile" class="right nav">
       <!-- Categories -->
       <div class="container">
-        <h4><i class="fa fa-fw fa-folder-o"></i>Categories</h4>
+        <h4><i class="fa fa-fw fa-folder"></i>Categories</h4>
         <router-link to="" v-for="category in categories" :key="category.id" class="white link">
           <p>{{ category.name }}</p>
         </router-link>
