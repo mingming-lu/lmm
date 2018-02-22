@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     verify () {
-      axios.get('http://api.lmm.local/verify', {
+      axios.get('https://api.lmm.im/verify', {
         headers: {
           'Authorization': localStorage.getItem('token')
         }
