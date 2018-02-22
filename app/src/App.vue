@@ -74,9 +74,9 @@ export default {
           icon: 'fa-star-half-o'
         },
         {
-          link: '/profile',
-          name: 'Profile',
-          icon: 'fa-user'
+          link: '/about',
+          name: 'About',
+          icon: 'fa-info'
         }
       ]
     }

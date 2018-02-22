@@ -6,7 +6,7 @@ import Blog from '@/components/blog/Blog'
 import BlogList from '@/components/blog/List'
 import Photos from '@/components/Photos'
 import Projects from '@/components/Project'
-import Profile from '@/components/Profile'
+import About from '@/components/About'
 
 Vue.use(Router)
 
@@ -52,8 +52,8 @@ export default new Router({
       component: Projects
     },
     {
-      path: '/profile',
-      component: Profile
+      path: '/about',
+      component: About
     }
   ]
 })
