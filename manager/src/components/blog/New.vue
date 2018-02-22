@@ -26,7 +26,7 @@ export default {
   },
   methods: {
     onSubmit () {
-      axios.post('http://api.lmm.local/blogs', {
+      axios.post('https://api.lmm.im/blogs', {
         title: this.title,
         text: this.text
       }, {
