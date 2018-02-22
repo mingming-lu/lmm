@@ -12,68 +12,6 @@ CREATE TABLE IF NOT EXISTS user (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
-const createSkill = `
-CREATE TABLE IF NOT EXISTS skill (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	name varchar(32) NOT NULL UNIQUE,
-	sort int unsigned NOT NULL UNIQUE,
-	PRIMARY KEY (id),
-	UNIQUE (user, name)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-`
-
-const createLanguage = `
-CREATE TABLE IF NOT EXISTS language (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	name varchar(32) NOT NULL UNIQUE,
-	sort int unsigned NOT NULL UNIQUE,
-	PRIMARY KEY (id),
-	UNIQUE (user, name)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-`
-
-const createEducation = `
-CREATE TABLE IF NOT EXISTS education (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	date_from date NOT NULL,
-	date_to date NOT NULL,
-	institution varchar(255) NOT NULL,
-	department varchar(255),
-	major varchar(255),
-	degree varchar(32) NOT NULL,
-	current bit NOT NULL DEFAULT b'0',
-	PRIMARY KEY (id)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-`
-
-const createWorkExperience = `
-CREATE TABLE IF NOT EXISTS work_experience (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	date_from date NOT NULL,
-	date_to date NOT NULL,
-	company varchar(255) NOT NULL,
-	position varchar(32),
-	status varchar(32),
-	current bit NOT NULL DEFAULT b'0',
-	PRIMARY KEY (id)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-`
-
-const createQualification = `
-CREATE TABLE IF NOT EXISTS qualification (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	date date NOT NULL,
-	name varchar(255) NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE (user, name)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-`
-
 const createBlog = `
 CREATE TABLE IF NOT EXISTS blog (
 	id int unsigned NOT NULL AUTO_INCREMENT,
@@ -122,11 +60,6 @@ CREATE TABLE IF NOT EXISTS image (
 
 var CreateSQL = []string{
 	createUser,
-	createSkill,
-	createLanguage,
-	createEducation,
-	createWorkExperience,
-	createQualification,
 	createBlog,
 	createCategory,
 	createTag,
