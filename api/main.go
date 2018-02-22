@@ -12,7 +12,6 @@ import (
 	"lmm/api/controller/tag"
 	"lmm/api/controller/user"
 	"lmm/api/db"
-	"lmm/api/profile"
 )
 
 func init() {
@@ -50,8 +49,6 @@ func main() {
 	// image
 	router.GET("/users/:user/photos", image.GetPhotos)
 	router.POST("/images", image.Upload)
-
-	router.GET("/users/:user/profile", profile.GetProfile)
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
