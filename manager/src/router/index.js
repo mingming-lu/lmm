@@ -7,7 +7,6 @@ import BlogIndex from '@/components/blog/Index'
 import BlogNew from '@/components/blog/New'
 import BlogEdit from '@/components/blog/Edit'
 import Photographs from '@/components/Photographs'
-import Profile from '@/components/Profile'
 
 Vue.use(Router)
 
@@ -60,10 +59,6 @@ export default new Router({
     {
       path: '/photographs',
       component: Photographs
-    },
-    {
-      path: '/profile',
-      component: Profile
     }
   ]
 })

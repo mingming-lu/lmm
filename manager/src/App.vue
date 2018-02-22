@@ -4,7 +4,8 @@
       {{ username }}
       <span v-if="username"><button @click="signout">Signout</button></span>
     </div>
-    <router-view/> </div>
+    <router-view/>
+  </div>
 </template>
 
 <script>
@@ -12,7 +13,7 @@ import axios from 'axios'
 export default {
   name: 'app',
   created () {
-    this.verify()
+    // this.verify()
   },
   data () {
     return {
