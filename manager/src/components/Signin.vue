@@ -6,7 +6,7 @@
       <input type="text" size="32" id="username" v-model="username"><br>
       <label for="password">Password</label>
       <input type="password" size="32" v-model="password"><br>
-      <input type="submit" value="Signin" @click="signin">
+      <input type="submit" value="Signin" @click.prevent="signin">
     </form>
   </div>
 </template>
@@ -14,11 +14,6 @@
 <script>
 import axios from 'axios'
 export default {
-  beforeCreate () {
-    if (localStorage.getItem('token')) {
-      this.$router.push('/')
-    }
-  },
   data () {
     return {
       username: '',
@@ -37,6 +32,8 @@ export default {
         }
         localStorage.setItem('username', res.data.name)
         localStorage.setItem('token', res.data.token)
+        this.$router.push('/')
+        location.reload()
       }).catch(e => {
         console.log(e.response.data)
       })
