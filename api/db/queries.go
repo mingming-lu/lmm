@@ -12,20 +12,6 @@ CREATE TABLE IF NOT EXISTS user (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
-const createProfile = `
-CREATE TABLE IF NOT EXISTS profile (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL UNIQUE,
-	nickname varchar(32) NOT NULL UNIQUE,
-	avatar_url varchar(128) NOT NULL DEFAULT '',
-	description varchar(400) NOT NULL DEFAULT '',
-	profession varchar(32) NOT NULL DEFAULT '',
-	location varchar(128) NOT NULL DEFAULT '',
-	email varchar(128) NOT NULL DEFAULT '',
-	PRIMARY KEY (id)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-`
-
 const createSkill = `
 CREATE TABLE IF NOT EXISTS skill (
 	id int unsigned NOT NULL AUTO_INCREMENT,
@@ -136,7 +122,6 @@ CREATE TABLE IF NOT EXISTS image (
 
 var CreateSQL = []string{
 	createUser,
-	createProfile,
 	createSkill,
 	createLanguage,
 	createEducation,
