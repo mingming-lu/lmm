@@ -13,7 +13,7 @@ import axios from 'axios'
 export default {
   name: 'app',
   created () {
-    // this.verify()
+    this.verify()
   },
   data () {
     return {
