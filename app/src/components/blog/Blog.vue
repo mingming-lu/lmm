@@ -3,7 +3,7 @@
     <!-- Blog text -->
     <div class="left" :class="{ 'mobile-left': isMobile }">
       <div class="container">
-        <h2 class="center">{{ title }}</h2>
+        <h1 class="center">{{ title }}</h1>
         <div v-html="text" v-hljs class="text"></div>
         <p v-if="createdAt === updatedAt" class="text-right opacity">Created at {{ createdAt }}</p>
         <p v-else class="text-right opacity">Updated at {{ updatedAt }}</p>
