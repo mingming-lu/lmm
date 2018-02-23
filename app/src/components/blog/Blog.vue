@@ -21,10 +21,10 @@
 
     <!-- Blog chapters navigation -->
     <div v-if="!isMobile" class="right nav">
-      <div class="container">
+      <div class="container chapter">
         <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
-          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link">{{ subtitle.name }}</router-link>
+          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link item">{{ subtitle.name }}</router-link>
         </p>
       </div>
     </div>
@@ -120,15 +120,20 @@ export default {
 
       // regard all h3 as subtitle
       lines.forEach((line, index) => {
-        const match = /^<h3>(.+)<\/h3>$/g.exec(line)
-        if (match && match.length >= 2) {
-          let subtitle = {
-            name: match[1],
-            link: '#' + match[1]
-          }
-          subtitles.push(subtitle)
-          lines[index] = '<div id="' + match[1] + '">' + line + '</div>'
+        const h = /^<h(\d)>(.+)<\/h(\d)>$/g.exec(line)
+        if (!h || h.length !== 4) {
+          return
         }
+        let prefix = ''
+        if (h[1] === h[3]) {
+          prefix = '  '.repeat((Number(h[1]) - 2) * 2)
+        }
+        let subtitle = {
+          name: prefix + h[2],
+          link: '#' + h[2]
+        }
+        subtitles.push(subtitle)
+        lines[index] = '<div id="' + h[2] + '">' + line + '</div>'
       })
       return [lines.join('\n'), subtitles]
     },
@@ -148,5 +153,8 @@ export default {
 }
 .mobile-left {
   width: 100% !important;
+}
+.chapter .item{
+  white-space: pre;
 }
 </style>
