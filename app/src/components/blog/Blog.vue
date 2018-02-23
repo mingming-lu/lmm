@@ -3,8 +3,8 @@
     <!-- Blog text -->
     <div class="left" :class="{ 'mobile-left': isMobile }">
       <div class="container">
-        <h2 class="center">{{ title }}</h2>
-        <div v-html="text" v-hljs class="text"></div>
+        <h1 class="center">{{ title }}</h1>
+        <div ref="text" v-html="text" v-hljs class="text"></div>
         <p v-if="createdAt === updatedAt" class="text-right opacity">Created at {{ createdAt }}</p>
         <p v-else class="text-right opacity">Updated at {{ updatedAt }}</p>
       </div>
@@ -21,10 +21,11 @@
 
     <!-- Blog chapters navigation -->
     <div v-if="!isMobile" class="right nav">
-      <div class="container">
+      <div class="container chapter">
         <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
+        <div class="progress-bar" :style="{ width: progress + '%' }"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
-          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link">{{ subtitle.name }}</router-link>
+          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link item">{{ subtitle.name }}</router-link>
         </p>
       </div>
     </div>
@@ -44,7 +45,8 @@ export default {
       createdAt: '',
       updatedAt: '',
       category: null,
-      tags: []
+      tags: [],
+      progress: 0
     }
   },
   created () {
@@ -57,9 +59,18 @@ export default {
     this.fetchTags()
     this.calcIsMobile()
     window.addEventListener('resize', this.calcIsMobile)
+    window.addEventListener('scroll', this.calcProgress)
+  },
+  watch: {
+    text: function () {
+      this.$nextTick(() => {
+        this.calcProgress()
+      })
+    }
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.calcIsMobile)
+    window.removeEventListener('scroll', this.calcProgress)
   },
   methods: {
     fetchBlog: function () {
@@ -70,12 +81,12 @@ export default {
       axios.get('https://api.lmm.im/blogs/' + this.blogID).then(res => {
         const blog = res.data
         this.title = blog.title
-        this.text = md.render(blog.text)
         this.createdAt = blog.created_at
         this.updatedAt = blog.updated_at
 
         // prepare subtitles and their links
-        const results = this.extractSubtitles(this.text, this.$route.path)
+        const text = md.render(blog.text)
+        const results = this.extractSubtitles(text, this.$route.path)
         this.text = results[0]
         this.subtitles = results[1]
       }).catch(e => {
@@ -118,19 +129,28 @@ export default {
       let lines = text.split('\n')
       let subtitles = []
 
-      // regard all h3 as subtitle
       lines.forEach((line, index) => {
-        const match = /^<h3>(.+)<\/h3>$/g.exec(line)
-        if (match && match.length >= 2) {
-          let subtitle = {
-            name: match[1],
-            link: '#' + match[1]
-          }
-          subtitles.push(subtitle)
-          lines[index] = '<div id="' + match[1] + '">' + line + '</div>'
+        const h = /^<h(\d)>(.+)<\/h(\d)>$/g.exec(line)
+        if (!h || h.length !== 4) {
+          return
         }
+        let prefix = ''
+        if (h[1] === h[3]) {
+          prefix = '  '.repeat((Number(h[1]) - 2) * 2)
+        }
+        let subtitle = {
+          name: prefix + h[2],
+          link: '#' + h[2]
+        }
+        subtitles.push(subtitle)
+        lines[index] = '<div id="' + h[2] + '">' + line + '</div>'
       })
       return [lines.join('\n'), subtitles]
+    },
+    calcProgress () {
+      let el = this.$refs.text
+      let progress = ((window.scrollY + window.innerHeight) - el.offsetTop) / (el.offsetHeight)
+      this.progress = progress > 1 ? 100 : progress * 100
     },
     calcIsMobile () {
       this.isMobile = window.innerWidth <= 768
@@ -148,5 +168,12 @@ export default {
 }
 .mobile-left {
   width: 100% !important;
+}
+.chapter .item{
+  white-space: pre;
+}
+.progress-bar {
+  border-top: 1px solid red;
+  width: 0;
 }
 </style>
