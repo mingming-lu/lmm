@@ -2,14 +2,16 @@
   <div class="container">
     <!-- Posts -->
     <div class="left" :class="{ 'mobile-left': isMobile }">
-      <div v-for="(blog, index) in blogs" :key="blog.id">
-        <div class="container">
-          <h2>
-            <router-link :to="'/blog/' + blog.id" class="link white">{{ blog.title }}</router-link>
-          </h2>
-          <p class="opacity"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
+      <div class="container">
+        <div v-for="(blog, index) in blogs" :key="blog.id">
+          <div class="container">
+            <h2>
+              <router-link :to="'/blog/' + blog.id" class="link white">{{ blog.title }}</router-link>
+            </h2>
+            <p class="opacity"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
+          </div>
+          <hr v-if="index !== blog.length - 1" class="opacity-plus">
         </div>
-        <hr v-if="index !== blog.length - 1" class="opacity-plus">
       </div>
     </div>
 
@@ -86,6 +88,7 @@ export default {
 }
 </script>
 <style scoped>
+@import '../../assets/styles/blog.css';
 .container .left {
   width: 75%;
 }
