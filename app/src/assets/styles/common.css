@@ -45,6 +45,7 @@ nav .nav-item {
 }
 .left {
   float: left;
+  width: 50%;
 }
 .highlighted {
   background-color: lemonchiffon;
@@ -57,6 +58,7 @@ nav .nav-item {
 }
 .right {
   float: right;
+  width: 50%;
 }
 .picture {
   width: 100%;
