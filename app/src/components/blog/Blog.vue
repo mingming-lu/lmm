@@ -81,12 +81,12 @@ export default {
       axios.get('https://api.lmm.im/blogs/' + this.blogID).then(res => {
         const blog = res.data
         this.title = blog.title
-        this.text = md.render(blog.text)
         this.createdAt = blog.created_at
         this.updatedAt = blog.updated_at
 
         // prepare subtitles and their links
-        const results = this.extractSubtitles(this.text, this.$route.path)
+        const text = md.render(blog.text)
+        const results = this.extractSubtitles(text, this.$route.path)
         this.text = results[0]
         this.subtitles = results[1]
       }).catch(e => {
@@ -129,7 +129,6 @@ export default {
       let lines = text.split('\n')
       let subtitles = []
 
-      // regard all h3 as subtitle
       lines.forEach((line, index) => {
         const h = /^<h(\d)>(.+)<\/h(\d)>$/g.exec(line)
         if (!h || h.length !== 4) {
