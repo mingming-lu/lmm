@@ -160,6 +160,7 @@ export default {
 </script>
 
 <style scoped>
+@import '../../assets/styles/blog.css';
 .container .left {
   width: 75%;
 }

@@ -1,0 +1,5 @@
+.container>.left>.container {
+    margin-right: 0;
+    margin-left: auto;
+    max-width:768px;
+}
