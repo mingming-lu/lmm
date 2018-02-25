@@ -4,8 +4,13 @@
     max-width: 768px;
 }
 
+.container>.right {
+    padding-top: 16px;
+}
+
 .container>.right>.container {
     margin-right: auto;
     margin-left: 0;
     max-width: 192px;
+    border: 1px solid #e1e1e1;
 }
