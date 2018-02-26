@@ -5,6 +5,12 @@ type Minimal struct {
 	Text  string `json:"text"`
 }
 
+type ListItem struct {
+	ID        int64  `json:"id"`
+	Title     string `json:"title"`
+	CreatedAt string `json:"created_at"`
+}
+
 type Blog struct {
 	ID        int64  `json:"id"`
 	User      int64  `json:"user"`

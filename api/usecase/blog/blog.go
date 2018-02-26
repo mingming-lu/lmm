@@ -20,6 +20,10 @@ func FetchByUser(userID int64) ([]model.Blog, error) {
 	return repo.ByUser(userID)
 }
 
+func FetchListByUser(userID int64) ([]model.ListItem, error) {
+	return repo.List(userID)
+}
+
 func Update(id int64, title, text string) error {
 	title = strings.TrimSpace(title)
 	text = strings.TrimSpace(text)

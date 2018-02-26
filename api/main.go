@@ -28,7 +28,7 @@ func main() {
 
 	// blog
 	router.GET("/blogs/:blog", blog.Get)
-	router.GET("/users/:user/blogs", blog.GetByUser)
+	router.GET("/users/:user/blogs", blog.GetList)
 	router.POST("/blogs", blog.Post)
 	router.PUT("/blogs/:blog", blog.Update)
 	router.DELETE("/blogs/:blog", blog.Delete)
