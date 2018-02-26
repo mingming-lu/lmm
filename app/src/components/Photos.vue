@@ -36,8 +36,7 @@ export default {
 
 <style scoped>
 div {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+  padding: 0 !important;
 }
 </style>
 
