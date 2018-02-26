@@ -58,10 +58,24 @@ CREATE TABLE IF NOT EXISTS image (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
+const createProject = `
+CREATE TABLE IF NOT EXISTS project (
+	id int unsigned NOT NULL AUTO_INCREMENT,
+	user int unsigned NOT NULL,
+	icon varchar(255) NOT NULL DEFAULT "",
+	name varchar(63) NOT NULL,
+	description varchar(1023) NOT NULL DEFAULT "",
+	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (id),
+	UNIQUE (user, name)
+)
+`
+
 var CreateSQL = []string{
 	createUser,
 	createBlog,
 	createCategory,
 	createTag,
 	createImage,
+	createProject,
 }
