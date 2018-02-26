@@ -39,7 +39,7 @@
       <a href="https://www.linkedin.com/in/lumingming/" target="_blank">
         <i class="fa fa-linkedin link white"></i>
       </a>
-      <p>&copy; 2018 <router-link to="/about#author" class="link white"><u>Lu Mingming</u></router-link></p>
+      <p>&copy; 2018 <router-link to="/home#author" class="link white"><u>Lu Mingming</u></router-link></p>
     </footer>
   </div>
 </template>
@@ -74,8 +74,8 @@ export default {
           icon: 'fa-star-half-o'
         },
         {
-          link: '/about',
-          name: 'About',
+          link: '/reviews',
+          name: 'Reviews',
           icon: 'fa-info'
         }
       ]
