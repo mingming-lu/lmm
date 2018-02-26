@@ -63,6 +63,31 @@ func ByUser(userID int64) ([]model.Blog, error) {
 	return blogs, nil
 }
 
+func List(userID int64) ([]model.ListItem, error) {
+	d := db.Default()
+	defer d.Close()
+
+	stmt := d.Must("SELECT id, title, created_at FROM blog WHERE user = ? ORDER BY created_at DESC")
+	defer stmt.Close()
+
+	itr, err := stmt.Query(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	blogs := make([]model.ListItem, 0)
+	for itr.Next() {
+		blog := model.ListItem{}
+		err = itr.Scan(&blog.ID, &blog.Title, &blog.CreatedAt)
+		if err != nil {
+			return blogs, err
+		}
+		blogs = append(blogs, blog)
+	}
+
+	return blogs, nil
+}
+
 func Update(id int64, title, text string) error {
 	d := db.Default()
 	defer d.Close()
