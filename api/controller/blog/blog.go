@@ -64,6 +64,21 @@ func GetByUser(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(blogs)
 }
 
+func GetList(c *elesion.Context) {
+	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("Invalid user ID").Error(err.Error())
+		return
+	}
+
+	blogs, err := usecase.FetchListByUser(userID)
+	if err != nil {
+		c.Status(http.StatusNotFound).String("Blogs not found").Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).JSON(blogs)
+}
+
 func Update(c *elesion.Context) {
 	// check token
 	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
