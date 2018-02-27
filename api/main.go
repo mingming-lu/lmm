@@ -39,8 +39,8 @@ func main() {
 
 	// category
 	router.GET("/users/:user/categories", category.GetByUser)
-	router.POST("/category", category.Register)
-	router.PUT("/category", category.Update)
+	router.POST("/categories", category.Register)
+	router.PUT("/categories/:category", category.Update)
 
 	// tag
 	router.GET("/users/:user/tags", tag.GetByUser)
