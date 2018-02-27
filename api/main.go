@@ -32,12 +32,15 @@ func main() {
 	router.POST("/blogs", blog.Post)
 	router.PUT("/blogs/:blog", blog.Update)
 	router.DELETE("/blogs/:blog", blog.Delete)
+	// blog category
+	router.GET("/blogs/:blog/category", blog.GetCategory)
+	router.PUT("/blogs/:blog/category", blog.SetCategory)
+	router.DELETE("/blogs/:blog/category", blog.DeleteCategory)
 
 	// category
 	router.GET("/users/:user/categories", category.GetByUser)
-	router.GET("/blogs/:blog/category", category.GetByBlog)
-	router.POST("/blogs/:blog/category", category.Register)
-	router.PUT("/blogs/:blog/category", category.Update)
+	router.POST("/category", category.Register)
+	router.PUT("/category", category.Update)
 
 	// tag
 	router.GET("/users/:user/tags", tag.GetByUser)
