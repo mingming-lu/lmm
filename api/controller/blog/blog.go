@@ -151,3 +151,15 @@ func Delete(c *elesion.Context) {
 	}
 	c.Status(http.StatusNoContent)
 }
+
+func GetCategory(c *elesion.Context) {
+	c.Status(http.StatusNotImplemented)
+}
+
+func SetCategory(c *elesion.Context) {
+	c.Status(http.StatusNotImplemented)
+}
+
+func DeleteCategory(c *elesion.Context) {
+	c.Status(http.StatusNotImplemented)
+}
