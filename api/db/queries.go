@@ -62,8 +62,8 @@ const createProject = `
 CREATE TABLE IF NOT EXISTS project (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
-	icon varchar(255) NOT NULL DEFAULT "",
 	name varchar(63) NOT NULL,
+	icon varchar(255) NOT NULL DEFAULT "",
 	url varchar(255) NOT NULL DEFAULT "",
 	description varchar(1023) NOT NULL DEFAULT "",
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
