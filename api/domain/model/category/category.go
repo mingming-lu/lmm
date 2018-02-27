@@ -7,6 +7,5 @@ type Minimal struct {
 type Category struct {
 	ID   int64  `json:"id"`
 	User int64  `json:"user"`
-	Blog int64  `json:"blog"`
 	Name string `json:"name"`
 }
