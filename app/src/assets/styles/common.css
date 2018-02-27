@@ -54,7 +54,7 @@ nav .nav-item {
   text-decoration: none;
 }
 .link:hover {
-  color: #757575;
+  color: dodgerblue;
 }
 .right {
   float: right;
@@ -190,6 +190,9 @@ pre, code {
 }
 i {
   margin-right: 8px;
+}
+a {
+  color: dodgerblue;
 }
 img {
   background-image: url("//:0")
