@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS project (
 	user int unsigned NOT NULL,
 	icon varchar(255) NOT NULL DEFAULT "",
 	name varchar(63) NOT NULL,
+	url varchar(255) NOT NULL DEFAULT "",
 	description varchar(1023) NOT NULL DEFAULT "",
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
