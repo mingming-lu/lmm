@@ -67,6 +67,8 @@ CREATE TABLE IF NOT EXISTS project (
 	url varchar(255) NOT NULL DEFAULT "",
 	description varchar(1023) NOT NULL DEFAULT "",
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	from_date date,
+	to_date date,
 	PRIMARY KEY (id),
 	UNIQUE (user, name)
 )
