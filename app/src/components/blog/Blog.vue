@@ -25,7 +25,7 @@
         <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
         <div class="progress-bar" :style="{ width: progress + '%' }"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
-          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link item">{{ subtitle.name }}</router-link>
+          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link chapter-item">{{ subtitle.name }}</router-link>
         </p>
       </div>
     </div>
@@ -170,8 +170,8 @@ export default {
 .mobile-left {
   width: 100% !important;
 }
-.chapter .item{
-  white-space: pre;
+.chapter .chapter-item {
+  white-space: pre-wrap;
 }
 .progress-bar {
   border-top: 1px solid red;
