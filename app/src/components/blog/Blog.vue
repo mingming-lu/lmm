@@ -171,7 +171,7 @@ export default {
   width: 100% !important;
 }
 .chapter .item{
-  white-space: pre;
+  white-space: pre-wrap;
 }
 .progress-bar {
   border-top: 1px solid red;
