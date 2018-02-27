@@ -121,7 +121,7 @@ export default {
   border-top: 1px solid #f1f1f1;
 }
 .drawer-item-active {
-  color: crimson;
+  color: dodgerblue;
 }
 .animate-left {
   position: relative;
