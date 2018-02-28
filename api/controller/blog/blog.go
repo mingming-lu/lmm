@@ -3,13 +3,15 @@ package blog
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+
+	"lmm/api/db"
 	model "lmm/api/domain/model/blog"
 	usecase "lmm/api/usecase/blog"
 	"lmm/api/usecase/category"
 	"lmm/api/usecase/tag"
 	"lmm/api/usecase/user"
-	"net/http"
-	"strconv"
 
 	"github.com/akinaru-lu/elesion"
 )
@@ -50,15 +52,15 @@ func Get(c *elesion.Context) {
 	}
 
 	category, err := category.FetchByBlog(blog.ID)
-	if err != nil {
-		c.Status(http.StatusNotFound).String("category not found").Error(err.Error())
+	if err != nil && err.Error() != db.ErrNoRows.Error() {
+		c.Status(http.StatusInternalServerError).String("internal server error").Error(err.Error())
 		return
 	}
 	blog.Category = *category
 
 	tags, err := tag.FetchByBlog(blog.ID)
-	if err != nil {
-		c.Status(http.StatusNotFound).String("tags not found").Error(err.Error())
+	if err != nil && err.Error() != db.ErrNoRows.Error() {
+		c.Status(http.StatusInternalServerError).String("internal server error").Error(err.Error())
 		return
 	}
 	blog.Tags = tags
