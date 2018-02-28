@@ -12,7 +12,7 @@ func Post(userID int64, title, text string) (int64, error) {
 	return repo.Add(userID, title, text)
 }
 
-func Fetch(id int64) (*model.Blog, error) {
+func FetchByID(id int64) (*model.Blog, error) {
 	return repo.ById(id)
 }
 
