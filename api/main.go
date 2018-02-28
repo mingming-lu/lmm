@@ -1,8 +1,5 @@
 package main
 
-// TODO
-// - change blogs to blog
-
 import (
 	"log"
 	"net/http"

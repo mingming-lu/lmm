@@ -35,7 +35,7 @@ func Post(c *elesion.Context) {
 		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
 		return
 	}
-	c.Header("Location", fmt.Sprintf("/blogs/%d", id)).Status(http.StatusCreated).String("success")
+	c.Header("Location", fmt.Sprintf("/blog/%d", id)).Status(http.StatusCreated).String("success")
 }
 
 func Get(c *elesion.Context) {
@@ -75,12 +75,12 @@ func GetByUser(c *elesion.Context) {
 		return
 	}
 
-	blogs, err := usecase.FetchByUser(userID)
+	blog, err := usecase.FetchByUser(userID)
 	if err != nil {
-		c.Status(http.StatusNotFound).String("Blogs not found").Error(err.Error())
+		c.Status(http.StatusNotFound).String("Blog not found").Error(err.Error())
 		return
 	}
-	c.Status(http.StatusOK).JSON(blogs)
+	c.Status(http.StatusOK).JSON(blog)
 }
 
 func GetList(c *elesion.Context) {
@@ -90,12 +90,12 @@ func GetList(c *elesion.Context) {
 		return
 	}
 
-	blogs, err := usecase.FetchListByUser(userID)
+	blog, err := usecase.FetchListByUser(userID)
 	if err != nil {
-		c.Status(http.StatusNotFound).String("Blogs not found").Error(err.Error())
+		c.Status(http.StatusNotFound).String("Blog not found").Error(err.Error())
 		return
 	}
-	c.Status(http.StatusOK).JSON(blogs)
+	c.Status(http.StatusOK).JSON(blog)
 }
 
 func Update(c *elesion.Context) {

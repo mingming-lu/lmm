@@ -3,7 +3,7 @@
     <!-- Posts -->
     <div class="left" :class="{ 'mobile-left': isMobile }">
       <div class="container">
-        <div v-for="(blog, index) in blogs" :key="blog.id">
+        <div v-for="(blog, index) in blogList" :key="blog.id">
           <div class="container">
             <h2>
               <router-link :to="'/blog/' + blog.id" class="link white">{{ blog.title }}</router-link>
@@ -44,7 +44,7 @@ export default {
   data () {
     return {
       isMobile: false,
-      blogs: [],
+      blogList: [],
       categories: [],
       tags: []
     }
