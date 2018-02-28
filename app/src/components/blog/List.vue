@@ -61,8 +61,8 @@ export default {
   },
   methods: {
     fetchBlog () {
-      axios.get('https://api.lmm.im/v1/users/1/blogs').then(res => {
-        this.blogs = res.data
+      axios.get('https://api.lmm.im/v1/users/1/blog').then(res => {
+        this.blog = res.data
       }).catch(e => {
         console.log(e.response.data)
       })

@@ -27,15 +27,15 @@ func main() {
 	router.GET("/v1/verify", user.Verify)
 
 	// blog
-	router.GET("/v1/blogs/:blog", blog.Get)
-	router.GET("/v1/users/:user/blogs", blog.GetList)
-	router.POST("/v1/blogs", blog.Post)
-	router.PUT("/v1/blogs/:blog", blog.Update)
-	router.DELETE("/v1/blogs/:blog", blog.Delete)
+	router.GET("/v1/blog/:blog", blog.Get)
+	router.GET("/v1/users/:user/blog", blog.GetList)
+	router.POST("/v1/blog", blog.Post)
+	router.PUT("/v1/blog/:blog", blog.Update)
+	router.DELETE("/v1/blog/:blog", blog.Delete)
 	// blog category
-	router.GET("/v1/blogs/:blog/category", blog.GetCategory)
-	router.PUT("/v1/blogs/:blog/category", blog.SetCategory)
-	router.DELETE("/v1/blogs/:blog/category", blog.DeleteCategory)
+	router.GET("/v1/blog/:blog/category", blog.GetCategory)
+	router.PUT("/v1/blog/:blog/category", blog.SetCategory)
+	router.DELETE("/v1/blog/:blog/category", blog.DeleteCategory)
 
 	// category
 	router.GET("/v1/users/:user/categories", category.GetByUser)
@@ -44,10 +44,10 @@ func main() {
 
 	// tag
 	router.GET("/v1/users/:user/tags", tag.GetByUser)
-	router.GET("/v1/blogs/:blog/tags", tag.GetByBlog)
-	router.POST("/v1/blogs/:blog/tags", tag.Register)
-	router.PUT("/v1/blogs/:blog/tags/:tag", tag.Update)
-	router.DELETE("/v1/blogs/:blog/tags/:tag", tag.Delete)
+	router.GET("/v1/blog/:blog/tags", tag.GetByBlog)
+	router.POST("/v1/blog/:blog/tags", tag.Register)
+	router.PUT("/v1/blog/:blog/tags/:tag", tag.Update)
+	router.DELETE("/v1/blog/:blog/tags/:tag", tag.Delete)
 
 	// image
 	router.GET("/v1/users/:user/photos", image.GetPhotos)
