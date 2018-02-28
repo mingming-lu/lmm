@@ -14,12 +14,6 @@ import (
 )
 
 func Register(c *elesion.Context) {
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
-		return
-	}
-
 	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
@@ -34,7 +28,7 @@ func Register(c *elesion.Context) {
 	}
 
 	// TODO handle already exists
-	id, err := usecase.Register(usr.ID, blogID, m.Name)
+	id, err := usecase.Register(usr.ID, m.Name)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
 		return
@@ -44,26 +38,15 @@ func Register(c *elesion.Context) {
 }
 
 func Update(c *elesion.Context) {
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	categoryID, err := strconv.ParseInt(c.Params.ByName("category"), 10, 64)
 	if err != nil {
-		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
+		c.Status(http.StatusBadRequest).String("Invalid category id").Error(err.Error())
 		return
 	}
 
 	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
-		return
-	}
-
-	category, err := usecase.FetchByBlog(blogID)
-	if err != nil {
-		c.Status(http.StatusNotFound).String("Blog not found").Error(err.Error())
-		return
-	}
-
-	if category.User != usr.ID {
-		c.Status(http.StatusForbidden).String("Access forbidden").Error(err.Error())
 		return
 	}
 
@@ -74,7 +57,7 @@ func Update(c *elesion.Context) {
 		return
 	}
 
-	err = usecase.Update(usr.ID, blogID, m.Name)
+	err = usecase.Update(usr.ID, categoryID, m.Name)
 	if err != nil && err == db.ErrNoChange {
 		c.Status(http.StatusNoContent).String("No change").Error(err.Error())
 		return
@@ -87,27 +70,13 @@ func Update(c *elesion.Context) {
 	c.Status(http.StatusOK).String("success")
 }
 
-func GetByBlog(c *elesion.Context) {
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
-	}
-
-	blog, err := usecase.FetchByBlog(blogID)
-	if err != nil {
-		c.Status(http.StatusNotFound).String("Not Found").Error(err.Error())
-		return
-	}
-	c.Status(http.StatusOK).JSON(blog)
-}
-
 func GetByUser(c *elesion.Context) {
-	blogID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
+	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
 	if err != nil {
-		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
+		c.Status(http.StatusBadRequest).String("Invalid user id").Error(err.Error())
 	}
 
-	blog, err := usecase.FetchByUser(blogID)
+	blog, err := usecase.FetchByUser(userID)
 	if err != nil {
 		c.Status(http.StatusNotFound).String("Not Found").Error(err.Error())
 		return

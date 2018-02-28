@@ -5,12 +5,12 @@ import (
 	repo "lmm/api/domain/repository/category"
 )
 
-func Register(userID, blogID int64, name string) (int64, error) {
-	return repo.Add(userID, blogID, name)
+func Register(userID int64, name string) (int64, error) {
+	return repo.Add(userID, name)
 }
 
-func Update(userID, blogID int64, name string) error {
-	return repo.Update(userID, blogID, name)
+func Update(userID, categoryID int64, name string) error {
+	return repo.Update(userID, categoryID, name)
 }
 
 func FetchByUser(userID int64) ([]model.Category, error) {

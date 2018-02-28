@@ -9,7 +9,7 @@ import (
 )
 
 func Add(userID, blogID int64, tags []model.Minimal) error {
-	blog, err := blog.Fetch(blogID)
+	blog, err := blog.FetchByID(blogID)
 	if err != nil {
 		return errors.Wrapf(err, "No such blog: %d", blogID)
 	}
@@ -23,7 +23,7 @@ func Update(userID, blogID, tagID int64, name string) error {
 		return errors.Wrapf(err, "No such tag: %d", tagID)
 	}
 
-	blog, err := blog.Fetch(blogID)
+	blog, err := blog.FetchByID(blogID)
 	if err != nil {
 		return errors.Wrapf(err, "No such blog: %d", blogID)
 	}

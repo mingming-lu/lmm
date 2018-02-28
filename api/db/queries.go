@@ -28,10 +28,19 @@ const createCategory = `
 CREATE TABLE IF NOT EXISTS category (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
-	blog int unsigned NOT NULL,
 	name varchar(32) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (user, blog)
+	UNIQUE (user, name)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+`
+
+const createBlogCategory = `
+CREATE TABLE IF NOT EXISTS blog_category (
+	id int unsigned NOT NULL AUTO_INCREMENT,
+	blog int unsigned NOT NULL,
+	category int unsigned NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE(blog)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
@@ -78,6 +87,7 @@ var CreateSQL = []string{
 	createUser,
 	createBlog,
 	createCategory,
+	createBlogCategory,
 	createTag,
 	createImage,
 	createProject,

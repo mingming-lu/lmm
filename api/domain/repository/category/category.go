@@ -5,14 +5,14 @@ import (
 	model "lmm/api/domain/model/category"
 )
 
-func Add(userID, blogID int64, name string) (int64, error) {
+func Add(userID int64, name string) (int64, error) {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("INSERT INTO category (user, blog, name) VALUES (?, ?, ?)")
+	stmt := d.Must("INSERT INTO category (user, name) VALUES (?, ?)")
 	defer stmt.Close()
 
-	res, err := stmt.Exec(userID, blogID, name)
+	res, err := stmt.Exec(userID, name)
 	if err != nil {
 		return 0, err
 	}
@@ -20,14 +20,14 @@ func Add(userID, blogID int64, name string) (int64, error) {
 	return res.LastInsertId()
 }
 
-func Update(userID, blogID int64, name string) error {
+func Update(userID, categoryID int64, name string) error {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("UPDATE category SET name = ? WHERE user = ? AND blog = ?")
+	stmt := d.Must("UPDATE category SET name = ? WHERE user = ? AND category = ?")
 	defer stmt.Close()
 
-	res, err := stmt.Exec(name, userID, blogID)
+	res, err := stmt.Exec(name, userID, categoryID)
 	rows, err := res.RowsAffected()
 
 	if err != nil {
@@ -43,7 +43,7 @@ func ByUser(userID int64) ([]model.Category, error) {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("SELECT MIN(id), MIN(user), MIN(blog), name FROM category WHERE user = ? GROUP BY name ORDER BY name")
+	stmt := d.Must("SELECT name FROM category WHERE user = ? GROUP BY name ORDER BY name")
 	defer stmt.Close()
 
 	categories := make([]model.Category, 0)
@@ -53,7 +53,7 @@ func ByUser(userID int64) ([]model.Category, error) {
 	}
 	for itr.Next() {
 		category := model.Category{}
-		err = itr.Scan(&category.ID, &category.User, &category.Blog, &category.Name)
+		err = itr.Scan(&category.ID, &category.User, &category.Name)
 		if err != nil {
 			return categories, nil
 		}
@@ -67,14 +67,11 @@ func ByBlog(blogID int64) (*model.Category, error) {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("SELECT id, user, blog, name FROM category WHERE blog = ?")
+	stmt := d.Must("SELECT c.id, c.user, c.name FROM blog_category AS bc INNER JOIN category AS c ON c.id = bc.category WHERE bc.blog = ?")
 	defer stmt.Close()
 
 	category := model.Category{}
-	err := stmt.QueryRow(blogID).Scan(&category.ID, &category.User, &category.Blog, &category.Name)
-	if err != nil {
-		return nil, err
-	}
+	err := stmt.QueryRow(blogID).Scan(&category.ID, &category.User, &category.Name)
 
-	return &category, nil
+	return &category, err
 }
