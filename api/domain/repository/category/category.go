@@ -43,7 +43,7 @@ func ByUser(userID int64) ([]model.Category, error) {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("SELECT name FROM category WHERE user = ? GROUP BY name ORDER BY name")
+	stmt := d.Must("SELECT id, user, name FROM category WHERE user = ? ORDER BY name")
 	defer stmt.Close()
 
 	categories := make([]model.Category, 0)
