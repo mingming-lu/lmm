@@ -5,6 +5,8 @@ import (
 	"fmt"
 	model "lmm/api/domain/model/blog"
 	usecase "lmm/api/usecase/blog"
+	"lmm/api/usecase/category"
+	"lmm/api/usecase/tag"
 	"lmm/api/usecase/user"
 	"net/http"
 	"strconv"
@@ -41,11 +43,26 @@ func Get(c *elesion.Context) {
 		return
 	}
 
-	blog, err := usecase.Fetch(id)
+	blog, err := usecase.FetchByID(id)
 	if err != nil {
 		c.Status(http.StatusNotFound).String("No such blog").Error(err.Error())
 		return
 	}
+
+	category, err := category.FetchByBlog(blog.ID)
+	if err != nil {
+		c.Status(http.StatusNotFound).String("category not found").Error(err.Error())
+		return
+	}
+	blog.Category = *category
+
+	tags, err := tag.FetchByBlog(blog.ID)
+	if err != nil {
+		c.Status(http.StatusNotFound).String("tags not found").Error(err.Error())
+		return
+	}
+	blog.Tags = tags
+
 	c.Status(http.StatusOK).JSON(blog)
 }
 
@@ -93,7 +110,7 @@ func Update(c *elesion.Context) {
 		return
 	}
 
-	blog, err := usecase.Fetch(id)
+	blog, err := usecase.FetchByID(id)
 	if err != nil {
 		c.Status(http.StatusNotFound).String("No such blog").Error(err.Error())
 		return
@@ -133,7 +150,7 @@ func Delete(c *elesion.Context) {
 		return
 	}
 
-	blog, err := usecase.Fetch(id)
+	blog, err := usecase.FetchByID(id)
 	if err != nil {
 		c.Status(http.StatusNotFound).String("No such blog").Error(err.Error())
 		return
@@ -153,7 +170,19 @@ func Delete(c *elesion.Context) {
 }
 
 func GetCategory(c *elesion.Context) {
-	c.Status(http.StatusNotImplemented)
+	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
+		return
+	}
+
+	category, err := category.FetchByBlog(blogID)
+	if err != nil {
+		c.Status(http.StatusNotFound).String("category not found").Error(err.Error())
+		return
+	}
+
+	c.Status(http.StatusOK).JSON(category)
 }
 
 func SetCategory(c *elesion.Context) {
