@@ -44,7 +44,7 @@ export default {
       this.fetchCategories()
     },
     fetchBlogList () {
-      axios.get('https://api.lmm.im/users/1/blogs').then(res => {
+      axios.get('https://api.lmm.im/v1/users/1/blog').then(res => {
         this.blogList = res.data
       }).catch(e => {
         console.log(e.response.data)
@@ -52,7 +52,7 @@ export default {
       this.newCategoryName = ''
     },
     fetchCategories () {
-      axios.get('https://api.lmm.im/user/1/categories').then(res => {
+      axios.get('https://api.lmm.im/v1/user/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)

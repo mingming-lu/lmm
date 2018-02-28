@@ -50,17 +50,17 @@ func ByUser(userID int64) ([]model.Blog, error) {
 		return nil, err
 	}
 
-	blogs := make([]model.Blog, 0)
+	blogList := make([]model.Blog, 0)
 	for rows.Next() {
 		blog := model.Blog{}
 		err = rows.Scan(&blog.ID, &blog.User, &blog.Title, &blog.Text, &blog.CreatedAt, &blog.UpdatedAt)
 		if err != nil {
-			return blogs, err
+			return blogList, err
 		}
-		blogs = append(blogs, blog)
+		blogList = append(blogList, blog)
 	}
 
-	return blogs, nil
+	return blogList, nil
 }
 
 func List(userID int64) ([]model.ListItem, error) {
@@ -75,17 +75,17 @@ func List(userID int64) ([]model.ListItem, error) {
 		return nil, err
 	}
 
-	blogs := make([]model.ListItem, 0)
+	blogList := make([]model.ListItem, 0)
 	for itr.Next() {
 		blog := model.ListItem{}
 		err = itr.Scan(&blog.ID, &blog.Title, &blog.CreatedAt)
 		if err != nil {
-			return blogs, err
+			return blogList, err
 		}
-		blogs = append(blogs, blog)
+		blogList = append(blogList, blog)
 	}
 
-	return blogs, nil
+	return blogList, nil
 }
 
 func Update(id int64, title, text string) error {

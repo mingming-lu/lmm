@@ -3,7 +3,7 @@
     <!-- Posts -->
     <div class="left" :class="{ 'mobile-left': isMobile }">
       <div class="container">
-        <div v-for="(blog, index) in blogs" :key="blog.id">
+        <div v-for="(blog, index) in blogList" :key="blog.id">
           <div class="container">
             <h2>
               <router-link :to="'/blog/' + blog.id" class="link white">{{ blog.title }}</router-link>
@@ -44,7 +44,7 @@ export default {
   data () {
     return {
       isMobile: false,
-      blogs: [],
+      blogList: [],
       categories: [],
       tags: []
     }
@@ -61,21 +61,21 @@ export default {
   },
   methods: {
     fetchBlog () {
-      axios.get('https://api.lmm.im/users/1/blogs').then(res => {
-        this.blogs = res.data
+      axios.get('https://api.lmm.im/v1/users/1/blog').then(res => {
+        this.blog = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchCategories () {
-      axios.get('https://api.lmm.im/users/1/categories').then(res => {
+      axios.get('https://api.lmm.im/v1/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get('https://api.lmm.im/users/1/tags').then(res => {
+      axios.get('https://api.lmm.im/v1/users/1/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)

@@ -50,7 +50,7 @@ export default {
     }
   },
   created () {
-    const pattern = /^\/blog\/(\d+)$/g
+    const pattern = /^v\d\/\/blog\/(\d+)$/g
     const match = pattern.exec(this.$route.path)
     const id = match[1]
     this.blogID = id
@@ -78,7 +78,7 @@ export default {
         html: true,
         typographer: true
       })
-      axios.get('https://api.lmm.im/blogs/' + this.blogID).then(res => {
+      axios.get('https://api.lmm.im/v1/blog/' + this.blogID).then(res => {
         const blog = res.data
         this.title = blog.title
         this.createdAt = blog.created_at
@@ -98,14 +98,14 @@ export default {
       })
     },
     fetchCategory: function () {
-      axios.get('https://api.lmm.im/blogs/' + this.blogID + '/category').then(res => {
+      axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/category').then(res => {
         this.category = res.data
       }).catch(e => {
         console.log(e)
       })
     },
     fetchTags: function () {
-      axios.get('https://api.lmm.im/blogs/' + this.blogID + '/tags').then(res => {
+      axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
