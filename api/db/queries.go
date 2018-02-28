@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS blog_category (
 	blog int unsigned NOT NULL,
 	category int unsigned NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE(blog, category)
+	UNIQUE(blog)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
@@ -87,6 +87,7 @@ var CreateSQL = []string{
 	createUser,
 	createBlog,
 	createCategory,
+	createBlogCategory,
 	createTag,
 	createImage,
 	createProject,
