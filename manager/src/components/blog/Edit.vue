@@ -25,7 +25,7 @@ export default {
     }
   },
   created () {
-    const pattern = /^v\d\/\/blog\/(\d+)\/edit$/g
+    const pattern = /^\/blog\/(\d+)\/edit$/g
     const match = pattern.exec(this.$route.path)
     this.blogID = match[1]
     this.fetchData()
