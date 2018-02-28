@@ -1,8 +1,5 @@
 package main
 
-// TODO
-// - versioning api
-
 import (
 	"log"
 	"net/http"
@@ -25,36 +22,35 @@ func main() {
 	router := elesion.Default("[api]")
 
 	// user
-	router.POST("/signup", user.SignUp)
-	router.POST("/signin", user.SignIn)
-	router.GET("/verify", user.Verify)
+	router.POST("/v1/signup", user.SignUp)
+	router.POST("/v1/signin", user.SignIn)
+	router.GET("/v1/verify", user.Verify)
 
 	// blog
-	router.GET("/blog/:blog", blog.Get)
-	router.GET("/users/:user/blog", blog.GetList)
-	router.POST("/blog", blog.Post)
-	router.PUT("/blog/:blog", blog.Update)
-	router.DELETE("/blog/:blog", blog.Delete)
+	router.GET("/v1/blogs/:blog", blog.Get)
+	router.GET("/v1/users/:user/blogs", blog.GetList)
+	router.POST("/v1/blogs", blog.Post)
+	router.PUT("/v1/blogs/:blog", blog.Update)
+	router.DELETE("/v1/blogs/:blog", blog.Delete)
 	// blog category
-	router.GET("/blog/:blog/category", blog.GetCategory)
-	router.PUT("/blog/:blog/category", blog.SetCategory)
-	router.DELETE("/blog/:blog/category", blog.DeleteCategory)
+	router.GET("/v1/blogs/:blog/category", blog.GetCategory)
+	router.PUT("/v1/blogs/:blog/category", blog.SetCategory)
+	router.DELETE("/v1/blogs/:blog/category", blog.DeleteCategory)
 
 	// category
-	router.GET("/users/:user/categories", category.GetByUser)
-	router.POST("/categories", category.Register)
-	router.PUT("/categories/:category", category.Update)
+	router.GET("/v1/users/:user/categories", category.GetByUser)
+	router.POST("/v1/categories", category.Register)
+	router.PUT("/v1/categories/:category", category.Update)
 
 	// tag
-	router.GET("/users/:user/tags", tag.GetByUser)
-	router.GET("/blog/:blog/tags", tag.GetByBlog)
-	router.POST("/blog/:blog/tags", tag.Register)
-	router.PUT("/blog/:blog/tags/:tag", tag.Update)
-	router.DELETE("/blog/:blog/tags/:tag", tag.Delete)
-
+	router.GET("/v1/users/:user/tags", tag.GetByUser)
+	router.GET("/v1/blogs/:blog/tags", tag.GetByBlog)
+	router.POST("/v1/blogs/:blog/tags", tag.Register)
+	router.PUT("/v1/blogs/:blog/tags/:tag", tag.Update)
+	router.DELETE("/v1/blogs/:blog/tags/:tag", tag.Delete)
 	// image
-	router.GET("/users/:user/photos", image.GetPhotos)
-	router.POST("/images", image.Upload)
+	router.GET("/v1/users/:user/photos", image.GetPhotos)
+	router.POST("/v1/images", image.Upload)
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }

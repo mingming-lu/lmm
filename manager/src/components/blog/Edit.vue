@@ -25,7 +25,7 @@ export default {
     }
   },
   created () {
-    const pattern = /^\/blog\/(\d+)\/edit$/g
+    const pattern = /^v\d\/\/blog\/(\d+)\/edit$/g
     const match = pattern.exec(this.$route.path)
     this.blogID = match[1]
     this.fetchData()
@@ -36,7 +36,7 @@ export default {
         alert('no change')
         return
       }
-      axios.put('https://api.lmm.im/blog/' + this.blogID, {
+      axios.put('https://api.lmm.im/v1/blogs/' + this.blogID, {
         title: this.title,
         text: this.text
       }, {
@@ -70,7 +70,7 @@ export default {
       this.fetchTags()
     },
     fetchBlog () {
-      axios.get('https://api.lmm.im/blog/' + this.blogID).then(blog => {
+      axios.get('https://api.lmm.im/v1/blogs/' + this.blogID).then(blog => {
         this.blogOriginal = blog.data
 
         this.id = this.blogOriginal.id
@@ -83,8 +83,8 @@ export default {
     },
     fetchCategories () {
       axios.all([
-        axios.get('https://api.lmm.im/users/1/categories'),
-        axios.get('https://api.lmm.im/blog/' + this.blogID + '/category')
+        axios.get('https://api.lmm.im/v1/users/1/categories'),
+        axios.get('https://api.lmm.im/v1/blogs/' + this.blogID + '/category')
       ]).then(axios.spread((categories, category) => {
         this.categories = categories.data
         this.categoryID = category.data[0].id
@@ -93,7 +93,7 @@ export default {
       })
     },
     fetchTags () {
-      axios.get('http://api.lmm.im/blog/' + this.blogID + '/tags').then(res => {
+      axios.get('http://api.lmm.im/v1/blogs/' + this.blogID + '/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)

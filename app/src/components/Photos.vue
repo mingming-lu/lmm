@@ -19,7 +19,7 @@ export default {
     }
   },
   created () {
-    axios.get('https://api.lmm.im/users/1/photos').then((res) => {
+    axios.get('https://api.lmm.im/v1/users/1/photos').then((res) => {
       res.data.forEach((image, index) => {
         if (index % 2 === 0) {
           this.left.push(image)
