@@ -2,7 +2,6 @@ package main
 
 // TODO
 // - versioning api
-// - change blogs to blog
 
 import (
 	"log"
@@ -31,15 +30,15 @@ func main() {
 	router.GET("/verify", user.Verify)
 
 	// blog
-	router.GET("/blogs/:blog", blog.Get)
-	router.GET("/users/:user/blogs", blog.GetList)
-	router.POST("/blogs", blog.Post)
-	router.PUT("/blogs/:blog", blog.Update)
-	router.DELETE("/blogs/:blog", blog.Delete)
+	router.GET("/blog/:blog", blog.Get)
+	router.GET("/users/:user/blog", blog.GetList)
+	router.POST("/blog", blog.Post)
+	router.PUT("/blog/:blog", blog.Update)
+	router.DELETE("/blog/:blog", blog.Delete)
 	// blog category
-	router.GET("/blogs/:blog/category", blog.GetCategory)
-	router.PUT("/blogs/:blog/category", blog.SetCategory)
-	router.DELETE("/blogs/:blog/category", blog.DeleteCategory)
+	router.GET("/blog/:blog/category", blog.GetCategory)
+	router.PUT("/blog/:blog/category", blog.SetCategory)
+	router.DELETE("/blog/:blog/category", blog.DeleteCategory)
 
 	// category
 	router.GET("/users/:user/categories", category.GetByUser)
@@ -48,10 +47,10 @@ func main() {
 
 	// tag
 	router.GET("/users/:user/tags", tag.GetByUser)
-	router.GET("/blogs/:blog/tags", tag.GetByBlog)
-	router.POST("/blogs/:blog/tags", tag.Register)
-	router.PUT("/blogs/:blog/tags/:tag", tag.Update)
-	router.DELETE("/blogs/:blog/tags/:tag", tag.Delete)
+	router.GET("/blog/:blog/tags", tag.GetByBlog)
+	router.POST("/blog/:blog/tags", tag.Register)
+	router.PUT("/blog/:blog/tags/:tag", tag.Update)
+	router.DELETE("/blog/:blog/tags/:tag", tag.Delete)
 
 	// image
 	router.GET("/users/:user/photos", image.GetPhotos)

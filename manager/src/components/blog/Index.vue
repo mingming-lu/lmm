@@ -44,7 +44,7 @@ export default {
       this.fetchCategories()
     },
     fetchBlogList () {
-      axios.get('https://api.lmm.im/users/1/blogs').then(res => {
+      axios.get('https://api.lmm.im/users/1/blog').then(res => {
         this.blogList = res.data
       }).catch(e => {
         console.log(e.response.data)
