@@ -55,8 +55,6 @@ export default {
     const id = match[1]
     this.blogID = id
     this.fetchBlog()
-    this.fetchCategory()
-    this.fetchTags()
     this.calcIsMobile()
     window.addEventListener('resize', this.calcIsMobile)
     window.addEventListener('scroll', this.calcProgress)
@@ -80,9 +78,12 @@ export default {
       })
       axios.get('https://api.lmm.im/v1/blog/' + this.blogID).then(res => {
         const blog = res.data
+
         this.title = blog.title
         this.createdAt = blog.created_at
         this.updatedAt = blog.updated_at
+        this.category = blog.category
+        this.tags = blog.tags
 
         // prepare subtitles and their links
         const text = md.render(blog.text)
@@ -95,20 +96,6 @@ export default {
         } else {
           console.log(e)
         }
-      })
-    },
-    fetchCategory: function () {
-      axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/category').then(res => {
-        this.category = res.data
-      }).catch(e => {
-        console.log(e)
-      })
-    },
-    fetchTags: function () {
-      axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/tags').then(res => {
-        this.tags = res.data
-      }).catch(e => {
-        console.log(e.response.data)
       })
     },
     jumpToHash: (hash) => {
