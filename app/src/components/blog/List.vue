@@ -61,21 +61,21 @@ export default {
   },
   methods: {
     fetchBlog () {
-      axios.get('https://api.lmm.im/users/1/blogs').then(res => {
+      axios.get('https://api.lmm.im/v1/users/1/blogs').then(res => {
         this.blogs = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchCategories () {
-      axios.get('https://api.lmm.im/users/1/categories').then(res => {
+      axios.get('https://api.lmm.im/v1/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get('https://api.lmm.im/users/1/tags').then(res => {
+      axios.get('https://api.lmm.im/v1/users/1/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
