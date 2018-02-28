@@ -1,7 +1,6 @@
 package main
 
 // TODO
-// - versioning api
 // - change blogs to blog
 
 import (
