@@ -50,7 +50,7 @@ export default {
     }
   },
   created () {
-    const pattern = /^v\d\/\/blog\/(\d+)$/g
+    const pattern = /^\/blog\/(\d+)$/g
     const match = pattern.exec(this.$route.path)
     const id = match[1]
     this.blogID = id
