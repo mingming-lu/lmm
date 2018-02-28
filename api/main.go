@@ -48,6 +48,7 @@ func main() {
 	router.POST("/v1/blogs/:blog/tags", tag.Register)
 	router.PUT("/v1/blogs/:blog/tags/:tag", tag.Update)
 	router.DELETE("/v1/blogs/:blog/tags/:tag", tag.Delete)
+
 	// image
 	router.GET("/v1/users/:user/photos", image.GetPhotos)
 	router.POST("/v1/images", image.Upload)
