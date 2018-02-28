@@ -13,6 +13,10 @@ func Update(userID, categoryID int64, name string) error {
 	return repo.Update(userID, categoryID, name)
 }
 
-func FetchByUser(userID int64) ([]model.Minimal, error) {
+func FetchByUser(userID int64) ([]model.Category, error) {
 	return repo.ByUser(userID)
+}
+
+func FetchByBlog(blogID int64) (*model.Category, error) {
+	return repo.ByBlog(blogID)
 }

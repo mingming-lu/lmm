@@ -39,21 +39,21 @@ func Update(userID, categoryID int64, name string) error {
 	return nil
 }
 
-func ByUser(userID int64) ([]model.Minimal, error) {
+func ByUser(userID int64) ([]model.Category, error) {
 	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("SELECT name FROM category WHERE user = ? GROUP BY name ORDER BY name")
 	defer stmt.Close()
 
-	categories := make([]model.Minimal, 0)
+	categories := make([]model.Category, 0)
 	itr, err := stmt.Query(userID)
 	if err != nil {
 		return categories, err
 	}
 	for itr.Next() {
-		category := model.Minimal{}
-		err = itr.Scan(&category.Name)
+		category := model.Category{}
+		err = itr.Scan(&category.ID, &category.User, &category.Name)
 		if err != nil {
 			return categories, nil
 		}
@@ -61,4 +61,17 @@ func ByUser(userID int64) ([]model.Minimal, error) {
 	}
 
 	return categories, nil
+}
+
+func ByBlog(blogID int64) (*model.Category, error) {
+	d := db.Default()
+	defer d.Close()
+
+	stmt := d.Must("SELECT c.id, c.user, c.name FROM blog_category AS bc INNER JOIN category AS c ON c.id = bc.category WHERE bc.blog = ?")
+	defer stmt.Close()
+
+	category := model.Category{}
+	err := stmt.QueryRow(blogID).Scan(&category.ID, &category.User, &category.Name)
+
+	return &category, err
 }
