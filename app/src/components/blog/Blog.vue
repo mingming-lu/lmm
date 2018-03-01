@@ -161,7 +161,7 @@ export default {
   white-space: pre-wrap;
 }
 .progress-bar {
-  border-top: 1px solid red;
+  border-top: 1px solid seagreen;
   width: 0;
 }
 </style>
