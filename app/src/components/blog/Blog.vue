@@ -164,4 +164,35 @@ export default {
   border-top: 1px solid #11AF33;
   width: 0;
 }
+.left >>> h1 {
+  text-align: center;
+}
+.left >>> h2:before {
+  white-space: pre-wrap;
+  border-left: 5px solid #11AF33;
+  content: '  ';
+}
+.left >>> h2 {
+  font-weight: 400;
+  color: #11AF33;
+}
+.left >>> h3 {
+  font-weight: 400;
+  color: #11AF33;
+}
+.left >>> h4 {
+  font-size: 400;
+  color: #11AF33;
+}
+.left >>> h5 {
+  font-size: 400;
+  color: #11AF33;
+}
+.left >>> h6 {
+  font-size: 400;
+  color: #11AF33;
+}
+.left >>> s {
+  opacity: 0.5;
+}
 </style>
