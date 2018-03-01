@@ -1,12 +1,13 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '@/components/Home'
-import Index from '@/components/Index'
-import Blog from '@/components/blog/Blog'
-import BlogList from '@/components/blog/List'
-import Photos from '@/components/Photos'
-import Projects from '@/components/Project'
-import Reviews from '@/components/Reviews'
+
+const Home = () => import('@/components/Home')
+const Index = () => import('@/components/Index')
+const Blog = () => import('@/components/blog/Blog')
+const BlogList = () => import('@/components/blog/List')
+const Photos = () => import('@/components/Photos')
+const Projects = () => import('@/components/Project')
+const Reviews = () => import('@/components/Reviews')
 
 Vue.use(Router)
 
