@@ -195,4 +195,7 @@ export default {
 .left >>> s {
   opacity: 0.5;
 }
+.left >>> img {
+  width: 100%;
+}
 </style>
