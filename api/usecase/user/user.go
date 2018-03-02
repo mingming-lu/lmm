@@ -4,6 +4,7 @@ import (
 	model "lmm/api/domain/model/user"
 	repo "lmm/api/domain/repository/user"
 	"lmm/api/domain/service/base64"
+	"lmm/api/domain/service/sha256"
 	"lmm/api/domain/service/token"
 	"lmm/api/domain/service/uuid"
 
@@ -17,7 +18,7 @@ var (
 func SignUp(name, password string) (int64, error) {
 	token := uuid.New()
 	guid := uuid.New()
-	password = base64.Encode([]byte(guid + password))
+	password = sha256.Hex([]byte(guid + password)) // digest
 	return repo.Add(name, password, guid, token)
 }
 
