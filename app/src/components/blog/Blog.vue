@@ -167,14 +167,16 @@ export default {
 .left >>> h1 {
   text-align: center;
 }
-.left >>> h2:before {
+.left >>> h3:before {
   white-space: pre-wrap;
   border-left: 5px solid #11AF33;
+  opacity: 0.6;
   content: '  ';
 }
 .left >>> h2 {
   font-weight: 400;
   color: #11AF33;
+  border-bottom: 1px solid #eee;
 }
 .left >>> h3 {
   font-weight: 400;
@@ -197,5 +199,11 @@ export default {
 }
 .left >>> img {
   width: 100%;
+}
+.left >>> blockquote {
+  background: #f9f9f9;
+  border-left: 8px solid #ccc;
+  margin: 1.5em 0;
+  padding: 0.5em 16px;
 }
 </style>
