@@ -29,7 +29,7 @@ func SignIn(name, password string) (*model.Response, error) {
 		return nil, err
 	}
 
-	encoded := base64.Encode([]byte(user.GUID + password))
+	encoded := sha256.Hex([]byte(user.GUID + password))
 	if encoded != user.Password {
 		return nil, ErrIncorrectPassword
 	}
