@@ -200,4 +200,10 @@ export default {
 .left >>> img {
   width: 100%;
 }
+.left >>> blockquote {
+  background: #f9f9f9;
+  border-left: 8px solid #ccc;
+  margin: 1.5em 0;
+  padding: 0.5em 16px;
+}
 </style>
