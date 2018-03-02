@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS project (
 	to_date date,
 	PRIMARY KEY (id),
 	UNIQUE (user, name)
-)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 `
 
 var CreateSQL = []string{
