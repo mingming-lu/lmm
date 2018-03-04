@@ -41,6 +41,7 @@ func main() {
 	router.GET("/v1/users/:user/categories", category.GetByUser)
 	router.POST("/v1/categories", category.Register)
 	router.PUT("/v1/categories/:category", category.Update)
+	router.DELETE("/v1/categories/:category", category.Delete)
 
 	// tag
 	router.GET("/v1/users/:user/tags", tag.GetByUser)

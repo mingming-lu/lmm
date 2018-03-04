@@ -16,7 +16,7 @@
       <input type="submit" value="Add" @click.prevent="onSubmitCategory()">
     </form>
     <form v-for="category in categories" :key="category.name">
-      {{ category.name }} <input size="32" :id="category.id">
+      {{ category.name }} <input size="32" :id="category.name">
       <input type="submit" value="Update" @click.prevent="onUpdateCategory(category)">
       <input type="submit" value="Delete" @click.prevent="onDeleteCategory(category)">
     </form>
@@ -52,17 +52,55 @@ export default {
       this.newCategoryName = ''
     },
     fetchCategories () {
-      axios.get('https://api.lmm.im/v1/user/1/categories').then(res => {
+      this.newCategoryName = ''
+      axios.get('https://api.lmm.im/v1/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     onSubmitCategory () {
+      axios.post('https://api.lmm.im/v1/categories', {
+        name: this.newCategoryName
+      }, {
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then(res => {
+        alert(res.data)
+        this.fetchCategories()
+      }).catch(e => {
+        console.log(e)
+        console.log(e.response.data)
+      })
     },
     onUpdateCategory (category) {
+      axios.put('https://api.lmm.im/v1/categories/' + category.id, {
+        name: document.getElementById(category.name).value
+      }, {
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then(res => {
+        alert(res.data)
+        this.fetchCategories()
+      }).catch(e => {
+        console.log(e)
+        console.log(e.response.data)
+      })
     },
     onDeleteCategory (category) {
+      axios.delete('https://api.lmm.im/v1/categories/' + category.id, {
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then(res => {
+        alert('deleted')
+        this.fetchCategories()
+      }).catch(e => {
+        console.log(e)
+        console.log(e.response.data)
+      })
     }
   }
 }
