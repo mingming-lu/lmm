@@ -24,10 +24,14 @@ func Update(userID, categoryID int64, name string) error {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("UPDATE category SET name = ? WHERE user = ? AND category = ?")
+	stmt := d.Must("UPDATE category SET name = ? WHERE user = ? AND id = ?")
 	defer stmt.Close()
 
 	res, err := stmt.Exec(name, userID, categoryID)
+	if err != nil {
+		return err
+	}
+
 	rows, err := res.RowsAffected()
 
 	if err != nil {
