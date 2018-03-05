@@ -12,7 +12,6 @@ class SQLHelper(cli.CLI):
 
     def exec(self):
         if self.args.warnings:
-            import sys
             warnings.filterwarnings('error', category=MySQLdb.Warning)
 
         with open(self.args.file) as f:
@@ -31,15 +30,12 @@ class SQLHelper(cli.CLI):
                     cli.warn(w)
                 print()
 
-            return
             cli.ok('All {} sql statement(s) executed.'.format(len(queries)))
 
             if self.args.deploy:
                 conn.commit()
-                cli.info('deploy mode')
             else:
                 conn.rollback()
-                cli.info('dry run mode')
 
         except Exception as e:
             cli.error(e)
