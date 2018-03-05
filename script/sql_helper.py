@@ -9,7 +9,6 @@ class SQLHelper(cli.CLI):
         parser.add_argument('--file', help='target sql script file')
         parser.add_argument('--warnings', action='store_true', help='should output warning infomation')
 
-
     def exec(self):
         if self.args.warnings:
             warnings.filterwarnings('error', category=MySQLdb.Warning)
