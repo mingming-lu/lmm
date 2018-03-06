@@ -11,12 +11,7 @@ import (
 	"lmm/api/controller/image"
 	"lmm/api/controller/tag"
 	"lmm/api/controller/user"
-	"lmm/api/db"
 )
-
-func init() {
-	db.Init("lmm")
-}
 
 func main() {
 	router := elesion.Default("[api]")

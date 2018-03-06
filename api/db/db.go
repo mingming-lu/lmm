@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 	"sync"
@@ -107,19 +106,6 @@ func (db *DB) Must(query string) *sql.Stmt {
 func (db *DB) Mustf(format string, args ...interface{}) *sql.Stmt {
 	query := fmt.Sprintf(format, args...)
 	return db.Must(query)
-}
-
-func Init(name string) {
-	defaultDatabaseName = name
-	d := New().CreateDatabase(defaultDatabaseName).Use(defaultDatabaseName)
-	defer d.Close()
-
-	for _, query := range CreateSQL {
-		_, err := d.Exec(query)
-		if err != nil {
-			log.Println(err)
-		}
-	}
 }
 
 func (db *DB) Exists(query string, args ...interface{}) (bool, error) {
