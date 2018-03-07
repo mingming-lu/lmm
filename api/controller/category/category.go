@@ -20,7 +20,7 @@ func Register(c *elesion.Context) {
 		return
 	}
 
-	m := model.Minimal{}
+	m := model.Category{}
 	err = json.NewDecoder(c.Request.Body).Decode(&m)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid body").Error(err.Error())
@@ -50,7 +50,7 @@ func Update(c *elesion.Context) {
 		return
 	}
 
-	m := model.Minimal{}
+	m := model.Category{}
 	err = json.NewDecoder(c.Request.Body).Decode(&m)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid body").Error(err.Error())
