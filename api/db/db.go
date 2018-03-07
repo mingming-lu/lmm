@@ -18,7 +18,7 @@ var (
 	ErrNoRows        = errors.New(sql.ErrNoRows.Error())
 )
 
-var defaultDatabaseName = ""
+var defaultDatabaseName = "lmm"
 var mux sync.Mutex
 
 func SetDefaultDatabaseName(name string) {
