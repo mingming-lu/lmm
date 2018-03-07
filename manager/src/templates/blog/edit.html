@@ -4,17 +4,17 @@
     <div class="left" style="width:50%">
       <div class="container">
         <input v-model="title" placeholder="title">
-        <div align="right">
-          <select v-model="categoryID">
-            <option disabled value="">Select one category</option>
-            <option v-for="ctg in categories" :key="ctg.id" :value="ctg.id">{{ ctg.name }}</option>
-          </select>
-        </div>
         <br>
         <textarea v-model="text" v-on:input="textPreview = marked(text)" placeholder="text"></textarea>
       </div>
 
       <div class="text-left container">
+        <p>Category</p>
+        <select v-model="categoryID">
+            <option disabled value="">Select one category</option>
+            <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+        </select>
+        <button @click="onSetCategory">Set</button>
         <p>Tags</p>
         <form v-for="tag in tags" :key="tag.name">
           {{ tag.name }}<input type="submit" value="Delete" @click.prevent="onRemoveTag(tag)">
