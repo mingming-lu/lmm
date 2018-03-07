@@ -43,6 +43,8 @@ export default {
     marked: (text) => {
       return md.render(text)
     },
+    onSetCategory () {
+    },
     onAddTag (name) {
     },
     onRemoveTag (tag) {
