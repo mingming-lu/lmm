@@ -46,6 +46,18 @@ func Update(userID, categoryID int64, name string) error {
 	return nil
 }
 
+func SetBlogCategory(blogID, categoryID int64) error {
+	d := db.Default()
+	defer d.Close()
+
+	stmt := d.Must("INSERT INTO blog_category (blog, category) VALUES (?, ?) ON DUPLICATE KEY UPDATE category = ?")
+	defer stmt.Close()
+
+	_, err := stmt.Exec(blogID, categoryID, categoryID)
+
+	return err
+}
+
 func ByUser(userID int64) ([]model.Category, error) {
 	d := db.Default()
 	defer d.Close()
@@ -81,6 +93,22 @@ func ByBlog(blogID int64) (*model.Category, error) {
 	err := stmt.QueryRow(blogID).Scan(&category.ID, &category.User, &category.Name)
 
 	return &category, err
+}
+
+func ByID(categoryID int64) (*model.Category, error) {
+	d := db.Default()
+	defer d.Close()
+
+	stmt := d.Must("SELECT id, user, name FROM category WHERE id = ?")
+	defer stmt.Close()
+
+	category := model.Category{}
+	err := stmt.QueryRow(categoryID).Scan(&category.ID, &category.User, &category.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &category, nil
 }
 
 func AllBlogByID(categoryID int64) ([]blog.ListItem, error) {
