@@ -3,10 +3,12 @@
     <!-- Blog text -->
     <div class="left" :class="{ 'mobile-left': isMobile }">
       <div class="container">
-        <h1 class="center">{{ title }}</h1>
+        <h1>{{ title }}</h1>
+        <span><i class="fa fa-fw fa-folder-open-o"></i><router-link to="" class="white link">{{ category.name }}</router-link></span>
+        <span style="white-space: pre;">  |  </span>
+        <span><i class="fa fa-fw fa-calendar-o"></i><span class="opacity">{{ createdAt }}</span></span>
         <div ref="text" v-html="text" v-hljs class="text"></div>
-        <p v-if="createdAt === updatedAt" class="text-right opacity">Created at {{ createdAt }}</p>
-        <p v-else class="text-right opacity">Updated at {{ updatedAt }}</p>
+        <p v-if="createdAt !== updatedAt" class="text-right opacity">Updated at {{ updatedAt }}</p>
       </div>
     </div>
 
@@ -44,7 +46,7 @@ export default {
       text: '',
       createdAt: '',
       updatedAt: '',
-      category: null,
+      category: undefined,
       tags: [],
       progress: 0
     }
@@ -163,9 +165,6 @@ export default {
 .progress-bar {
   border-top: 1px solid #11AF33;
   width: 0;
-}
-.left >>> h1 {
-  text-align: center;
 }
 .left >>> h3:before {
   white-space: pre-wrap;
