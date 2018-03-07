@@ -8,6 +8,7 @@ import (
 
 	"lmm/api/db"
 	model "lmm/api/domain/model/blog"
+	categoryModel "lmm/api/domain/model/category"
 	usecase "lmm/api/usecase/blog"
 	"lmm/api/usecase/category"
 	"lmm/api/usecase/tag"
@@ -188,7 +189,29 @@ func GetCategory(c *elesion.Context) {
 }
 
 func SetCategory(c *elesion.Context) {
-	c.Status(http.StatusNotImplemented)
+	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
+		return
+	}
+
+	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
+		return
+	}
+
+	categoryModel, err := categoryModel.Read(c.Request.Body)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("Invalid body").Error(err.Error())
+		return
+	}
+
+	if err = category.SetBlogCategory(usr.ID, blogID, categoryModel.ID); err != nil {
+		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).String("success")
 }
 
 func DeleteCategory(c *elesion.Context) {

@@ -4,6 +4,7 @@ import (
 	"lmm/api/domain/model/blog"
 	model "lmm/api/domain/model/category"
 	repo "lmm/api/domain/repository/category"
+	blogUsecase "lmm/api/usecase/blog"
 	"strings"
 
 	"github.com/akinaru-lu/errors"
@@ -25,6 +26,10 @@ func Update(userID, categoryID int64, name string) error {
 	return repo.Update(userID, categoryID, name)
 }
 
+func FetchByID(categoryID int64) (*model.Category, error) {
+	return repo.ByID(categoryID)
+}
+
 func FetchByUser(userID int64) ([]model.Category, error) {
 	return repo.ByUser(userID)
 }
@@ -33,8 +38,29 @@ func FetchByBlog(blogID int64) (*model.Category, error) {
 	return repo.ByBlog(blogID)
 }
 
+func SetBlogCategory(userID, blogID, categoryID int64) error {
+	if err := blogUsecase.CheckOwnership(userID, blogID); err != nil {
+		return errors.Wrap(err, "Not allowed to edit target blog")
+	}
+	if err := CheckOwnership(userID, categoryID); err != nil {
+		return errors.Wrap(err, "Not allowd to add targer category")
+	}
+	return repo.SetBlogCategory(blogID, categoryID)
+}
+
 func FetchAllBlog(categoryID int64) ([]blog.ListItem, error) {
 	return repo.AllBlogByID(categoryID)
+}
+
+func CheckOwnership(userID, categoryID int64) error {
+	category, err := FetchByID(categoryID)
+	if err != nil {
+		return err
+	}
+	if category.ID != categoryID {
+		return errors.New("User doesn't own the target category")
+	}
+	return nil
 }
 
 func Delete(userID, categoryID int64) error {

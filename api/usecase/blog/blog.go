@@ -4,6 +4,8 @@ import (
 	model "lmm/api/domain/model/blog"
 	repo "lmm/api/domain/repository/blog"
 	"strings"
+
+	"github.com/akinaru-lu/errors"
 )
 
 func Post(userID int64, title, text string) (int64, error) {
@@ -22,6 +24,17 @@ func FetchByUser(userID int64) ([]model.Blog, error) {
 
 func FetchListByUser(userID int64) ([]model.ListItem, error) {
 	return repo.List(userID)
+}
+
+func CheckOwnership(userID, blogID int64) error {
+	blog, err := FetchByID(blogID)
+	if err != nil {
+		return err
+	}
+	if blog.User != userID {
+		return errors.New("User doesn't own the targer blog")
+	}
+	return nil
 }
 
 func Update(id int64, title, text string) error {

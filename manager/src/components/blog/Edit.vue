@@ -60,6 +60,19 @@ export default {
     marked: (text) => {
       return md.render(text)
     },
+    onSetCategory () {
+      axios.put('https://api.lmm.im/v1/blog/' + this.blogID + '/category', {
+        id: this.categoryID
+      }, {
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then(res => {
+        alert(res.data)
+      }).catch(e => {
+        console.log(e.response.data)
+      })
+    },
     onAddTag (name) {
     },
     onRemoveTag (tag) {
