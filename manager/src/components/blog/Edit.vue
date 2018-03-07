@@ -85,7 +85,6 @@ export default {
       axios.get('https://api.lmm.im/v1/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
-        console.lgo(e)
         console.log(e.response.data)
       })
       axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/category').then(res => {
