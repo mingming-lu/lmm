@@ -82,18 +82,19 @@ export default {
       })
     },
     fetchCategories () {
-      axios.all([
-        axios.get('https://api.lmm.im/v1/users/1/categories'),
-        axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/category')
-      ]).then(axios.spread((categories, category) => {
-        this.categories = categories.data
-        this.categoryID = category.data[0].id
-      })).catch(e => {
+      axios.get('https://api.lmm.im/v1/users/1/categories').then(res => {
+        this.categories = res.data
+      }).catch(e => {
+        console.log(e.response.data)
+      })
+      axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/category').then(res => {
+        this.categoryID = res.data.id
+      }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get('http://api.lmm.im/v1/blog/' + this.blogID + '/tags').then(res => {
+      axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
