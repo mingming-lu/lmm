@@ -4,13 +4,11 @@
     <div class="left" :class="{ 'mobile-left': isMobile }">
       <div class="container">
         <div v-for="(blog, index) in blogList" :key="blog.id">
-          <div class="container">
-            <h2>
-              <router-link :to="'/blog/' + blog.id" class="link white">{{ blog.title }}</router-link>
-            </h2>
-            <p class="opacity"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
-          </div>
-          <hr v-if="index !== blog.length - 1" class="opacity-plus">
+          <h3>
+            <router-link :to="'/blog/' + blog.id" class="link white">{{ blog.title }}</router-link>
+          </h3>
+          <p class="opacity"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
+          <hr v-if="index !== blogList.length - 1" class="opacity-plus">
         </div>
       </div>
     </div>
