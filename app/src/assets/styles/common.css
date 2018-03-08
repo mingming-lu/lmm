@@ -35,9 +35,11 @@ nav .nav-item {
 }
 .nav-item-active {
   padding-bottom: 12px !important;
-  border-bottom: 2px solid #11AF33 !important;
+  border-bottom: 2px solid deepskyblue !important;
 }
 .nav-item:hover {
+  opacity: 0.8;
+  color: deepskyblue;
   background-color: #f1f1f1;
 }
 .center {
@@ -54,7 +56,8 @@ nav .nav-item {
   text-decoration: none;
 }
 .link:hover {
-  color: #11AF33;
+  opacity: 0.8;
+  color: deepskyblue;
 }
 .right {
   float: right;
@@ -66,7 +69,7 @@ nav .nav-item {
 }
 .tag {
   display: inline-block;
-  background-color: #11AF33;
+  background-color: skyblue;
   padding: 1px 8px;
   margin: 0 2px 3.36px 2px;
   border-radius: 2px;
@@ -192,7 +195,7 @@ i {
   margin-right: 8px;
 }
 a {
-  color: #11AF33;
+  color: deepskyblue;
 }
 a:hover {
   opacity: 0.8;
