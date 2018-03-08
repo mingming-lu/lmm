@@ -163,35 +163,35 @@ export default {
   white-space: pre-wrap;
 }
 .progress-bar {
-  border-top: 1px solid #11AF33;
+  border-top: 1px solid deepskyblue;
   width: 0;
 }
 .left >>> h3:before {
   white-space: pre-wrap;
-  border-left: 5px solid #11AF33;
+  border-left: 5px solid deepskyblue;
   opacity: 0.6;
   content: '  ';
 }
 .left >>> h2 {
   font-weight: 400;
-  color: #11AF33;
+  color: deepskyblue;
   border-bottom: 1px solid #eee;
 }
 .left >>> h3 {
   font-weight: 400;
-  color: #11AF33;
+  color: deepskyblue;
 }
 .left >>> h4 {
   font-size: 400;
-  color: #11AF33;
+  color: deepskyblue;
 }
 .left >>> h5 {
   font-size: 400;
-  color: #11AF33;
+  color: deepskyblue;
 }
 .left >>> h6 {
   font-size: 400;
-  color: #11AF33;
+  color: deepskyblue;
 }
 .left >>> s {
   opacity: 0.5;
