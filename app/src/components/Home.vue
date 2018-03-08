@@ -16,12 +16,6 @@
 
 <script>
 export default {
-  created () {
-    document.getElementsByTagName('header')[0].className = 'fixed'
-  },
-  destroyed () {
-    document.getElementsByTagName('header')[0].className = 'white sticky header-shadow'
-  }
 }
 </script>
 
