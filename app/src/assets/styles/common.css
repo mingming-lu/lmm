@@ -23,11 +23,12 @@ nav .nav-item {
   border: none;
   display: inline-block;
   outline: 0;
-  padding: 12px 16px 14px 16px;
+  padding: 16px;
   vertical-align: top;
   overflow: hidden;
   text-decoration: none;
   color: inherit;
+  font-weight: 600;
   background-color: inherit;
   text-align: center;
   cursor: pointer;
