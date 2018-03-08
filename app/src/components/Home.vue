@@ -16,12 +16,18 @@
 
 <script>
 export default {
+  created () {
+    document.getElementsByTagName('header')[0].className = 'fixed'
+  },
+  destroyed () {
+    document.getElementsByTagName('header')[0].className = 'sticky white header-shadow'
+  }
 }
 </script>
 
 <style scoped>
 h1 {
-  font-weight: normal;
+  font-weight: 500;
   letter-spacing: 6px;
 }
 .bg {

@@ -1,11 +1,11 @@
 <template>
   <div id="app">
-    <header class="white" :class="{'text-center': wideMode}">
+    <header class="white sticky header-shadow">
       <nav>
 
         <!-- wide mode-->
         <div>
-          <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" active-class="nav-item-active" class="nav-item">
+          <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
             {{ item.name }}
           </router-link>
         </div>
