@@ -2,7 +2,7 @@
   <div class="center">
 
     <div class="bg bgimg-1">
-      <div class="container display-middle" style="white-space:nowrap;">
+      <div class="container display-middle">
         <h1 class="center">一个一点也不萌的网站</h1>
         <hr class="opacity-plus">
         <p class=""></p>
