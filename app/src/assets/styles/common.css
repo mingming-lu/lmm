@@ -1,6 +1,12 @@
 .card { /* for debug */
   border: 1px solid red;
 }
+.fixed {
+  position: fixed !important;
+}
+.sticky {
+  position: sticky !important;
+}
 .opacity {
   opacity: 0.6;
 }
@@ -162,10 +168,11 @@ header {
   position: -moz-sticky;
   position: -ms-sticky;
   position: -o-sticky;
-  position: sticky !important;
-  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
   z-index: 99 !important;
   top: 0 !important;
+}
+.header-shadow {
+  box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
 }
 footer {
   width: 100%;
