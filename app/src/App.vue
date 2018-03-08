@@ -71,12 +71,12 @@ export default {
         {
           link: '/projects',
           name: 'Projects',
-          icon: 'fa-star-half-o'
+          icon: 'fa-archive'
         },
         {
           link: '/reviews',
           name: 'Reviews',
-          icon: 'fa-info'
+          icon: 'fa-star-half-o'
         }
       ]
     }
