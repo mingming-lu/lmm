@@ -2,6 +2,7 @@ package tag
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -20,8 +21,8 @@ func Register(c *elesion.Context) {
 		return
 	}
 
-	tags := make([]model.Minimal, 0)
-	err = json.NewDecoder(c.Request.Body).Decode(&tags)
+	tag := model.Minimal{}
+	err = json.NewDecoder(c.Request.Body).Decode(&tag)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid body").Error(err.Error())
 		return
@@ -33,12 +34,12 @@ func Register(c *elesion.Context) {
 		return
 	}
 
-	err = usecase.Add(usr.ID, blogID, tags)
+	tagID, err := usecase.Add(usr.ID, blogID, tag.Name)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
 		return
 	}
-	c.Status(http.StatusCreated).String("success")
+	c.Header("Location", fmt.Sprintf("/v1/blog/%d/tags/%d", blogID, tagID)).Status(http.StatusCreated).String("success")
 }
 
 func Update(c *elesion.Context) {
