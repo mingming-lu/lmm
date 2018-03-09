@@ -74,8 +74,28 @@ export default {
       })
     },
     onAddTag (name) {
+      axios.post('https://api.lmm.im/v1/blog/' + this.blogID + '/tags', {
+        name: name
+      }, {
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then(res => {
+        alert(res.data)
+      }).catch(e => {
+        console.log(e.response.data)
+      })
     },
     onRemoveTag (tag) {
+      axios.delete('http://api.lmm.im/v1/blog/' + this.blogID + '/tags/' + tag.id, {
+        headers: {
+          Authorization: localStorage.getItem('token')
+        }
+      }).then(res => {
+        alert(res.data)
+      }).catch(e => {
+        console.log(e.response.data)
+      })
     },
     fetchData () {
       this.fetchBlog()
