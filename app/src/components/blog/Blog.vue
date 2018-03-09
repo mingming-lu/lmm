@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- Blog text -->
-    <div class="left" :class="{ 'mobile-left': isMobile }">
+    <div :class="{ 'left': !isMobile, 'mobile': isMobile }">
       <div class="container">
         <h1>{{ title }}</h1>
         <span><i class="fa fa-fw fa-folder-open-o"></i><router-link to="" class="white link">{{ category.name }}</router-link></span>
@@ -156,7 +156,7 @@ export default {
 .container .right {
   width: 25%;
 }
-.mobile-left {
+.mobile {
   width: 100% !important;
 }
 .chapter .chapter-item {
