@@ -7,39 +7,18 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-func Add(userID, blogID int64, tags []model.Minimal) error {
+func Add(userID, blogID int64, tagName string) (int64, error) {
 	d := db.Default()
 	defer d.Close()
 
 	stmt := d.Must("INSERT INTO tag (user, blog, name) VALUES (?, ?, ?)")
 	defer stmt.Close()
 
-	tx, err := d.Begin()
-	stmt = tx.Stmt(stmt)
-
-	rowsAffected := int64(0)
-	for _, tag := range tags {
-		res, err := stmt.Exec(userID, blogID, tag.Name)
-		if err != nil {
-			break
-		}
-		rows, err := res.RowsAffected()
-		if err != nil {
-			break
-		}
-		rowsAffected += rows
-	}
-
+	res, err := stmt.Exec(userID, blogID, tagName)
 	if err != nil {
-		return errors.Wrap(err, errors.Wrap(tx.Rollback(), "").Error())
+		return 0, err
 	}
-	if rowsAffected == 0 {
-		return db.ErrNoChange
-	}
-	if rowsAffected != int64(len(tags)) {
-		return errors.Wrap(err, errors.Wrap(tx.Rollback(), "Rows inserted not equal to length of input array").Error())
-	}
-	return tx.Commit()
+	return res.LastInsertId()
 }
 
 func Update(userID, blogID, tagID int64, name string) error {

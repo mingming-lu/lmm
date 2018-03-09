@@ -8,13 +8,13 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-func Add(userID, blogID int64, tags []model.Minimal) error {
+func Add(userID, blogID int64, tagName string) (int64, error) {
 	blog, err := blog.FetchByID(blogID)
 	if err != nil {
-		return errors.Wrapf(err, "No such blog: %d", blogID)
+		return 0, errors.Wrapf(err, "No such blog: %d", blogID)
 	}
 
-	return repo.Add(userID, blog.ID, tags)
+	return repo.Add(userID, blog.ID, tagName)
 }
 
 func Update(userID, blogID, tagID int64, name string) error {
