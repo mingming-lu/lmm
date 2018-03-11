@@ -5,6 +5,10 @@ import cli
 
 
 class SQLHelper(cli.CLI):
+    '''
+    usage: sqlhelper.py [-h] [--deploy] [--file FILE] [--warnings]
+    '''
+
     def add_arguments(self, parser):
         parser.add_argument('--file', help='target sql script file')
         parser.add_argument('--warnings', action='store_true', help='should output warning infomation')
@@ -12,10 +16,16 @@ class SQLHelper(cli.CLI):
     def exec(self):
         if self.args.warnings:
             warnings.filterwarnings('error', category=MySQLdb.Warning)
+        else:
+            warnings.filterwarnings('ignore', category=MySQLdb.Warning)
 
-        with open(self.args.file) as f:
-            data = f.read()
-            queries = [query.strip() for query in data.split(';') if query.strip()]
+        try:
+            with open(self.args.file) as f:
+                data = f.read()
+                queries = [query.strip() for query in data.split(';') if query.strip()]
+        except Exception as e:
+            cli.error(e)
+            return
 
         conn = MySQLdb.connect(db='lmm', user='root')
         cursor = conn.cursor()
