@@ -47,11 +47,18 @@ CREATE TABLE IF NOT EXISTS tag (
 CREATE TABLE IF NOT EXISTS image (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
-	type tinyint NOT NULL,
-	url varchar(127) NOT NULL,
+	name varchar(127) NOT NULL,
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
-	UNIQUE (url)
+	UNIQUE (name)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+
+CREATE TABLE IF NOT EXISTS photo (
+	id int unsigned NOT NULL AUTO_INCREMENT,
+	user int unsigned NOT NULL,
+	image int unsigned NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (user, image)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS project (
