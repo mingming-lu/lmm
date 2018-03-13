@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS tag (
 CREATE TABLE IF NOT EXISTS image (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
-	name varchar(127) NOT NULL,
+	name varchar(255) NOT NULL,
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
 	UNIQUE (user, name)

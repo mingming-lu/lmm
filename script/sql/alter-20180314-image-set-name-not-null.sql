@@ -1,0 +1,1 @@
+ALTER TABLE image CHANGE `name` `name` varchar(255) NOT NULL;
