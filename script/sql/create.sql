@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS image (
 	name varchar(127) NOT NULL,
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
-	UNIQUE (name)
+	UNIQUE (user, name)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS photo (
