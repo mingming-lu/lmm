@@ -7,26 +7,14 @@ import (
 	"lmm/api/domain/service/uuid"
 )
 
-func Upload(userID int64, imageTypeStr string, data []byte) error {
-	imageType := toImageType(imageTypeStr)
-	name := base64.Encode([]byte(uuid.New()))
-	return repo.Add(userID, imageType, name, data)
-}
-
-func Find(userID int64, imageTypeStr string) ([]model.Minimal, error) {
-	imageType := toImageType(imageTypeStr)
-	return repo.Fetch(userID, imageType)
-}
-
-func toImageType(imageType string) model.ImageType {
-	switch imageType {
-	case "avatar":
-		return model.TypeAvatar
-	case "blog":
-		return model.TypeBlog
-	case "photo":
-		return model.TypePhoto
-	default:
-		panic("Unexpected image type: " + imageType)
+func Upload(userID int64, bulkData [][]byte) error {
+	imageData := make([]model.ImageData, 0)
+	for _, image := range bulkData {
+		imgData := model.ImageData{
+			Name: base64.Encode([]byte(uuid.New())),
+			Data: image,
+		}
+		imageData = append(imageData, imgData)
 	}
+	return repo.Add(userID, imageData)
 }
