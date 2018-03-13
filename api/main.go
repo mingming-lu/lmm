@@ -46,7 +46,8 @@ func main() {
 	router.DELETE("/v1/blog/:blog/tags/:tag", tag.Delete)
 
 	// image
-	router.GET("/v1/users/:user/photos", image.GetPhotos)
+	router.GET("/v1/users/:user/images", image.GetAllImages)
+	router.GET("/v1/users/:user/images/photos", image.GetAllPhotos)
 	router.POST("/v1/images", image.Upload)
 
 	log.Fatal(http.ListenAndServe(":8081", router))

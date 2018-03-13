@@ -18,3 +18,7 @@ func Upload(userID int64, bulkData [][]byte) error {
 	}
 	return repo.Add(userID, imageData)
 }
+
+func AllImages(userID int64) ([]model.Minimal, error) {
+	return repo.FetchAllImage(userID)
+}

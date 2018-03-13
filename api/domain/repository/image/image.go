@@ -39,7 +39,7 @@ func Add(userID int64, data []model.ImageData) error {
 	return tx.Commit()
 }
 
-func FetchAllImage(userID int64) {
+func FetchAllImage(userID int64) ([]model.Minimal, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -48,8 +48,16 @@ func FetchAllImage(userID int64) {
 
 	itr, err := stmt.Query(userID)
 	if err != nil {
-		return
+		return nil, err
 	}
+
+	images := make([]model.Minimal, 0)
 	for itr.Next() {
+		image := model.Minimal{}
+		if err := itr.Scan(&image.Name); err != nil {
+			return images, err
+		}
+		images = append(images, image)
 	}
+	return images, nil
 }

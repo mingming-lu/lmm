@@ -50,17 +50,32 @@ func Upload(c *elesion.Context) {
 	c.Status(http.StatusCreated).String("success")
 }
 
-func GetPhotos(c *elesion.Context) {
+func GetAllImages(c *elesion.Context) {
 	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid user").Error(err.Error())
 		return
 	}
 
-	images, err := usecase.AllPhotos(userID)
+	images, err := usecase.AllImages(userID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
 		return
 	}
 	c.Status(http.StatusOK).JSON(images)
+}
+
+func GetAllPhotos(c *elesion.Context) {
+	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String("Invalid user").Error(err.Error())
+		return
+	}
+
+	photos, err := usecase.AllPhotos(userID)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).JSON(photos)
 }
