@@ -61,3 +61,16 @@ func FetchAllImage(userID int64) ([]model.Minimal, error) {
 	}
 	return images, nil
 }
+
+func ByName(userID int64, imageName string) (*model.Image, error) {
+	d := db.Default()
+	defer d.Close()
+
+	stmt := d.Must("SELECT id, user, name, created_at FROM image WHERE user = ? AND name = ?")
+	defer stmt.Close()
+
+	image := model.Image{}
+	err := stmt.QueryRow(userID, imageName).Scan(&image.ID, &image.User, &image.Name, &image.CreatedAt)
+
+	return &image, err
+}

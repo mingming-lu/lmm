@@ -9,7 +9,10 @@ func AllPhotos(userID int64) ([]model.Minimal, error) {
 	return repo.FetchAllPhotos(userID)
 }
 
-func ShowOnPhotos(userID, imageID int64) error {
-	// TODO check image id
-	return repo.MarkAsPhoto(userID, imageID)
+func ShowOnPhotos(userID int64, imageName string) error {
+	image, err := repo.ByName(userID, imageName)
+	if err != nil {
+		return err
+	}
+	return repo.MarkAsPhoto(userID, image.ID)
 }
