@@ -65,7 +65,7 @@ export default {
         },
         {
           link: '/photos',
-          name: 'Photographs',
+          name: 'Photos',
           icon: 'fa-camera-retro'
         },
         {

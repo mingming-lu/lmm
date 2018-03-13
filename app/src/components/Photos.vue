@@ -1,10 +1,10 @@
 <template>
   <div class="container">
     <div class="left">
-        <img v-for="photo in left" :key="photo.url" :src="photo.url" class="picture">
+      <img v-for="photo in left" :key="photo.url" :src="photo.url" class="picture">
     </div>
     <div class="right">
-        <img v-for="photo in right" :key="photo.url" :src="photo.url" class="picture">
+      <img v-for="photo in right" :key="photo.url" :src="photo.url" class="picture">
     </div>
   </div>
 </template>

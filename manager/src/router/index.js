@@ -6,7 +6,8 @@ import PageNotFound from '@/components/404'
 import BlogIndex from '@/components/blog/Index'
 import BlogNew from '@/components/blog/New'
 import BlogEdit from '@/components/blog/Edit'
-import Photographs from '@/components/Photographs'
+import ImageIndex from '@/components/image/Index'
+import ImageUpload from '@/components/image/Upload'
 
 Vue.use(Router)
 
@@ -57,8 +58,20 @@ export default new Router({
       ]
     },
     {
-      path: '/photographs',
-      component: Photographs
+      path: '/image',
+      component: {
+        template: '<router-view/>'
+      },
+      children: [
+        {
+          path: '/',
+          component: ImageIndex
+        },
+        {
+          path: 'upload',
+          component: ImageUpload
+        }
+      ]
     }
   ]
 })

@@ -1,23 +1,19 @@
 package image
 
 type Minimal struct {
-	URL string `json:"url"`
+	Name string `json:"name"`
 }
 
-type ImageType int
-
-const (
-	TypeAvatar ImageType = iota
-	TypeBlog
-	TypePhoto
-)
+type ImageData struct {
+	Name string
+	Data []byte
+}
 
 const BaseURL = "https://image.lmm.im/"
 
 type Image struct {
 	ID        int64
 	User      int64
-	Type      ImageType
-	URL       string
+	Name      string
 	CreatedAt string
 }
