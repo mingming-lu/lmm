@@ -17,28 +17,32 @@ func Upload(c *elesion.Context) {
 		return
 	}
 
-	file, handler, err := c.Request.FormFile("src")
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("Invalid image").Error(err.Error())
-		return
-	}
-	defer file.Close()
+	c.Request.ParseMultipartForm(32 << 20) // 32MB is the default used by FormFile
+	fhs := c.Request.MultipartForm.File["src"]
 
-	contentType := handler.Header.Get("Content-Type")
-	switch contentType {
-	case "image/jpeg", "image/png":
-	default:
-		c.Status(http.StatusBadRequest).String("Invalid content type: " + contentType)
-		return
+	type bytes = []byte
+	bulkData := make([]bytes, 0)
+	for _, fh := range fhs {
+		contentType := fh.Header.Get("Content-Type")
+		switch contentType {
+		case "image/jpeg", "image/png":
+		default:
+			c.Status(http.StatusBadRequest).String("Invalid content type: " + contentType)
+			return
+		}
+
+		f, err := fh.Open()
+
+		data, err := ioutil.ReadAll(f)
+		if err != nil {
+			c.Status(http.StatusBadRequest).String("Invalid input image").Error(err.Error())
+			return
+		}
+
+		bulkData = append(bulkData, data)
 	}
 
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("Invalid input image").Error(err.Error())
-		return
-	}
-
-	err = usecase.Upload(usr.ID, c.Request.FormValue("type"), data)
+	err = usecase.Upload(usr.ID, bulkData)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
 		return
@@ -53,7 +57,7 @@ func GetPhotos(c *elesion.Context) {
 		return
 	}
 
-	images, err := usecase.Find(userID, "photo")
+	images, err := usecase.AllPhotos(userID)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
 		return
