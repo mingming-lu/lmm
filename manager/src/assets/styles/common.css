@@ -16,3 +16,7 @@ body {
   content: 'text: ';
   opacity: 0.4;
 }
+.error {
+  color: red;
+  background-color: lemonchiffon;
+}
