@@ -9,11 +9,11 @@ import (
 
 const pathRaw = "image/raw/"
 
-func Add(userID int64, imageType model.ImageType, name string, data []byte) error {
+func Add(userID int64, data []model.ImageData) error {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("INSERT INTO image (user, type, url) VALUES (?, ?, ?)")
+	stmt := d.Must("INSERT INTO image (user, name) VALUES (?, ?)")
 	defer stmt.Close()
 
 	tx, err := d.Begin()
@@ -22,43 +22,34 @@ func Add(userID int64, imageType model.ImageType, name string, data []byte) erro
 	}
 	stmt = tx.Stmt(stmt)
 
-	_, err = stmt.Exec(userID, imageType, model.BaseURL+name)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+	for _, image := range data {
+		_, err = stmt.Exec(userID, image.Name)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 
-	err = ioutil.WriteFile(pathRaw+name, data, os.ModePerm)
-	if err != nil {
-		tx.Rollback()
-		return err
+		err = ioutil.WriteFile(pathRaw+image.Name, image.Data, os.ModePerm)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	return tx.Commit()
 }
 
-func Fetch(userID int64, imageType model.ImageType) ([]model.Minimal, error) {
+func FetchAllImage(userID int64) {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("SELECT url FROM image WHERE user = ? AND type = ? ORDER BY created_at desc")
+	stmt := d.Must("SELECT name FROM image WHERE user = ? ORDER BY created_at DESC")
 	defer stmt.Close()
 
-	images := make([]model.Minimal, 0)
-
-	itr, err := stmt.Query(userID, imageType)
+	itr, err := stmt.Query(userID)
 	if err != nil {
-		return images, err
+		return
 	}
-
 	for itr.Next() {
-		image := model.Minimal{}
-		err = itr.Scan(&image.URL)
-		if err != nil {
-			return images, err
-		}
-		images = append(images, image)
 	}
-
-	return images, nil
 }
