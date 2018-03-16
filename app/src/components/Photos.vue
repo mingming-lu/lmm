@@ -1,10 +1,10 @@
 <template>
   <div class="container">
     <div class="left">
-      <img v-for="photo in left" :key="photo.url" :src="photo.url" class="picture">
+      <img v-for="photo in left" :key="photo.name" :src="url(photo.name)" class="picture">
     </div>
     <div class="right">
-      <img v-for="photo in right" :key="photo.url" :src="photo.url" class="picture">
+      <img v-for="photo in right" :key="photo.name" :src="url(photo.name)" class="picture">
     </div>
   </div>
 </template>
@@ -30,6 +30,11 @@ export default {
     }).catch((e) => {
       console.log(e)
     })
+  },
+  methods: {
+    url: (name) => {
+      return 'https://image.lmm.im/' + name
+    }
   }
 }
 </script>
