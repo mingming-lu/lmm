@@ -49,6 +49,8 @@ func main() {
 	router.GET("/v1/users/:user/images", image.GetAllImages)
 	router.GET("/v1/users/:user/images/photos", image.GetAllPhotos)
 	router.POST("/v1/images", image.Upload)
+	router.PUT("/v1/images/putPhoto", image.PutPhoto)
+	router.PUT("/v1/images/removePhoto", image.RemovePhoto)
 
 	log.Fatal(http.ListenAndServe(":8081", router))
 }

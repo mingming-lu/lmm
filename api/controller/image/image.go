@@ -1,7 +1,9 @@
 package image
 
 import (
+	"encoding/json"
 	"io/ioutil"
+	model "lmm/api/domain/model/image"
 	usecase "lmm/api/usecase/image"
 	"lmm/api/usecase/user"
 	"net/http"
@@ -78,4 +80,44 @@ func GetAllPhotos(c *elesion.Context) {
 		return
 	}
 	c.Status(http.StatusOK).JSON(photos)
+}
+
+func PutPhoto(c *elesion.Context) {
+	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
+		return
+	}
+
+	m := model.Minimal{}
+	if err := json.NewDecoder(c.Request.Body).Decode(&m); err != nil {
+		c.Status(http.StatusBadRequest).String("Invalid body").Error(err.Error())
+		return
+	}
+
+	if err := usecase.TurnOnPhotoSwitch(usr.ID, m.Name); err != nil {
+		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).String("success")
+}
+
+func RemovePhoto(c *elesion.Context) {
+	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	if err != nil {
+		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
+		return
+	}
+
+	m := model.Minimal{}
+	if err := json.NewDecoder(c.Request.Body).Decode(&m); err != nil {
+		c.Status(http.StatusBadRequest).String("Invalid body").Error(err.Error())
+		return
+	}
+
+	if err := usecase.TurnOffPhotoSwitch(usr.ID, m.Name); err != nil {
+		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
+		return
+	}
+	c.Status(http.StatusOK).String("success")
 }
