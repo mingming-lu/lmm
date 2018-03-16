@@ -9,7 +9,13 @@ func FetchAllPhotos(userID int64) ([]model.Minimal, error) {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("SELECT i.name FROM photo AS p INNER JOIN image AS i ON p.image = i.id AND p.user = i.user WHERE p.user = ? ORDER BY created_at DESC")
+	stmt := d.Must(`
+		SELECT i.name
+		FROM photo AS p
+		INNER JOIN image AS i ON p.image = i.id AND p.user = i.user
+		WHERE p.user = ? AND p.deleted = 0
+		ORDER BY created_at DESC
+	`)
 	defer stmt.Close()
 
 	images := make([]model.Minimal, 0)
@@ -31,14 +37,23 @@ func FetchAllPhotos(userID int64) ([]model.Minimal, error) {
 	return images, nil
 }
 
-func MarkAsPhoto(userID, imageID int64) error {
+func SavePhoto(userID, imageID int64, shown bool) error {
 	d := db.Default()
 	defer d.Close()
 
-	stmt := d.Must("INSERT INTO photo (user, image) VALUES (?, ?)")
+	stmt := d.Must(`
+		INSERT INTO photo (user, image)
+		VALUES (?, ?)
+		ON DUPLICATE key update deleted = ?
+	`)
 	defer stmt.Close()
 
-	_, err := stmt.Exec(userID, imageID)
+	var err error
+	if shown {
+		_, err = stmt.Exec(userID, imageID, 0)
+	} else {
+		_, err = stmt.Exec(userID, imageID, 1)
+	}
 	if err != nil {
 		return err
 	}

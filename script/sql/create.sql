@@ -57,8 +57,9 @@ CREATE TABLE IF NOT EXISTS photo (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	user int unsigned NOT NULL,
 	image int unsigned NOT NULL,
+	deleted tinyint unsigned NOT NULL DEFAULT 0,
 	PRIMARY KEY (id),
-	UNIQUE (user, image)
+	UNIQUE `image` (`image`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS project (
