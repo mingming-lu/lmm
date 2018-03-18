@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS photo (
 	user int unsigned NOT NULL,
 	image int unsigned NOT NULL,
 	deleted tinyint unsigned NOT NULL DEFAULT 0,
+	last_modified timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
 	UNIQUE `image` (`image`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
