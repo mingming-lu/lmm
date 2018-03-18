@@ -27,7 +27,9 @@
         <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
         <div class="progress-bar" :style="{ width: progress + '%' }"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
-          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link chapter-item">{{ subtitle.name }}</router-link>
+          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link chapter-item">
+            <div v-html="subtitle.name"></div>
+          </router-link>
         </p>
       </div>
     </div>
@@ -123,12 +125,12 @@ export default {
         if (!h || h.length !== 4) {
           return
         }
-        let prefix = ''
+        let className = ''
         if (h[1] === h[3]) {
-          prefix = '  '.repeat((Number(h[1]) - 2) * 2)
+          className = 'h' + h[1]
         }
         let subtitle = {
-          name: prefix + h[2],
+          name: '<div class="' + className + '">' + h[2] + '</div>',
           link: '#' + h[2]
         }
         subtitles.push(subtitle)
@@ -158,9 +160,6 @@ export default {
 }
 .mobile {
   width: 100% !important;
-}
-.chapter .chapter-item {
-  white-space: pre-wrap;
 }
 .progress-bar {
   border-top: 1px solid deepskyblue;
@@ -204,5 +203,17 @@ export default {
   border-left: 8px solid #ccc;
   margin: 1.5em 0;
   padding: 0.5em 16px;
+}
+.chapter-item >>> .h3 {
+  padding-left: 1em;
+}
+.chapter-item >>> .h4 {
+  padding-left: 2em;
+}
+.chapter-item >>> .h5 {
+  padding-left: 3em;
+}
+.chapter-item >>> .h6 {
+  padding-left: 4em;
 }
 </style>
