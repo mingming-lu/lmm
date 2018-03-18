@@ -14,7 +14,7 @@ func FetchAllPhotos(userID int64) ([]model.Minimal, error) {
 		FROM photo AS p
 		INNER JOIN image AS i ON p.image = i.id AND p.user = i.user
 		WHERE p.user = ? AND p.deleted = 0
-		ORDER BY created_at DESC
+		ORDER BY p.last_modified DESC
 	`)
 	defer stmt.Close()
 
