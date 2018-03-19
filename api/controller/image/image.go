@@ -44,6 +44,11 @@ func Upload(c *elesion.Context) {
 		bulkData = append(bulkData, data)
 	}
 
+	if len(bulkData) == 0 {
+		c.Status(http.StatusBadRequest).String("No file selected")
+		return
+	}
+
 	err = usecase.Upload(usr.ID, bulkData)
 	if err != nil {
 		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())

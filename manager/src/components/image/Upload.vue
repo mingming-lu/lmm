@@ -12,7 +12,7 @@
       <img v-for="image in images" :src="image" :key="image.name">
     </div>
 
-    <button @click="upload()">Upload</button>
+    <button @click="upload()" :disabled="files.length === 0">Upload</button>
   </div>
 </template>
 
