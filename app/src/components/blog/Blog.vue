@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <!-- Blog text -->
-    <div :class="{ 'left': !isMobile, 'mobile': isMobile }">
+    <div class="marked" :class="{ 'left': !isMobile, 'mobile': isMobile }">
       <div class="container">
         <h1>{{ title }}</h1>
         <span><i class="fa fa-fw fa-folder-open-o"></i><router-link to="" class="white link">{{ category.name }}</router-link></span>
@@ -165,40 +165,40 @@ export default {
   border-top: 1px solid deepskyblue;
   width: 0;
 }
-.left >>> h3:before {
+.marked >>> h3:before {
   white-space: pre-wrap;
   border-left: 5px solid deepskyblue;
   opacity: 0.6;
   content: '  ';
 }
-.left >>> h2 {
+.marked >>> h2 {
   font-weight: 400;
   color: deepskyblue;
   border-bottom: 1px solid #eee;
 }
-.left >>> h3 {
+.marked >>> h3 {
   font-weight: 400;
   color: deepskyblue;
 }
-.left >>> h4 {
+.marked >>> h4 {
   font-size: 400;
   color: deepskyblue;
 }
-.left >>> h5 {
+.marked >>> h5 {
   font-size: 400;
   color: deepskyblue;
 }
-.left >>> h6 {
+.marked >>> h6 {
   font-size: 400;
   color: deepskyblue;
 }
-.left >>> s {
+.marked >>> s {
   opacity: 0.5;
 }
-.left >>> img {
+.marked >>> img {
   width: 100%;
 }
-.left >>> blockquote {
+.marked >>> blockquote {
   background: #f9f9f9;
   border-left: 8px solid #ccc;
   margin: 1.5em 0;
