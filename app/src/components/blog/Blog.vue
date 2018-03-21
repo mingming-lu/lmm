@@ -204,6 +204,26 @@ export default {
   margin: 1.5em 0;
   padding: 0.5em 16px;
 }
+.marked >>> table {
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  border-collapse: collapse;
+  width: 100%;
+}
+.marked >>> th {
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+.marked >>> tr:nth-child(odd) {
+  background-color: #eee;
+}
+.marked >>> td {
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  padding: 4px 8px;
+}
 .chapter-item >>> .h3 {
   padding-left: 1em;
 }
