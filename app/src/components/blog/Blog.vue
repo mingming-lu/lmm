@@ -15,9 +15,11 @@
     <div v-if="!isMobile" class="right">
       <div class="container">
         <h4><i class="fa fa-fw fa-tags"></i>Tags</h4>
-        <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
-          {{ tag.name }}
-        </router-link>
+        <p>
+          <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
+            {{ tag.name }}
+          </router-link>
+        </p>
       </div>
     </div>
 
