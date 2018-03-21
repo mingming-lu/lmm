@@ -1,9 +1,9 @@
 <template>
   <div id="app">
-    <div class="text-right">
+    <div class="text-right" v-if="username">
       <router-link to="/" style="float: left">Home</router-link>
       {{ username }}
-      <span v-if="username"><button @click="signout">Signout</button></span>
+      <span><button @click="signout">Signout</button></span>
     </div>
     <router-view/>
   </div>
