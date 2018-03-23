@@ -50,7 +50,7 @@ export default {
       text: '',
       createdAt: '',
       updatedAt: '',
-      category: undefined,
+      category: {},
       tags: [],
       progress: 0
     }
