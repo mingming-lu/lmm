@@ -27,7 +27,7 @@
     <div v-if="!isMobile" class="right nav">
       <div class="container chapter">
         <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
-        <div class="progress-bar" :style="{ width: progress + '%' }"/>
+        <div ref="progress" class="progress-bar"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
           <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link chapter-item">
             <div v-html="subtitle.name"></div>
@@ -51,8 +51,7 @@ export default {
       createdAt: '',
       updatedAt: '',
       category: {},
-      tags: [],
-      progress: 0
+      tags: []
     }
   },
   created () {
@@ -143,7 +142,8 @@ export default {
     calcProgress () {
       let el = this.$refs.text
       let progress = ((window.scrollY + window.innerHeight) - el.offsetTop) / (el.offsetHeight)
-      this.progress = progress > 1 ? 100 : progress * 100
+      progress = progress > 1 ? 100 : progress * 100
+      this.$refs.progress.style.width = progress + '%'
     },
     calcIsMobile () {
       this.isMobile = window.innerWidth <= 768
