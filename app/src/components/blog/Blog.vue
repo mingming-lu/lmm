@@ -153,12 +153,11 @@ export default {
 </script>
 
 <style scoped>
-@import '../../assets/styles/blog.css';
 .container .left {
-  width: 75%;
+  width: 66.666%;
 }
 .container .right {
-  width: 25%;
+  width: 33.333%;
 }
 .mobile {
   width: 100% !important;
