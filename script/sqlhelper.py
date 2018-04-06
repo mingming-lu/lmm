@@ -27,10 +27,11 @@ class SQLHelper(cli.CLI):
             cli.error(e)
             return
 
-        conn = MySQLdb.connect(db='lmm', user='root')
-        cursor = conn.cursor()
-
         try:
+            db = MySQLdb.connect(user="root")
+            cursor = db.cursor()
+            cursor.execute('CREATE DATABASE IF NOT EXISTS lmm;')
+            db.select_db('lmm')
             for query in queries:
                 print(query)
                 try:
@@ -42,17 +43,17 @@ class SQLHelper(cli.CLI):
             cli.ok('All {} sql statement(s) executed.'.format(len(queries)))
 
             if self.args.deploy:
-                conn.commit()
+                db.commit()
             else:
-                conn.rollback()
+                db.rollback()
 
         except Exception as e:
             cli.error(e)
-            conn.rollback()
+            db.rollback()
 
         finally:
             cursor.close()
-            conn.close()
+            db.close()
     
     
 if __name__ == '__main__':
