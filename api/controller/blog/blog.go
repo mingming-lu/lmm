@@ -69,21 +69,6 @@ func Get(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(blog)
 }
 
-func GetByUser(c *elesion.Context) {
-	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("Invalid user ID").Error(err.Error())
-		return
-	}
-
-	blog, err := usecase.FetchByUser(userID)
-	if err != nil {
-		c.Status(http.StatusNotFound).String("Blog not found").Error(err.Error())
-		return
-	}
-	c.Status(http.StatusOK).JSON(blog)
-}
-
 func GetList(c *elesion.Context) {
 	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
 	if err != nil {
