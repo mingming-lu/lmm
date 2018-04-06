@@ -18,10 +18,6 @@ func FetchByID(id int64) (*model.Blog, error) {
 	return repo.ById(id)
 }
 
-func FetchByUser(userID int64) ([]model.Blog, error) {
-	return repo.ByUser(userID)
-}
-
 func FetchListByUser(userID int64) ([]model.ListItem, error) {
 	return repo.List(userID)
 }
