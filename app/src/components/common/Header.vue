@@ -1,19 +1,17 @@
 <template>
-   <header class="white sticky header-shadow">
+   <header class="shadow white">
       <nav>
-
         <!-- wide mode-->
         <div>
           <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
             {{ item.name }}
           </router-link>
         </div>
-
         <!-- narrow mode-->
         <div class="text-left">
           <router-link v-if="!wideMode" to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
           <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
-            <router-link to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
+            <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
             <div class="container">
               <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link white" @click.native="toggleDrawer">
                 <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
@@ -21,9 +19,7 @@
             </div>
           </div>
         </div>
-
       </nav>
-      <div class="overlay animate-opacity" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']" @click="toggleDrawer"></div>
     </header>
 </template>
 
@@ -81,6 +77,20 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+header {
+  width: 100%;
+  border: none;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  position: -ms-sticky;
+  position: -o-sticky;
+  position: sticky !important;
+  z-index: 99 !important;
+  top: 0 !important;
+  &.shadow {
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+  }
+}
 .drawer-show {
   display: block;
 }
@@ -88,12 +98,48 @@ export default {
   display: none;
 }
 .drawer {
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  position: fixed !important;
+  z-index: 99 !important;
+  overflow:auto;
   .container {
     border-top: 1px solid #f1f1f1;
   }
+  .drawer-item-active {
+    color: deepskyblue;
+  }
 }
-.drawer-item-active {
-  color: deepskyblue;
+nav {
+  .nav-item {
+    border: none;
+    display: inline-block;
+    outline: 0;
+    padding: 16px;
+    vertical-align: top;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    font-weight: 600;
+    background-color: inherit;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    &:hover {
+      opacity: 0.8;
+      color: deepskyblue;
+      background-color: #f1f1f1;
+    }
+  }
 }
 .animate-left {
   position: relative;
