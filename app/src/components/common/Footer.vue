@@ -13,12 +13,11 @@
   </footer>
 </template>
 
-<script>
-export default {
-  
-}
-</script>
-
 <style lang="scss" scoped>
-
+footer {
+  width: 100%;
+  position: fixed !important;
+  z-index: -99 !important;
+  bottom: 0 !important;
+}
 </style>
