@@ -1,26 +1,26 @@
 <template>
-   <header class="shadow">
-      <nav>
-        <!-- wide mode-->
-        <div>
-          <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
-            {{ item.name }}
-          </router-link>
-        </div>
-        <!-- narrow mode-->
-        <div class="text-left">
-          <router-link v-if="!wideMode" to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
-          <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
-            <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
-            <div class="container">
-              <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
-                <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
-              </router-link>
-            </div>
+  <header class="shadow">
+    <nav>
+      <!-- wide mode-->
+      <div>
+        <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
+          {{ item.name }}
+        </router-link>
+      </div>
+      <!-- narrow mode-->
+      <div class="text-left">
+        <router-link v-if="!wideMode" to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
+        <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
+          <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
+          <div class="container">
+            <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
+              <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
+            </router-link>
           </div>
         </div>
-      </nav>
-    </header>
+      </div>
+    </nav>
+  </header>
 </template>
 
 <script>
@@ -80,6 +80,7 @@ export default {
 @import '@/assets/scss/styles.scss';
 header {
   width: 100%;
+  background-color: white;
   border: none;
   position: -webkit-sticky;
   position: -moz-sticky;
