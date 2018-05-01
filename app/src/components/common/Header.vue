@@ -1,5 +1,5 @@
 <template>
-   <header class="shadow white">
+   <header class="shadow">
       <nav>
         <!-- wide mode-->
         <div>
@@ -13,7 +13,7 @@
           <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
             <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
             <div class="container">
-              <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link white" @click.native="toggleDrawer">
+              <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
                 <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
               </router-link>
             </div>
@@ -77,6 +77,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/scss/styles.scss';
 header {
   width: 100%;
   border: none;
@@ -110,7 +111,7 @@ header {
     border-top: 1px solid #f1f1f1;
   }
   .drawer-item-active {
-    color: deepskyblue;
+    color: $font_color;
   }
 }
 nav {
@@ -136,7 +137,7 @@ nav {
     user-select: none;
     &:hover {
       opacity: 0.8;
-      color: deepskyblue;
+      color: $font_color;
       background-color: #f1f1f1;
     }
   }

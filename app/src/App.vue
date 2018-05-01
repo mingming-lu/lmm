@@ -21,11 +21,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import "@/assets/scss/styles.scss";
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #424949;
-  background-color: #fff;
+  color: $font_color;
+  background-color: white;
 }
 #index {
   margin-bottom: 86px;
