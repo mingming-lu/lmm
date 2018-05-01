@@ -19,6 +19,9 @@ footer {
   hr {
     opacity: 0.15;
   }
+  i {
+    margin: 4px;
+  }
   bottom: 0 !important;
   position: fixed !important;
   width: 100%;
