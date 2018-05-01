@@ -1,10 +1,10 @@
 <template>
   <div class="container">
     <div class="left">
-      <img v-for="photo in left" :key="photo.name" :src="url(photo.name)" class="picture">
+      <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
     </div>
     <div class="right">
-      <img v-for="photo in right" :key="photo.name" :src="url(photo.name)" class="picture">
+      <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
     </div>
   </div>
 </template>
@@ -39,9 +39,25 @@ export default {
 }
 </script>
 
-<style scoped>
-div {
-  padding: 0 !important;
+<style lang="scss" scoped>
+img {
+  display: block;
+  width: 100%;
+}
+.container {
+  .left {
+    float: left;
+    width: 50%;
+  }
+  .right {
+    float: right;
+    width: 50%;
+  }
+  &:before, &:after {
+    clear: both;
+    content: "";
+    display: table;
+  }
 }
 </style>
 
