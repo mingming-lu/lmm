@@ -1,18 +1,20 @@
 <template>
   <div id="app">
-    <Header />
-    <router-view style="margin-bottom:86px;" />
-    <Footer />
+    <Header id="header" />
+    <Index id="index" />
+    <Footer id="footer" />
   </div>
 </template>
 
 <script>
 import Header from '@/components/common/Header'
+import Index from '@/components/Index'
 import Footer from '@/components/common/Footer'
 export default {
   name: 'app',
   components: {
     Header,
+    Index,
     Footer
   }
 }
@@ -28,5 +30,8 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: #424949;
   background-color: #fff;
+}
+#index {
+  margin-bottom: 86px;
 }
 </style>
