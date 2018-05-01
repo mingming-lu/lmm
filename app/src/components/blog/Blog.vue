@@ -1,18 +1,21 @@
 <template>
   <div class="container">
     <!-- Blog text -->
-    <div class="marked" :class="{ 'left': !isMobile, 'mobile': isMobile }">
+    <div class="blog" :class="{ 'left': !isMobile, 'mobile': isMobile }">
       <div class="container">
         <h1>{{ title }}</h1>
-        <span><i class="fa fa-fw fa-folder-open-o"></i><router-link to="" class="white link">{{ category.name }}</router-link></span>
-        <span style="white-space: pre;">  |  </span>
-        <span><i class="fa fa-fw fa-calendar-o"></i><span class="opacity">{{ createdAt }}</span></span>
-        <div ref="text" v-html="text" v-hljs class="text"></div>
-        <p v-if="createdAt !== updatedAt" class="text-right opacity">Updated at {{ updatedAt }}</p>
+        <div class="info">
+          <span><i class="fa fa-fw fa-folder-open-o"></i><router-link to="" class="link">{{ category.name }}</router-link></span>
+          <span style="white-space: pre;">  |  </span>
+          <span><i class="fa fa-fw fa-calendar-o"></i><span>{{ createdAt }}</span></span>
+        </div>
+        <div ref="text" class="marked" v-html="text" v-hljs></div>
+        <p v-if="createdAt !== updatedAt" class="info text-right">Updated at {{ updatedAt }}</p>
       </div>
     </div>
 
-    <div v-if="!isMobile" class="right">
+    <!-- Blog tags -->
+    <div v-if="!isMobile" class="tags">
       <div class="container">
         <h4><i class="fa fa-fw fa-tags"></i>Tags</h4>
         <p>
@@ -23,13 +26,13 @@
       </div>
     </div>
 
-    <!-- Blog chapters navigation -->
-    <div v-if="!isMobile" class="right nav">
-      <div class="container chapter">
+    <!-- Blog chapters -->
+    <div v-if="!isMobile" class="chapters">
+      <div class="container">
         <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
         <div ref="progress" class="progress-bar"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
-          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="white link chapter-item">
+          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
             <div v-html="subtitle.name"></div>
           </router-link>
         </p>
@@ -113,7 +116,7 @@ export default {
         const id = match[1]
         document.getElementById(id).className = 'highlighted'
         setTimeout(() => {
-          document.getElementById(id).className = 'white-trans'
+          document.getElementById(id).className = 'highlight-dispear-trans'
         }, 500)
       }
     },
@@ -152,89 +155,143 @@ export default {
 }
 </script>
 
-<style scoped>
-.container .left {
-  width: 66.666%;
+<style lang="scss" scoped>
+@import '@/assets/scss/styles.scss';
+i {
+  margin-right: 8px;
 }
-.container .right {
-  width: 33.333%;
+.container {
+  padding: 0 16px;
+  .blog {
+    float: left;
+    width: 66.666%;
+    .info {
+      opacity: 0.6;
+    }
+  }
+  .tags {
+    float: right;
+    width: 33.3333%;
+    .tag {
+      display: inline-block;
+      background-color: #777;
+      padding: 1px 8px;
+      margin: 2px;
+      border-radius: 2px;
+      font-weight: bold;
+      font-size: 0.88em;
+      color: white !important;
+      &:hover {
+        background-color: $secondary_color;
+        opacity: 0.8;
+      }
+    }
+  }
+  .chapters {
+    float: right;
+    position: sticky !important;
+    top: 44px;
+    width: 33.3333%;
+  }
 }
 .mobile {
   width: 100% !important;
 }
 .progress-bar {
-  border-top: 1px solid deepskyblue;
+  border-top: 1px solid $secondary_color;
   width: 0;
 }
-.marked >>> h3:before {
-  white-space: pre-wrap;
-  border-left: 5px solid deepskyblue;
-  opacity: 0.6;
-  content: '  ';
-}
-.marked >>> h2 {
+.marked /deep/ h2 {
   font-weight: 400;
-  color: deepskyblue;
+  color: $secondary_color;
   border-bottom: 1px solid #eee;
 }
-.marked >>> h3 {
+.marked /deep/ h3 {
   font-weight: 400;
-  color: deepskyblue;
+  color: $secondary_color;
+  &:before {
+    white-space: pre-wrap;
+    border-left: 5px solid $secondary_color;
+    opacity: 0.6;
+    content: '  '; 
+  }
 }
-.marked >>> h4 {
+.marked /deep/ h4 {
   font-size: 400;
-  color: deepskyblue;
+  color: $secondary_color;
 }
-.marked >>> h5 {
+.marked /deep/ h5 {
   font-size: 400;
-  color: deepskyblue;
+  color: $secondary_color;
 }
-.marked >>> h6 {
+.marked /deep/ h6 {
   font-size: 400;
-  color: deepskyblue;
+  color: $secondary_color;
 }
-.marked >>> s {
+.marked /deep/ a {
+  color: $secondary_color;
+  &:hover {
+    opacity: 0.8;
+  }
+}
+.marked /deep/ code {
+  background-color: #f1f1f1 !important;
+  font-family: Monaco, "Courier", monospace;
+}
+.marked /deep/ s {
   opacity: 0.5;
 }
-.marked >>> img {
+.marked /deep/ img {
   width: 100%;
 }
-.marked >>> blockquote {
+.marked /deep/ blockquote {
   background: #f9f9f9;
   border-left: 8px solid #ccc;
   margin: 1.5em 0;
   padding: 0.5em 16px;
 }
-.marked >>> table {
+.marked /deep/ table {
   border-bottom: 1px solid #ddd;
   border-top: 1px solid #ddd;
   border-collapse: collapse;
   width: 100%;
 }
-.marked >>> th {
+.marked /deep/ th {
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
   padding: 8px;
   text-align: center;
 }
-.marked >>> tr:nth-child(odd) {
+.marked /deep/ tr:nth-child(odd) {
   background-color: #eee;
 }
-.marked >>> td {
+.marked /deep/ td {
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
   padding: 4px 8px;
 }
-.chapter-item >>> .h3 {
+.marked /deep/ .highlighted {
+  background-color: lemonchiffon;
+}
+.marked /deep/ .highlight-dispear-trans {
+  color: $font_color;
+  background-color: #fff;
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+  -ms-transition: all 0.5s ease-in-out;
+  transition: all 0.5s ease-in-out;
+}
+.chapter-item /deep/ .h3 {
   padding-left: 1em;
 }
-.chapter-item >>> .h4 {
+.chapter-item /deep/ .h4 {
   padding-left: 2em;
 }
-.chapter-item >>> .h5 {
+.chapter-item /deep/ .h5 {
   padding-left: 3em;
 }
-.chapter-item >>> .h6 {
+.chapter-item /deep/ .h6 {
   padding-left: 4em;
 }
 </style>

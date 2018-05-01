@@ -10,7 +10,8 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+@import '@/assets/scss/styles.scss';
 h1 {
   font-weight: 500;
   letter-spacing: 6px;

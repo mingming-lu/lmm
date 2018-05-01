@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <Header id="header" />
-    <Index id="index" />
-    <Footer id="footer" />
+    <Header />
+    <Index id="content" />
+    <Footer />
   </div>
 </template>
 
@@ -20,18 +20,15 @@ export default {
 }
 </script>
 
-<style>
-  @import './assets/styles/common.css';
-</style>
-
 <style lang="scss" scoped>
+@import "@/assets/scss/styles.scss";
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #424949;
-  background-color: #fff;
+  color: $font_color;
+  background-color: white;
 }
-#index {
+#content {
   margin-bottom: 86px;
 }
 </style>
