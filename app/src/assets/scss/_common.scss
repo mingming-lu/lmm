@@ -1,0 +1,12 @@
+.center {
+  text-align: center;
+}
+.link {
+  background-color: white;
+  color: $font_color;
+  text-decoration: none;
+  &:hover {
+    opacity: 0.8;
+    color: dodgerblue;
+  }
+}
