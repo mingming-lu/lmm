@@ -21,3 +21,12 @@ export default {
 <style>
   @import './assets/styles/common.css';
 </style>
+
+<style lang="scss" scoped>
+#app {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #424949;
+  background-color: #fff;
+}
+</style>
