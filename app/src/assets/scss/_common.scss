@@ -1,6 +1,13 @@
 .center {
   text-align: center;
 }
+.container {
+  &:before, &:after {
+    clear: both;
+    content: "";
+    display: table;
+  }
+}
 .link {
   background-color: white;
   color: $font_color;
@@ -9,4 +16,10 @@
     opacity: 0.8;
     color: dodgerblue;
   }
+}
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
 }
