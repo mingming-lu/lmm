@@ -7,7 +7,6 @@ import hljs from 'highlight.js'
 
 // stylesheets
 import 'highlight.js/styles/github-gist.css'
-import '@/../../app/src/assets/styles/common.css'
 import '@/assets/styles/common.css'
 
 Vue.config.productionTip = true
