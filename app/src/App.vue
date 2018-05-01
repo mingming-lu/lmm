@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header />
-    <Index />
+    <Index id="content" />
     <Footer />
   </div>
 </template>
@@ -28,7 +28,7 @@ export default {
   color: $font_color;
   background-color: white;
 }
-#index {
+#content {
   margin-bottom: 86px;
 }
 </style>
