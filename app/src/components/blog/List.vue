@@ -119,7 +119,6 @@ export default {
       }
     }
     .tags {
-      margin-top: 16px;
       .tag {
         display: inline-block;
         background-color: #777;
@@ -135,11 +134,6 @@ export default {
         }
       }
     }
-  }
-  &:before, &:after {
-    clear: both;
-    content: "";
-    display: table;
   }
 }
 .mobile-left {
