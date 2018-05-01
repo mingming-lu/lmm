@@ -8,17 +8,10 @@ install:
 	go get -v github.com/go-sql-driver/mysql
 	go get -v github.com/google/uuid
 	go get -v github.com/stretchr/testify/assert
+	rm -rf manager/node_modules
+	rm -rf app/node_modules
 	npm --prefix app install
 	npm --prefix manager install
-
-.PHONY: update
-update:
-	go get -u -v github.com/akinaru-lu/elesion
-	go get -u -v github.com/go-sql-driver/mysql
-	go get -u -v github.com/google/uuid
-	go get -u -v github.com/stretchr/testify/assert
-	npm --prefix app update
-	npm --prefix manager update
 
 .PHONY: run
 run: app api image manager
