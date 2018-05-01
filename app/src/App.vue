@@ -20,9 +20,6 @@ export default {
 }
 </script>
 
-<style src='@/assets/styles/base.scss' lang='scss'>
-</style>
-
 <style lang="scss" scoped>
 #app {
   -webkit-font-smoothing: antialiased;
