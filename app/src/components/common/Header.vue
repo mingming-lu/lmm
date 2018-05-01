@@ -111,7 +111,7 @@ header {
     border-top: 1px solid #f1f1f1;
   }
   .drawer-item-active {
-    color: $font_color;
+    color: $secondary_color;
   }
 }
 nav {
@@ -137,7 +137,7 @@ nav {
     user-select: none;
     &:hover {
       opacity: 0.8;
-      color: $font_color;
+      color: $secondary_color;
       background-color: #f1f1f1;
     }
   }
@@ -149,9 +149,10 @@ nav {
 @keyframes animateleft {
   from {
     left: -300px;
-    opacity:0
+    opacity:0;
   } to {
-    left:0;opacity:1
+    left:0;
+    opacity:1;
   }
 }
 </style>
