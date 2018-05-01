@@ -53,11 +53,6 @@ img {
     float: right;
     width: 50%;
   }
-  &:before, &:after {
-    clear: both;
-    content: "";
-    display: table;
-  }
 }
 </style>
 
