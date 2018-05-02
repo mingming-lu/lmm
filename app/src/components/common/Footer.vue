@@ -1,6 +1,5 @@
 <template>
-  <footer class="center">
-    <hr>
+  <footer class="container center">
     <a href="https://github.com/akinaru-lu" target="_blank">
       <i class="fa fa-github link"></i>
     </a>
