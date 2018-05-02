@@ -93,6 +93,9 @@ header {
     box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
   }
 }
+i {
+  margin-right: 8px;
+}
 .drawer-show {
   display: block;
 }
@@ -109,6 +112,8 @@ header {
   z-index: 99 !important;
   overflow:auto;
   .container {
+    font-size: 1.2em;
+    padding: 0 8px;
     border-top: 1px solid #f1f1f1;
   }
   .drawer-item-active {
