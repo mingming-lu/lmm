@@ -15,7 +15,7 @@
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
 .container {
-  padding: 32px;
+  padding: 32px 0;
 }
 footer {
   i {
