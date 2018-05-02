@@ -1,15 +1,15 @@
 <template>
   <header class="shadow">
-    <nav>
-      <!-- wide mode-->
-      <div>
-        <router-link v-if="wideMode" v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
-          {{ item.name }}
-        </router-link>
-      </div>
-      <!-- narrow mode-->
+
+    <nav v-if="wideMode" class="top-nav">
+      <router-link v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
+        {{ item.name }}
+      </router-link>
+    </nav>
+
+    <nav v-if="!wideMode" class="drawer-nav">
       <div class="text-left">
-        <router-link v-if="!wideMode" to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
+        <router-link to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
         <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
           <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
           <div class="container">
@@ -20,6 +20,7 @@
         </div>
       </div>
     </nav>
+
   </header>
 </template>
 
@@ -96,28 +97,29 @@ header {
 i {
   margin-right: 8px;
 }
-.drawer-show {
-  display: block;
-}
-.drawer-hide {
-  display: none;
-}
-.drawer {
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-  background-color: #fff;
-  position: fixed !important;
-  z-index: 99 !important;
-  overflow:auto;
-  .container {
-    font-size: 1.2em;
-    padding: 0 8px;
-    border-top: 1px solid #f1f1f1;
-  }
-  .drawer-item-active {
-    color: $secondary_color;
+.drawer-nav {
+  .drawer {
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    position: fixed !important;
+    z-index: 99 !important;
+    overflow:auto;
+    &.drawer-show {
+      display: block;
+    }
+    &.drawer-hide {
+      display: none;
+    }
+    .container {
+      padding: 0 8px;
+      border-top: 1px solid #f1f1f1;
+    }
+    .drawer-item-active {
+      color: $secondary_color;
+    }
   }
 }
 nav {
