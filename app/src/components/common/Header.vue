@@ -9,9 +9,11 @@
         </div>
       </a>
 
-      <router-link v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
-        {{ item.name }}
-      </router-link>
+      <div :class="{narrowTopNav: moderateWideMode}">
+        <router-link v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
+          {{ item.name }}
+        </router-link>
+      </div>
     </nav>
 
     <nav v-if="!wideMode" class="drawer-nav">
@@ -36,14 +38,17 @@ export default {
   created () {
     this.calcIsWideMode()
     window.addEventListener('resize', this.calcIsWideMode)
+    window.addEventListener('resize', this.calcIsModerateWideMode)
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.calcIsWideMode)
+    window.removeEventListener('resize', this.calcIsModerateWideMode)
   },
   data () {
     return {
       drawerShown: false,
       wideMode: false,
+      moderateWideMode: false,
       items: [
         {
           link: '/blog',
@@ -70,7 +75,10 @@ export default {
   },
   methods: {
     calcIsWideMode () {
-      this.wideMode = window.innerWidth > 600
+      this.wideMode = window.innerWidth > 680
+    },
+    calcIsModerateWideMode () {
+      this.moderateWideMode = window.innerWidth < 960
     },
     toggleDrawer () {
       this.drawerShown = !this.drawerShown
@@ -81,6 +89,10 @@ export default {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
+.narrowTopNav {
+  display: inline-block;
+  width: 310px;
+}
 .logo {
   cursor: pointer;
   float: left;
