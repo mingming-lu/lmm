@@ -25,10 +25,11 @@ export default {
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: $font_color;
-  background-color: white;
+  color: $color_text;
+  background-color: $color_primary;
 }
 #content {
-  margin-bottom: 86px;
+  margin-top: 128px;
+  margin-bottom: 140px;
 }
 </style>
