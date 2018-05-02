@@ -198,20 +198,23 @@ i {
   width: 100% !important;
 }
 .progress-bar {
-  border-top: 1px solid $color_primary;
+  border-top: 1px solid $color_accent;
   width: 0;
+}
+h1 {
+  color: $color_accent;
 }
 .marked /deep/ h2 {
   font-weight: 400;
-  color: $color_primary;
+  color: $color_accent;
   border-bottom: 1px solid #eee;
 }
 .marked /deep/ h3 {
   font-weight: 400;
-  color: $color_text;
+  color: $color_accent;
   &:before {
     white-space: pre-wrap;
-    border-left: 5px solid $color_primary;
+    border-left: 5px solid $color_accent;
     opacity: 0.6;
     content: '  '; 
   }
