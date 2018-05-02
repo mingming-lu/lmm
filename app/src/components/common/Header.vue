@@ -2,6 +2,13 @@
   <header class="shadow">
 
     <nav v-if="wideMode" class="top-nav">
+      <a href="/">
+        <div class="logo">
+          <img class="icon" src="/static/img/logo.png">
+          明鳴的树洞
+        </div>
+      </a>
+
       <router-link v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
         {{ item.name }}
       </router-link>
@@ -39,11 +46,6 @@ export default {
       wideMode: false,
       items: [
         {
-          link: '/home',
-          name: 'Home',
-          icon: 'fa-home'
-        },
-        {
           link: '/blog',
           name: 'Blog',
           icon: 'fa-pencil'
@@ -79,20 +81,30 @@ export default {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
+.logo {
+  cursor: pointer;
+  float: left;
+  outline:none;
+  user-select: none;
+  color: $color_text;
+  padding: 0 32px;
+  vertical-align: middle;
+  .icon {
+    width: 64px;
+    height: 64px;
+  }
+}
 header {
-  width: 100%;
-  background-color: white;
+  background-color: $color_primary_dark;
   border: none;
   position: -webkit-sticky;
   position: -moz-sticky;
   position: -ms-sticky;
   position: -o-sticky;
-  position: sticky !important;
   z-index: 99 !important;
   top: 0 !important;
-  &.shadow {
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
-  }
+  padding: 48px;
+  font-size: 1.5em;
 }
 i {
   margin-right: 8px;
@@ -118,21 +130,27 @@ i {
       border-top: 1px solid #f1f1f1;
     }
     .drawer-item-active {
-      color: $secondary_color;
+      color: $color_accent;
     }
   }
 }
 nav {
+  &.top-nav {
+    text-align: right;
+    .nav-item {
+      margin: 0 16px;
+    }
+  }
   .nav-item {
     border: none;
     display: inline-block;
     outline: 0;
     padding: 16px;
-    vertical-align: top;
+    vertical-align: middle;
     overflow: hidden;
     text-decoration: none;
     color: inherit;
-    font-weight: 600;
+    // font-weight: 600;
     background-color: inherit;
     text-align: center;
     cursor: pointer;
