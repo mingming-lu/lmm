@@ -103,7 +103,7 @@ i {
     width: 100%;
     top: 0;
     left: 0;
-    background-color: #fff;
+    background-color: $color_primary_dark;
     position: fixed !important;
     z-index: 99 !important;
     overflow:auto;
@@ -145,8 +145,7 @@ nav {
     user-select: none;
     &:hover {
       opacity: 0.8;
-      color: $secondary_color;
-      background-color: #f1f1f1;
+      color: $color_accent;
     }
   }
 }

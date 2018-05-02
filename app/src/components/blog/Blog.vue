@@ -198,38 +198,38 @@ i {
   width: 100% !important;
 }
 .progress-bar {
-  border-top: 1px solid $secondary_color;
+  border-top: 1px solid $color_primary;
   width: 0;
 }
 .marked /deep/ h2 {
   font-weight: 400;
-  color: $secondary_color;
+  color: $color_primary;
   border-bottom: 1px solid #eee;
 }
 .marked /deep/ h3 {
   font-weight: 400;
-  color: $secondary_color;
+  color: $color_text;
   &:before {
     white-space: pre-wrap;
-    border-left: 5px solid $secondary_color;
+    border-left: 5px solid $color_primary;
     opacity: 0.6;
     content: '  '; 
   }
 }
 .marked /deep/ h4 {
   font-size: 400;
-  color: $secondary_color;
+  color: $color_text;
 }
 .marked /deep/ h5 {
   font-size: 400;
-  color: $secondary_color;
+  color: $color_text;
 }
 .marked /deep/ h6 {
   font-size: 400;
-  color: $secondary_color;
+  color: $color_text;
 }
 .marked /deep/ a {
-  color: $secondary_color;
+  color: $color_text;
   &:hover {
     opacity: 0.8;
   }
@@ -274,7 +274,7 @@ i {
   background-color: lemonchiffon;
 }
 .marked /deep/ .highlight-dispear-trans {
-  color: $font_color;
+  color: $color_text;
   background-color: #fff;
   -webkit-transition: all 0.5s ease-in-out;
   -moz-transition: all 0.5s ease-in-out;

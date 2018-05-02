@@ -15,13 +15,15 @@
 
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
+.container {
+  padding: 32px;
+}
 footer {
-  hr {
-    opacity: 0.15;
-  }
   i {
     margin: 4px;
   }
+  background-color: $color_primary;
+  color: $color_text;
   bottom: 0 !important;
   position: fixed !important;
   width: 100%;
