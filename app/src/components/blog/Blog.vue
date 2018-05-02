@@ -182,7 +182,7 @@ i {
       font-size: 0.88em;
       color: white !important;
       &:hover {
-        background-color: $secondary_color;
+        background-color: $color_primary;
         opacity: 0.8;
       }
     }
