@@ -109,12 +109,6 @@ export default {
 header {
   background-color: $color_primary_dark;
   border: none;
-  // position: -webkit-sticky;
-  // position: -moz-sticky;
-  // position: -ms-sticky;
-  // position: -o-sticky;
-  // z-index: 99 !important;
-  // top: 0 !important;
   padding: 48px;
   font-size: 1.5em;
 }
@@ -162,7 +156,6 @@ nav {
     overflow: hidden;
     text-decoration: none;
     color: inherit;
-    // font-weight: 600;
     background-color: inherit;
     text-align: center;
     cursor: pointer;
@@ -176,6 +169,7 @@ nav {
     &:hover {
       opacity: 0.8;
       color: $color_accent;
+      transition: all 0.3s ease-out;
     }
   }
 }
