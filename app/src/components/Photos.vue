@@ -3,10 +3,14 @@
 
     <div v-if="wideMode">
       <div class="left">
-        <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
+        <div :class="{container: wideMode}">
+          <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
+        </div>
       </div>
       <div class="right">
-        <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
+        <div :class="{container: wideMode}">
+          <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
+        </div>
       </div>
     </div>
 
@@ -49,18 +53,34 @@ export default {
       return 'https://image.lmm.im/' + name
     },
     calcIsWideMode () {
-      this.wideMode = window.innerWidth > 800
+      this.wideMode = window.innerWidth >= 800
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/scss/styles.scss';
 img {
   display: block;
   width: 100%;
+  @media screen and (min-width: 800px) {
+    margin-bottom: 64px;
+  }
+  @media screen and (max-width: 799px) {
+    margin-bottom: 32px;
+  }
+  @media screen and (max-width: $width_max_drawer_to_view) {
+    margin-bottom: 16px;
+  }
 }
 .container {
+  margin-bottom: -64px;
+  padding: 0 32px;
+  @media screen and (max-width: $width_max_drawer_to_view) {
+    margin-bottom: -16px;
+    padding: 0 16px;
+  }
   .left {
     float: left;
     width: 50%;
