@@ -2,9 +2,18 @@
   <header class="shadow">
 
     <nav v-if="wideMode" class="top-nav">
-      <router-link v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
-        {{ item.name }}
+      <router-link to="/">
+        <div class="logo">
+          <img class="icon" src="/static/img/logo.png">
+          明鳴的树洞
+        </div>
       </router-link>
+
+      <div :class="{narrowTopNav: moderateWideMode}">
+        <router-link v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
+          {{ item.name }}
+        </router-link>
+      </div>
     </nav>
 
     <nav v-if="!wideMode" class="drawer-nav">
@@ -13,6 +22,9 @@
         <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
           <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
           <div class="container">
+            <router-link to="/home" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
+              <p><i class="fa fa-fw fa-home"></i>Home</p>
+            </router-link>
             <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
               <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
             </router-link>
@@ -29,20 +41,18 @@ export default {
   created () {
     this.calcIsWideMode()
     window.addEventListener('resize', this.calcIsWideMode)
+    window.addEventListener('resize', this.calcIsModerateWideMode)
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.calcIsWideMode)
+    window.removeEventListener('resize', this.calcIsModerateWideMode)
   },
   data () {
     return {
       drawerShown: false,
       wideMode: false,
+      moderateWideMode: false,
       items: [
-        {
-          link: '/home',
-          name: 'Home',
-          icon: 'fa-home'
-        },
         {
           link: '/blog',
           name: 'Blog',
@@ -68,7 +78,10 @@ export default {
   },
   methods: {
     calcIsWideMode () {
-      this.wideMode = window.innerWidth > 600
+      this.wideMode = window.innerWidth >= 680 // $width_max_drawer_to_view + 1
+    },
+    calcIsModerateWideMode () {
+      this.moderateWideMode = window.innerWidth <= 960
     },
     toggleDrawer () {
       this.drawerShown = !this.drawerShown
@@ -79,19 +92,33 @@ export default {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
+.narrowTopNav {
+  display: inline-block;
+  width: 310px;
+}
+.logo {
+  cursor: pointer;
+  float: left;
+  outline:none;
+  user-select: none;
+  color: $color_text;
+  padding: 0 16px;
+  vertical-align: middle;
+  .icon {
+    width: 64px;
+    height: 64px;
+  }
+}
 header {
-  width: 100%;
-  background-color: white;
+  background-color: $color_primary_dark;
   border: none;
-  position: -webkit-sticky;
-  position: -moz-sticky;
-  position: -ms-sticky;
-  position: -o-sticky;
-  position: sticky !important;
-  z-index: 99 !important;
-  top: 0 !important;
-  &.shadow {
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
+  font-size: 1.5em;
+  @media screen and (min-width: $width_max_drawer_to_view + 1) {
+    padding: 48px;
+  }
+  @media screen and (max-width: $width_max_drawer_to_view) {
+    position: sticky;
+    top: 0;
   }
 }
 i {
@@ -103,7 +130,7 @@ i {
     width: 100%;
     top: 0;
     left: 0;
-    background-color: #fff;
+    background-color: $color_primary_dark;
     position: fixed !important;
     z-index: 99 !important;
     overflow:auto;
@@ -114,25 +141,30 @@ i {
       display: none;
     }
     .container {
-      padding: 0 8px;
+      padding: 0 1em;
       border-top: 1px solid #f1f1f1;
     }
     .drawer-item-active {
-      color: $secondary_color;
+      color: $color_accent;
     }
   }
 }
 nav {
+  &.top-nav {
+    text-align: right;
+    .nav-item {
+      margin: 0 16px;
+    }
+  }
   .nav-item {
     border: none;
     display: inline-block;
     outline: 0;
     padding: 16px;
-    vertical-align: top;
+    vertical-align: middle;
     overflow: hidden;
     text-decoration: none;
     color: inherit;
-    font-weight: 600;
     background-color: inherit;
     text-align: center;
     cursor: pointer;
@@ -145,8 +177,8 @@ nav {
     user-select: none;
     &:hover {
       opacity: 0.8;
-      color: $secondary_color;
-      background-color: #f1f1f1;
+      color: $color_accent;
+      transition: all 0.3s ease-out;
     }
   }
 }

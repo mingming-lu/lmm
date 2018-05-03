@@ -1,6 +1,5 @@
 <template>
   <footer class="center">
-    <hr>
     <a href="https://github.com/akinaru-lu" target="_blank">
       <i class="fa fa-github link"></i>
     </a>
@@ -16,13 +15,15 @@
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
 footer {
-  hr {
-    opacity: 0.15;
-  }
   i {
+    font-size: 1.23em;
     margin: 4px;
   }
+  background-color: $color_primary;
   bottom: 0 !important;
+  color: $color_text;
+  padding-top: 32px;
+  padding-bottom: 8px;
   position: fixed !important;
   width: 100%;
   z-index: -99 !important;

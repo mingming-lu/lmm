@@ -2,22 +2,22 @@
   <div class="container">
     <!-- Blog text -->
     <div class="blog" :class="{ 'left': !isMobile, 'mobile': isMobile }">
-      <div class="container">
-        <h1>{{ title }}</h1>
+      <div :class="{container: !isMobile}">
+        <p class="title">{{ title }}</p>
         <div class="info">
-          <span><i class="fa fa-fw fa-folder-open-o"></i><router-link to="" class="link">{{ category.name }}</router-link></span>
+          <span><i class="fa fa-fw fa-folder-open-o"></i>{{ category.name }}</span>
           <span style="white-space: pre;">  |  </span>
           <span><i class="fa fa-fw fa-calendar-o"></i><span>{{ createdAt }}</span></span>
         </div>
-        <div ref="text" class="marked" v-html="text" v-hljs></div>
+        <div ref="text" class="marked text" v-html="text" v-hljs></div>
         <p v-if="createdAt !== updatedAt" class="info text-right">Updated at {{ updatedAt }}</p>
       </div>
     </div>
 
     <!-- Blog tags -->
     <div v-if="!isMobile" class="tags">
-      <div class="container">
-        <h4><i class="fa fa-fw fa-tags"></i>Tags</h4>
+      <div :class="{container: !isMobile}">
+        <h3><i class="fa fa-fw fa-tags"></i>Tags</h3>
         <p>
           <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
             {{ tag.name }}
@@ -28,8 +28,8 @@
 
     <!-- Blog chapters -->
     <div v-if="!isMobile" class="chapters">
-      <div class="container">
-        <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
+      <div :class="{container: !isMobile}">
+        <h3><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h3>
         <div ref="progress" class="progress-bar"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
           <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
@@ -161,12 +161,28 @@ i {
   margin-right: 8px;
 }
 .container {
-  padding: 0 16px;
+  @media screen and (min-width: $width_max_drawer_to_view + 1) {
+    padding: 0 32px;
+  }
+  @media screen and (max-width: $width_max_drawer_to_view) {
+    padding: 0 16px;
+  }
   .blog {
     float: left;
     width: 66.666%;
+    .title {
+      color: $color_accent;
+      font-weight: 600;
+      font-size: 2em;
+    }
+    .text {
+      font-size: 1.1em;
+      line-height: 1.8;
+      text-align: justify;
+    }
     .info {
-      opacity: 0.6;
+      // opacity: 0.6;
+      color: #777 !important;
     }
   }
   .tags {
@@ -179,10 +195,10 @@ i {
       margin: 2px;
       border-radius: 2px;
       font-weight: bold;
-      font-size: 0.88em;
+      font-size: 0.98em;
       color: white !important;
       &:hover {
-        background-color: $secondary_color;
+        background-color: $color_accent;
         opacity: 0.8;
       }
     }
@@ -192,44 +208,59 @@ i {
     position: sticky !important;
     top: 44px;
     width: 33.3333%;
+    .chapter-item {
+      font-size: 1.1em;
+    }
+    .chapter-item /deep/ .h3 {
+      padding-left: 1em;
+    }
+    .chapter-item /deep/ .h4 {
+      padding-left: 2em;
+    }
+    .chapter-item /deep/ .h5 {
+      padding-left: 3em;
+    }
+    .chapter-item /deep/ .h6 {
+      padding-left: 4em;
+    }
   }
 }
 .mobile {
   width: 100% !important;
 }
 .progress-bar {
-  border-top: 1px solid $secondary_color;
+  border-top: 1px solid $color_accent;
   width: 0;
 }
 .marked /deep/ h2 {
   font-weight: 400;
-  color: $secondary_color;
+  color: $color_accent;
   border-bottom: 1px solid #eee;
 }
 .marked /deep/ h3 {
   font-weight: 400;
-  color: $secondary_color;
+  color: $color_accent;
   &:before {
     white-space: pre-wrap;
-    border-left: 5px solid $secondary_color;
+    border-left: 5px solid $color_accent;
     opacity: 0.6;
     content: '  '; 
   }
 }
 .marked /deep/ h4 {
   font-size: 400;
-  color: $secondary_color;
+  color: $color_text;
 }
 .marked /deep/ h5 {
   font-size: 400;
-  color: $secondary_color;
+  color: $color_text;
 }
 .marked /deep/ h6 {
   font-size: 400;
-  color: $secondary_color;
+  color: $color_text;
 }
 .marked /deep/ a {
-  color: $secondary_color;
+  color: $color_text;
   &:hover {
     opacity: 0.8;
   }
@@ -274,24 +305,8 @@ i {
   background-color: lemonchiffon;
 }
 .marked /deep/ .highlight-dispear-trans {
-  color: $font_color;
+  color: $color_text;
   background-color: #fff;
-  -webkit-transition: all 0.5s ease-in-out;
-  -moz-transition: all 0.5s ease-in-out;
-  -o-transition: all 0.5s ease-in-out;
-  -ms-transition: all 0.5s ease-in-out;
   transition: all 0.5s ease-in-out;
-}
-.chapter-item /deep/ .h3 {
-  padding-left: 1em;
-}
-.chapter-item /deep/ .h4 {
-  padding-left: 2em;
-}
-.chapter-item /deep/ .h5 {
-  padding-left: 3em;
-}
-.chapter-item /deep/ .h6 {
-  padding-left: 4em;
 }
 </style>

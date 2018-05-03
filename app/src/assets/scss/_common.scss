@@ -9,12 +9,12 @@
   }
 }
 .link {
-  background-color: white;
-  color: $font_color;
+  background-color: $color_primary;
+  color: $color_text;
   text-decoration: none;
   &:hover {
     opacity: 0.8;
-    color: dodgerblue;
+    color: $color_accent;
   }
 }
 .text-left {

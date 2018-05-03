@@ -2,21 +2,24 @@
   <div class="container">
     <!-- Posts -->
     <div class="posts" :class="{ 'mobile-left': isMobile }">
-      <div class="container">
-        <div v-for="(blog, index) in blogList" :key="blog.id">
-          <h3>
-            <router-link :to="'/blog/' + blog.id" class="link">{{ blog.title }}</router-link>
-          </h3>
-          <p class="post-info"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
-          <hr v-if="index !== blogList.length - 1" class="post-separator">
-        </div>
+      <div :class="{container: !isMobile}">
+        <table>
+          <tr v-for="blog in blogList" :key="blog.id">
+            <td>
+              <p class="post-title">
+                <router-link :to="'/blog/' + blog.id" class="link">{{ blog.title }}</router-link>
+              </p>
+              <p class="post-info"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
 
     <div v-if="!isMobile" class="nav">
       <!-- Categories -->
       <div class="categories container">
-        <h4><i class="fa fa-fw fa-folder"></i>Categories</h4>
+        <h3><i class="fa fa-fw fa-folder"></i>Categories</h3>
         <router-link to="" v-for="category in categories" :key="category.id" class="link">
           <p class="category">{{ category.name }}</p>
         </router-link>
@@ -24,7 +27,7 @@
 
       <!-- Tags -->
       <div class="tags container">
-        <h4><i class="fa fa-fw fa-tags"></i>Tags</h4>
+        <h3><i class="fa fa-fw fa-tags"></i>Tags</h3>
           <p>
             <router-link to="" v-for="tag in tags" :key="tag.name" class="link tag">
               {{ tag.name }}
@@ -91,15 +94,26 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
 .container {
-  padding: 0 16px;
+  @media screen and (min-width: $width_max_drawer_to_view + 1) {
+    margin: 0 32px;
+  }
+  @media screen and (max-width: $width_max_drawer_to_view) {
+    margin: 0 16px;
+  }
   .posts {
     float: left;
     width: 66.6666%;
-    .post-info {
-      opacity: 0.6;
+    table {
+      width: 100%;
+      td {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
     }
-    .post-separator {
-      opacity: 0.15;
+    .post-title {
+      font-size: 1.8em;
+    }
+    .post-info {
+      color: #777;
     }
   }
   .nav {
@@ -113,6 +127,7 @@ export default {
     width: 33.3333%;
     .categories {
       .category {
+        font-size: 1.1em;
         i {
           opacity: 0;
         }
@@ -126,10 +141,10 @@ export default {
         margin: 2px;
         border-radius: 2px;
         font-weight: bold;
-        font-size: 0.88em;
+        font-size: 0.98em;
         color: white !important;
         &:hover {
-          background-color: $secondary_color;
+          background-color: $color_accent;
           opacity: 0.8;
         }
       }
