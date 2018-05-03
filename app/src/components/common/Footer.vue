@@ -23,6 +23,7 @@ footer {
   bottom: 0 !important;
   color: $color_text;
   padding-top: 32px;
+  padding-bottom: 8px;
   position: fixed !important;
   width: 100%;
   z-index: -99 !important;
