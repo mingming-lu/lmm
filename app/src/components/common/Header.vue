@@ -141,7 +141,7 @@ i {
       display: none;
     }
     .container {
-      padding: 0 8px;
+      padding: 0 1em;
       border-top: 1px solid #f1f1f1;
     }
     .drawer-item-active {
