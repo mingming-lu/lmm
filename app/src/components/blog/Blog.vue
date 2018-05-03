@@ -301,10 +301,6 @@ i {
 .marked /deep/ .highlight-dispear-trans {
   color: $color_text;
   background-color: #fff;
-  -webkit-transition: all 0.5s ease-in-out;
-  -moz-transition: all 0.5s ease-in-out;
-  -o-transition: all 0.5s ease-in-out;
-  -ms-transition: all 0.5s ease-in-out;
   transition: all 0.5s ease-in-out;
 }
 </style>
