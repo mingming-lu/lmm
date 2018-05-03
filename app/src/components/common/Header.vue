@@ -78,10 +78,10 @@ export default {
   },
   methods: {
     calcIsWideMode () {
-      this.wideMode = window.innerWidth > 680
+      this.wideMode = window.innerWidth >= 680
     },
     calcIsModerateWideMode () {
-      this.moderateWideMode = window.innerWidth < 960
+      this.moderateWideMode = window.innerWidth <= 960
     },
     toggleDrawer () {
       this.drawerShown = !this.drawerShown
@@ -112,8 +112,14 @@ export default {
 header {
   background-color: $color_primary_dark;
   border: none;
-  padding: 48px;
   font-size: 1.5em;
+  @media screen and (min-width: 680px) {
+    padding: 48px;
+  }
+  @media screen and (max-width: 679px) {
+    position: sticky;
+    top: 0;
+  }
 }
 i {
   margin-right: 8px;
