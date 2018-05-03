@@ -3,13 +3,13 @@
     <!-- Blog text -->
     <div class="blog" :class="{ 'left': !isMobile, 'mobile': isMobile }">
       <div class="container">
-        <h1>{{ title }}</h1>
+        <p class="title">{{ title }}</p>
         <div class="info">
           <span><i class="fa fa-fw fa-folder-open-o"></i><router-link to="" class="link">{{ category.name }}</router-link></span>
           <span style="white-space: pre;">  |  </span>
           <span><i class="fa fa-fw fa-calendar-o"></i><span>{{ createdAt }}</span></span>
         </div>
-        <div ref="text" class="marked" v-html="text" v-hljs></div>
+        <div ref="text" class="marked text" v-html="text" v-hljs></div>
         <p v-if="createdAt !== updatedAt" class="info text-right">Updated at {{ updatedAt }}</p>
       </div>
     </div>
@@ -17,7 +17,7 @@
     <!-- Blog tags -->
     <div v-if="!isMobile" class="tags">
       <div class="container">
-        <h4><i class="fa fa-fw fa-tags"></i>Tags</h4>
+        <h3><i class="fa fa-fw fa-tags"></i>Tags</h3>
         <p>
           <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
             {{ tag.name }}
@@ -29,7 +29,7 @@
     <!-- Blog chapters -->
     <div v-if="!isMobile" class="chapters">
       <div class="container">
-        <h4><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h4>
+        <h3><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h3>
         <div ref="progress" class="progress-bar"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
           <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
@@ -161,10 +161,20 @@ i {
   margin-right: 8px;
 }
 .container {
-  padding: 0 16px;
+  padding: 0 32px;
   .blog {
     float: left;
     width: 66.666%;
+    .title {
+      color: $color_accent;
+      font-weight: 600;
+      font-size: 2.1em;
+    }
+    .text {
+      font-size: 1.2em;
+      line-height: 1.5;
+      text-align: justify;
+    }
     .info {
       opacity: 0.6;
     }
@@ -179,7 +189,7 @@ i {
       margin: 2px;
       border-radius: 2px;
       font-weight: bold;
-      font-size: 0.88em;
+      font-size: 1em;
       color: white !important;
       &:hover {
         background-color: $color_primary;
@@ -192,6 +202,21 @@ i {
     position: sticky !important;
     top: 44px;
     width: 33.3333%;
+    .chapter-item {
+      font-size: 1.2em;
+    }
+    .chapter-item /deep/ .h3 {
+      padding-left: 1em;
+    }
+    .chapter-item /deep/ .h4 {
+      padding-left: 2em;
+    }
+    .chapter-item /deep/ .h5 {
+      padding-left: 3em;
+    }
+    .chapter-item /deep/ .h6 {
+      padding-left: 4em;
+    }
   }
 }
 .mobile {
@@ -200,9 +225,6 @@ i {
 .progress-bar {
   border-top: 1px solid $color_accent;
   width: 0;
-}
-h1 {
-  color: $color_accent;
 }
 .marked /deep/ h2 {
   font-weight: 400;
@@ -284,17 +306,5 @@ h1 {
   -o-transition: all 0.5s ease-in-out;
   -ms-transition: all 0.5s ease-in-out;
   transition: all 0.5s ease-in-out;
-}
-.chapter-item /deep/ .h3 {
-  padding-left: 1em;
-}
-.chapter-item /deep/ .h4 {
-  padding-left: 2em;
-}
-.chapter-item /deep/ .h5 {
-  padding-left: 3em;
-}
-.chapter-item /deep/ .h6 {
-  padding-left: 4em;
 }
 </style>
