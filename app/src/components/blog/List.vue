@@ -2,14 +2,17 @@
   <div class="container">
     <!-- Posts -->
     <div class="posts" :class="{ 'mobile-left': isMobile }">
-      <div class="container">
-        <div v-for="(blog, index) in blogList" :key="blog.id">
-          <p class="post-title">
-            <router-link :to="'/blog/' + blog.id" class="link">{{ blog.title }}</router-link>
-          </p>
-          <p class="post-info"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
-          <hr v-if="index !== blogList.length - 1" class="post-separator">
-        </div>
+      <div :class="{container: !isMobile}">
+        <table>
+          <tr v-for="blog in blogList" :key="blog.id">
+            <td>
+              <p class="post-title">
+                <router-link :to="'/blog/' + blog.id" class="link">{{ blog.title }}</router-link>
+              </p>
+              <p class="post-info"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
 
@@ -91,18 +94,26 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
 .container {
-  margin: 0 32px;
+  @media screen and (min-width: 680px) {
+    margin: 0 32px;
+  }
+  @media screen and (max-width: 679px) {
+    margin: 0 16px;
+  }
   .posts {
     float: left;
     width: 66.6666%;
+    table {
+      width: 100%;
+      td {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+    }
     .post-title {
       font-size: 1.8em;
     }
     .post-info {
-      opacity: 0.6;
-    }
-    .post-separator {
-      opacity: 0.15;
+      color: #777;
     }
   }
   .nav {
