@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <Header />
-    <Index id="content" />
-    <Footer />
+    <Index id="content" :style="{marginBottom: footerHeight + 'px'}" />
+    <Footer ref="footer" />
   </div>
 </template>
 
@@ -16,6 +16,25 @@ export default {
     Header,
     Index,
     Footer
+  },
+  created () {
+    window.addEventListener('resize', this.calcFooterHeight)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.calcFooterHeight)
+  },
+  mounted () {
+    this.calcFooterHeight()
+  },
+  data () {
+    return {
+      footerHeight: 0
+    }
+  },
+  methods: {
+    calcFooterHeight () {
+      this.footerHeight = this.$refs.footer.$el.clientHeight
+    }
   }
 }
 </script>
@@ -30,6 +49,5 @@ export default {
 }
 #content {
   margin-top: 128px;
-  margin-bottom: 140px;
 }
 </style>
