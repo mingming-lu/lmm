@@ -22,6 +22,9 @@
         <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
           <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
           <div class="container">
+            <router-link to="/home" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
+              <p><i class="fa fa-fw fa-home"></i>Home</p>
+            </router-link>
             <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
               <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
             </router-link>
