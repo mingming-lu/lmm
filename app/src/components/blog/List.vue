@@ -94,10 +94,10 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
 .container {
-  @media screen and (min-width: 680px) {
+  @media screen and (min-width: $width_max_drawer_to_view + 1) {
     margin: 0 32px;
   }
-  @media screen and (max-width: 679px) {
+  @media screen and (max-width: $width_max_drawer_to_view) {
     margin: 0 16px;
   }
   .posts {

@@ -78,7 +78,7 @@ export default {
   },
   methods: {
     calcIsWideMode () {
-      this.wideMode = window.innerWidth >= 680
+      this.wideMode = window.innerWidth >= 680 // $width_max_drawer_to_view + 1
     },
     calcIsModerateWideMode () {
       this.moderateWideMode = window.innerWidth <= 960
@@ -113,10 +113,10 @@ header {
   background-color: $color_primary_dark;
   border: none;
   font-size: 1.5em;
-  @media screen and (min-width: 680px) {
+  @media screen and (min-width: $width_max_drawer_to_view + 1) {
     padding: 48px;
   }
-  @media screen and (max-width: 679px) {
+  @media screen and (max-width: $width_max_drawer_to_view) {
     position: sticky;
     top: 0;
   }
