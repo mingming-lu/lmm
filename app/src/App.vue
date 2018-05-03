@@ -48,6 +48,14 @@ export default {
   background-color: $color_primary;
 }
 #content {
-  margin-top: 128px;
+  @media screen and (min-width: 680px) {
+    margin-top: 128px;
+  }
+  @media screen and (max-width: 960px) {
+    margin-top: 64px;
+  }
+  @media screen and (max-width: 659px) {
+    margin-top: 0;
+  }
 }
 </style>
