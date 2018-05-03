@@ -99,7 +99,7 @@ export default {
   outline:none;
   user-select: none;
   color: $color_text;
-  padding: 0 32px;
+  padding: 0 16px;
   vertical-align: middle;
   .icon {
     width: 64px;
