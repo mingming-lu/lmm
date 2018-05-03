@@ -109,12 +109,12 @@ export default {
 header {
   background-color: $color_primary_dark;
   border: none;
-  position: -webkit-sticky;
-  position: -moz-sticky;
-  position: -ms-sticky;
-  position: -o-sticky;
-  z-index: 99 !important;
-  top: 0 !important;
+  // position: -webkit-sticky;
+  // position: -moz-sticky;
+  // position: -ms-sticky;
+  // position: -o-sticky;
+  // z-index: 99 !important;
+  // top: 0 !important;
   padding: 48px;
   font-size: 1.5em;
 }
