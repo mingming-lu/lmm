@@ -1,5 +1,5 @@
 <template>
-  <footer class="container center">
+  <footer class="center">
     <a href="https://github.com/akinaru-lu" target="_blank">
       <i class="fa fa-github link"></i>
     </a>
@@ -14,16 +14,15 @@
 
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
-.container {
-  padding: 32px 0;
-}
 footer {
   i {
+    font-size: 1.23em;
     margin: 4px;
   }
   background-color: $color_primary;
-  color: $color_text;
   bottom: 0 !important;
+  color: $color_text;
+  padding-top: 32px;
   position: fixed !important;
   width: 100%;
   z-index: -99 !important;
