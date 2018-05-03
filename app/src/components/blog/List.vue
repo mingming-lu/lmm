@@ -116,7 +116,7 @@ export default {
     width: 33.3333%;
     .categories {
       .category {
-        font-size: 1.2em;
+        font-size: 1.1em;
         i {
           opacity: 0;
         }
@@ -130,7 +130,7 @@ export default {
         margin: 2px;
         border-radius: 2px;
         font-weight: bold;
-        font-size: 1em;
+        font-size: 0.98em;
         color: white !important;
         &:hover {
           background-color: $color_accent;

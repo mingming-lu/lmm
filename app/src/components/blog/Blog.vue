@@ -168,11 +168,11 @@ i {
     .title {
       color: $color_accent;
       font-weight: 600;
-      font-size: 2.1em;
+      font-size: 2em;
     }
     .text {
-      font-size: 1.2em;
-      line-height: 1.66;
+      font-size: 1.1em;
+      line-height: 1.8;
       text-align: justify;
     }
     .info {
@@ -189,7 +189,7 @@ i {
       margin: 2px;
       border-radius: 2px;
       font-weight: bold;
-      font-size: 1em;
+      font-size: 0.98em;
       color: white !important;
       &:hover {
         background-color: $color_primary;
@@ -203,7 +203,7 @@ i {
     top: 44px;
     width: 33.3333%;
     .chapter-item {
-      font-size: 1.2em;
+      font-size: 1.1em;
     }
     .chapter-item /deep/ .h3 {
       padding-left: 1em;
