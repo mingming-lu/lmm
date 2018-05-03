@@ -2,12 +2,12 @@
   <header class="shadow">
 
     <nav v-if="wideMode" class="top-nav">
-      <a href="/">
+      <router-link to="/">
         <div class="logo">
           <img class="icon" src="/static/img/logo.png">
           明鳴的树洞
         </div>
-      </a>
+      </router-link>
 
       <div :class="{narrowTopNav: moderateWideMode}">
         <router-link v-for="item in items" :key="item.name" :to="item.link" class="nav-item">
