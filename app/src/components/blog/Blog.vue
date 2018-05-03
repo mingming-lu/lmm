@@ -2,10 +2,10 @@
   <div class="container">
     <!-- Blog text -->
     <div class="blog" :class="{ 'left': !isMobile, 'mobile': isMobile }">
-      <div class="container">
+      <div :class="{container: !isMobile}">
         <p class="title">{{ title }}</p>
         <div class="info">
-          <span><i class="fa fa-fw fa-folder-open-o"></i><router-link to="" class="link">{{ category.name }}</router-link></span>
+          <span><i class="fa fa-fw fa-folder-open-o"></i>{{ category.name }}</span>
           <span style="white-space: pre;">  |  </span>
           <span><i class="fa fa-fw fa-calendar-o"></i><span>{{ createdAt }}</span></span>
         </div>
@@ -16,7 +16,7 @@
 
     <!-- Blog tags -->
     <div v-if="!isMobile" class="tags">
-      <div class="container">
+      <div :class="{container: !isMobile}">
         <h3><i class="fa fa-fw fa-tags"></i>Tags</h3>
         <p>
           <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
@@ -28,7 +28,7 @@
 
     <!-- Blog chapters -->
     <div v-if="!isMobile" class="chapters">
-      <div class="container">
+      <div :class="{container: !isMobile}">
         <h3><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h3>
         <div ref="progress" class="progress-bar"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
@@ -161,7 +161,12 @@ i {
   margin-right: 8px;
 }
 .container {
-  padding: 0 32px;
+  @media screen and (min-width: 680px) {
+    padding: 0 32px;
+  }
+  @media screen and (max-width: 679px) {
+    padding: 0 16px;
+  }
   .blog {
     float: left;
     width: 66.666%;
@@ -176,7 +181,8 @@ i {
       text-align: justify;
     }
     .info {
-      opacity: 0.6;
+      // opacity: 0.6;
+      color: #777 !important;
     }
   }
   .tags {
