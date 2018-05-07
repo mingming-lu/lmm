@@ -39,9 +39,11 @@
 <script>
 export default {
   created () {
-    this.calcIsWideMode()
     window.addEventListener('resize', this.calcIsWideMode)
     window.addEventListener('resize', this.calcIsModerateWideMode)
+  },
+  mounted () {
+    this.calcIsWideMode()
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.calcIsWideMode)
