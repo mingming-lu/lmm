@@ -110,7 +110,12 @@ export default {
       }
     }
     .post-title {
-      font-size: 1.8em;
+      @media screen and (min-width: $width_max_drawer_to_view + 1) {
+        font-size: 1.8em;
+      }
+      @media screen and(max-width: $width_max_drawer_to_view) {
+        font-size: 1.5em;
+      }
     }
     .post-info {
       color: #777;
