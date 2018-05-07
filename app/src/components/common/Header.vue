@@ -16,15 +16,18 @@
     </nav>
 
     <nav v-if="!wideMode" class="drawer-nav" >
-      <div class="text-right" ref="drawerNavBar">
-        <router-link to="" class="toggler" @click.native="toggleDrawer">
-          <i v-if="drawerShown" class="fa fa-fw fa-times"></i>
-          <i v-else class="fa fa-fw fa-bars"></i>
-        </router-link>
+      <div ref="drawerNavBar">
+        <router-link to="" class="toggler container" @click.native="toggleDrawer">
+          <i v-if="!drawerShown" class="fa fa-fw fa-bars"></i>
+          <i v-else class="fa fa-fw fa-times"></i>
+        </router-link><span v-if="!drawerShown">{{ currentRouterName }}</span>
       </div>
-      <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']" :style="{marginTop: drawerNavBarHeight - 1 + 'px'}">
+      <div class="drawer" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']" :style="{marginTop: drawerNavBarHeight - 1 + 'px'}">
         <div class="container">
-          <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
+          <router-link to="/home" class="link" active-class="drawer-item-active" @click.native="navigate('Home')">
+            <p><i class="fa fa-fw fa-home" ></i>Home</p>
+          </router-link>
+          <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="navigate(item.name)">
             <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
           </router-link>
         </div>
@@ -43,6 +46,7 @@ export default {
   mounted () {
     this.calcDrawerNavBarHeight()
     this.calcIsWideMode()
+    this.determineCurrentRouterName()
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.calcDrawerNavBarHeight)
@@ -51,6 +55,7 @@ export default {
   },
   data () {
     return {
+      currentRouterName: '',
       drawerNavBarHeight: 0,
       drawerShown: false,
       wideMode: false,
@@ -91,6 +96,23 @@ export default {
     },
     toggleDrawer () {
       this.drawerShown = !this.drawerShown
+    },
+    determineCurrentRouterName () {
+      this.currentRouterName = ''
+      const path = window.location.pathname
+      if (path === '/' || path === '/home') {
+        this.currentRouterName = 'Home'
+        return
+      }
+      this.items.forEach(item => {
+        if (path === item.link) {
+          this.currentRouterName = item.name
+        }
+      })
+    },
+    navigate (name) {
+      this.currentRouterName = name
+      this.toggleDrawer()
     }
   }
 }
@@ -150,9 +172,9 @@ header {
       transition: all 0.4s ease;
     }
     .container {
-      padding: 0 1em;
+      padding: 0 16px;
       i {
-        margin-right: 8px;
+        margin-right: 16px;
       }
     }
     .drawer-item-active {
