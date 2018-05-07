@@ -17,23 +17,28 @@
     </nav>
 
     <nav v-if="!wideMode" class="drawer-nav">
-      <div class="text-left">
-        <router-link to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
-        <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
-          <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
-          <div class="container">
-            <router-link to="/home" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
-              <p><i class="fa fa-fw fa-home"></i>Home</p>
-            </router-link>
-            <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
-              <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
-            </router-link>
-          </div>
-        </div>
+      <div class="text-right">
+        <router-link to="" class="toggler" @click.native="toggleDrawer">
+          <i v-if="drawerShown" class="fa fa-fw fa-bars"></i>
+          <i v-else class="fa fa-fw fa-times"></i>
+        </router-link>
       </div>
     </nav>
 
   </header>
+  <!--
+    <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
+      <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
+      <div class="container">
+        <router-link to="/home" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
+          <p><i class="fa fa-fw fa-home"></i>Home</p>
+        </router-link>
+        <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
+          <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
+        </router-link>
+      </div>
+    </div>
+  -->
 </template>
 
 <script>
@@ -123,10 +128,13 @@ header {
     top: 0;
   }
 }
-i {
-  margin-right: 8px;
-}
+
 .drawer-nav {
+  .toggler {
+    color: $color_text;
+    display: inline-block;
+    padding: 16px;
+  }
   .drawer {
     height: 100%;
     width: 100%;
@@ -145,6 +153,9 @@ i {
     .container {
       padding: 0 1em;
       border-top: 1px solid #f1f1f1;
+      i {
+        margin-right: 8px;
+      }
     }
     .drawer-item-active {
       color: $color_accent;
