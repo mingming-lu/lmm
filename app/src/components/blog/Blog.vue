@@ -161,10 +161,10 @@ i {
   margin-right: 8px;
 }
 .container {
-  @media screen and (min-width: $width_max_drawer_to_view + 1) {
+  @media screen and (min-width: $max_width_device + 1) {
     padding: 0 32px;
   }
-  @media screen and (max-width: $width_max_drawer_to_view) {
+  @media screen and (max-width: $max_width_device) {
     padding: 0 16px;
   }
   .blog {

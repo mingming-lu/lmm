@@ -89,7 +89,7 @@ export default {
       this.drawerNavBarHeight = this.$refs.drawerNavBar.clientHeight
     },
     calcIsWideMode () {
-      this.wideMode = window.innerWidth >= 680 // $width_max_drawer_to_view + 1
+      this.wideMode = window.innerWidth >= 680 // $max_width_device + 1
     },
     calcIsModerateWideMode () {
       this.moderateWideMode = window.innerWidth <= 960
@@ -141,10 +141,10 @@ header {
   background-color: $color_primary_dark;
   border: none;
   font-size: 1.5em;
-  @media screen and (min-width: $width_max_drawer_to_view + 1) {
+  @media screen and (min-width: $max_width_device + 1) {
     padding: 48px;
   }
-  @media screen and (max-width: $width_max_drawer_to_view) {
+  @media screen and (max-width: $max_width_device) {
     position: sticky;
     top: 0;
   }

@@ -70,14 +70,14 @@ img {
   @media screen and (max-width: 799px) {
     margin-bottom: 32px;
   }
-  @media screen and (max-width: $width_max_drawer_to_view) {
+  @media screen and (max-width: $max_width_device) {
     margin-bottom: 16px;
   }
 }
 .container {
   margin-bottom: -64px;
   padding: 0 32px;
-  @media screen and (max-width: $width_max_drawer_to_view) {
+  @media screen and (max-width: $max_width_device) {
     margin-bottom: -16px;
     padding: 0 16px;
   }
