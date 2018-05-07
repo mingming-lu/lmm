@@ -142,10 +142,12 @@ header {
     position: fixed !important;
     overflow:auto;
     &.drawer-show {
-      display: block;
+      margin-left: 0;
+      transition: all 0.4s ease;
     }
     &.drawer-hide {
-      display: none;
+      margin-left: 100%;
+      transition: all 0.4s ease;
     }
     .container {
       padding: 0 1em;
@@ -189,19 +191,6 @@ nav {
       color: $color_accent;
       transition: all 0.3s ease-out;
     }
-  }
-}
-.animate-left {
-  position: relative;
-  animation:animateleft 0.4s
-}
-@keyframes animateleft {
-  from {
-    left: -300px;
-    opacity:0;
-  } to {
-    left:0;
-    opacity:1;
   }
 }
 </style>
