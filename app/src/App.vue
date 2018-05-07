@@ -48,13 +48,13 @@ export default {
   background-color: $color_primary;
 }
 #content {
-  @media screen and (min-width: $width_max_drawer_to_view + 1) {
+  @media screen and (min-width: $max_width_device + 1) {
     margin-top: 128px;
   }
   @media screen and (max-width: 960px) {
     margin-top: 64px;
   }
-  @media screen and (max-width: $width_max_drawer_to_view) {
+  @media screen and (max-width: $max_width_device) {
     margin-top: 0;
   }
 }

@@ -94,10 +94,10 @@ export default {
 <style lang="scss" scoped>
 @import '@/assets/scss/styles.scss';
 .container {
-  @media screen and (min-width: $width_max_drawer_to_view + 1) {
+  @media screen and (min-width: $max_width_device + 1) {
     margin: 0 32px;
   }
-  @media screen and (max-width: $width_max_drawer_to_view) {
+  @media screen and (max-width: $max_width_device) {
     margin: 0 16px;
   }
   .posts {
@@ -110,10 +110,10 @@ export default {
       }
     }
     .post-title {
-      @media screen and (min-width: $width_max_drawer_to_view + 1) {
+      @media screen and (min-width: $max_width_device + 1) {
         font-size: 1.8em;
       }
-      @media screen and(max-width: $width_max_drawer_to_view) {
+      @media screen and(max-width: $max_width_device) {
         font-size: 1.5em;
       }
     }
