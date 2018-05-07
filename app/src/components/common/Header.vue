@@ -168,7 +168,7 @@ header {
       transition: all 0.4s ease;
     }
     &.drawer-hide {
-      margin-left: 100%;
+      margin-left: -100%;
       transition: all 0.4s ease;
     }
     .container {
