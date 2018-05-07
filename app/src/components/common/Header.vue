@@ -1,6 +1,5 @@
 <template>
   <header class="shadow">
-
     <nav v-if="wideMode" class="top-nav">
       <router-link to="/">
         <div class="logo">
@@ -16,39 +15,48 @@
       </div>
     </nav>
 
-    <nav v-if="!wideMode" class="drawer-nav">
-      <div class="text-left">
-        <router-link to="" class="nav-item" @click.native="toggleDrawer">&#9776;</router-link>
-        <div class="drawer animate-left" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']">
-          <router-link to="" class="nav-item" @click.native="toggleDrawer">&#x2715;</router-link>
-          <div class="container">
-            <router-link to="/home" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
-              <p><i class="fa fa-fw fa-home"></i>Home</p>
-            </router-link>
-            <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="toggleDrawer">
-              <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
-            </router-link>
-          </div>
+    <nav v-if="!wideMode" class="drawer-nav" >
+      <div ref="drawerNavBar">
+        <router-link to="" class="toggler container" @click.native="toggleDrawer">
+          <i v-if="!drawerShown" class="fa fa-fw fa-bars"></i>
+          <i v-else class="fa fa-fw fa-times"></i>
+        </router-link><span v-if="!drawerShown">{{ currentRouterName }}</span>
+      </div>
+      <div class="drawer" :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']" :style="{marginTop: drawerNavBarHeight - 1 + 'px'}">
+        <div class="container">
+          <router-link to="/home" class="link" active-class="drawer-item-active" @click.native="navigate('Home')">
+            <p><i class="fa fa-fw fa-home" ></i>Home</p>
+          </router-link>
+          <router-link v-for="item in items" :key="item.name" :to="item.link" active-class="drawer-item-active" class="link" @click.native="navigate(item.name)">
+            <p><i class="fa fa-fw" :class="item.icon"></i>{{ item.name }}</p>
+          </router-link>
         </div>
       </div>
     </nav>
-
   </header>
 </template>
 
 <script>
 export default {
   created () {
-    this.calcIsWideMode()
+    window.addEventListener('resize', this.calcDrawerNavBarHeight)
     window.addEventListener('resize', this.calcIsWideMode)
     window.addEventListener('resize', this.calcIsModerateWideMode)
   },
+  mounted () {
+    this.calcDrawerNavBarHeight()
+    this.calcIsWideMode()
+    this.determineCurrentRouterName()
+  },
   beforeDestroy () {
+    window.removeEventListener('resize', this.calcDrawerNavBarHeight)
     window.removeEventListener('resize', this.calcIsWideMode)
     window.removeEventListener('resize', this.calcIsModerateWideMode)
   },
   data () {
     return {
+      currentRouterName: '',
+      drawerNavBarHeight: 0,
       drawerShown: false,
       wideMode: false,
       moderateWideMode: false,
@@ -77,6 +85,9 @@ export default {
     }
   },
   methods: {
+    calcDrawerNavBarHeight () {
+      this.drawerNavBarHeight = this.$refs.drawerNavBar.clientHeight
+    },
     calcIsWideMode () {
       this.wideMode = window.innerWidth >= 680 // $width_max_drawer_to_view + 1
     },
@@ -85,6 +96,23 @@ export default {
     },
     toggleDrawer () {
       this.drawerShown = !this.drawerShown
+    },
+    determineCurrentRouterName () {
+      this.currentRouterName = ''
+      const path = window.location.pathname
+      if (path === '/' || path === '/home') {
+        this.currentRouterName = 'Home'
+        return
+      }
+      this.items.forEach(item => {
+        if (path === item.link) {
+          this.currentRouterName = item.name
+        }
+      })
+    },
+    navigate (name) {
+      this.currentRouterName = name
+      this.toggleDrawer()
     }
   }
 }
@@ -121,10 +149,12 @@ header {
     top: 0;
   }
 }
-i {
-  margin-right: 8px;
-}
 .drawer-nav {
+  .toggler {
+    color: $color_text;
+    display: inline-block;
+    padding: 16px;
+  }
   .drawer {
     height: 100%;
     width: 100%;
@@ -132,17 +162,20 @@ i {
     left: 0;
     background-color: $color_primary_dark;
     position: fixed !important;
-    z-index: 99 !important;
     overflow:auto;
     &.drawer-show {
-      display: block;
+      margin-left: 0;
+      transition: all 0.4s ease;
     }
     &.drawer-hide {
-      display: none;
+      margin-left: 100%;
+      transition: all 0.4s ease;
     }
     .container {
-      padding: 0 1em;
-      border-top: 1px solid #f1f1f1;
+      padding: 0 16px;
+      i {
+        margin-right: 16px;
+      }
     }
     .drawer-item-active {
       color: $color_accent;
@@ -180,19 +213,6 @@ nav {
       color: $color_accent;
       transition: all 0.3s ease-out;
     }
-  }
-}
-.animate-left {
-  position: relative;
-  animation:animateleft 0.4s
-}
-@keyframes animateleft {
-  from {
-    left: -300px;
-    opacity:0;
-  } to {
-    left:0;
-    opacity:1;
   }
 }
 </style>
