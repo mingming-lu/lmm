@@ -12,7 +12,6 @@
   position: relative;
   width: 64px;
   height: 64px;
-  opacity: 0.2;
   div {
     position: absolute;
     top: 27px;
