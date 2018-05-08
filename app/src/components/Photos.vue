@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <div v-if="!isPageLoaded" class="center">
-      <LdsEllipsis />
+      <LdsEllipsis class="fade-in" />
     </div>
-    <div v-if="false">
+    <div v-else>
       <div v-if="wideMode">
         <div class="left">
           <div :class="{container: wideMode}">
@@ -99,6 +99,9 @@ img {
     float: right;
     width: 50%;
   }
+}
+.fade-in {
+  @include fade_in($opacity: 0.2, $duration: 2s);
 }
 </style>
 

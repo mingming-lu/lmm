@@ -4,7 +4,7 @@
     <div class="posts" :class="{ 'mobile-left': isMobile }">
       <div :class="{container: !isMobile}">
         <div v-if="!isBlogListLoaded" class="center">
-          <LdsEllipsis />
+          <LdsEllipsis class="fade-in" />
         </div>
         <table v-else>
           <tr v-for="blog in blogList" :key="blog.id">
@@ -164,6 +164,9 @@ export default {
       }
     }
   }
+}
+.fade-in {
+  @include fade_in($opacity: 0.2, $duration: 2s);
 }
 .mobile-left {
   width: 100% !important;
