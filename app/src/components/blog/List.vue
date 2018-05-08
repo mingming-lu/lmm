@@ -3,7 +3,10 @@
     <!-- Posts -->
     <div class="posts" :class="{ 'mobile-left': isMobile }">
       <div :class="{container: !isMobile}">
-        <table>
+        <div v-if="!isBlogListLoaded" class="center">
+          <LdsEllipsis />
+        </div>
+        <table v-else>
           <tr v-for="blog in blogList" :key="blog.id">
             <td>
               <p class="post-title">
@@ -43,10 +46,15 @@
 
 <script>
 import axios from 'axios'
+import LdsEllipsis from '@/components/loadings/LdsEllipsis'
 export default {
+  components: {
+    LdsEllipsis
+  },
   data () {
     return {
       isMobile: false,
+      isBlogListLoaded: false,
       blogList: [],
       categories: [],
       tags: []
@@ -66,6 +74,7 @@ export default {
     fetchBlog () {
       axios.get('https://api.lmm.im/v1/users/1/blog').then(res => {
         this.blogList = res.data
+        this.isBlogListLoaded = true
       }).catch(e => {
         console.log(e.response.data)
       })
