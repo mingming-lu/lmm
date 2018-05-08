@@ -1,28 +1,37 @@
 <template>
   <div class="container">
-
-    <div v-if="wideMode">
-      <div class="left">
-        <div :class="{container: wideMode}">
-          <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
-        </div>
-      </div>
-      <div class="right">
-        <div :class="{container: wideMode}">
-          <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
-        </div>
-      </div>
+    <div v-if="!isPageLoaded" class="center">
+      <LdsEllipsis class="fade-in" />
     </div>
+    <div v-else>
+      <div v-if="wideMode">
+        <div class="left">
+          <div :class="{container: wideMode}">
+            <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
+          </div>
+        </div>
+        <div class="right">
+          <div :class="{container: wideMode}">
+            <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
+          </div>
+        </div>
+      </div>
 
-    <img v-if="!wideMode" v-for="photo in photos" :key="photo.name" :src="url(photo.name)">
+      <img v-if="!wideMode" v-for="photo in photos" :key="photo.name" :src="url(photo.name)">
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import LdsEllipsis from '@/components/loadings/LdsEllipsis'
 export default {
+  components: {
+    LdsEllipsis
+  },
   data () {
     return {
+      isPageLoaded: false,
       wideMode: false,
       left: [],
       right: [],
@@ -41,6 +50,7 @@ export default {
           this.right.push(photo)
         }
       })
+      this.isPageLoaded = true
     }).catch((e) => {
       console.log(e)
     })
@@ -89,6 +99,9 @@ img {
     float: right;
     width: 50%;
   }
+}
+.fade-in {
+  @include fade_in($opacity: 0.2, $duration: 2s);
 }
 </style>
 
