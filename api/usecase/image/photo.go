@@ -20,7 +20,7 @@ func FetchPhotosURLs(userIDStr, countStr, pageStr string) ([]model.Minimal, erro
 		return nil, ErrInvalidUserID
 	}
 
-	count := uint64(0)
+	count := uint64(10)
 	if countStr != "" {
 		_count, err := strconv.ParseUint(countStr, 10, 64)
 		if err != nil {
