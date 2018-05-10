@@ -5,7 +5,7 @@ import (
 	model "lmm/api/domain/model/image"
 )
 
-func FetchAllPhotos(userID int64) ([]model.Minimal, error) {
+func SearchPhotosByUserID(userID, count, page uint64) ([]model.Minimal, error) {
 	d := db.Default()
 	defer d.Close()
 
