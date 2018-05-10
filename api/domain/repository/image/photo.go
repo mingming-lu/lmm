@@ -15,16 +15,18 @@ func SearchPhotosByUserID(userID, count, page uint64) ([]model.Minimal, error) {
 		INNER JOIN image AS i ON p.image = i.id AND p.user = i.user
 		WHERE p.user = ? AND p.deleted = 0
 		ORDER BY p.last_modified DESC
+		LIMIT ?
+		OFFSET ?
 	`)
 	defer stmt.Close()
 
-	images := make([]model.Minimal, 0)
+	itr, err := stmt.Query(userID, count, count*(page-1))
 
-	itr, err := stmt.Query(userID)
 	if err != nil {
-		return images, err
+		return nil, err
 	}
 
+	images := make([]model.Minimal, 0)
 	for itr.Next() {
 		image := model.Minimal{}
 		err = itr.Scan(&image.Name)
