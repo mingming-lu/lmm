@@ -72,19 +72,17 @@ func GetAllImages(c *elesion.Context) {
 	c.Status(http.StatusOK).JSON(images)
 }
 
-func GetAllPhotos(c *elesion.Context) {
-	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("Invalid user").Error(err.Error())
-		return
+func GetPhotos(c *elesion.Context) {
+	queryParams := c.Query()
+	photos, err := usecase.FetchPhotosURLs(c.Params.ByName("user"), queryParams.Get("count"), queryParams.Get("page"))
+	switch err {
+	case nil:
+		c.Status(http.StatusOK).JSON(photos)
+	case usecase.ErrInvalidUserID, usecase.ErrInvalidCount, usecase.ErrInvalidPage:
+		c.Status(http.StatusBadRequest).String(http.StatusText(http.StatusBadRequest)).Error(err.Error())
+	default:
+		c.Status(http.StatusInternalServerError).String(http.StatusText(http.StatusInternalServerError)).Error(err.Error())
 	}
-
-	photos, err := usecase.AllPhotos(userID)
-	if err != nil {
-		c.Status(http.StatusInternalServerError).String("Internal server error").Error(err.Error())
-		return
-	}
-	c.Status(http.StatusOK).JSON(photos)
 }
 
 func PutPhoto(c *elesion.Context) {

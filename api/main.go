@@ -47,7 +47,7 @@ func main() {
 
 	// image
 	router.GET("/v1/users/:user/images", image.GetAllImages)
-	router.GET("/v1/users/:user/images/photos", image.GetAllPhotos)
+	router.GET("/v1/users/:user/images/photos", image.GetPhotos)
 	router.POST("/v1/images", image.Upload)
 	router.PUT("/v1/images/putPhoto", image.PutPhoto)
 	router.PUT("/v1/images/removePhoto", image.RemovePhoto)
