@@ -56,7 +56,7 @@ export default {
     fetchPhotos () {
       this.page += 1
       this.isPageLoaded = false
-      axios.get('http://api.lmm.local/v1/users/1/images/photos?page=' + this.page).then((res) => {
+      axios.get('https://api.lmm.im/v1/users/1/images/photos?page=' + this.page).then((res) => {
         this.photos.push(...res.data)
         res.data.forEach((photo, index) => {
           if (index % 2 === 0) {
