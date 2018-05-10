@@ -19,6 +19,9 @@
 
       <img v-if="!wideMode" v-for="photo in photos" :key="photo.name" :src="url(photo.name)">
     </div>
+    <div class="center">
+      <button @click="fetchPhotos()">More&hellip;</button>
+    </div>
   </div>
 </template>
 
@@ -33,32 +36,40 @@ export default {
     return {
       isPageLoaded: false,
       wideMode: false,
+      page: 0,
       left: [],
       right: [],
       photos: []
     }
   },
   created () {
-    this.calcIsWideMode()
     window.addEventListener('resize', this.calcIsWideMode)
-    axios.get('https://api.lmm.im/v1/users/1/images/photos').then((res) => {
-      this.photos.push(...res.data)
-      res.data.forEach((photo, index) => {
-        if (index % 2 === 0) {
-          this.left.push(photo)
-        } else {
-          this.right.push(photo)
-        }
-      })
-      this.isPageLoaded = true
-    }).catch((e) => {
-      console.log(e)
-    })
+  },
+  mounted () {
+    this.calcIsWideMode()
+    this.fetchPhotos()
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.calcIsWideMode)
   },
   methods: {
+    fetchPhotos () {
+      this.page += 1
+      this.isPageLoaded = false
+      axios.get('http://api.lmm.local/v1/users/1/images/photos?page=' + this.page).then((res) => {
+        this.photos.push(...res.data)
+        res.data.forEach((photo, index) => {
+          if (index % 2 === 0) {
+            this.left.push(photo)
+          } else {
+            this.right.push(photo)
+          }
+        })
+        this.isPageLoaded = true
+      }).catch((e) => {
+        console.log(e)
+      })
+    },
     url: (name) => {
       return 'https://image.lmm.im/' + name
     },
