@@ -65,7 +65,7 @@ export default {
       this.isPageLoaded = false
       axios.get('https://api.lmm.im/v1/users/1/images/photos?page=' + this.page).then((res) => {
         this.photos.push(...res.data.photos)
-        res.data.forEach((photo, index) => {
+        this.photos.forEach((photo, index) => {
           if (index % 2 === 0) {
             this.left.push(photo)
           } else {

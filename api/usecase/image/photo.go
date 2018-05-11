@@ -15,7 +15,7 @@ var (
 )
 
 type FetchPhotosResponse struct {
-	Images  []model.Minimal `json:"images"`
+	Photos  []model.Minimal `json:"photos"`
 	HasNext bool            `json:"has_next"`
 }
 
@@ -43,13 +43,13 @@ func FetchPhotos(userIDStr, countStr, pageStr string) (*FetchPhotosResponse, err
 		page = _page
 	}
 
-	urls, err := repo.SearchPhotosByUserID(userID, count+1, page)
+	photos, err := repo.SearchPhotosByUserID(userID, count+1, page)
 	hasNext := false
-	if uint64(len(urls)) > count {
+	if uint64(len(photos)) > count {
 		hasNext = true
 	}
 	res := &FetchPhotosResponse{
-		Images:  urls,
+		Photos:  photos[:count],
 		HasNext: hasNext,
 	}
 	return res, err
