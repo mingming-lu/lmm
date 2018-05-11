@@ -14,7 +14,12 @@ var (
 	ErrInvalidPage   = errors.New("Invalid page")
 )
 
-func FetchPhotosURLs(userIDStr, countStr, pageStr string) ([]model.Minimal, error) {
+type FetchPhotosResponse struct {
+	Images  []model.Minimal `json:"images"`
+	HasNext bool            `json:"has_next"`
+}
+
+func FetchPhotos(userIDStr, countStr, pageStr string) (*FetchPhotosResponse, error) {
 	userID, err := strconv.ParseUint(userIDStr, 10, 64)
 	if err != nil {
 		return nil, ErrInvalidUserID
@@ -38,7 +43,16 @@ func FetchPhotosURLs(userIDStr, countStr, pageStr string) ([]model.Minimal, erro
 		page = _page
 	}
 
-	return repo.SearchPhotosByUserID(userID, count, page)
+	urls, err := repo.SearchPhotosByUserID(userID, count+1, page)
+	hasNext := false
+	if uint64(len(urls)) > count {
+		hasNext = true
+	}
+	res := &FetchPhotosResponse{
+		Images:  urls,
+		HasNext: hasNext,
+	}
+	return res, err
 }
 
 func TurnOnPhotoSwitch(userID int64, imageName string) error {

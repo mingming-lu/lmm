@@ -74,7 +74,7 @@ func GetAllImages(c *elesion.Context) {
 
 func GetPhotos(c *elesion.Context) {
 	queryParams := c.Query()
-	photos, err := usecase.FetchPhotosURLs(c.Params.ByName("user"), queryParams.Get("count"), queryParams.Get("page"))
+	photos, err := usecase.FetchPhotos(c.Params.ByName("user"), queryParams.Get("count"), queryParams.Get("page"))
 	switch err {
 	case nil:
 		c.Status(http.StatusOK).JSON(photos)
