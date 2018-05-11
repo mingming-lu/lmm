@@ -47,9 +47,10 @@ func FetchPhotos(userIDStr, countStr, pageStr string) (*FetchPhotosResponse, err
 	hasNext := false
 	if uint64(len(photos)) > count {
 		hasNext = true
+		photos = photos[:count]
 	}
 	res := &FetchPhotosResponse{
-		Photos:  photos[:count],
+		Photos:  photos,
 		HasNext: hasNext,
 	}
 	return res, err
