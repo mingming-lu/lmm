@@ -3,6 +3,10 @@ openapi: 3.0.0
 servers:
   - url: https://api.lmm.im
 
+paths:
+  /v1/signup:
+    $ref: ./paths/v1_signup.yaml
+
 tags:
   - name: signup
     description: 注册账号
