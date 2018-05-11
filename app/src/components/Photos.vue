@@ -1,27 +1,33 @@
 <template>
   <div class="container">
+    <div v-if="wideMode" class="content" ref="content">
+      <div class="left">
+        <div :class="{container: wideMode}">
+          <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
+        </div>
+      </div>
+      <div class="right">
+        <div :class="{container: wideMode}">
+          <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
+        </div>
+      </div>
+    </div>
+
+    <img v-if="!wideMode" v-for="photo in photos" :key="photo.name" :src="url(photo.name)">
+
     <div v-if="!isPageLoaded" class="center">
       <LdsEllipsis class="fade-in" />
     </div>
-    <div v-else>
-      <div v-if="wideMode">
-        <div class="left">
-          <div :class="{container: wideMode}">
-            <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
-          </div>
-        </div>
-        <div class="right">
-          <div :class="{container: wideMode}">
-            <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
-          </div>
-        </div>
-      </div>
 
-      <img v-if="!wideMode" v-for="photo in photos" :key="photo.name" :src="url(photo.name)">
+    <div v-if="hasNextPage && isPageLoaded" class="center">
+      <br>
+      <button class="more" @click.prevent="fetchPhotos()">See more&hellip;</button>
     </div>
-    <div class="center">
-      <button @click="fetchPhotos()">More&hellip;</button>
+
+    <div v-if="!hasNextPage && isPageLoaded" class="center">
+      <p class="hint">No more photos.</p>
     </div>
+
   </div>
 </template>
 
@@ -37,6 +43,7 @@ export default {
       isPageLoaded: false,
       wideMode: false,
       page: 0,
+      hasNextPage: true,
       left: [],
       right: [],
       photos: []
@@ -57,7 +64,7 @@ export default {
       this.page += 1
       this.isPageLoaded = false
       axios.get('https://api.lmm.im/v1/users/1/images/photos?page=' + this.page).then((res) => {
-        this.photos.push(...res.data)
+        this.photos.push(...res.data.photos)
         res.data.forEach((photo, index) => {
           if (index % 2 === 0) {
             this.left.push(photo)
@@ -65,6 +72,7 @@ export default {
             this.right.push(photo)
           }
         })
+        this.hasNext = res.data.has_next
         this.isPageLoaded = true
       }).catch((e) => {
         console.log(e)
