@@ -119,6 +119,27 @@ img {
     width: 50%;
   }
 }
+.content {
+  display: inline-block;
+}
+.more {
+  border: 1px solid rgba(1, 1, 1, 0.1);
+  border-radius: 2px;
+  padding: 8px 16px;
+  color: $color_text;
+  cursor: pointer;
+  font-size: 1.2em;
+  &:hover {
+    background: transparent;
+    border: 1px solid rgba(30, 144, 255, 0.1);
+    color: $color_accent;
+    outline: none;
+  }
+}
+.hint {
+  color: rgba(1, 1, 1, 0.1);
+  font-size: 1.2em;
+}
 .fade-in {
   @include fade_in($opacity: 0.2, $duration: 2s);
 }
