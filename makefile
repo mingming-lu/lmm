@@ -14,7 +14,7 @@ install:
 	npm --prefix manager install
 
 .PHONY: run
-run: app api image manager
+run: app api image manager docs
 
 .PHONY: app
 app: app/package.json
@@ -31,4 +31,8 @@ api: api/main.go
 .PHONY: image
 image: image/main.go
 	go run image/main.go
+
+.PHONY: docs
+docs: docs/docker-compose.yaml
+	cd docs && docker-compose up
 
