@@ -1,25 +1,43 @@
 package user
 
 import (
+	"encoding/json"
+	"io"
 	model "lmm/api/domain/model/user"
 	repo "lmm/api/domain/repository/user"
 	"lmm/api/domain/service/base64"
 	"lmm/api/domain/service/sha256"
 	"lmm/api/domain/service/token"
-	"lmm/api/domain/service/uuid"
 
 	"github.com/akinaru-lu/errors"
 )
 
 var (
+	ErrInvalidInput      = errors.New("invalid input")
 	ErrIncorrectPassword = errors.New("incorrect password")
 )
 
-func SignUp(name, password string) (int64, error) {
-	token := uuid.New()
-	guid := uuid.New()
-	password = sha256.Hex([]byte(guid + password)) // digest
-	return repo.Add(name, password, guid, token)
+type Auth struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
+type Usecase struct {
+	repo *repo.Repository
+}
+
+func New(repo *repo.Repository) *Usecase {
+	return &Usecase{repo: repo}
+}
+
+func (uc Usecase) SignUp(requestBody io.ReadCloser) (*model.User, error) {
+	auth := &Auth{}
+	err := json.NewDecoder(requestBody).Decode(auth)
+	if err != nil {
+		return nil, ErrInvalidInput
+	}
+	user := model.New(auth.Name, auth.Password)
+	return uc.repo.Save(user)
 }
 
 func SignIn(name, password string) (*model.Response, error) {
