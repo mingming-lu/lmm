@@ -12,18 +12,7 @@ import (
 )
 
 func SignUp(c *elesion.Context) {
-	info := model.Minimal{}
-	err := json.NewDecoder(c.Request.Body).Decode(&info)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid body").Error(err.Error())
-		return
-	}
-
-	id, err := usecase.SignUp(info.Name, info.Password)
-	if err != nil {
-		c.Status(http.StatusInternalServerError).String("internal server error").Error(err.Error())
-		return
-	}
+	usecase.SignUp(c.Request.Body)
 
 	c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
 }
