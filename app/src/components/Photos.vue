@@ -1,24 +1,33 @@
 <template>
   <div class="container">
+    <div v-if="wideMode" class="content" ref="content">
+      <div class="left">
+        <div :class="{container: wideMode}">
+          <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
+        </div>
+      </div>
+      <div class="right">
+        <div :class="{container: wideMode}">
+          <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
+        </div>
+      </div>
+    </div>
+
+    <img v-if="!wideMode" v-for="photo in photos" :key="photo.name" :src="url(photo.name)">
+
     <div v-if="!isPageLoaded" class="center">
       <LdsEllipsis class="fade-in" />
     </div>
-    <div v-else>
-      <div v-if="wideMode">
-        <div class="left">
-          <div :class="{container: wideMode}">
-            <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
-          </div>
-        </div>
-        <div class="right">
-          <div :class="{container: wideMode}">
-            <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
-          </div>
-        </div>
-      </div>
 
-      <img v-if="!wideMode" v-for="photo in photos" :key="photo.name" :src="url(photo.name)">
+    <div v-if="hasNext && isPageLoaded" class="center">
+      <br>
+      <button class="more" @click.prevent="fetchPhotos()">See more&hellip;</button>
     </div>
+
+    <div v-if="!hasNext && isPageLoaded" class="center">
+      <p class="hint">No more photos.</p>
+    </div>
+
   </div>
 </template>
 
@@ -33,32 +42,42 @@ export default {
     return {
       isPageLoaded: false,
       wideMode: false,
+      page: 0,
+      hasNext: true,
       left: [],
       right: [],
       photos: []
     }
   },
   created () {
-    this.calcIsWideMode()
     window.addEventListener('resize', this.calcIsWideMode)
-    axios.get('https://api.lmm.im/v1/users/1/images/photos').then((res) => {
-      this.photos.push(...res.data)
-      res.data.forEach((photo, index) => {
-        if (index % 2 === 0) {
-          this.left.push(photo)
-        } else {
-          this.right.push(photo)
-        }
-      })
-      this.isPageLoaded = true
-    }).catch((e) => {
-      console.log(e)
-    })
+  },
+  mounted () {
+    this.calcIsWideMode()
+    this.fetchPhotos()
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.calcIsWideMode)
   },
   methods: {
+    fetchPhotos () {
+      this.page += 1
+      this.isPageLoaded = false
+      axios.get('https://api.lmm.im/v1/users/1/images/photos?page=' + this.page).then((res) => {
+        this.photos.push(...res.data.photos)
+        res.data.photos.forEach((photo, index) => {
+          if (index % 2 === 0) {
+            this.left.push(photo)
+          } else {
+            this.right.push(photo)
+          }
+        })
+        this.hasNext = res.data.has_next
+        this.isPageLoaded = true
+      }).catch((e) => {
+        console.log(e)
+      })
+    },
     url: (name) => {
       return 'https://image.lmm.im/' + name
     },
@@ -99,6 +118,27 @@ img {
     float: right;
     width: 50%;
   }
+}
+.content {
+  display: inline-block;
+}
+.more {
+  border: 1px solid rgba(1, 1, 1, 0.1);
+  border-radius: 2px;
+  padding: 8px 32px;
+  color: $color_text;
+  cursor: pointer;
+  font-size: 1.12em;
+  &:hover {
+    background: transparent;
+    border: 1px solid rgba(30, 144, 255, 0.1);
+    color: $color_accent;
+    outline: none;
+  }
+}
+.hint {
+  color: rgba(1, 1, 1, 0.1);
+  font-size: 1.12em;
 }
 .fade-in {
   @include fade_in($opacity: 0.2, $duration: 2s);
