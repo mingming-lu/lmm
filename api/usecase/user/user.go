@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	ErrInvalidInput      = errors.New("invalid input")
-	ErrIncorrectPassword = errors.New("incorrect password")
+	ErrInvalidInput      = errors.New("Invalid input")
+	ErrDuplicateUserName = errors.New("User name duplicated")
+	ErrIncorrectPassword = errors.New("Incorrect password")
 )
 
 type Auth struct {
@@ -38,6 +39,16 @@ func (uc *Usecase) SignUp(requestBody io.ReadCloser) (uint64, error) {
 	}
 	m := model.New(auth.Name, auth.Password)
 	user, err := uc.repo.Save(m)
+	if err != nil {
+		key, _, ok := uc.repo.CheckErrorDuplicate(err.Error())
+		if !ok {
+			return 0, err
+		}
+		if key == "name" {
+			return 0, ErrDuplicateUserName
+		}
+		return 0, err
+	}
 	return user.ID, nil
 }
 
