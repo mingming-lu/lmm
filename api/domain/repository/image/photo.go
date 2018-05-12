@@ -39,7 +39,7 @@ func SearchPhotosByUserID(userID, count, page uint64) ([]model.Minimal, error) {
 	return images, nil
 }
 
-func SavePhoto(userID, imageID int64, shown bool) error {
+func SavePhoto(userID, imageID uint64, shown bool) error {
 	d := db.Default()
 	defer d.Close()
 

@@ -40,7 +40,7 @@ func Post(c *elesion.Context) {
 }
 
 func Get(c *elesion.Context) {
-	id, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	id, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
@@ -70,7 +70,7 @@ func Get(c *elesion.Context) {
 }
 
 func GetList(c *elesion.Context) {
-	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
+	userID, err := strconv.ParseUint(c.Params.ByName("user"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid user ID").Error(err.Error())
 		return
@@ -92,7 +92,7 @@ func Update(c *elesion.Context) {
 		return
 	}
 
-	id, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	id, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
@@ -132,7 +132,7 @@ func Delete(c *elesion.Context) {
 		return
 	}
 
-	id, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	id, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
@@ -158,7 +158,7 @@ func Delete(c *elesion.Context) {
 }
 
 func GetCategory(c *elesion.Context) {
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	blogID, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
@@ -180,7 +180,7 @@ func SetCategory(c *elesion.Context) {
 		return
 	}
 
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	blogID, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return

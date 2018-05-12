@@ -8,7 +8,7 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-func Add(userID, blogID int64, tagName string) (int64, error) {
+func Add(userID, blogID uint64, tagName string) (uint64, error) {
 	blog, err := blog.FetchByID(blogID)
 	if err != nil {
 		return 0, errors.Wrapf(err, "No such blog: %d", blogID)
@@ -17,7 +17,7 @@ func Add(userID, blogID int64, tagName string) (int64, error) {
 	return repo.Add(userID, blog.ID, tagName)
 }
 
-func Update(userID, blogID, tagID int64, name string) error {
+func Update(userID, blogID, tagID uint64, name string) error {
 	tag, err := repo.ByID(tagID)
 	if err != nil {
 		return errors.Wrapf(err, "No such tag: %d", tagID)
@@ -31,14 +31,14 @@ func Update(userID, blogID, tagID int64, name string) error {
 	return repo.Update(userID, blog.ID, tag.ID, name)
 }
 
-func FetchByUser(userID int64) ([]model.Tag, error) {
+func FetchByUser(userID uint64) ([]model.Tag, error) {
 	return repo.ByUser(userID)
 }
 
-func FetchByBlog(blogID int64) ([]model.Tag, error) {
+func FetchByBlog(blogID uint64) ([]model.Tag, error) {
 	return repo.ByBlog(blogID)
 }
 
-func Delete(userID, blogID, tagID int64) error {
+func Delete(userID, blogID, tagID uint64) error {
 	return repo.Delete(userID, blogID, tagID)
 }

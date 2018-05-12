@@ -56,15 +56,15 @@ func FetchPhotos(userIDStr, countStr, pageStr string) (*FetchPhotosResponse, err
 	return res, err
 }
 
-func TurnOnPhotoSwitch(userID int64, imageName string) error {
+func TurnOnPhotoSwitch(userID uint64, imageName string) error {
 	return togglePhotoSwitch(userID, imageName, true)
 }
 
-func TurnOffPhotoSwitch(userID int64, imageName string) error {
+func TurnOffPhotoSwitch(userID uint64, imageName string) error {
 	return togglePhotoSwitch(userID, imageName, false)
 }
 
-func togglePhotoSwitch(userID int64, imageName string, shown bool) error {
+func togglePhotoSwitch(userID uint64, imageName string, shown bool) error {
 	image, err := repo.ByName(userID, imageName)
 	if err != nil {
 		return err

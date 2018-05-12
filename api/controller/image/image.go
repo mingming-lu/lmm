@@ -58,7 +58,7 @@ func Upload(c *elesion.Context) {
 }
 
 func GetAllImages(c *elesion.Context) {
-	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
+	userID, err := strconv.ParseUint(c.Params.ByName("user"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid user").Error(err.Error())
 		return

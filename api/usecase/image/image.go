@@ -7,7 +7,7 @@ import (
 	"lmm/api/domain/service/uuid"
 )
 
-func Upload(userID int64, bulkData [][]byte) error {
+func Upload(userID uint64, bulkData [][]byte) error {
 	imageData := make([]model.ImageData, 0)
 	for _, image := range bulkData {
 		imgData := model.ImageData{
@@ -19,6 +19,6 @@ func Upload(userID int64, bulkData [][]byte) error {
 	return repo.Add(userID, imageData)
 }
 
-func AllImages(userID int64) ([]model.Minimal, error) {
+func AllImages(userID uint64) ([]model.Minimal, error) {
 	return repo.FetchAllImage(userID)
 }

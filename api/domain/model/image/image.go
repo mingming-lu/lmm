@@ -12,8 +12,8 @@ type ImageData struct {
 const BaseURL = "https://image.lmm.im/"
 
 type Image struct {
-	ID        int64
-	User      int64
+	ID        uint64
+	User      uint64
 	Name      string
 	CreatedAt string
 }

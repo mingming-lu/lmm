@@ -5,7 +5,7 @@ import (
 	model "lmm/api/domain/model/blog"
 )
 
-func Add(userID int64, title, text string) (int64, error) {
+func Add(userID uint64, title, text string) (uint64, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -17,10 +17,11 @@ func Add(userID int64, title, text string) (int64, error) {
 		return 0, err
 	}
 
-	return res.LastInsertId()
+	blogID, err := res.LastInsertId()
+	return uint64(blogID), err
 }
 
-func ById(id int64) (*model.Blog, error) {
+func ById(id uint64) (*model.Blog, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -38,7 +39,7 @@ func ById(id int64) (*model.Blog, error) {
 	return &blog, nil
 }
 
-func List(userID int64) ([]model.ListItem, error) {
+func List(userID uint64) ([]model.ListItem, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -63,7 +64,7 @@ func List(userID int64) ([]model.ListItem, error) {
 	return blogList, nil
 }
 
-func Update(id int64, title, text string) error {
+func Update(id uint64, title, text string) error {
 	d := db.Default()
 	defer d.Close()
 
@@ -82,7 +83,7 @@ func Update(id int64, title, text string) error {
 	return nil
 }
 
-func Delete(id int64) error {
+func Delete(id uint64) error {
 	d := db.Default()
 	defer d.Close()
 

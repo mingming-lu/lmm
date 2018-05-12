@@ -1,6 +1,6 @@
 .PHONY: all
 all:
-	sudo make run -j
+	make run -j
 
 .PHONY: install
 install:

@@ -9,7 +9,7 @@ import (
 
 const pathRaw = "image/raw/"
 
-func Add(userID int64, data []model.ImageData) error {
+func Add(userID uint64, data []model.ImageData) error {
 	d := db.Default()
 	defer d.Close()
 
@@ -39,7 +39,7 @@ func Add(userID int64, data []model.ImageData) error {
 	return tx.Commit()
 }
 
-func FetchAllImage(userID int64) ([]model.Minimal, error) {
+func FetchAllImage(userID uint64) ([]model.Minimal, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -62,7 +62,7 @@ func FetchAllImage(userID int64) ([]model.Minimal, error) {
 	return images, nil
 }
 
-func ByName(userID int64, imageName string) (*model.Image, error) {
+func ByName(userID uint64, imageName string) (*model.Image, error) {
 	d := db.Default()
 	defer d.Close()
 

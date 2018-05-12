@@ -38,7 +38,7 @@ func Register(c *elesion.Context) {
 }
 
 func Update(c *elesion.Context) {
-	categoryID, err := strconv.ParseInt(c.Params.ByName("category"), 10, 64)
+	categoryID, err := strconv.ParseUint(c.Params.ByName("category"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid category id").Error(err.Error())
 		return
@@ -71,7 +71,7 @@ func Update(c *elesion.Context) {
 }
 
 func GetByUser(c *elesion.Context) {
-	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
+	userID, err := strconv.ParseUint(c.Params.ByName("user"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid user id").Error(err.Error())
 	}
@@ -91,7 +91,7 @@ func Delete(c *elesion.Context) {
 		return
 	}
 
-	categoryID, err := strconv.ParseInt(c.Params.ByName("category"), 10, 64)
+	categoryID, err := strconv.ParseUint(c.Params.ByName("category"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid category id").Error(err.Error())
 		return

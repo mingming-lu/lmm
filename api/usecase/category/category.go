@@ -10,7 +10,7 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-func Register(userID int64, name string) (int64, error) {
+func Register(userID uint64, name string) (uint64, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return 0, errors.New("Empty name")
@@ -18,7 +18,7 @@ func Register(userID int64, name string) (int64, error) {
 	return repo.Add(userID, name)
 }
 
-func Update(userID, categoryID int64, name string) error {
+func Update(userID, categoryID uint64, name string) error {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return errors.New("Empty name")
@@ -26,19 +26,19 @@ func Update(userID, categoryID int64, name string) error {
 	return repo.Update(userID, categoryID, name)
 }
 
-func FetchByID(categoryID int64) (*model.Category, error) {
+func FetchByID(categoryID uint64) (*model.Category, error) {
 	return repo.ByID(categoryID)
 }
 
-func FetchByUser(userID int64) ([]model.Category, error) {
+func FetchByUser(userID uint64) ([]model.Category, error) {
 	return repo.ByUser(userID)
 }
 
-func FetchByBlog(blogID int64) (*model.Category, error) {
+func FetchByBlog(blogID uint64) (*model.Category, error) {
 	return repo.ByBlog(blogID)
 }
 
-func SetBlogCategory(userID, blogID, categoryID int64) error {
+func SetBlogCategory(userID, blogID, categoryID uint64) error {
 	if err := blogUsecase.CheckOwnership(userID, blogID); err != nil {
 		return errors.Wrap(err, "Not allowed to edit target blog")
 	}
@@ -48,11 +48,11 @@ func SetBlogCategory(userID, blogID, categoryID int64) error {
 	return repo.SetBlogCategory(blogID, categoryID)
 }
 
-func FetchAllBlog(categoryID int64) ([]blog.ListItem, error) {
+func FetchAllBlog(categoryID uint64) ([]blog.ListItem, error) {
 	return repo.AllBlogByID(categoryID)
 }
 
-func CheckOwnership(userID, categoryID int64) error {
+func CheckOwnership(userID, categoryID uint64) error {
 	category, err := FetchByID(categoryID)
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func CheckOwnership(userID, categoryID int64) error {
 	return nil
 }
 
-func Delete(userID, categoryID int64) error {
+func Delete(userID, categoryID uint64) error {
 	blogList, err := FetchAllBlog(categoryID)
 	if err != nil {
 		return err
