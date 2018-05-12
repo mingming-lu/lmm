@@ -30,14 +30,15 @@ func New(repo *repo.Repository) *Usecase {
 	return &Usecase{repo: repo}
 }
 
-func (uc Usecase) SignUp(requestBody io.ReadCloser) (*model.User, error) {
+func (uc *Usecase) SignUp(requestBody io.ReadCloser) (uint64, error) {
 	auth := &Auth{}
 	err := json.NewDecoder(requestBody).Decode(auth)
 	if err != nil {
-		return nil, ErrInvalidInput
+		return 0, ErrInvalidInput
 	}
-	user := model.New(auth.Name, auth.Password)
-	return uc.repo.Save(user)
+	m := model.New(auth.Name, auth.Password)
+	user, err := uc.repo.Save(m)
+	return user.ID, nil
 }
 
 func SignIn(name, password string) (*model.Response, error) {
