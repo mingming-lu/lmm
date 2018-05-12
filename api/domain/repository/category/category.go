@@ -8,7 +8,7 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-func Add(userID int64, name string) (int64, error) {
+func Add(userID uint64, name string) (uint64, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -20,10 +20,11 @@ func Add(userID int64, name string) (int64, error) {
 		return 0, err
 	}
 
-	return res.LastInsertId()
+	categoryID, err := res.LastInsertId()
+	return uint64(categoryID), err
 }
 
-func Update(userID, categoryID int64, name string) error {
+func Update(userID, categoryID uint64, name string) error {
 	d := db.Default()
 	defer d.Close()
 
@@ -46,7 +47,7 @@ func Update(userID, categoryID int64, name string) error {
 	return nil
 }
 
-func SetBlogCategory(blogID, categoryID int64) error {
+func SetBlogCategory(blogID, categoryID uint64) error {
 	d := db.Default()
 	defer d.Close()
 
@@ -58,7 +59,7 @@ func SetBlogCategory(blogID, categoryID int64) error {
 	return err
 }
 
-func ByUser(userID int64) ([]model.Category, error) {
+func ByUser(userID uint64) ([]model.Category, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -82,7 +83,7 @@ func ByUser(userID int64) ([]model.Category, error) {
 	return categories, nil
 }
 
-func ByBlog(blogID int64) (*model.Category, error) {
+func ByBlog(blogID uint64) (*model.Category, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -95,7 +96,7 @@ func ByBlog(blogID int64) (*model.Category, error) {
 	return &category, err
 }
 
-func ByID(categoryID int64) (*model.Category, error) {
+func ByID(categoryID uint64) (*model.Category, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -111,7 +112,7 @@ func ByID(categoryID int64) (*model.Category, error) {
 	return &category, nil
 }
 
-func AllBlogByID(categoryID int64) ([]blog.ListItem, error) {
+func AllBlogByID(categoryID uint64) ([]blog.ListItem, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -135,7 +136,7 @@ func AllBlogByID(categoryID int64) ([]blog.ListItem, error) {
 	return blogList, nil
 }
 
-func Delete(userID, categoryID int64) error {
+func Delete(userID, categoryID uint64) error {
 	d := db.Default()
 	defer d.Close()
 

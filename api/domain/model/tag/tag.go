@@ -5,8 +5,8 @@ type Minimal struct {
 }
 
 type Tag struct {
-	ID   int64  `json:"id"`
-	User int64  `json:"user"`
-	Blog int64  `json:"blog"`
+	ID   uint64 `json:"id"`
+	User uint64 `json:"user"`
+	Blog uint64 `json:"blog"`
 	Name string `json:"name"`
 }

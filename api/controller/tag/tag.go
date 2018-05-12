@@ -28,7 +28,7 @@ func Register(c *elesion.Context) {
 		return
 	}
 
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	blogID, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
@@ -56,13 +56,13 @@ func Update(c *elesion.Context) {
 		return
 	}
 
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	blogID, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
 	}
 
-	tagID, err := strconv.ParseInt(c.Params.ByName("tag"), 10, 64)
+	tagID, err := strconv.ParseUint(c.Params.ByName("tag"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid tag id").Error(err.Error())
 		return
@@ -77,7 +77,7 @@ func Update(c *elesion.Context) {
 }
 
 func GetByUser(c *elesion.Context) {
-	userID, err := strconv.ParseInt(c.Params.ByName("user"), 10, 64)
+	userID, err := strconv.ParseUint(c.Params.ByName("user"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid user id").Error(err.Error())
 		return
@@ -92,7 +92,7 @@ func GetByUser(c *elesion.Context) {
 }
 
 func GetByBlog(c *elesion.Context) {
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	blogID, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
@@ -113,13 +113,13 @@ func Delete(c *elesion.Context) {
 		return
 	}
 
-	blogID, err := strconv.ParseInt(c.Params.ByName("blog"), 10, 64)
+	blogID, err := strconv.ParseUint(c.Params.ByName("blog"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid blog id").Error(err.Error())
 		return
 	}
 
-	tagID, err := strconv.ParseInt(c.Params.ByName("tag"), 10, 64)
+	tagID, err := strconv.ParseUint(c.Params.ByName("tag"), 10, 64)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String("Invalid tag id").Error(err.Error())
 		return

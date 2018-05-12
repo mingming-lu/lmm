@@ -7,7 +7,7 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-func Add(userID, blogID int64, tagName string) (int64, error) {
+func Add(userID, blogID uint64, tagName string) (uint64, error) {
 	d := db.Default()
 	defer d.Close()
 
@@ -18,10 +18,11 @@ func Add(userID, blogID int64, tagName string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return res.LastInsertId()
+	tagID, err := res.LastInsertId()
+	return uint64(tagID), err
 }
 
-func Update(userID, blogID, tagID int64, name string) error {
+func Update(userID, blogID, tagID uint64, name string) error {
 	d := db.Default()
 	defer d.Close()
 
@@ -43,7 +44,7 @@ func Update(userID, blogID, tagID int64, name string) error {
 	return nil
 }
 
-func ByID(id int64) (*model.Tag, error) {
+func ByID(id uint64) (*model.Tag, error) {
 	tags, err := bySingle("id", id)
 	if err != nil {
 		return nil, err
@@ -54,11 +55,11 @@ func ByID(id int64) (*model.Tag, error) {
 	return &tags[0], nil
 }
 
-func ByUser(userID int64) ([]model.Tag, error) {
+func ByUser(userID uint64) ([]model.Tag, error) {
 	return bySingle("user", userID)
 }
 
-func ByBlog(blogID int64) ([]model.Tag, error) {
+func ByBlog(blogID uint64) ([]model.Tag, error) {
 	return bySingle("blog", blogID)
 }
 
@@ -88,7 +89,7 @@ func bySingle(field string, value interface{}) ([]model.Tag, error) {
 	return tags, nil
 }
 
-func Delete(userID, blogID, tagID int64) error {
+func Delete(userID, blogID, tagID uint64) error {
 	d := db.Default()
 	defer d.Close()
 
