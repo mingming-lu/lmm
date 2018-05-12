@@ -48,3 +48,11 @@ func (r *Response) Body() string {
 	}
 	return string(b)
 }
+
+type Router struct {
+	*elesion.Router
+}
+
+func NewRouter() *Router {
+	return &Router{Router: elesion.New()}
+}
