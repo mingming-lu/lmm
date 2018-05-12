@@ -1,6 +1,10 @@
 package testing
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"io/ioutil"
 	"lmm/api/db"
 	"log"
 )
@@ -27,4 +31,12 @@ func InitTable(name string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func StructToRequestBody(o interface{}) io.ReadCloser {
+	b, err := json.Marshal(o)
+	if err != nil {
+		panic(err)
+	}
+	return ioutil.NopCloser(bytes.NewReader(b))
 }
