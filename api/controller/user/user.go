@@ -8,13 +8,18 @@ import (
 	"github.com/akinaru-lu/elesion"
 
 	model "lmm/api/domain/model/user"
+	repo "lmm/api/domain/repository/user"
 	usecase "lmm/api/usecase/user"
 )
 
 func SignUp(c *elesion.Context) {
-	usecase.SignUp(c.Request.Body)
-
-	c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
+	id, err := usecase.New(repo.New()).SignUp(c.Request.Body)
+	switch err {
+	case nil:
+		c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
+	default:
+		c.Status(http.StatusInternalServerError).String(http.StatusText(http.StatusInternalServerError))
+	}
 }
 
 func SignIn(c *elesion.Context) {
