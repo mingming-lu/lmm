@@ -17,6 +17,8 @@ func SignUp(c *elesion.Context) {
 	switch err {
 	case nil:
 		c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
+	case usecase.ErrDuplicateUserName:
+		c.Status(http.StatusBadRequest).String(http.StatusText(http.StatusBadRequest))
 	default:
 		c.Status(http.StatusInternalServerError).String(http.StatusText(http.StatusInternalServerError))
 	}
