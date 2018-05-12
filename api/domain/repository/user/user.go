@@ -3,19 +3,20 @@ package user
 import (
 	"lmm/api/db"
 	model "lmm/api/domain/model/user"
+	"lmm/api/domain/repository"
 )
 
 type Repository struct {
-	db func() *db.DB
+	*repository.Repository
 }
 
 func New() *Repository {
-	return &Repository{db: func() *db.DB { return db.Default() }}
+	return &Repository{Repository: repository.New()}
 }
 
 // Save return a User model with generated id
 func (repo *Repository) Save(user *model.User) (*model.User, error) {
-	db := repo.db()
+	db := repo.DB()
 	defer db.Close()
 
 	stmt := db.Must(`INSERT INTO user (name, password, guid, token, created_at) VALUES (?, ?, ?, ?, ?)`)
