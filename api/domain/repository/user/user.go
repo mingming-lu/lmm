@@ -3,7 +3,36 @@ package user
 import (
 	"lmm/api/db"
 	model "lmm/api/domain/model/user"
+	"lmm/api/domain/repository"
 )
+
+type Repository struct {
+	*repository.Repository
+}
+
+func New() *Repository {
+	return &Repository{Repository: repository.New()}
+}
+
+// Save return a User model with generated id
+func (repo *Repository) Save(user *model.User) (*model.User, error) {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.Must(`INSERT INTO user (name, password, guid, token, created_at) VALUES (?, ?, ?, ?, ?)`)
+	defer stmt.Close()
+
+	res, err := stmt.Exec(user.Name, user.Password, user.GUID, user.Token, user.CreatedAt.UTC())
+	if err != nil {
+		return nil, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	user.ID = uint64(id)
+	return user, nil
+}
 
 func Add(name, password, guid, token string) (int64, error) {
 	d := db.Default()

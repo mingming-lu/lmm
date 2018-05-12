@@ -1,25 +1,55 @@
 package user
 
 import (
+	"encoding/json"
+	"io"
 	model "lmm/api/domain/model/user"
 	repo "lmm/api/domain/repository/user"
 	"lmm/api/domain/service/base64"
 	"lmm/api/domain/service/sha256"
 	"lmm/api/domain/service/token"
-	"lmm/api/domain/service/uuid"
 
 	"github.com/akinaru-lu/errors"
 )
 
 var (
-	ErrIncorrectPassword = errors.New("incorrect password")
+	ErrInvalidInput      = errors.New("Invalid input")
+	ErrDuplicateUserName = errors.New("User name duplicated")
+	ErrIncorrectPassword = errors.New("Incorrect password")
 )
 
-func SignUp(name, password string) (int64, error) {
-	token := uuid.New()
-	guid := uuid.New()
-	password = sha256.Hex([]byte(guid + password)) // digest
-	return repo.Add(name, password, guid, token)
+type Auth struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+}
+
+type Usecase struct {
+	repo *repo.Repository
+}
+
+func New(repo *repo.Repository) *Usecase {
+	return &Usecase{repo: repo}
+}
+
+func (uc *Usecase) SignUp(requestBody io.ReadCloser) (uint64, error) {
+	auth := &Auth{}
+	err := json.NewDecoder(requestBody).Decode(auth)
+	if err != nil {
+		return 0, ErrInvalidInput
+	}
+	m := model.New(auth.Name, auth.Password)
+	user, err := uc.repo.Save(m)
+	if err != nil {
+		key, _, ok := uc.repo.CheckErrorDuplicate(err.Error())
+		if !ok {
+			return 0, err
+		}
+		if key == "name" {
+			return 0, ErrDuplicateUserName
+		}
+		return 0, err
+	}
+	return user.ID, nil
 }
 
 func SignIn(name, password string) (*model.Response, error) {
