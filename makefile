@@ -1,7 +1,6 @@
 .PHONY: all
 all:
 	make run -j
-
 .PHONY: install
 install:
 	go get -v github.com/akinaru-lu/elesion
@@ -31,3 +30,14 @@ api: api/main.go
 .PHONY: image
 image: image/main.go
 	go run image/main.go
+
+.PHONY: test
+test: test-api
+
+.PHONY: test-api
+test-api:
+	go test lmm/api/controller/user
+	go test lmm/api/domain/model/user
+	go test lmm/api/domain/repository/user
+	go test lmm/api/usecase/user
+	go test lmm/api/testing
