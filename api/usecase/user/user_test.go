@@ -5,7 +5,7 @@ import (
 	"lmm/api/testing"
 )
 
-func TestSignup(t *testing.T) {
+func TestSignUp(t *testing.T) {
 	tester := testing.NewTester(t)
 
 	auth := Auth{Name: "foobar", Password: "1234"}
