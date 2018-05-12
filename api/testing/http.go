@@ -5,29 +5,27 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/akinaru-lu/elesion"
 )
 
-type Request struct {
-	*http.Request
+func NewRequest(method, path string, body io.Reader) *http.Request {
+	return httptest.NewRequest(method, path, body)
 }
 
-func NewRequest(method, path string, body io.Reader) *Request {
-	return &Request{Request: httptest.NewRequest(method, path, body)}
-}
-
-func GET(path string) *Request {
+func GET(path string) *http.Request {
 	return NewRequest(http.MethodGet, path, nil)
 }
 
-func POST(path string, body io.Reader) *Request {
+func POST(path string, body io.Reader) *http.Request {
 	return NewRequest(http.MethodPost, path, body)
 }
 
-func PUT(path string, body io.Reader) *Request {
+func PUT(path string, body io.Reader) *http.Request {
 	return NewRequest(http.MethodPut, path, body)
 }
 
-func DELETE(path string, body io.Reader) *Request {
+func DELETE(path string, body io.Reader) *http.Request {
 	return NewRequest(http.MethodDelete, path, body)
 }
 
