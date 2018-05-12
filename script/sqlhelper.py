@@ -11,6 +11,7 @@ class SQLHelper(cli.CLI):
 
     def add_arguments(self, parser):
         parser.add_argument('--file', help='target sql script file')
+        parser.add_argument('--database', help='target database')
         parser.add_argument('--warnings', action='store_true', help='should output warning infomation')
 
     def exec(self):
@@ -30,8 +31,8 @@ class SQLHelper(cli.CLI):
         try:
             db = MySQLdb.connect(user="root")
             cursor = db.cursor()
-            cursor.execute('CREATE DATABASE IF NOT EXISTS lmm;')
-            db.select_db('lmm')
+            cursor.execute('CREATE DATABASE IF NOT EXISTS {};'.format(self.args.database))
+            db.select_db(self.args.database)
             for query in queries:
                 print(query)
                 try:
