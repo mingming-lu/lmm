@@ -7,10 +7,10 @@ import (
 )
 
 func TestSave(t *testing.T) {
+	testing.InitTable("user")
 	tester := testing.NewTester(t)
 
 	repo := New()
-	testing.InitTable("user")
 	m := model.New("foobar", "1234")
 	user, err := repo.Save(m)
 	tester.NoError(err)
