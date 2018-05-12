@@ -1,4 +1,4 @@
-package tester
+package testing
 
 import (
 	"lmm/api/db"
@@ -12,16 +12,9 @@ func init() {
 	db.SetDefaultDatabaseName("lmm_test")
 }
 
-type Tester struct {
-	*testing.T
-}
-
-func New(t *testing.T) *Tester {
-	return &Tester{T: t}
-}
-
 func InitTableAll() {
 	db := db.Default()
+	defer db.Close()
 	r, err := db.Query("SHOW TABLES")
 	if err != nil {
 		log.Fatal(err)
@@ -31,6 +24,26 @@ func InitTableAll() {
 		r.Scan(&table)
 		db.Query("TRUNCATE TABLE " + table)
 	}
+}
+
+func InitTable(name string) {
+	db := db.Default()
+	defer db.Close()
+
+	_, err := db.Query("TRUNCATE TABLE " + name)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+type T = testing.T
+
+type Tester struct {
+	*T
+}
+
+func NewTester(t *T) *Tester {
+	return &Tester{T: t}
 }
 
 func (t *Tester) Is(expected, actual interface{}, msgAndArgs ...interface{}) bool {
