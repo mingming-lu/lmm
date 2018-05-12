@@ -1,6 +1,6 @@
 .PHONY: all
 all:
-	make run -j
+	sudo make run -j
 
 .PHONY: install
 install:
@@ -31,8 +31,3 @@ api: api/main.go
 .PHONY: image
 image: image/main.go
 	go run image/main.go
-
-.PHONY: docs
-docs: docs/docker-compose.yaml
-	cd docs && docker-compose up
-
