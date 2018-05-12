@@ -14,8 +14,8 @@ func TestSave(t *testing.T) {
 	m := model.New("foobar", "1234")
 	user, err := repo.Save(m)
 	tester.NoError(err)
-	tester.Is(user.ID, uint64(1))
-	tester.Is(user.Name, "foobar")
+	tester.Is(uint64(1), user.ID)
+	tester.Is("foobar", user.Name)
 
 	db := db.Default()
 	defer db.Close()
@@ -25,5 +25,5 @@ func TestSave(t *testing.T) {
 
 	r := stmt.QueryRow(user.ID)
 	r.Scan(&m)
-	tester.Is(m.ID, uint64(1))
+	tester.Is(uint64(1), m.ID)
 }

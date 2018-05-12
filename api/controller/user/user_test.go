@@ -18,6 +18,6 @@ func TestPostV1Signup(t *testing.T) {
 	res := testing.NewResponse()
 	router.ServeHTTP(res, testing.POST("/v1/signup", reqeustBody))
 
-	tester.Is(res.StatusCode(), http.StatusCreated)
-	tester.Is(res.Header().Get("Location"), "/users/1")
+	tester.Is(http.StatusCreated, res.StatusCode())
+	tester.Is("/users/1", res.Header().Get("Location"))
 }

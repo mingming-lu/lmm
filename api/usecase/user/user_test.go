@@ -14,5 +14,5 @@ func TestSignup(t *testing.T) {
 	testing.InitTable("user")
 	id, err := New(repo.New()).SignUp(requestBody)
 	tester.NoError(err)
-	tester.Is(id, uint64(1))
+	tester.Is(uint64(1), id)
 }
