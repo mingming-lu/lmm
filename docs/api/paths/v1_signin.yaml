@@ -1,0 +1,34 @@
+post:
+  tags:
+    - signin
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          description: 账号和密码
+          properties:
+            name:
+              type: string
+            password:
+              type: string
+  responses:
+    200:
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/user.yaml
+
+    400:
+      allOf:
+        - description: 缺少账号或密码
+        - $ref: ../components/responses/400.yaml
+
+    404:
+      allOf:
+        - description: 用户名或密码不正确
+        - $rf: ../components/responses/404.yaml
+
+    500:
+      $ref: ../components/responses/500.yaml
