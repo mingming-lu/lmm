@@ -10,9 +10,7 @@ func TestSignUp(t *testing.T) {
 	tester := testing.NewTester(t)
 
 	auth := Auth{Name: "foobar", Password: "1234"}
-	requestBody := testing.StructToRequestBody(auth)
-
-	id, err := New(repository.New()).SignUp(requestBody)
+	id, err := New(repository.New()).SignUp(auth.Name, auth.Password)
 	tester.NoError(err)
 	tester.Is(uint64(1), id)
 }
@@ -23,8 +21,8 @@ func TestSignUp_Duplicate(t *testing.T) {
 
 	auth := Auth{Name: "foobar", Password: "1234"}
 	repo := repository.New()
-	New(repo).SignUp(testing.StructToRequestBody(auth))
-	id, err := New(repo).SignUp(testing.StructToRequestBody(auth))
+	New(repo).SignUp(auth.Name, auth.Password)
+	id, err := New(repo).SignUp(auth.Name, auth.Password)
 	tester.Error(err)
 	tester.Is(ErrDuplicateUserName, err)
 	tester.Is(uint64(0), id)

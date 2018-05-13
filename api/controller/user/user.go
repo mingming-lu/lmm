@@ -12,7 +12,13 @@ import (
 )
 
 func SignUp(c *elesion.Context) {
-	id, err := usecase.New(repository.New()).SignUp(c.Request.Body)
+	uc := usecase.New(repository.New())
+	auth := &usecase.Auth{}
+	err := json.NewDecoder(c.Request.Body).Decode(auth)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String(http.StatusText(http.StatusBadRequest))
+	}
+	id, err := uc.SignUp(auth.Name, auth.Password)
 	switch err {
 	case nil:
 		c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
