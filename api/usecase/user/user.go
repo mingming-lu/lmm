@@ -5,9 +5,9 @@ import (
 	"io"
 	model "lmm/api/domain/model/user"
 	repo "lmm/api/domain/repository/user"
-	"lmm/api/domain/service/base64"
-	"lmm/api/domain/service/sha256"
-	"lmm/api/domain/service/token"
+	"lmm/api/utils/base64"
+	"lmm/api/utils/sha256"
+	"lmm/api/utils/token"
 
 	"github.com/akinaru-lu/errors"
 )

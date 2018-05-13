@@ -2,8 +2,8 @@ package user
 
 import (
 	"lmm/api/domain/model"
-	"lmm/api/domain/service/sha256"
-	"lmm/api/domain/service/uuid"
+	"lmm/api/utils/sha256"
+	"lmm/api/utils/uuid"
 	"time"
 )
 
