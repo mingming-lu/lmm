@@ -1,8 +1,8 @@
-package user
+package repository
 
 import (
+	"lmm/api/context/account/domain/model"
 	"lmm/api/db"
-	model "lmm/api/domain/model/user"
 	"lmm/api/testing"
 )
 

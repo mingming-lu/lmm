@@ -3,17 +3,16 @@ package user
 import (
 	"encoding/json"
 	"fmt"
+	"lmm/api/context/account/domain/model"
+	"lmm/api/context/account/domain/repository"
+	"lmm/api/context/account/usecase"
 	"net/http"
 
 	"github.com/akinaru-lu/elesion"
-
-	model "lmm/api/domain/model/user"
-	repo "lmm/api/domain/repository/user"
-	usecase "lmm/api/usecase/user"
 )
 
 func SignUp(c *elesion.Context) {
-	id, err := usecase.New(repo.New()).SignUp(c.Request.Body)
+	id, err := usecase.New(repository.New()).SignUp(c.Request.Body)
 	switch err {
 	case nil:
 		c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")

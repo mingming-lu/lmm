@@ -1,10 +1,10 @@
 package user
 
 import (
-	model "lmm/api/domain/model/user"
-	repo "lmm/api/domain/repository/user"
+	"lmm/api/context/account/domain/model"
+	"lmm/api/context/account/domain/repository"
+	"lmm/api/context/account/usecase"
 	"lmm/api/testing"
-	usecase "lmm/api/usecase/user"
 	"net/http"
 )
 
@@ -32,7 +32,7 @@ func TestPostV1Signup_Duplicate(t *testing.T) {
 	router.POST("/v1/signup", SignUp)
 
 	model := model.New("foobar", "1234")
-	repo.New().Save(model)
+	repository.New().Save(model)
 
 	res := testing.NewResponse()
 	auth := usecase.Auth{Name: "foobar", Password: "1234"}
