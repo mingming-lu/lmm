@@ -3,7 +3,6 @@ package user
 import (
 	"encoding/json"
 	"fmt"
-	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/context/account/usecase"
 	"net/http"
@@ -27,23 +26,6 @@ func SignUp(c *elesion.Context) {
 	default:
 		c.Status(http.StatusInternalServerError).String(http.StatusText(http.StatusInternalServerError))
 	}
-}
-
-func SignIn(c *elesion.Context) {
-	info := model.Minimal{}
-	err := json.NewDecoder(c.Request.Body).Decode(&info)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid body").Error(err.Error())
-		return
-	}
-
-	user, err := usecase.New(repository.New()).SignIn(info.Name, info.Password)
-	if err != nil {
-		c.Status(http.StatusNotFound).String(err.Error())
-		return
-	}
-
-	c.Status(http.StatusOK).JSON(user)
 }
 
 func Verify(c *elesion.Context) {
