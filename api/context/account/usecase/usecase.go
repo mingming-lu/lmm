@@ -17,12 +17,6 @@ type Auth struct {
 	Password string `json:"password"`
 }
 
-type PostSignInResponse struct {
-	ID    uint64 `json:"id"`
-	Name  string `json:"name"`
-	Token string `json:"token"`
-}
-
 type Usecase struct {
 	repo *repository.Repository
 }

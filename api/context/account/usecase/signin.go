@@ -1,12 +1,13 @@
 package usecase
 
 import (
+	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/service"
 	"lmm/api/db"
 	"lmm/api/utils/sha256"
 )
 
-func (uc *Usecase) SignIn(name, password string) (*PostSignInResponse, error) {
+func (uc *Usecase) SignIn(name, password string) (*model.User, error) {
 	if name == "" || password == "" {
 		return nil, ErrEmptyUserNameOrPassword
 	}
@@ -26,10 +27,7 @@ func (uc *Usecase) SignIn(name, password string) (*PostSignInResponse, error) {
 	}
 
 	encodedToken := service.EncodeToken(user.Token)
+	user.Token = encodedToken
 
-	return &PostSignInResponse{
-		ID:    user.ID,
-		Name:  user.Name,
-		Token: encodedToken,
-	}, nil
+	return user, nil
 }
