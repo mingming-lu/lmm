@@ -4,6 +4,8 @@ import (
 	"lmm/api/context/account/domain/model"
 	"lmm/api/db"
 	"lmm/api/domain/repository"
+
+	"github.com/akinaru-lu/errors"
 )
 
 type Repository struct {
@@ -44,7 +46,7 @@ func (repo *Repository) FindByName(name string) (*model.User, error) {
 	user := &model.User{}
 	err := stmt.QueryRow(name).Scan(&user.ID, &user.Name, &user.Password, &user.GUID, &user.Token, &user.CreatedAt)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(err.Error())
 	}
 	return user, nil
 }
