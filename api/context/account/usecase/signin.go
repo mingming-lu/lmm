@@ -1,37 +1,35 @@
 package usecase
 
 import (
-	"lmm/api/context/account/domain/model"
-	"lmm/api/context/account/domain/repository"
-	"lmm/api/utils/base64"
+	"lmm/api/context/account/domain/service"
+	"lmm/api/db"
 	"lmm/api/utils/sha256"
-	"lmm/api/utils/token"
 )
 
-func SignIn(name, password string) (*model.Response, error) {
-	user, err := repository.ByName(name)
+func (uc *Usecase) SignIn(name, password string) (*PostSignInResponse, error) {
+	if name == "" || password == "" {
+		return nil, ErrEmptyUserNameOrPassword
+	}
 
+	user, err := uc.repo.FindByName(name)
 	if err != nil {
+		if err == db.ErrNoRows {
+			return nil, ErrInvalidUserNameOrPassword
+		}
 		return nil, err
 	}
 
+	// validate password
 	encoded := sha256.Hex([]byte(user.GUID + password))
 	if encoded != user.Password {
-		return nil, ErrIncorrectPassword
+		return nil, ErrInvalidUserNameOrPassword
 	}
 
-	token, err := token.Encode(user.Token)
-	if err != nil {
-		return nil, err
-	}
+	encodedToken := service.EncodeToken(user.Token)
 
-	encodedToken := base64.Encode(token)
-
-	res := model.Response{
+	return &PostSignInResponse{
 		ID:    user.ID,
 		Name:  user.Name,
 		Token: encodedToken,
-	}
-
-	return &res, nil
+	}, nil
 }
