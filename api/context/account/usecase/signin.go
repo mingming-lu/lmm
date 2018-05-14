@@ -7,6 +7,7 @@ import (
 	"lmm/api/utils/sha256"
 )
 
+// SignIn is a usecase which users sign in with a account
 func (uc *Usecase) SignIn(name, password string) (*model.User, error) {
 	if name == "" || password == "" {
 		return nil, ErrEmptyUserNameOrPassword
