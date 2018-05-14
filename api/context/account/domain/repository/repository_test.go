@@ -2,6 +2,7 @@ package repository
 
 import (
 	"lmm/api/context/account/domain/model"
+	testingService "lmm/api/context/account/domain/service/testing"
 	"lmm/api/db"
 	"lmm/api/testing"
 )
@@ -26,4 +27,17 @@ func TestSave(t *testing.T) {
 	r := stmt.QueryRow(user.ID)
 	r.Scan(&m)
 	tester.Is(uint64(1), m.ID)
+}
+
+func TestFindByName_Success(t *testing.T) {
+	testing.InitTable("user")
+	tester := testing.NewTester(t)
+	user := testingService.NewUser()
+
+	repo := New()
+	found, err := repo.FindByName(user.Name)
+
+	tester.NoError(err)
+	tester.Isa(&model.User{}, found)
+	tester.Is(user, found)
 }
