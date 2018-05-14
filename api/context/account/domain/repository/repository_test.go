@@ -41,3 +41,15 @@ func TestFindByName_Success(t *testing.T) {
 	tester.Isa(&model.User{}, found)
 	tester.Is(user, found)
 }
+
+func TestFindByName_NotFound(t *testing.T) {
+	testing.InitTable("user")
+	tester := testing.NewTester(t)
+
+	repo := New()
+	found, err := repo.FindByName("foo")
+
+	tester.Error(err)
+	tester.Nil(found)
+	tester.Is(db.ErrNoRows, err)
+}
