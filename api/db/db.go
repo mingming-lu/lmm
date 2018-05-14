@@ -57,7 +57,7 @@ func (values Values) Where() string {
 }
 
 func New() *DB {
-	super, err := sql.Open("mysql", "root:@/")
+	super, err := sql.Open("mysql", "root:@/?parseTime=true")
 	if err != nil {
 		panic(err)
 	}
