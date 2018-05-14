@@ -34,6 +34,21 @@ func (repo *Repository) Save(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
+func (repo *Repository) FindByName(name string) (*model.User, error) {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.Must(`SELECT id, name, password, guid, token, created_at FROM user WHERE name = ?`)
+	defer stmt.Close()
+
+	user := &model.User{}
+	err := stmt.QueryRow(name).Scan(&user.ID, &user.Name, &user.Password, &user.GUID, &user.Token, &user.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func Add(name, password, guid, token string) (int64, error) {
 	d := db.Default()
 	defer d.Close()
