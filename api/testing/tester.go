@@ -16,6 +16,10 @@ func NewTester(t *T) *Tester {
 	return &Tester{T: t}
 }
 
+func (t *Tester) Nil(o interface{}, magAndArgs ...interface{}) bool {
+	return assert.Nil(t, o, magAndArgs...)
+}
+
 func (t *Tester) Is(expected, actual interface{}, msgAndArgs ...interface{}) bool {
 	return assert.Equal(t, expected, actual, msgAndArgs...)
 }
