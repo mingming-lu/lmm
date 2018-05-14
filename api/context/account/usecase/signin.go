@@ -14,7 +14,7 @@ func (uc *Usecase) SignIn(name, password string) (*model.User, error) {
 
 	user, err := uc.repo.FindByName(name)
 	if err != nil {
-		if err == db.ErrNoRows {
+		if err.Error() == db.ErrNoRows.Error() {
 			return nil, ErrInvalidUserNameOrPassword
 		}
 		return nil, err
