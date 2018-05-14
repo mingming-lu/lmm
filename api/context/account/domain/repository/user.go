@@ -64,21 +64,6 @@ func Add(name, password, guid, token string) (int64, error) {
 	return res.LastInsertId()
 }
 
-func ByName(name string) (*model.User, error) {
-	d := db.Default()
-	defer d.Close()
-
-	stmt := d.Must("SELECT id, name, password, guid, token, created_at FROM user WHERE name = ?")
-	defer stmt.Close()
-
-	user := model.User{}
-	err := stmt.QueryRow(name).Scan(
-		&user.ID, &user.Name, &user.Password, &user.GUID, &user.Token, &user.CreatedAt,
-	)
-
-	return &user, err
-}
-
 func ByToken(token string) (*model.User, error) {
 	d := db.Default()
 	defer d.Close()
