@@ -35,3 +35,7 @@ func (t *Tester) Error(err error, msgAndArgs ...interface{}) bool {
 func (t *Tester) NoError(err error, msgAndArgs ...interface{}) bool {
 	return assert.NoError(t, err, msgAndArgs...)
 }
+
+func (t *Tester) Isa(expectedType, o interface{}, msgAndArgs ...interface{}) bool {
+	return assert.IsType(t, expectedType, o, msgAndArgs...)
+}

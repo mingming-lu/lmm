@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/testing"
 )
@@ -13,10 +14,11 @@ func TestSignIn_Success(t *testing.T) {
 	id, err := uc.SignUp("foobar", "1234")
 	tester.NoError(err)
 
-	res, err := uc.SignIn("foobar", "1234")
+	user, err := uc.SignIn("foobar", "1234")
 	tester.NoError(err)
-	tester.Is(id, res.ID)
-	tester.Is("foobar", res.Name)
+	tester.Is(id, user.ID)
+	tester.Is("foobar", user.Name)
+	tester.Isa(&model.User{}, user)
 }
 
 func TestSignIn_InvalidPassword(t *testing.T) {
