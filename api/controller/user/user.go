@@ -37,7 +37,7 @@ func SignIn(c *elesion.Context) {
 		return
 	}
 
-	user, err := usecase.SignIn(info.Name, info.Password)
+	user, err := usecase.New(repository.New()).SignIn(info.Name, info.Password)
 	if err != nil {
 		c.Status(http.StatusNotFound).String(err.Error())
 		return
