@@ -36,6 +36,7 @@ func (repo *Repository) Save(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
+// FindByName return a user model determined by name
 func (repo *Repository) FindByName(name string) (*model.User, error) {
 	db := repo.DB()
 	defer db.Close()
