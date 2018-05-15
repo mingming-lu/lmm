@@ -5,6 +5,7 @@ import (
 	testingService "lmm/api/context/account/domain/service/testing"
 	"lmm/api/db"
 	"lmm/api/testing"
+	"lmm/api/utils/sha256"
 )
 
 func TestSave(t *testing.T) {
@@ -33,6 +34,7 @@ func TestFindByName_Success(t *testing.T) {
 	testing.InitTable("user")
 	tester := testing.NewTester(t)
 	user := testingService.NewUser()
+	user.Password = sha256.Hex([]byte(user.GUID + user.Password))
 
 	repo := New()
 	found, err := repo.FindByName(user.Name)
