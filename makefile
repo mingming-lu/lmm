@@ -7,6 +7,7 @@ install:
 	go get -v github.com/go-sql-driver/mysql
 	go get -v github.com/google/uuid
 	go get -v github.com/stretchr/testify/assert
+	go get -v github.com/stretchr/testify/mock
 	rm -rf manager/node_modules
 	rm -rf app/node_modules
 	npm --prefix app install
