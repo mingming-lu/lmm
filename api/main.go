@@ -11,6 +11,8 @@ import (
 	"lmm/api/controller/image"
 	"lmm/api/controller/tag"
 	"lmm/api/controller/user"
+
+	account "lmm/api/context/account/ui"
 )
 
 func main() {
@@ -18,7 +20,7 @@ func main() {
 
 	// user
 	router.POST("/v1/signup", user.SignUp)
-	router.POST("/v1/signin", user.SignIn)
+	router.POST("/v1/signin", account.SignIn)
 	router.GET("/v1/verify", user.Verify)
 
 	// blog

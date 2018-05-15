@@ -3,8 +3,8 @@ package image
 import (
 	model "lmm/api/domain/model/image"
 	repo "lmm/api/domain/repository/image"
-	"lmm/api/domain/service/base64"
-	"lmm/api/domain/service/uuid"
+	"lmm/api/utils/base64"
+	"lmm/api/utils/uuid"
 )
 
 func Upload(userID uint64, bulkData [][]byte) error {

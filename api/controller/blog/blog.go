@@ -6,19 +6,19 @@ import (
 	"net/http"
 	"strconv"
 
+	account "lmm/api/context/account/usecase"
 	"lmm/api/db"
 	model "lmm/api/domain/model/blog"
 	categoryModel "lmm/api/domain/model/category"
 	usecase "lmm/api/usecase/blog"
 	"lmm/api/usecase/category"
 	"lmm/api/usecase/tag"
-	"lmm/api/usecase/user"
 
 	"github.com/akinaru-lu/elesion"
 )
 
 func Post(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -86,7 +86,7 @@ func GetList(c *elesion.Context) {
 
 func Update(c *elesion.Context) {
 	// check token
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -126,7 +126,7 @@ func Update(c *elesion.Context) {
 
 func Delete(c *elesion.Context) {
 	// check token
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -174,7 +174,7 @@ func GetCategory(c *elesion.Context) {
 }
 
 func SetCategory(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return

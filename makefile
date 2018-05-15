@@ -7,6 +7,7 @@ install:
 	go get -v github.com/go-sql-driver/mysql
 	go get -v github.com/google/uuid
 	go get -v github.com/stretchr/testify/assert
+	go get -v github.com/stretchr/testify/mock
 	rm -rf manager/node_modules
 	rm -rf app/node_modules
 	npm --prefix app install
@@ -36,8 +37,8 @@ test: test-api
 
 .PHONY: test-api
 test-api:
-	go test lmm/api/controller/user
-	go test lmm/api/domain/model/user
-	go test lmm/api/domain/repository/user
-	go test lmm/api/usecase/user
-	go test lmm/api/testing
+	go test -v lmm/api/controller/user
+	go test -v lmm/api/context/account/domain/model
+	go test -v lmm/api/context/account/domain/repository
+	go test -v lmm/api/context/account/usecase
+	go test -v lmm/api/testing

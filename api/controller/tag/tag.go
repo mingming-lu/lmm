@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"lmm/api/usecase/user"
-
+	account "lmm/api/context/account/usecase"
 	model "lmm/api/domain/model/tag"
 	usecase "lmm/api/usecase/tag"
 
@@ -15,7 +14,7 @@ import (
 )
 
 func Register(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -43,7 +42,7 @@ func Register(c *elesion.Context) {
 }
 
 func Update(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -107,7 +106,7 @@ func GetByBlog(c *elesion.Context) {
 }
 
 func Delete(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return

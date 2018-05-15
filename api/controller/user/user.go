@@ -3,17 +3,21 @@ package user
 import (
 	"encoding/json"
 	"fmt"
+	"lmm/api/context/account/domain/repository"
+	"lmm/api/context/account/usecase"
 	"net/http"
 
 	"github.com/akinaru-lu/elesion"
-
-	model "lmm/api/domain/model/user"
-	repo "lmm/api/domain/repository/user"
-	usecase "lmm/api/usecase/user"
 )
 
 func SignUp(c *elesion.Context) {
-	id, err := usecase.New(repo.New()).SignUp(c.Request.Body)
+	uc := usecase.New(repository.New())
+	auth := &usecase.Auth{}
+	err := json.NewDecoder(c.Request.Body).Decode(auth)
+	if err != nil {
+		c.Status(http.StatusBadRequest).String(http.StatusText(http.StatusBadRequest))
+	}
+	id, err := uc.SignUp(auth.Name, auth.Password)
 	switch err {
 	case nil:
 		c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
@@ -22,23 +26,6 @@ func SignUp(c *elesion.Context) {
 	default:
 		c.Status(http.StatusInternalServerError).String(http.StatusText(http.StatusInternalServerError))
 	}
-}
-
-func SignIn(c *elesion.Context) {
-	info := model.Minimal{}
-	err := json.NewDecoder(c.Request.Body).Decode(&info)
-	if err != nil {
-		c.Status(http.StatusBadRequest).String("invalid body").Error(err.Error())
-		return
-	}
-
-	user, err := usecase.SignIn(info.Name, info.Password)
-	if err != nil {
-		c.Status(http.StatusNotFound).String(err.Error())
-		return
-	}
-
-	c.Status(http.StatusOK).JSON(user)
 }
 
 func Verify(c *elesion.Context) {

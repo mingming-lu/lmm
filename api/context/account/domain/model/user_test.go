@@ -1,8 +1,8 @@
-package user
+package model
 
 import (
-	"lmm/api/domain/service/sha256"
 	"lmm/api/testing"
+	"lmm/api/utils/sha256"
 )
 
 func TestNew(t *testing.T) {

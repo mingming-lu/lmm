@@ -3,10 +3,10 @@ package category
 import (
 	"encoding/json"
 	"fmt"
+	account "lmm/api/context/account/usecase"
 	"lmm/api/db"
 	model "lmm/api/domain/model/category"
 	usecase "lmm/api/usecase/category"
-	"lmm/api/usecase/user"
 	"net/http"
 	"strconv"
 
@@ -14,7 +14,7 @@ import (
 )
 
 func Register(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -44,7 +44,7 @@ func Update(c *elesion.Context) {
 		return
 	}
 
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -85,7 +85,7 @@ func GetByUser(c *elesion.Context) {
 }
 
 func Delete(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return

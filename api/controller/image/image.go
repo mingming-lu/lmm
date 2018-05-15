@@ -3,9 +3,9 @@ package image
 import (
 	"encoding/json"
 	"io/ioutil"
+	account "lmm/api/context/account/usecase"
 	model "lmm/api/domain/model/image"
 	usecase "lmm/api/usecase/image"
-	"lmm/api/usecase/user"
 	"net/http"
 	"strconv"
 
@@ -13,7 +13,7 @@ import (
 )
 
 func Upload(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -86,7 +86,7 @@ func GetPhotos(c *elesion.Context) {
 }
 
 func PutPhoto(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return
@@ -106,7 +106,7 @@ func PutPhoto(c *elesion.Context) {
 }
 
 func RemovePhoto(c *elesion.Context) {
-	usr, err := user.Verify(c.Request.Header.Get("Authorization"))
+	usr, err := account.Verify(c.Request.Header.Get("Authorization"))
 	if err != nil {
 		c.Status(http.StatusUnauthorized).String("Unauthorized, invalid token").Error(err.Error())
 		return

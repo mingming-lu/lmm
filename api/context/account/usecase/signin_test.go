@@ -1,0 +1,95 @@
+package usecase
+
+import (
+	"lmm/api/context/account/domain/model"
+	"lmm/api/context/account/domain/repository"
+	"lmm/api/testing"
+
+	"github.com/akinaru-lu/errors"
+)
+
+func TestSignIn_Success(t *testing.T) {
+	testing.InitTable("user")
+	tester := testing.NewTester(t)
+	uc := New(repository.New())
+
+	id, err := uc.SignUp("foobar", "1234")
+	tester.NoError(err)
+
+	user, err := uc.SignIn("foobar", "1234")
+	tester.NoError(err)
+	tester.Is(id, user.ID)
+	tester.Is("foobar", user.Name)
+	tester.Isa(&model.User{}, user)
+}
+
+func TestSignIn_InvalidPassword(t *testing.T) {
+	testing.InitTable("user")
+	tester := testing.NewTester(t)
+	uc := New(repository.New())
+
+	_, err := uc.SignUp("foobar", "1234")
+	tester.NoError(err)
+
+	res, err := uc.SignIn("foobar", "5555")
+	tester.Error(err)
+	tester.Nil(res)
+	tester.Is(ErrInvalidUserNameOrPassword, err)
+}
+
+func TestSignIn_NoSuchUser(t *testing.T) {
+	testing.InitTable("user")
+	tester := testing.NewTester(t)
+	uc := New(repository.New())
+
+	res, err := uc.SignIn("foobar", "1234")
+	tester.Error(err)
+	tester.Nil(res)
+	tester.Is(ErrInvalidUserNameOrPassword, err)
+}
+
+func TestSignIn_EmptyUserName(t *testing.T) {
+	tester := testing.NewTester(t)
+	uc := New(repository.New())
+
+	res, err := uc.SignIn("", "1234")
+	tester.Error(err)
+	tester.Nil(res)
+	tester.Is(ErrEmptyUserNameOrPassword, err)
+}
+
+func TestSignIn_EmptyPassword(t *testing.T) {
+	tester := testing.NewTester(t)
+	uc := New(repository.New())
+
+	res, err := uc.SignIn("user", "")
+	tester.Error(err)
+	tester.Nil(res)
+	tester.Is(ErrEmptyUserNameOrPassword, err)
+}
+
+func TestSignIn_EmptyUserNameAndPassword(t *testing.T) {
+	tester := testing.NewTester(t)
+	uc := New(repository.New())
+
+	res, err := uc.SignIn("", "")
+	tester.Error(err)
+	tester.Nil(res)
+	tester.Is(ErrEmptyUserNameOrPassword, err)
+}
+
+func TestingSignin_Exception(t *testing.T) {
+	tester := testing.NewTester(t)
+
+	type Repo struct {
+		repository.Repository
+		testing.Mock
+	}
+
+	repo := new(Repo)
+	repo.On("FindByName").Return(nil, errors.New("DB crashed"))
+	res, err := repo.FindByName("foobar")
+	tester.Error(err)
+	tester.Nil(res)
+	tester.Is("DB crashed", err.Error())
+}

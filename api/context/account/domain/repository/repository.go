@@ -1,9 +1,11 @@
-package user
+package repository
 
 import (
+	"lmm/api/context/account/domain/model"
 	"lmm/api/db"
-	model "lmm/api/domain/model/user"
 	"lmm/api/domain/repository"
+
+	"github.com/akinaru-lu/errors"
 )
 
 type Repository struct {
@@ -34,6 +36,22 @@ func (repo *Repository) Save(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
+// FindByName return a user model determined by name
+func (repo *Repository) FindByName(name string) (*model.User, error) {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.Must(`SELECT id, name, password, guid, token, created_at FROM user WHERE name = ?`)
+	defer stmt.Close()
+
+	user := &model.User{}
+	err := stmt.QueryRow(name).Scan(&user.ID, &user.Name, &user.Password, &user.GUID, &user.Token, &user.CreatedAt)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+	return user, nil
+}
+
 func Add(name, password, guid, token string) (int64, error) {
 	d := db.Default()
 	defer d.Close()
@@ -47,21 +65,6 @@ func Add(name, password, guid, token string) (int64, error) {
 	}
 
 	return res.LastInsertId()
-}
-
-func ByName(name string) (*model.User, error) {
-	d := db.Default()
-	defer d.Close()
-
-	stmt := d.Must("SELECT id, name, password, guid, token, created_at FROM user WHERE name = ?")
-	defer stmt.Close()
-
-	user := model.User{}
-	err := stmt.QueryRow(name).Scan(
-		&user.ID, &user.Name, &user.Password, &user.GUID, &user.Token, &user.CreatedAt,
-	)
-
-	return &user, err
 }
 
 func ByToken(token string) (*model.User, error) {
