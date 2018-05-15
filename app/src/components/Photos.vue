@@ -127,6 +127,7 @@ img {
   border-radius: 2px;
   padding: 8px 32px;
   color: $color_text;
+  background-color: transparent;
   cursor: pointer;
   font-size: 1.12em;
   &:hover {
