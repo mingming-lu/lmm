@@ -4,6 +4,8 @@ import (
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/testing"
+
+	"github.com/akinaru-lu/errors"
 )
 
 func TestSignIn_Success(t *testing.T) {
@@ -74,4 +76,20 @@ func TestSignIn_EmptyUserNameAndPassword(t *testing.T) {
 	tester.Error(err)
 	tester.Nil(res)
 	tester.Is(ErrEmptyUserNameOrPassword, err)
+}
+
+func TestingSignin_Exception(t *testing.T) {
+	tester := testing.NewTester(t)
+
+	type Repo struct {
+		repository.Repository
+		testing.Mock
+	}
+
+	repo := new(Repo)
+	repo.On("FindByName").Return(nil, errors.New("DB crashed"))
+	res, err := repo.FindByName("foobar")
+	tester.Error(err)
+	tester.Nil(res)
+	tester.Is("DB crashed", err.Error())
 }
