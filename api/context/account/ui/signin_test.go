@@ -76,6 +76,18 @@ func TestPostV1SignIn_404_InvalidPassword(t *testing.T) {
 	tester.Is(usecase.ErrInvalidUserNameOrPassword.Error()+"\n", res.Body())
 }
 
+func TestPostV1SignIn_404_InvalidUserNameAndPassword(t *testing.T) {
+	testing.InitTable("user")
+	testingService.NewUser()
+
+	requestBody := testing.StructToRequestBody(Auth{Name: "123", Password: "123"})
+	res := postSignIn(requestBody)
+
+	tester := testing.NewTester(t)
+	tester.Is(http.StatusNotFound, res.StatusCode())
+	tester.Is(usecase.ErrInvalidUserNameOrPassword.Error()+"\n", res.Body())
+}
+
 func postSignIn(requestBody io.Reader) *testing.Response {
 	res := testing.NewResponse()
 
