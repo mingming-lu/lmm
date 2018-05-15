@@ -4,7 +4,6 @@ import (
 	"lmm/api/context/account/domain/model"
 	"lmm/api/db"
 	"lmm/api/utils/uuid"
-	"time"
 )
 
 func NewUser() *model.User {
@@ -14,18 +13,23 @@ func NewUser() *model.User {
 	stmt1 := db.Must(`INSERT INTO user (name, password, guid, token, created_at) VALUES(?, ?, ?, ?, ?)`)
 	defer stmt1.Close()
 
-	result, err := stmt1.Exec(uuid.New()[:32], uuid.New(), uuid.New(), uuid.New(), time.Now().UTC())
+	name := uuid.New()[:32]
+	password := uuid.New()
+	user := model.New(name, password)
+
+	result, err := stmt1.Exec(user.Name, user.Password, user.GUID, user.Token, user.CreatedAt)
 	if err != nil {
 		panic(err)
 	}
 	userID, err := result.LastInsertId()
 
-	stmt2 := db.Must(`SELECT id, name, password, guid, token, created_at FROM user WHERE id = ?`)
+	stmt2 := db.Must(`SELECT id, name, guid, token, created_at FROM user WHERE id = ?`)
 	defer stmt2.Close()
 
-	user := model.User{}
-	if err := stmt2.QueryRow(userID).Scan(&user.ID, &user.Name, &user.Password, &user.GUID, &user.Token, &user.CreatedAt); err != nil {
+	user = &model.User{}
+	if err := stmt2.QueryRow(userID).Scan(&user.ID, &user.Name, &user.GUID, &user.Token, &user.CreatedAt); err != nil {
 		panic(err)
 	}
-	return &user
+	user.Password = password
+	return user
 }
