@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"io"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/context/account/usecase"
@@ -40,4 +41,47 @@ func TestPostV1Signup_Duplicate(t *testing.T) {
 
 	tester.Is(http.StatusBadRequest, res.StatusCode())
 	tester.Is(usecase.ErrDuplicateUserName.Error()+"\n", res.Body())
+}
+
+func TestPostV1SignUp_400_EmptyUserName(t *testing.T) {
+	testing.InitTable("user")
+
+	requestBody := testing.StructToRequestBody(Auth{Name: "", Password: "1234"})
+	res := postSignUp(requestBody)
+
+	tester := testing.NewTester(t)
+	tester.Is(http.StatusBadRequest, res.StatusCode())
+	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+}
+
+func TestPostV1SignUp_400_EmptyPassword(t *testing.T) {
+	testing.InitTable("user")
+
+	requestBody := testing.StructToRequestBody(Auth{Name: "foobar", Password: ""})
+	res := postSignUp(requestBody)
+
+	tester := testing.NewTester(t)
+	tester.Is(http.StatusBadRequest, res.StatusCode())
+	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+}
+
+func TestPostV1SignUp_400_EmptyUserNameAndPassword(t *testing.T) {
+	testing.InitTable("user")
+
+	requestBody := testing.StructToRequestBody(Auth{Name: "", Password: ""})
+	res := postSignUp(requestBody)
+
+	tester := testing.NewTester(t)
+	tester.Is(http.StatusBadRequest, res.StatusCode())
+	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+}
+
+func postSignUp(requestBody io.Reader) *testing.Response {
+	res := testing.NewResponse()
+
+	router := testing.NewRouter()
+	router.POST("/v1/signup", SignIn)
+	router.ServeHTTP(res, testing.POST("/v1/signup", requestBody))
+
+	return res
 }
