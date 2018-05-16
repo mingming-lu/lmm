@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrPatternDuplicate = regexp.MustCompile(`Error 1062: Duplicate entry '(\w+)' for key '(\w+)'`)
+	ErrPatternDuplicate = regexp.MustCompile(`Error 1062: Duplicate entry '([-\w]+)' for key '(\w+)'`)
 )
 
 type Repository struct {
