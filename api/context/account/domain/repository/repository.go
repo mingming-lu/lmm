@@ -10,7 +10,7 @@ import (
 
 type Repository interface {
 	repository.Repository
-	Save(*model.User) (*model.User, error)
+	Put(*model.User) (*model.User, error)
 	FindByName(string) (*model.User, error)
 }
 
@@ -22,8 +22,8 @@ func New() Repository {
 	return new(repo)
 }
 
-// Save return a User model with generated id
-func (repo *repo) Save(user *model.User) (*model.User, error) {
+// Put puts a new user into repository and return a User model with generated id
+func (repo *repo) Put(user *model.User) (*model.User, error) {
 	db := repo.DB()
 	defer db.Close()
 

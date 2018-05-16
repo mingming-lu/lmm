@@ -2,8 +2,7 @@ package ui
 
 import (
 	"io"
-	"lmm/api/context/account/domain/model"
-	"lmm/api/context/account/domain/repository"
+	testingService "lmm/api/context/account/domain/service/testing"
 	"lmm/api/context/account/usecase"
 	"lmm/api/testing"
 	"net/http"
@@ -32,11 +31,10 @@ func TestPostV1Signup_Duplicate(t *testing.T) {
 	router := testing.NewRouter()
 	router.POST("/v1/signup", SignUp)
 
-	model := model.New("foobar", "1234")
-	repository.New().Save(model)
+	user := testingService.NewUser()
 
 	res := testing.NewResponse()
-	auth := usecase.Auth{Name: "foobar", Password: "1234"}
+	auth := usecase.Auth{Name: user.Name, Password: user.Password}
 	router.ServeHTTP(res, testing.POST("/v1/signup", testing.StructToRequestBody(auth)))
 
 	tester.Is(http.StatusBadRequest, res.StatusCode())

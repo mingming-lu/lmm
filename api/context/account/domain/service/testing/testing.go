@@ -50,6 +50,6 @@ func (repo *MockedRepo) FindByName(name string) (*model.User, error) {
 	return nil, errors.New("DB crashed")
 }
 
-func (repo *MockedRepo) Save(*model.User) (*model.User, error) {
+func (repo *MockedRepo) Put(*model.User) (*model.User, error) {
 	return nil, errors.New("Cannot save user")
 }

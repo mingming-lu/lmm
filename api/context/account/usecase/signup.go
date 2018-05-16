@@ -11,7 +11,7 @@ func (uc *Usecase) SignUp(name, password string) (uint64, error) {
 	}
 
 	m := model.New(name, password)
-	user, err := uc.repo.Save(m)
+	user, err := uc.repo.Put(m)
 	if err != nil {
 		key, _, ok := repository.CheckErrorDuplicate(err.Error())
 		if !ok {
