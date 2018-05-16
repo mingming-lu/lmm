@@ -18,8 +18,8 @@ import (
 func main() {
 	router := elesion.Default("[api]")
 
-	// user
-	router.POST("/v1/signup", user.SignUp)
+	// account
+	router.POST("/v1/signup", account.SignUp)
 	router.POST("/v1/signin", account.SignIn)
 	router.GET("/v1/verify", user.Verify)
 

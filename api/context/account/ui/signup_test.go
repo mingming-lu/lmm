@@ -1,4 +1,4 @@
-package user
+package ui
 
 import (
 	"lmm/api/context/account/domain/model"
