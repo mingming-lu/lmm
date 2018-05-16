@@ -8,16 +8,22 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-type Repository struct {
-	*repository.Repository
+type Repository interface {
+	repository.Repository
+	Save(*model.User) (*model.User, error)
+	FindByName(string) (*model.User, error)
 }
 
-func New() *Repository {
-	return &Repository{Repository: repository.New()}
+type repo struct {
+	repository.Default
+}
+
+func New() Repository {
+	return new(repo)
 }
 
 // Save return a User model with generated id
-func (repo *Repository) Save(user *model.User) (*model.User, error) {
+func (repo *repo) Save(user *model.User) (*model.User, error) {
 	db := repo.DB()
 	defer db.Close()
 
@@ -37,7 +43,7 @@ func (repo *Repository) Save(user *model.User) (*model.User, error) {
 }
 
 // FindByName return a user model determined by name
-func (repo *Repository) FindByName(name string) (*model.User, error) {
+func (repo *repo) FindByName(name string) (*model.User, error) {
 	db := repo.DB()
 	defer db.Close()
 
