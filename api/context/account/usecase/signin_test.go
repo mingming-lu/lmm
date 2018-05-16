@@ -12,13 +12,12 @@ func TestSignIn_Success(t *testing.T) {
 	tester := testing.NewTester(t)
 	uc := New(repository.New())
 
-	id, err := uc.SignUp("foobar", "1234")
-	tester.NoError(err)
+	m := testingService.NewUser()
+	user, err := uc.SignIn(m.Name, m.Password)
 
-	user, err := uc.SignIn("foobar", "1234")
 	tester.NoError(err)
-	tester.Is(id, user.ID)
-	tester.Is("foobar", user.Name)
+	tester.Is(m.ID, user.ID)
+	tester.Is(m.Name, user.Name)
 	tester.Isa(&model.User{}, user)
 }
 
@@ -27,12 +26,11 @@ func TestSignIn_InvalidPassword(t *testing.T) {
 	tester := testing.NewTester(t)
 	uc := New(repository.New())
 
-	_, err := uc.SignUp("foobar", "1234")
-	tester.NoError(err)
+	m := testingService.NewUser()
+	user, err := uc.SignIn(m.Name, "1234")
 
-	res, err := uc.SignIn("foobar", "5555")
 	tester.Error(err)
-	tester.Nil(res)
+	tester.Nil(user)
 	tester.Is(ErrInvalidUserNameOrPassword, err)
 }
 
