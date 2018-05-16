@@ -37,8 +37,8 @@ test: test-api
 
 .PHONY: test-api
 test-api:
-	go test -v lmm/api/controller/user
 	go test -v lmm/api/context/account/domain/model
 	go test -v lmm/api/context/account/domain/repository
 	go test -v lmm/api/context/account/usecase
+	go test -v lmm/api/context/account/ui
 	go test -v lmm/api/testing
