@@ -1,0 +1,25 @@
+get:
+  tags:
+    - verify
+  parameters:
+    - in: header
+      name: Authorization
+      description: Basic {token}
+      required: true
+      schema:
+        type: string
+
+  responses:
+    200:
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/user.yaml
+
+    400:
+      allOf:
+        - description: token不正确
+        - $ref: ../components/responses/400.yaml
+
+    500:
+      $ref: ../components/responses/500.yaml

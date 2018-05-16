@@ -8,6 +8,8 @@ paths:
     $ref: ./paths/v1_signup.yaml
   /v1/signin:
     $ref: ./paths/v1_signin.yaml
+  /v1/verify:
+    $ref: ./paths/v1_verify.yaml
 
 tags:
   - name: signup
