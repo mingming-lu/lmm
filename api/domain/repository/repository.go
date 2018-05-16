@@ -6,18 +6,21 @@ import (
 )
 
 var (
-	ErrPatternDuplicate = regexp.MustCompile(`Error 1062: Duplicate entry '(\w+)' for key '(\w+)'`)
+	ErrPatternDuplicate = regexp.MustCompile(`Error 1062: Duplicate entry '([-\w]+)' for key '(\w+)'`)
 )
 
-type Repository struct {
-	DB func() *db.DB
+type Repository interface {
+	DB() *db.DB
 }
 
-func New() *Repository {
-	return &Repository{DB: func() *db.DB { return db.Default() }}
+type Default struct {
 }
 
-func (repo *Repository) CheckErrorDuplicate(errMsg string) (key string, entry string, ok bool) {
+func (repo *Default) DB() *db.DB {
+	return db.Default()
+}
+
+func CheckErrorDuplicate(errMsg string) (key string, entry string, ok bool) {
 	matched := ErrPatternDuplicate.FindStringSubmatch(errMsg)
 	if len(matched) == 3 {
 		key = matched[2]

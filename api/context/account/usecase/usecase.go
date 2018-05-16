@@ -18,9 +18,9 @@ type Auth struct {
 }
 
 type Usecase struct {
-	repo *repository.Repository
+	repo repository.Repository
 }
 
-func New(repo *repository.Repository) *Usecase {
+func New(repo repository.Repository) *Usecase {
 	return &Usecase{repo: repo}
 }
