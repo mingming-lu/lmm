@@ -22,5 +22,5 @@ type Usecase struct {
 }
 
 func New(repo repository.Repository) *Usecase {
-	return &Usecase{repo: repository.New()}
+	return &Usecase{repo: repo}
 }
