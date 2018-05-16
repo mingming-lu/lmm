@@ -55,3 +55,13 @@ func TestSignUp_EmptyUserNameAndPassword(t *testing.T) {
 	tester.Is(uint64(id), id)
 	tester.Is(ErrEmptyUserNameOrPassword, err)
 }
+
+func TestSignUp_Exception(t *testing.T) {
+	tester := testing.NewTester(t)
+
+	id, err := New(testingService.NewMockedRepo()).SignUp("foobar", "1234")
+
+	tester.Error(err)
+	tester.Is(uint64(0), id)
+	tester.Is("Cannot save user", err.Error())
+}

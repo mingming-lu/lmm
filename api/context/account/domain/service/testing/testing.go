@@ -1,8 +1,11 @@
 package testing
 
 import (
+	"errors"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/db"
+	"lmm/api/domain/repository"
+	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 )
 
@@ -32,4 +35,21 @@ func NewUser() *model.User {
 	}
 	user.Password = password
 	return user
+}
+
+type MockedRepo struct {
+	repository.Repository
+	testing.Mock
+}
+
+func NewMockedRepo() *MockedRepo {
+	return &MockedRepo{Repository: &repository.Default{}}
+}
+
+func (repo *MockedRepo) FindByName(name string) (*model.User, error) {
+	return nil, errors.New("DB crashed")
+}
+
+func (repo *MockedRepo) Save(*model.User) (*model.User, error) {
+	return nil, errors.New("Cannot save user")
 }
