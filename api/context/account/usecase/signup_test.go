@@ -28,3 +28,30 @@ func TestSignUp_Duplicate(t *testing.T) {
 	tester.Is(ErrDuplicateUserName.Error(), err.Error())
 	tester.Is(uint64(0), id)
 }
+
+func TestSignUp_EmptyUserName(t *testing.T) {
+	tester := testing.NewTester(t)
+
+	id, err := New(repository.New()).SignUp("", "1234")
+	tester.Error(err)
+	tester.Is(uint64(id), id)
+	tester.Is(ErrEmptyUserNameOrPassword, err)
+}
+
+func TestSignUp_EmptyPassword(t *testing.T) {
+	tester := testing.NewTester(t)
+
+	id, err := New(repository.New()).SignUp("user", "")
+	tester.Error(err)
+	tester.Is(uint64(id), id)
+	tester.Is(ErrEmptyUserNameOrPassword, err)
+}
+
+func TestSignUp_EmptyUserNameAndPassword(t *testing.T) {
+	tester := testing.NewTester(t)
+
+	id, err := New(repository.New()).SignUp("", "")
+	tester.Error(err)
+	tester.Is(uint64(id), id)
+	tester.Is(ErrEmptyUserNameOrPassword, err)
+}
