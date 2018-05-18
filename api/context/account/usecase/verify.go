@@ -3,20 +3,22 @@ package usecase
 import (
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
-	"lmm/api/utils/base64"
-	"lmm/api/utils/token"
+	"lmm/api/context/account/domain/service"
+	"log"
 )
 
-func Verify(encodedToken string) (*model.User, error) {
-	encoded, err := base64.Decode(encodedToken)
+func VerifyToken(encodedToken string) (user *model.User, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("%v", r)
+			err = ErrInvalidToken
+		}
+	}()
+	token, err := service.DecodeToken(encodedToken)
 	if err != nil {
 		return nil, err
 	}
 
-	token, err := token.Decode(encoded)
-	if err != nil {
-		return nil, err
-	}
-
-	return repository.ByToken(token)
+	user, err = repository.New().FindByToken(token)
+	return user, err
 }
