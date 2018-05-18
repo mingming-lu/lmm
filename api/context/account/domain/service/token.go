@@ -16,16 +16,15 @@ import (
 )
 
 var (
-	key = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
-	// Expire defines the expiration date of token, 1 day by default
-	Expire = int64(86400)
-	// ErrExpired should be return if token is expired
-	ErrExpired = errors.New("time expired")
+	key                   = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
+	TokenExpire           = int64(86400)
+	ErrInvalidTokenFormat = errors.New("Invalid token format")
+	ErrTokenExpired       = errors.New("Token expired")
 )
 
-// EncodeToken convert a token string into base64({token}:{timestamp}) format
+// EncodeToken convert a token string into base64({timestamp}:{token}) format
 func EncodeToken(targetToken string) string {
-	expire := time.Now().Unix() + Expire
+	expire := time.Now().Unix() + TokenExpire
 
 	targetToken = fmt.Sprintf("%v:%s", expire, targetToken)
 	b := []byte(targetToken)
@@ -47,12 +46,12 @@ func EncodeToken(targetToken string) string {
 	return base64.StdEncoding.EncodeToString(encoded)
 }
 
-// DecodeToken parse a token string from base64({token}:{timestamp}) format to raw token
+// DecodeToken parse a token string from base64({timestamp}:{token}) format to raw token
 // panic if failed to parse base64 encoded string
 func DecodeToken(targetToken string) (string, error) {
 	encodedToken, err := base64.StdEncoding.DecodeString(targetToken)
 	if err != nil {
-		panic("Failed to parse base64 encoded token: " + err.Error())
+		return "", ErrInvalidTokenFormat
 	}
 
 	block, err := aes.NewCipher(key)
@@ -61,7 +60,7 @@ func DecodeToken(targetToken string) (string, error) {
 	}
 
 	if len(encodedToken) < aes.BlockSize {
-		panic(fmt.Sprintf("Token size error: %d", len(encodedToken)))
+		return "", ErrInvalidTokenFormat
 	}
 
 	iv := encodedToken[:aes.BlockSize]
@@ -74,16 +73,16 @@ func DecodeToken(targetToken string) (string, error) {
 
 	params := strings.Split(string(decodedToken), ":")
 	if len(params) != 2 {
-		panic("Invald token format: " + string(decodedToken))
+		return "", ErrInvalidTokenFormat
 	}
 
 	seconds, err := strconv.ParseInt(params[0], 10, 64)
 	if err != nil {
-		panic("Invalid timestamp format: " + params[0])
+		return "", ErrInvalidTokenFormat
 	}
 
 	if time.Now().Unix() > seconds {
-		return "", ErrExpired
+		return "", ErrTokenExpired
 	}
 	return params[1], nil
 }
