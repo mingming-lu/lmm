@@ -52,10 +52,7 @@ func EncodeToken(targetToken string) string {
 func DecodeToken(targetToken string) (string, error) {
 	encodedToken, err := base64.StdEncoding.DecodeString(targetToken)
 	if err != nil {
-		panic(err)
-	}
-	if err != nil {
-		return "", errors.Wrap(err, "input string is not base64 encoded")
+		panic("Failed to parse base64 encoded token: " + err.Error())
 	}
 
 	block, err := aes.NewCipher(key)
@@ -64,7 +61,7 @@ func DecodeToken(targetToken string) (string, error) {
 	}
 
 	if len(encodedToken) < aes.BlockSize {
-		return "", errors.New("the length of input string should be larger than or equal to 16")
+		panic(fmt.Sprintf("Token size error: %d", len(encodedToken)))
 	}
 
 	iv := encodedToken[:aes.BlockSize]
@@ -77,12 +74,14 @@ func DecodeToken(targetToken string) (string, error) {
 
 	params := strings.Split(string(decodedToken), ":")
 	if len(params) != 2 {
-		return "", errors.New("access token format invalid")
+		panic("Invald token format: " + string(decodedToken))
 	}
+
 	seconds, err := strconv.ParseInt(params[0], 10, 64)
 	if err != nil {
-		return "", errors.Wrap(err, "invalid timestamp: "+params[0])
+		panic("Invalid timestamp format: " + params[0])
 	}
+
 	if time.Now().Unix() > seconds {
 		return "", ErrExpired
 	}
