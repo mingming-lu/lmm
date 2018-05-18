@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/akinaru-lu/errors"
@@ -43,4 +45,46 @@ func EncodeToken(targetToken string) string {
 	stream.XORKeyStream(encoded[aes.BlockSize:], b)
 
 	return base64.StdEncoding.EncodeToString(encoded)
+}
+
+// DecodeToken parse a token string from base64({token}:{timestamp}) format to raw token
+// panic if failed to parse base64 encoded string
+func DecodeToken(targetToken string) (string, error) {
+	encodedToken, err := base64.StdEncoding.DecodeString(targetToken)
+	if err != nil {
+		panic(err)
+	}
+	if err != nil {
+		return "", errors.Wrap(err, "input string is not base64 encoded")
+	}
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	if len(encodedToken) < aes.BlockSize {
+		return "", errors.New("the length of input string should be larger than or equal to 16")
+	}
+
+	iv := encodedToken[:aes.BlockSize]
+	encodedToken = encodedToken[aes.BlockSize:]
+	decodedToken := make([]byte, len(encodedToken))
+
+	stream := cipher.NewCFBDecrypter(block, iv)
+
+	stream.XORKeyStream(decodedToken, encodedToken)
+
+	params := strings.Split(string(decodedToken), ":")
+	if len(params) != 2 {
+		return "", errors.New("access token format invalid")
+	}
+	seconds, err := strconv.ParseInt(params[0], 10, 64)
+	if err != nil {
+		return "", errors.Wrap(err, "invalid timestamp: "+params[0])
+	}
+	if time.Now().Unix() > seconds {
+		return "", ErrExpired
+	}
+	return params[1], nil
 }
