@@ -18,6 +18,7 @@ import (
 var (
 	key                   = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
 	TokenExpire           = int64(86400)
+	ErrInvalidTimestamp   = errors.New("Invalid timestamp")
 	ErrInvalidTokenFormat = errors.New("Invalid token format")
 	ErrInvalidTokenLength = errors.New("Invalid token length")
 	ErrTokenExpired       = errors.New("Token expired")
@@ -80,7 +81,7 @@ func DecodeToken(targetToken string) (string, error) {
 
 	seconds, err := strconv.ParseInt(params[0], 10, 64)
 	if err != nil {
-		return "", ErrInvalidTokenFormat
+		return "", ErrInvalidTimestamp
 	}
 
 	if time.Now().Unix() > seconds {
