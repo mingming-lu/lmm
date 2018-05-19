@@ -3,7 +3,7 @@ package category
 import (
 	"encoding/json"
 	"fmt"
-	account "lmm/api/context/account/usecase"
+	account "lmm/api/context/account/appservice"
 	"lmm/api/db"
 	model "lmm/api/domain/model/category"
 	usecase "lmm/api/usecase/category"

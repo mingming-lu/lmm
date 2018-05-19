@@ -1,8 +1,8 @@
 package auth
 
 import (
+	accountService "lmm/api/context/account/appservice"
 	accountRepository "lmm/api/context/account/domain/repository"
-	accountService "lmm/api/context/account/usecase"
 	"net/http"
 	"regexp"
 
