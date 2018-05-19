@@ -2,6 +2,7 @@ package repository
 
 import (
 	"lmm/api/context/account/domain/model"
+	"lmm/api/db"
 	"lmm/api/domain/repository"
 
 	"github.com/akinaru-lu/errors"
@@ -60,6 +61,21 @@ func (repo *repo) FindByName(name string) (*model.User, error) {
 
 func (repo *repo) FindByToken(token string) (*model.User, error) {
 	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.Must(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
+	defer stmt.Close()
+
+	user := model.User{}
+	err := stmt.QueryRow(token).Scan(&user.ID, &user.Name, &user.Password, &user.GUID, &user.Token, &user.CreatedAt)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+	return &user, nil
+}
+
+func FindByToken(token string) (*model.User, error) {
+	db := db.Default()
 	defer db.Close()
 
 	stmt := db.Must(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
