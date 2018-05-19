@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/base64"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 )
@@ -24,5 +25,15 @@ func TestDecodeToken_NotBase64Encoded(t *testing.T) {
 
 	tester.Error(err)
 	tester.Is(ErrNotBase64Encoded, err)
+	tester.Is("", token)
+}
+
+func TestDecodeToken_InvalidTokenLength(t *testing.T) {
+	tester := testing.NewTester(t)
+
+	token, err := DecodeToken(base64.StdEncoding.EncodeToString([]byte("invalid")))
+
+	tester.Error(err)
+	tester.Is(ErrInvalidTokenLength, err)
 	tester.Is("", token)
 }

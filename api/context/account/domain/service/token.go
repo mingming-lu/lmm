@@ -19,6 +19,7 @@ var (
 	key                   = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
 	TokenExpire           = int64(86400)
 	ErrInvalidTokenFormat = errors.New("Invalid token format")
+	ErrInvalidTokenLength = errors.New("Invalid token length")
 	ErrTokenExpired       = errors.New("Token expired")
 	ErrNotBase64Encoded   = errors.New("Not base64 encoded")
 )
@@ -57,11 +58,11 @@ func DecodeToken(targetToken string) (string, error) {
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return "", err
+		panic(err)
 	}
 
 	if len(encodedToken) < aes.BlockSize {
-		return "", ErrInvalidTokenFormat
+		return "", ErrInvalidTokenLength
 	}
 
 	iv := encodedToken[:aes.BlockSize]
