@@ -24,7 +24,8 @@ func BearerAuth(handler elesion.Handler) elesion.Handler {
 		token := mathed[1]
 		user, err := accountService.New(accountRepository.New()).VerifyToken(token)
 		if err != nil {
-			c.Status(http.StatusNotFound).String(http.StatusText(http.StatusNotFound))
+			c.Status(http.StatusUnauthorized).String(http.StatusText(http.StatusUnauthorized))
+			return
 		}
 		c.Fields().Set("user", user)
 		handler(c)
