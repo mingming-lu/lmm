@@ -20,6 +20,7 @@ var (
 	TokenExpire           = int64(86400)
 	ErrInvalidTokenFormat = errors.New("Invalid token format")
 	ErrTokenExpired       = errors.New("Token expired")
+	ErrNotBase64Encoded   = errors.New("Not base64 encoded")
 )
 
 // EncodeToken convert a token string into base64({timestamp}:{token}) format
@@ -51,7 +52,7 @@ func EncodeToken(targetToken string) string {
 func DecodeToken(targetToken string) (string, error) {
 	encodedToken, err := base64.StdEncoding.DecodeString(targetToken)
 	if err != nil {
-		return "", ErrInvalidTokenFormat
+		return "", ErrNotBase64Encoded
 	}
 
 	block, err := aes.NewCipher(key)
