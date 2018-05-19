@@ -2,8 +2,8 @@ package ui
 
 import (
 	"io"
+	"lmm/api/context/account/appservice"
 	testingService "lmm/api/context/account/domain/service/testing"
-	"lmm/api/context/account/usecase"
 	"lmm/api/testing"
 	"net/http"
 )
@@ -15,7 +15,7 @@ func TestPostV1Signup(t *testing.T) {
 	router := testing.NewRouter()
 	router.POST("/v1/signup", SignUp)
 
-	reqeustBody := testing.StructToRequestBody(usecase.Auth{Name: "foobar", Password: "1234"})
+	reqeustBody := testing.StructToRequestBody(appservice.Auth{Name: "foobar", Password: "1234"})
 
 	res := testing.NewResponse()
 	router.ServeHTTP(res, testing.POST("/v1/signup", reqeustBody))
@@ -34,11 +34,11 @@ func TestPostV1Signup_Duplicate(t *testing.T) {
 	user := testingService.NewUser()
 
 	res := testing.NewResponse()
-	auth := usecase.Auth{Name: user.Name, Password: user.Password}
+	auth := appservice.Auth{Name: user.Name, Password: user.Password}
 	router.ServeHTTP(res, testing.POST("/v1/signup", testing.StructToRequestBody(auth)))
 
 	tester.Is(http.StatusBadRequest, res.StatusCode())
-	tester.Is(usecase.ErrDuplicateUserName.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrDuplicateUserName.Error()+"\n", res.Body())
 }
 
 func TestPostV1SignUp_400_EmptyUserName(t *testing.T) {
@@ -49,7 +49,7 @@ func TestPostV1SignUp_400_EmptyUserName(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusBadRequest, res.StatusCode())
-	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func TestPostV1SignUp_400_EmptyPassword(t *testing.T) {
@@ -60,7 +60,7 @@ func TestPostV1SignUp_400_EmptyPassword(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusBadRequest, res.StatusCode())
-	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func TestPostV1SignUp_400_EmptyUserNameAndPassword(t *testing.T) {
@@ -71,7 +71,7 @@ func TestPostV1SignUp_400_EmptyUserNameAndPassword(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusBadRequest, res.StatusCode())
-	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func postSignUp(requestBody io.Reader) *testing.Response {
