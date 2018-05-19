@@ -53,3 +53,7 @@ func (repo *MockedRepo) FindByName(name string) (*model.User, error) {
 func (repo *MockedRepo) Put(*model.User) (*model.User, error) {
 	return nil, errors.New("Cannot save user")
 }
+
+func (repo *MockedRepo) FindByToken(token string) (*model.User, error) {
+	return nil, errors.New("No such user")
+}

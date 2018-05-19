@@ -4,6 +4,4 @@ properties:
     type: integer
   name:
     type: string
-  token:
-    type: string
   

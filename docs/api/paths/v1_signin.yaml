@@ -18,7 +18,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/user.yaml
+            $ref: ../components/schemas/user_with_token.yaml
 
     400:
       allOf:

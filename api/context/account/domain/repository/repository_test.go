@@ -55,3 +55,28 @@ func TestFindByName_NotFound(t *testing.T) {
 	tester.Nil(found)
 	tester.Is(db.ErrNoRows, err)
 }
+
+func TestFindByToken_Success(t *testing.T) {
+	testing.InitTable("user")
+	tester := testing.NewTester(t)
+
+	user := testingService.NewUser()
+	repo := New()
+
+	found, err := repo.FindByToken(user.Token)
+	tester.NoError(err)
+	tester.Isa(&model.User{}, found)
+	tester.Is(user.Name, found.Name)
+}
+
+func TestFindByToken_NotFound(t *testing.T) {
+	testing.InitTable("user")
+	tester := testing.NewTester(t)
+
+	repo := New()
+
+	found, err := repo.FindByToken("1234")
+	tester.Error(err)
+	tester.Is(db.ErrNoRows, err)
+	tester.Nil(found)
+}

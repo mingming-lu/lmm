@@ -25,7 +25,7 @@ export default {
     verify () {
       axios.get('https://api.lmm.im/v1/verify', {
         headers: {
-          'Authorization': localStorage.getItem('token')
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         this.username = localStorage.getItem('username')

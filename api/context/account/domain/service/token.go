@@ -8,22 +8,23 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/akinaru-lu/errors"
 )
 
 var (
-	key = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
-	// Expire defines the expiration date of token, 1 day by default
-	Expire = int64(86400)
-	// ErrExpired should be return if token is expired
-	ErrExpired = errors.New("time expired")
+	key                   = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
+	TokenExpire           = int64(86400)
+	ErrInvalidTokenFormat = errors.New("Invalid token format")
+	ErrTokenExpired       = errors.New("Token expired")
 )
 
-// EncodeToken convert a token string into base64({token}:{timestamp}) format
+// EncodeToken convert a token string into base64({timestamp}:{token}) format
 func EncodeToken(targetToken string) string {
-	expire := time.Now().Unix() + Expire
+	expire := time.Now().Unix() + TokenExpire
 
 	targetToken = fmt.Sprintf("%v:%s", expire, targetToken)
 	b := []byte(targetToken)
@@ -43,4 +44,45 @@ func EncodeToken(targetToken string) string {
 	stream.XORKeyStream(encoded[aes.BlockSize:], b)
 
 	return base64.StdEncoding.EncodeToString(encoded)
+}
+
+// DecodeToken parse a token string from base64({timestamp}:{token}) format to raw token
+// panic if failed to parse base64 encoded string
+func DecodeToken(targetToken string) (string, error) {
+	encodedToken, err := base64.StdEncoding.DecodeString(targetToken)
+	if err != nil {
+		return "", ErrInvalidTokenFormat
+	}
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	if len(encodedToken) < aes.BlockSize {
+		return "", ErrInvalidTokenFormat
+	}
+
+	iv := encodedToken[:aes.BlockSize]
+	encodedToken = encodedToken[aes.BlockSize:]
+	decodedToken := make([]byte, len(encodedToken))
+
+	stream := cipher.NewCFBDecrypter(block, iv)
+
+	stream.XORKeyStream(decodedToken, encodedToken)
+
+	params := strings.Split(string(decodedToken), ":")
+	if len(params) != 2 {
+		return "", ErrInvalidTokenFormat
+	}
+
+	seconds, err := strconv.ParseInt(params[0], 10, 64)
+	if err != nil {
+		return "", ErrInvalidTokenFormat
+	}
+
+	if time.Now().Unix() > seconds {
+		return "", ErrTokenExpired
+	}
+	return params[1], nil
 }

@@ -1,0 +1,7 @@
+allOf:
+  - $ref: './user.yaml'
+
+  - type: object
+    properties:
+      token:
+        type: string

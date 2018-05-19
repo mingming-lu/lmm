@@ -4,15 +4,14 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/akinaru-lu/elesion"
-
+	account "lmm/api/context/account/ui"
 	"lmm/api/controller/blog"
 	"lmm/api/controller/category"
 	"lmm/api/controller/image"
 	"lmm/api/controller/tag"
-	"lmm/api/controller/user"
+	"lmm/api/usecase/auth"
 
-	account "lmm/api/context/account/ui"
+	"github.com/akinaru-lu/elesion"
 )
 
 func main() {
@@ -21,7 +20,7 @@ func main() {
 	// account
 	router.POST("/v1/signup", account.SignUp)
 	router.POST("/v1/signin", account.SignIn)
-	router.GET("/v1/verify", user.Verify)
+	router.GET("/v1/verify", auth.BearerAuth(account.Verify))
 
 	// blog
 	router.GET("/v1/blog/:blog", blog.Get)
