@@ -10,3 +10,8 @@ type SignInResponse struct {
 	Name  string `json:"name"`
 	Token string `json:"token"`
 }
+
+type VerifyResponse struct {
+	ID   uint64 `json:"id"`
+	Name string `json:"name"`
+}
