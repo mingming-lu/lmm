@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	account "lmm/api/context/account/usecase"
+	account "lmm/api/context/account/appservice"
 	"lmm/api/db"
 	model "lmm/api/domain/model/blog"
 	categoryModel "lmm/api/domain/model/category"

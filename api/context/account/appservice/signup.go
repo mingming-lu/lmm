@@ -1,4 +1,4 @@
-package usecase
+package appservice
 
 import (
 	"lmm/api/context/account/domain/model"
@@ -10,7 +10,7 @@ func (uc *Usecase) SignUp(name, password string) (uint64, error) {
 		return 0, ErrEmptyUserNameOrPassword
 	}
 
-	m := model.New(name, password)
+	m := model.NewUser(name, password)
 	user, err := uc.repo.Put(m)
 	if err != nil {
 		key, _, ok := repository.CheckErrorDuplicate(err.Error())

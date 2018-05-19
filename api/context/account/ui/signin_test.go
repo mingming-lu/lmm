@@ -2,8 +2,8 @@ package ui
 
 import (
 	"io"
+	"lmm/api/context/account/appservice"
 	testingService "lmm/api/context/account/domain/service/testing"
-	"lmm/api/context/account/usecase"
 	"lmm/api/testing"
 	"net/http"
 	"strings"
@@ -27,7 +27,7 @@ func TestPostV1SignIn_400_EmptyUserName(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusBadRequest, res.StatusCode())
-	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func TestPostV1SignIn_400_EmptyPassword(t *testing.T) {
@@ -38,7 +38,7 @@ func TestPostV1SignIn_400_EmptyPassword(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusBadRequest, res.StatusCode())
-	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func TestPostV1SignIn_400_EmptyUserNameAndPassword(t *testing.T) {
@@ -49,7 +49,7 @@ func TestPostV1SignIn_400_EmptyUserNameAndPassword(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusBadRequest, res.StatusCode())
-	tester.Is(usecase.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrEmptyUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func TestPostV1SignIn_404_InvalidUserName(t *testing.T) {
@@ -61,7 +61,7 @@ func TestPostV1SignIn_404_InvalidUserName(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusNotFound, res.StatusCode())
-	tester.Is(usecase.ErrInvalidUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrInvalidUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func TestPostV1SignIn_404_InvalidPassword(t *testing.T) {
@@ -73,7 +73,7 @@ func TestPostV1SignIn_404_InvalidPassword(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusNotFound, res.StatusCode())
-	tester.Is(usecase.ErrInvalidUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrInvalidUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func TestPostV1SignIn_404_InvalidUserNameAndPassword(t *testing.T) {
@@ -85,7 +85,7 @@ func TestPostV1SignIn_404_InvalidUserNameAndPassword(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusNotFound, res.StatusCode())
-	tester.Is(usecase.ErrInvalidUserNameOrPassword.Error()+"\n", res.Body())
+	tester.Is(appservice.ErrInvalidUserNameOrPassword.Error()+"\n", res.Body())
 }
 
 func postSignIn(requestBody io.Reader) *testing.Response {

@@ -18,8 +18,11 @@ import (
 var (
 	key                   = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
 	TokenExpire           = int64(86400)
+	ErrInvalidTimestamp   = errors.New("Invalid timestamp")
 	ErrInvalidTokenFormat = errors.New("Invalid token format")
+	ErrInvalidTokenLength = errors.New("Invalid token length")
 	ErrTokenExpired       = errors.New("Token expired")
+	ErrNotBase64Encoded   = errors.New("Not base64 encoded")
 )
 
 // EncodeToken convert a token string into base64({timestamp}:{token}) format
@@ -51,16 +54,16 @@ func EncodeToken(targetToken string) string {
 func DecodeToken(targetToken string) (string, error) {
 	encodedToken, err := base64.StdEncoding.DecodeString(targetToken)
 	if err != nil {
-		return "", ErrInvalidTokenFormat
+		return "", ErrNotBase64Encoded
 	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return "", err
+		panic(err)
 	}
 
 	if len(encodedToken) < aes.BlockSize {
-		return "", ErrInvalidTokenFormat
+		return "", ErrInvalidTokenLength
 	}
 
 	iv := encodedToken[:aes.BlockSize]
@@ -78,7 +81,7 @@ func DecodeToken(targetToken string) (string, error) {
 
 	seconds, err := strconv.ParseInt(params[0], 10, 64)
 	if err != nil {
-		return "", ErrInvalidTokenFormat
+		return "", ErrInvalidTimestamp
 	}
 
 	if time.Now().Unix() > seconds {

@@ -1,4 +1,4 @@
-package usecase
+package appservice
 
 import (
 	"lmm/api/context/account/domain/model"

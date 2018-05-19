@@ -13,7 +13,7 @@ func TestSave(t *testing.T) {
 	tester := testing.NewTester(t)
 
 	repo := New()
-	m := model.New("foobar", "1234")
+	m := model.NewUser("foobar", "1234")
 	user, err := repo.Put(m)
 	tester.NoError(err)
 	tester.Is(uint64(1), user.ID)

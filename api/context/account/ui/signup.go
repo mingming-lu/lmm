@@ -3,16 +3,16 @@ package ui
 import (
 	"encoding/json"
 	"fmt"
+	"lmm/api/context/account/appservice"
 	"lmm/api/context/account/domain/repository"
-	"lmm/api/context/account/usecase"
 	"net/http"
 
 	"github.com/akinaru-lu/elesion"
 )
 
 func SignUp(c *elesion.Context) {
-	uc := usecase.New(repository.New())
-	auth := &usecase.Auth{}
+	uc := appservice.New(repository.New())
+	auth := &appservice.Auth{}
 	err := json.NewDecoder(c.Request.Body).Decode(auth)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String(http.StatusText(http.StatusBadRequest))
@@ -21,8 +21,8 @@ func SignUp(c *elesion.Context) {
 	switch err {
 	case nil:
 		c.Header("location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
-	case usecase.ErrDuplicateUserName:
-		c.Status(http.StatusBadRequest).String(usecase.ErrDuplicateUserName.Error())
+	case appservice.ErrDuplicateUserName:
+		c.Status(http.StatusBadRequest).String(appservice.ErrDuplicateUserName.Error())
 	default:
 		c.Status(http.StatusInternalServerError).String(http.StatusText(http.StatusInternalServerError))
 	}

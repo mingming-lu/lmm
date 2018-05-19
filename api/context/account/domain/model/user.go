@@ -31,7 +31,7 @@ type User struct {
 // New new a User model which is going to be saved to repository (User.ID is 0!!)
 // If want to build a User model from existing data, just do this -> user := &User{ID: xxx, ...}
 // TODO New => NewUser
-func New(name, password string) *User {
+func NewUser(name, password string) *User {
 	token := uuid.New()
 	guid := uuid.New()
 	encodedPassword := sha256.Hex([]byte(guid + password)) // digest

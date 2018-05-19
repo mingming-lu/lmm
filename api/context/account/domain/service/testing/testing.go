@@ -18,7 +18,7 @@ func NewUser() *model.User {
 
 	name := uuid.New()[:32]
 	password := uuid.New()
-	user := model.New(name, password)
+	user := model.NewUser(name, password)
 
 	result, err := stmt1.Exec(user.Name, user.Password, user.GUID, user.Token, user.CreatedAt)
 	if err != nil {
