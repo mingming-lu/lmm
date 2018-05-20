@@ -43,3 +43,4 @@ test-api:
 	go test -v lmm/api/context/account/domain/service
 	go test -v lmm/api/context/account/ui
 	go test -v lmm/api/testing
+	go test -v lmm/api/usecase/auth
