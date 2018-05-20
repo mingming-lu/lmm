@@ -19,8 +19,16 @@ func NewTester(t *T) *Tester {
 	return &Tester{T: t}
 }
 
-func (t *Tester) Nil(o interface{}, magAndArgs ...interface{}) bool {
-	return assert.Nil(t, o, magAndArgs...)
+func (t *Tester) Nil(o interface{}, msgAndArgs ...interface{}) bool {
+	return assert.Nil(t, o, msgAndArgs...)
+}
+
+func (t *Tester) True(value bool, msgAndArgs ...interface{}) bool {
+	return assert.True(t, value, msgAndArgs...)
+}
+
+func (t *Tester) False(value bool, msgAndArgs ...interface{}) bool {
+	return assert.False(t, value, msgAndArgs)
 }
 
 // Is compare both their types and referenced value of two interfaces.
