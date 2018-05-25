@@ -1,0 +1,5 @@
+content:
+  text/plain:
+    schema:
+      type: string
+      example: No content

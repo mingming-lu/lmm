@@ -10,6 +10,12 @@ paths:
     $ref: ./paths/v1_signin.yaml
   /v1/verify:
     $ref: ./paths/v1_verify.yaml
+  /v1/blog:
+    $ref: ./paths/v1_blog.yaml
+  /v1/blog/{blog_id}:
+    $ref: ./paths/v1_blog_blog_id.yaml
+  /v1/blog/{blog_id}/category:
+    $ref: ./paths/v1_blog_blog_id_category.yaml
 
 tags:
   - name: signup
