@@ -1,9 +1,9 @@
 version: "3"
 services:
-  api:
+  docs:
     image: swaggerapi/swagger-ui
     volumes:
-      - ./api:/usr/share/nginx/html/api
+      - ../docs/api:/usr/share/nginx/html/api
     environment:
       API_URL: api/index.yaml
     ports:
