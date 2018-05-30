@@ -6,6 +6,15 @@ services:
       - ../docs/api:/usr/share/nginx/html/api
     environment:
       API_URL: api/index.yaml
+  mysql:
+    image: mysql:8.0.11
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      TZ: Asia/Tokyo
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    ports:
+      - "3306:3306"
   nginx:
     image: nginx:1.14
     restart: always
