@@ -12,6 +12,19 @@ services:
       - mysql
     links:
       - mysql:lmm-mysql
+  cli:
+    image: lmm/cli
+    build:
+      context: ../script
+      dockerfile: ../docker/cli/Dockerfile
+    volumes:
+      - ../script:/script
+    environment:
+      TZ: Asia/Tokyo
+    depends_on:
+      - mysql
+    links:
+      - mysql:lmm-mysql
   docs:
     image: swaggerapi/swagger-ui
     volumes:
