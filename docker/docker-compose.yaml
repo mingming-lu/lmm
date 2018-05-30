@@ -7,7 +7,7 @@ services:
     environment:
       API_URL: api/index.yaml
   mysql:
-    image: mysql:8.0.11
+    image: mysql:5.7.22
     volumes:
       - ./mysql/lib:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
