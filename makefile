@@ -31,7 +31,7 @@ image: image/main.go
 
 .PHONY: docker
 docker: docker
-	cd docker && docker-compose up -d
+	cd docker && docker-compose up
 
 .PHONY: test
 test: test-api
