@@ -53,5 +53,5 @@ func main() {
 	router.PUT("/v1/images/putPhoto", image.PutPhoto)
 	router.PUT("/v1/images/removePhoto", image.RemovePhoto)
 
-	log.Fatal(http.ListenAndServe(":8081", router))
+	log.Fatal(http.ListenAndServe(":8080", router))
 }

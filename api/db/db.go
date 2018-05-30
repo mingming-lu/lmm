@@ -18,12 +18,16 @@ var (
 	ErrNoRows        = errors.New(sql.ErrNoRows.Error())
 )
 
-var defaultDatabaseName = "lmm"
+var (
+	dbName     = "lmm"
+	connParams = "parseTime=true"
+	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
+)
 var mux sync.Mutex
 
 func SetDefaultDatabaseName(name string) {
 	mux.Lock()
-	defaultDatabaseName = name
+	dbName = name
 	mux.Unlock()
 }
 
@@ -57,18 +61,18 @@ func (values Values) Where() string {
 }
 
 func New() *DB {
-	super, err := sql.Open("mysql", "root:@/?parseTime=true")
+	conn, err := sql.Open("mysql", dbSrcName+dbName+"?"+connParams)
 	if err != nil {
 		panic(err)
 	}
-	return &DB{DB: super}
+	return &DB{DB: conn}
 }
 
 func Default() *DB {
-	if defaultDatabaseName == "" {
+	if dbName == "" {
 		panic("Default database has not been set")
 	}
-	return New().Use(defaultDatabaseName)
+	return New().Use(dbName)
 }
 
 func (db *DB) CreateDatabase(name string) *DB {
