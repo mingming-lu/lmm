@@ -39,6 +39,10 @@ docker: docker
 .PHONY: test
 test: test-api
 
+.PHONY: cli
+cli: script
+	cd docker && docker-compose run cli bash
+
 .PHONY: test-api
 test-api:
 	go test -v lmm/api/context/account/appservice
