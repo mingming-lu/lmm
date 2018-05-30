@@ -9,7 +9,8 @@ services:
   mysql:
     image: mysql:8.0.11
     volumes:
-      - ./mysql:/var/lib/mysql
+      - ./mysql/lib:/var/lib/mysql
+      - ./mysql/log:/var/log/mysql
     environment:
       TZ: Asia/Tokyo
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
