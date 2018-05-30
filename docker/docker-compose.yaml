@@ -11,6 +11,7 @@ services:
     volumes:
       - ./mysql/lib:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
     environment:
       TZ: Asia/Tokyo
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
