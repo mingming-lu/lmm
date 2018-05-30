@@ -26,7 +26,7 @@ services:
     links:
       - mysql:lmm-mysql
   docs:
-    image: swaggerapi/swagger-ui
+    image: swaggerapi/swagger-ui:v3.14.2
     volumes:
       - ../docs/api:/usr/share/nginx/html/api
     environment:
