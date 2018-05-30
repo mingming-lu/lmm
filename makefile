@@ -3,11 +3,8 @@ all:
 	make run -j
 .PHONY: install
 install:
-	go get -v github.com/akinaru-lu/elesion
-	go get -v github.com/go-sql-driver/mysql
-	go get -v github.com/google/uuid
-	go get -v github.com/stretchr/testify/assert
-	go get -v github.com/stretchr/testify/mock
+	go get -u github.com/golang/dep/cmd/dep
+	cd api && dep ensure
 	rm -rf manager/node_modules
 	rm -rf app/node_modules
 	npm --prefix app install
@@ -34,10 +31,14 @@ image: image/main.go
 
 .PHONY: docker
 docker: docker
-	cd docker && docker-compose up -d
+	cd docker && docker-compose up
 
 .PHONY: test
 test: test-api
+
+.PHONY: cli
+cli: script
+	cd docker && docker-compose run cli bash
 
 .PHONY: test-api
 test-api:

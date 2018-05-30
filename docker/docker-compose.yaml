@@ -1,5 +1,30 @@
 version: "3"
 services:
+  api:
+    image: golang:1.9
+    volumes:
+      - ../api:/go/src/lmm/api
+      - ../api/dep:/go/src
+    command: go run /go/src/lmm/api/main.go
+    environment:
+      TZ: Asia/Tokyo
+    depends_on:
+      - mysql
+    links:
+      - mysql:lmm-mysql
+  cli:
+    image: lmm/cli
+    build:
+      context: ../script
+      dockerfile: ../docker/cli/Dockerfile
+    volumes:
+      - ../script:/script
+    environment:
+      TZ: Asia/Tokyo
+    depends_on:
+      - mysql
+    links:
+      - mysql:lmm-mysql
   docs:
     image: swaggerapi/swagger-ui
     volumes:
@@ -30,6 +55,8 @@ services:
     ports:
       - "80:80"
     depends_on:
+      - api
       - docs
     links:
+      - api:lmm-api
       - docs:lmm-docs
