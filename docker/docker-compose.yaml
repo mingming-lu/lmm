@@ -11,6 +11,13 @@ services:
       - mysql
     links:
       - mysql:lmm-mysql
+  app:
+    image: node:9.9
+    volumes:
+      - ../app:/app
+    command: npm --prefix /app start
+    environment:
+      TZ: Asia/Tokyo
   cli:
     image: lmm/cli
     build:
@@ -62,9 +69,11 @@ services:
       - "80:80"
     depends_on:
       - api
+      - app
       - docs
       - image
     links:
       - api:lmm-api
+      - app:lmm-app
       - docs:lmm-docs
       - image:lmm-image
