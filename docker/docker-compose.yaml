@@ -4,7 +4,6 @@ services:
     image: golang:1.9
     volumes:
       - ../api:/go/src/lmm/api
-      - ../api/dep:/go/src
     command: go run /go/src/lmm/api/main.go
     environment:
       TZ: Asia/Tokyo
