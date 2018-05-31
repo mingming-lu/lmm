@@ -30,6 +30,13 @@ services:
       - ../docs/api:/usr/share/nginx/html/api
     environment:
       API_URL: api/index.yaml
+  image:
+    image: golang:1.9
+    volumes:
+      - ../image:/go/src/lmm/image
+    command: go run /go/src/lmm/image/main.go
+    environment:
+      TZ: Asia/Tokyo
   mysql:
     image: mysql:5.7
     volumes:
@@ -56,6 +63,8 @@ services:
     depends_on:
       - api
       - docs
+      - image
     links:
       - api:lmm-api
       - docs:lmm-docs
+      - image:lmm-image
