@@ -5,7 +5,7 @@ all:
 .PHONY: install
 install:
 	cd docker && docker-compose run --rm api bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/api && dep ensure"
-	cd image && dep ensure
+	cd docker && docker-compose run --rm image bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/image && dep ensure"
 	rm -rf app/node_modules
 	cd docker && docker-compose run --rm app bash -c "npm i npm@latest -g && npm --prefix /app install"
 	rm -rf manager/node_modules
