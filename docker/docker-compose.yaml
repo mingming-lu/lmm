@@ -44,6 +44,13 @@ services:
     command: go run /go/src/lmm/image/main.go
     environment:
       TZ: Asia/Tokyo
+  manager:
+    image: node:9.9
+    volumes:
+      - ../manager:/manager
+    command: npm --prefix /manager start
+    environment:
+      TZ: Asia/Tokyo
   mysql:
     image: mysql:5.7
     volumes:
@@ -72,8 +79,10 @@ services:
       - app
       - docs
       - image
+      - manager
     links:
       - api:lmm-api
       - app:lmm-app
       - docs:lmm-docs
       - image:lmm-image
+      - manager:lmm-manager
