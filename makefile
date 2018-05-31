@@ -1,14 +1,15 @@
 .PHONY: all
 all:
 	make run -j
+
 .PHONY: install
 install:
 	go get -u github.com/golang/dep/cmd/dep
 	cd api && dep ensure
 	cd image && dep ensure
-	rm -rf manager/node_modules
 	rm -rf app/node_modules
-	npm --prefix app install
+	cd docker && docker-compose run --rm app bash -c "npm i npm@latest -g && npm --prefix /app install"
+	rm -rf manager/node_modules
 	npm --prefix manager install
 
 .PHONY: run
