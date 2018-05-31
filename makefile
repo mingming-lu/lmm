@@ -2,6 +2,10 @@
 all:
 	make run -j
 
+.PHONY: build
+build:
+	cd docker && docker-compose build
+
 .PHONY: install
 install:
 	cd docker && docker-compose run --rm api bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/api && dep ensure"
