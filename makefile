@@ -5,6 +5,7 @@ all:
 install:
 	go get -u github.com/golang/dep/cmd/dep
 	cd api && dep ensure
+	cd image && dep ensure
 	rm -rf manager/node_modules
 	rm -rf app/node_modules
 	npm --prefix app install
