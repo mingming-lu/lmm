@@ -9,7 +9,7 @@ install:
 	rm -rf app/node_modules
 	cd docker && docker-compose run --rm app bash -c "npm i npm@latest -g && npm --prefix /app install"
 	rm -rf manager/node_modules
-	npm --prefix manager install
+	cd docker && docker-compose run --rm manager bash -c "npm i npm@latest -g && npm --prefix /manager install"
 
 .PHONY: run
 run: app api image manager docs
