@@ -36,7 +36,7 @@ export default {
         alert('no change')
         return
       }
-      axios.put('https://api.lmm.im/v1/blog/' + this.blogID, {
+      axios.put(process.env.API_URL_BASE + '/v1/blog/' + this.blogID, {
         title: this.title,
         text: this.text
       }, {
@@ -61,7 +61,7 @@ export default {
       return md.render(text)
     },
     onSetCategory () {
-      axios.put('https://api.lmm.im/v1/blog/' + this.blogID + '/category', {
+      axios.put(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/category', {
         id: this.categoryID
       }, {
         headers: {
@@ -74,7 +74,7 @@ export default {
       })
     },
     onAddTag (name) {
-      axios.post('https://api.lmm.im/v1/blog/' + this.blogID + '/tags', {
+      axios.post(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/tags', {
         name: name
       }, {
         headers: {
@@ -88,7 +88,7 @@ export default {
       })
     },
     onRemoveTag (tag) {
-      axios.delete('https://api.lmm.im/v1/blog/' + this.blogID + '/tags/' + tag.id, {
+      axios.delete(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/tags/' + tag.id, {
         headers: {
           Authorization: localStorage.getItem('token')
         }
@@ -105,7 +105,7 @@ export default {
       this.fetchTags()
     },
     fetchBlog () {
-      axios.get('https://api.lmm.im/v1/blog/' + this.blogID).then(blog => {
+      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID).then(blog => {
         this.blogOriginal = blog.data
 
         this.id = this.blogOriginal.id
@@ -117,19 +117,19 @@ export default {
       })
     },
     fetchCategories () {
-      axios.get('https://api.lmm.im/v1/users/1/categories').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
-      axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/category').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/category').then(res => {
         this.categoryID = res.data.id
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get('https://api.lmm.im/v1/blog/' + this.blogID + '/tags').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
