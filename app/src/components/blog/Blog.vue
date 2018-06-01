@@ -84,7 +84,7 @@ export default {
         html: true,
         typographer: true
       })
-      axios.get('https://api.lmm.im/v1/blog/' + this.blogID).then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID).then(res => {
         const blog = res.data
 
         this.title = blog.title

@@ -44,7 +44,7 @@ export default {
       this.fetchCategories()
     },
     fetchBlogList () {
-      axios.get('https://api.lmm.im/v1/users/1/blog').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/users/1/blog').then(res => {
         this.blogList = res.data
       }).catch(e => {
         console.log(e.response.data)
@@ -53,14 +53,14 @@ export default {
     },
     fetchCategories () {
       this.newCategoryName = ''
-      axios.get('https://api.lmm.im/v1/users/1/categories').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     onSubmitCategory () {
-      axios.post('https://api.lmm.im/v1/categories', {
+      axios.post(process.env.API_URL_BASE + '/v1/categories', {
         name: this.newCategoryName
       }, {
         headers: {
@@ -75,7 +75,7 @@ export default {
       })
     },
     onUpdateCategory (category) {
-      axios.put('https://api.lmm.im/v1/categories/' + category.id, {
+      axios.put(process.env.API_URL_BASE + '/v1/categories/' + category.id, {
         name: document.getElementById(category.name).value
       }, {
         headers: {
@@ -90,7 +90,7 @@ export default {
       })
     },
     onDeleteCategory (category) {
-      axios.delete('https://api.lmm.im/v1/categories/' + category.id, {
+      axios.delete(process.env.API_URL_BASE + '/v1/categories/' + category.id, {
         headers: {
           Authorization: localStorage.getItem('token')
         }

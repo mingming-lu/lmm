@@ -28,8 +28,8 @@ export default {
   methods: {
     fetchImages () {
       axios.all([
-        axios.get('https://api.lmm.im/v1/users/1/images'),
-        axios.get('https://api.lmm.im/v1/users/1/images/photos')
+        axios.get(process.env.API_URL_BASE + '/v1/users/1/images'),
+        axios.get(process.env.API_URL_BASE + '/v1/users/1/images/photos')
       ]).then(axios.spread((resImages, resPhotos) => {
         let images = resImages.data
         let photos = resPhotos.data
@@ -47,7 +47,7 @@ export default {
       })
     },
     imageURL: (name) => {
-      return 'https://image.lmm.im/' + name
+      return process.env.IMAGE_URL_BASE + '/' + name
     },
     togglePhotoSwitch (name) {
       let sw = this.$refs[name][0]
@@ -60,7 +60,7 @@ export default {
     },
     turnOnPhotoSwitch (name) {
       var sw = this.$refs[name][0]
-      axios.put('https://api.lmm.im/v1/images/putPhoto', {
+      axios.put(process.env.API_URL_BASE + '/v1/images/putPhoto', {
         name: name
       }, {
         headers: {
@@ -76,7 +76,7 @@ export default {
     },
     turnOffPhotoSwitch (name) {
       var sw = this.$refs[name][0]
-      axios.put('https://api.lmm.im/v1/images/removePhoto', {
+      axios.put(process.env.API_URL_BASE + '/v1/images/removePhoto', {
         name: name
       }, {
         headers: {

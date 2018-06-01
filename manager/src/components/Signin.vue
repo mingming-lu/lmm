@@ -22,7 +22,7 @@ export default {
   },
   methods: {
     signin () {
-      axios.post('https://api.lmm.im/v1/signin', {
+      axios.post(process.env.API_URL_BASE + '/v1/signin', {
         name: this.username,
         password: this.password
       }).then(res => {
