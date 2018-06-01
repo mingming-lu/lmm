@@ -63,7 +63,7 @@ export default {
     fetchPhotos () {
       this.page += 1
       this.isPageLoaded = false
-      axios.get('https://api.lmm.im/v1/users/1/images/photos?page=' + this.page).then((res) => {
+      axios.get(process.env.API_URL_BASE + '/v1/users/1/images/photos?page=' + this.page).then((res) => {
         this.photos.push(...res.data.photos)
         res.data.photos.forEach((photo, index) => {
           if (index % 2 === 0) {
@@ -79,7 +79,7 @@ export default {
       })
     },
     url: (name) => {
-      return 'https://image.lmm.im/' + name
+      return process.env.IMAGE_URL_BASE + '/' + name
     },
     calcIsWideMode () {
       this.wideMode = window.innerWidth >= 800

@@ -72,7 +72,7 @@ export default {
   },
   methods: {
     fetchBlog () {
-      axios.get('https://api.lmm.im/v1/users/1/blog').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/users/1/blog').then(res => {
         this.blogList = res.data
         this.isBlogListLoaded = true
       }).catch(e => {
@@ -80,14 +80,14 @@ export default {
       })
     },
     fetchCategories () {
-      axios.get('https://api.lmm.im/v1/users/1/categories').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/users/1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get('https://api.lmm.im/v1/users/1/tags').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/users/1/tags').then(res => {
         this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
