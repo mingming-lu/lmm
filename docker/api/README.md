@@ -1,6 +1,6 @@
-This directory should include .env, .dev.env, .test.env, etc.
+This directory should include .env, .dev.env, .test.env, etc., which contents are **SECURITY SENSITIVE**.
 
-See [nginx conf](../nginx/nginx.conf)
+See [docker-compose.yaml](../docker-compose.yaml)
 
 # env file template
 
