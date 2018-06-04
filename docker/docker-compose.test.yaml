@@ -1,0 +1,12 @@
+version: "3"
+services:
+  test:
+    image: golang:1.9
+    environment:
+      DATABASE_NAME: lmm_test
+      LMM_API_TOKEN_KEY: 94B0CF6126437566D5FF4EA99C55E75B
+    volumes:
+      - ../api:/go/src/lmm/api
+    links:
+      - api
+      - mysql:lmm-mysql
