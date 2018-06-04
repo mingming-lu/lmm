@@ -1,12 +1,12 @@
-.PHONY: all
-all:
-	make run -j
+all: dev
 
-.PHONY: build
+docker-compose: docker
+	cd docker && docker-compose -f docker-compose.yaml $(args) $(cmd)
+
 build:
-	cd docker && docker-compose build
+	make docker-compose cmd=build
 
-.PHONY: install
+# TODO move to Dockerfile
 install:
 	cd docker && docker-compose run --rm api bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/api && dep ensure"
 	cd docker && docker-compose run --rm image bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/image && dep ensure"
@@ -15,43 +15,17 @@ install:
 	rm -rf manager/node_modules
 	cd docker && docker-compose run --rm manager bash -c "npm i npm@latest -g && npm --prefix /manager install"
 
-.PHONY: run
-run: app api image manager docs
+prod:
+	make docker-compose cmd=up
 
-.PHONY: app
-app: app/package.json
-	npm --prefix app run dev
+dev:
+	make prod args="-f docker-compose.dev.yaml"
 
-.PHONY: manager
-manager: manager/package.json
-	npm --prefix manager run dev
-
-.PHONY: api
-api: api/main.go
-	go run api/main.go
-
-.PHONY: image
-image: image/main.go
-	go run image/main.go
-
-.PHONY: docker
-docker: docker
-	cd docker && docker-compose up
-
-.PHONY: test
 test:
-	cd docker && docker-compose -f docker-compose.yaml -f docker-compose.test.yaml run test bash
+	make docker-compose args="-f docker-compose.test.yaml" cmd="run $(target)"
 
-.PHONY: cli
 cli: script
-	cd docker && docker-compose run cli bash
+	make docker-compose cmd="run cli python $(target)"
 
-.PHONY: test-api
-test-api:
-	go test -v lmm/api/context/account/appservice
-	go test -v lmm/api/context/account/domain/model
-	go test -v lmm/api/context/account/domain/repository
-	go test -v lmm/api/context/account/domain/service
-	go test -v lmm/api/context/account/ui
-	go test -v lmm/api/testing
-	go test -v lmm/api/usecase/auth
+stop:
+	make docker-compose cmd=down
