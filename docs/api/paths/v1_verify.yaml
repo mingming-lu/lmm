@@ -4,7 +4,7 @@ get:
   parameters:
     - in: header
       name: Authorization
-      description: Basic {token}
+      description: Bearer {token}
       required: true
       schema:
         type: string
