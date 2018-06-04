@@ -1,5 +1,8 @@
 version: "3"
 services:
+  api:
+    env_file:
+      - ./api/.dev.env
   nginx:
     volumes:
       - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf

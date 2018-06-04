@@ -5,6 +5,8 @@ services:
     volumes:
       - ../api:/go/src/lmm/api
     command: go run /go/src/lmm/api/main.go
+    env_file:
+      - ./api/.env
     environment:
       TZ: Asia/Tokyo
       DATABASE_NAME: lmm
