@@ -7,6 +7,7 @@ services:
     command: go run /go/src/lmm/api/main.go
     environment:
       TZ: Asia/Tokyo
+      DATABASE_NAME: lmm
     depends_on:
       - mysql
     links:

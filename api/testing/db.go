@@ -6,7 +6,7 @@ import (
 )
 
 func InitTableAll() {
-	db := db.Default()
+	db := db.New()
 	defer db.Close()
 	r, err := db.Query("SHOW TABLES")
 	if err != nil {
@@ -20,7 +20,7 @@ func InitTableAll() {
 }
 
 func InitTable(name string) {
-	db := db.Default()
+	db := db.New()
 	defer db.Close()
 
 	_, err := db.Query("TRUNCATE TABLE " + name)

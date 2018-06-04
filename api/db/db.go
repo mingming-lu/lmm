@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 
@@ -19,7 +20,7 @@ var (
 )
 
 var (
-	dbName     = "lmm"
+	dbName     = os.Getenv("DATABASE_NAME")
 	connParams = "parseTime=true"
 	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
 )
@@ -68,11 +69,12 @@ func New() *DB {
 	return &DB{DB: conn}
 }
 
+// Deprecated: select database on creating db connection
 func Default() *DB {
-	if dbName == "" {
-		panic("Default database has not been set")
-	}
-	return New().Use(dbName)
+	// if dbName == "" {
+	// 	panic("Default database has not been set")
+	// }
+	return New()
 }
 
 func (db *DB) CreateDatabase(name string) *DB {
@@ -91,6 +93,7 @@ func (db *DB) DropDatabase(name string) *DB {
 	return db
 }
 
+// Deprecated: select database on creating db connection instead of use
 func (db *DB) Use(database string) *DB {
 	_, err := db.Exec("USE " + database)
 	if err != nil {

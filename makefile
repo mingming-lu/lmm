@@ -39,7 +39,8 @@ docker: docker
 	cd docker && docker-compose up
 
 .PHONY: test
-test: test-api
+test:
+	cd docker && docker-compose -f docker-compose.yaml -f docker-compose.test.yaml run test bash
 
 .PHONY: cli
 cli: script
