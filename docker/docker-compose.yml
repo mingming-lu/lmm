@@ -40,7 +40,7 @@ services:
     volumes:
       - ../docs/api:/usr/share/nginx/html/api
     environment:
-      API_URL: api/index.yaml
+      API_URL: api/index.yml
   image:
     image: golang:1.9
     volumes:

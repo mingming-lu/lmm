@@ -5,11 +5,11 @@ servers:
 
 paths:
   /v1/signup:
-    $ref: ./paths/v1_signup.yaml
+    $ref: ./paths/v1_signup.yml
   /v1/signin:
-    $ref: ./paths/v1_signin.yaml
+    $ref: ./paths/v1_signin.yml
   /v1/verify:
-    $ref: ./paths/v1_verify.yaml
+    $ref: ./paths/v1_verify.yml
 
 tags:
   - name: signup

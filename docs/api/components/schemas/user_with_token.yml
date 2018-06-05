@@ -1,5 +1,5 @@
 allOf:
-  - $ref: './user.yaml'
+  - $ref: './user.yml'
 
   - type: object
     properties:
