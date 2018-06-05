@@ -28,6 +28,7 @@ services:
       dockerfile: ../docker/cli/Dockerfile
     volumes:
       - ../script:/script
+    working_dir: /script
     environment:
       TZ: Asia/Tokyo
     depends_on:
