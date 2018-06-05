@@ -1,7 +1,7 @@
 all: dev
 
 docker-compose: docker
-	cd docker && docker-compose -f docker-compose.yaml $(args) $(cmd)
+	cd docker && docker-compose -f docker-compose.yml $(args) $(cmd)
 
 build:
 	make docker-compose cmd=build
@@ -19,10 +19,10 @@ prod:
 	make docker-compose cmd=up
 
 dev:
-	make prod args="-f docker-compose.dev.yaml"
+	make prod args="-f docker-compose.dev.yml"
 
 test:
-	make docker-compose args="-f docker-compose.test.yaml" cmd="run $(target)"
+	make docker-compose args="-f docker-compose.test.yml" cmd="run $(target)"
 
 cli: script
 	make docker-compose cmd="run cli python $(target)"
