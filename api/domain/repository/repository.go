@@ -17,7 +17,7 @@ type Default struct {
 }
 
 func (repo *Default) DB() *db.DB {
-	return db.Default()
+	return db.New()
 }
 
 func CheckErrorDuplicate(errMsg string) (key string, entry string, ok bool) {

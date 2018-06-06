@@ -28,7 +28,7 @@ func (repo *repo) Put(user *model.User) (*model.User, error) {
 	db := repo.DB()
 	defer db.Close()
 
-	stmt := db.Must(`INSERT INTO user (name, password, guid, token, created_at) VALUES (?, ?, ?, ?, ?)`)
+	stmt := db.MustPrepare(`INSERT INTO user (name, password, guid, token, created_at) VALUES (?, ?, ?, ?, ?)`)
 	defer stmt.Close()
 
 	res, err := stmt.Exec(user.Name, user.Password, user.GUID, user.Token, user.CreatedAt.UTC())
@@ -48,7 +48,7 @@ func (repo *repo) FindByName(name string) (*model.User, error) {
 	db := repo.DB()
 	defer db.Close()
 
-	stmt := db.Must(`SELECT id, name, password, guid, token, created_at FROM user WHERE name = ?`)
+	stmt := db.MustPrepare(`SELECT id, name, password, guid, token, created_at FROM user WHERE name = ?`)
 	defer stmt.Close()
 
 	user := &model.User{}
@@ -63,7 +63,7 @@ func (repo *repo) FindByToken(token string) (*model.User, error) {
 	db := repo.DB()
 	defer db.Close()
 
-	stmt := db.Must(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
+	stmt := db.MustPrepare(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
 	defer stmt.Close()
 
 	user := model.User{}
@@ -75,10 +75,10 @@ func (repo *repo) FindByToken(token string) (*model.User, error) {
 }
 
 func FindByToken(token string) (*model.User, error) {
-	db := db.Default()
+	db := db.New()
 	defer db.Close()
 
-	stmt := db.Must(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
+	stmt := db.MustPrepare(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
 	defer stmt.Close()
 
 	user := model.User{}

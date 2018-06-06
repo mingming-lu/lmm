@@ -19,10 +19,10 @@ func TestSave(t *testing.T) {
 	tester.Is(uint64(1), user.ID)
 	tester.Is("foobar", user.Name)
 
-	db := db.Default()
+	db := db.New()
 	defer db.Close()
 
-	stmt := db.Must("SELECT * FROM user WHERE id = ?")
+	stmt := db.MustPrepare("SELECT * FROM user WHERE id = ?")
 	defer stmt.Close()
 
 	r := stmt.QueryRow(user.ID)

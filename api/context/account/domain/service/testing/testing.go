@@ -10,10 +10,10 @@ import (
 )
 
 func NewUser() *model.User {
-	db := db.Default()
+	db := db.New()
 	defer db.Close()
 
-	stmt1 := db.Must(`INSERT INTO user (name, password, guid, token, created_at) VALUES(?, ?, ?, ?, ?)`)
+	stmt1 := db.MustPrepare(`INSERT INTO user (name, password, guid, token, created_at) VALUES(?, ?, ?, ?, ?)`)
 	defer stmt1.Close()
 
 	name := uuid.New()[:32]
@@ -26,7 +26,7 @@ func NewUser() *model.User {
 	}
 	userID, err := result.LastInsertId()
 
-	stmt2 := db.Must(`SELECT id, name, guid, token, created_at FROM user WHERE id = ?`)
+	stmt2 := db.MustPrepare(`SELECT id, name, guid, token, created_at FROM user WHERE id = ?`)
 	defer stmt2.Close()
 
 	user = &model.User{}
