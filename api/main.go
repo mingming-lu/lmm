@@ -47,5 +47,5 @@ func main() {
 	// router.PUT("/v1/images/removePhoto", image.RemovePhoto)
 
 	// log.Fatal(http.ListenAndServe(":8002", router))
-	http.Serve(":8080", router)
+	http.Serve(":8002", router)
 }
