@@ -27,7 +27,7 @@ func (r *Router) GET(path string, handler Handler) {
 	r.Handle(http.MethodGet, path, handler)
 }
 
-func (r *Router) Post(path string, handler Handler) {
+func (r *Router) POST(path string, handler Handler) {
 	r.Handle(http.MethodPost, path, handler)
 }
 
