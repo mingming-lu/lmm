@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -56,6 +57,40 @@ func NewRequest(req *http.Request, params URLParams) *Request {
 	}
 }
 
+type ResponseWriter interface {
+	http.ResponseWriter
+	Status() int
+}
+
+type responseWriter struct {
+	headerWritten bool
+	statusCode    int
+	ResponseWriter
+}
+
+func newResponseWriter(w http.ResponseWriter) ResponseWriter {
+	return &responseWriter{
+		headerWritten: false,
+		statusCode:    http.StatusOK,
+	}
+}
+
+func (rw *responseWriter) Status() int {
+	return rw.statusCode
+}
+
+func (rw *responseWriter) WriteHeader(statusCode int) {
+	if statusCode > 0 && rw.statusCode != statusCode {
+		if rw.headerWritten {
+			log.Printf("Status code has been written as %d, cannot be written as %d again\n", rw.statusCode, statusCode)
+			return
+		}
+		rw.statusCode = statusCode
+		rw.ResponseWriter.WriteHeader(statusCode)
+		rw.headerWritten = true
+	}
+}
+
 type Values map[string]interface{}
 
 func (vs Values) Set(key string, v interface{}) {
@@ -67,7 +102,7 @@ func (vs Values) Get(key string) interface{} {
 }
 
 type Context struct {
-	rw      http.ResponseWriter
+	rw      ResponseWriter
 	Request *Request
 	values  Values
 }
@@ -80,11 +115,8 @@ func (r *Request) ScanBody(schema interface{}) error {
 	return json.NewDecoder(r.Request.Body).Decode(schema)
 }
 
-func NewContext(rw http.ResponseWriter, r *http.Request, ps URLParams) *Context {
-	return &Context{
-		Request: NewRequest(r, ps),
-		rw:      rw,
-	}
+func NewContext(rw ResponseWriter, r *Request) *Context {
+	return &Context{Request: r, rw: rw}
 }
 
 func (c *Context) Status(code int) *Context {
