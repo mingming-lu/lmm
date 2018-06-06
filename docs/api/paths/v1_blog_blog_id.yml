@@ -2,7 +2,7 @@ put:
   tags:
     - blog
   parameters:
-    - $ref: ../components/auth/bearer.yaml
+    - $ref: ../components/auth/bearer.yml
     - in: path
       name: blog_id
       required: true
@@ -21,13 +21,13 @@ put:
               type: string
   responses:
     200:
-      $ref: ../components/responses/200.yaml
+      $ref: ../components/responses/200.yml
 
 delete:
   tags:
     - blog
   parameters:
-    - $ref: ../components/auth/bearer.yaml
+    - $ref: ../components/auth/bearer.yml
     - in: path
       name: blog_id
       required: true
@@ -35,4 +35,4 @@ delete:
         type: string
   responses:
     204:
-      $ref: ../components/responses/204.yaml
+      $ref: ../components/responses/204.yml

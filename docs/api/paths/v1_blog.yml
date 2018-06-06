@@ -48,7 +48,7 @@ post:
   tags:
     - blog
   parameters:
-    - $ref: ../components/auth/bearer.yaml
+    - $ref: ../components/auth/bearer.yml
   requestBody:
     required: true
     content:
