@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/akinaru-lu/elesion"
+	router "lmm/api/http"
 )
 
 func NewRequest(method, path string, body io.Reader) *http.Request {
@@ -50,9 +50,9 @@ func (r *Response) Body() string {
 }
 
 type Router struct {
-	*elesion.Router
+	*router.Router
 }
 
 func NewRouter() *Router {
-	return &Router{Router: elesion.New()}
+	return &Router{Router: router.NewRouter()}
 }
