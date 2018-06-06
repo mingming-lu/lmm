@@ -14,8 +14,6 @@ paths:
     $ref: ./paths/v1_blog.yml
   /v1/blog/{blog_id}:
     $ref: ./paths/v1_blog_blog_id.yml
-  /v1/blog/{blog_id}/category:
-    $ref: ./paths/v1_blog_blog_id_category.yml
 
 tags:
   - name: signup
