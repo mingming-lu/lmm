@@ -65,13 +65,14 @@ type ResponseWriter interface {
 type responseWriter struct {
 	headerWritten bool
 	statusCode    int
-	ResponseWriter
+	http.ResponseWriter
 }
 
 func newResponseWriter(w http.ResponseWriter) ResponseWriter {
 	return &responseWriter{
-		headerWritten: false,
-		statusCode:    http.StatusOK,
+		headerWritten:  false,
+		statusCode:     StatusOK,
+		ResponseWriter: w,
 	}
 }
 
@@ -82,7 +83,7 @@ func (rw *responseWriter) Status() int {
 func (rw *responseWriter) WriteHeader(statusCode int) {
 	if statusCode > 0 && rw.statusCode != statusCode {
 		if rw.headerWritten {
-			log.Printf("Status code has been written as %d, cannot be written as %d again\n", rw.statusCode, statusCode)
+			log.Printf("status code has been written as %d, cannot be written as %d again\n", rw.statusCode, statusCode)
 			return
 		}
 		rw.statusCode = statusCode
