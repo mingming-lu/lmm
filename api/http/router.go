@@ -18,7 +18,7 @@ func NewRouter() *Router {
 
 func (r *Router) Handle(method string, path string, handler Handler) {
 	r.router.Handle(method, path, func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		c := NewContext(w, req, params)
+		c := NewContext(newResponseWriter(w), NewRequest(req, params))
 		handler(c)
 	})
 }
