@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -17,6 +18,7 @@ const (
 type Handler = func(*Context)
 
 func Serve(addr string, r *Router) {
+	fmt.Println("Serving at: " + addr)
 	log.Fatal(http.ListenAndServe(addr, r))
 }
 

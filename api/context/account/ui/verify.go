@@ -2,15 +2,13 @@ package ui
 
 import (
 	"lmm/api/context/account/domain/model"
-	"net/http"
-
-	"github.com/akinaru-lu/elesion"
+	"lmm/api/http"
 )
 
-func Verify(c *elesion.Context) {
-	user, ok := c.Fields().Get("user").(*model.User)
+func Verify(c *http.Context) {
+	user, ok := c.Values().Get("user").(*model.User)
 	if !ok {
-		c.Status(http.StatusUnauthorized).String(http.StatusText(http.StatusUnauthorized))
+		http.Unauthorized(c)
 		return
 	}
 	c.Status(http.StatusOK).JSON(VerifyResponse{
