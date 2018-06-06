@@ -1,46 +1,31 @@
-.PHONY: all
-all:
-	make run -j
-.PHONY: install
+all: dev
+
+docker-compose: docker
+	cd docker && docker-compose -f docker-compose.yml $(args) $(cmd)
+
+build:
+	make docker-compose cmd=build
+
+# TODO move to Dockerfile
 install:
-	go get -v github.com/akinaru-lu/elesion
-	go get -v github.com/go-sql-driver/mysql
-	go get -v github.com/google/uuid
-	go get -v github.com/stretchr/testify/assert
-	go get -v github.com/stretchr/testify/mock
-	rm -rf manager/node_modules
+	cd docker && docker-compose run --rm api bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/api && dep ensure"
+	cd docker && docker-compose run --rm image bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/image && dep ensure"
 	rm -rf app/node_modules
-	npm --prefix app install
-	npm --prefix manager install
+	cd docker && docker-compose run --rm app bash -c "npm i npm@latest -g && npm --prefix /app install"
+	rm -rf manager/node_modules
+	cd docker && docker-compose run --rm manager bash -c "npm i npm@latest -g && npm --prefix /manager install"
 
-.PHONY: run
-run: app api image manager docs
+prod:
+	make docker-compose cmd=up
 
-.PHONY: app
-app: app/package.json
-	npm --prefix app run dev
+dev:
+	make prod args="-f docker-compose.dev.yml"
 
-.PHONY: manager
-manager: manager/package.json
-	npm --prefix manager run dev
+test:
+	make docker-compose args="-f docker-compose.test.yml" cmd="run $(target)"
 
-.PHONY: api
-api: api/main.go
-	go run api/main.go
+cli: script
+	make docker-compose cmd="run cli python $(target)"
 
-.PHONY: image
-image: image/main.go
-	go run image/main.go
-
-.PHONY: test
-test: test-api
-
-.PHONY: test-api
-test-api:
-	go test -v lmm/api/context/account/appservice
-	go test -v lmm/api/context/account/domain/model
-	go test -v lmm/api/context/account/domain/repository
-	go test -v lmm/api/context/account/domain/service
-	go test -v lmm/api/context/account/ui
-	go test -v lmm/api/testing
-	go test -v lmm/api/usecase/auth
+stop:
+	make docker-compose cmd=down

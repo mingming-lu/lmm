@@ -29,7 +29,7 @@ class SQLHelper(cli.CLI):
             return
 
         try:
-            db = MySQLdb.connect(user="root")
+            db = MySQLdb.connect(user="root", host='lmm-mysql')
             cursor = db.cursor()
             cursor.execute('CREATE DATABASE IF NOT EXISTS {};'.format(self.args.database))
             db.select_db(self.args.database)

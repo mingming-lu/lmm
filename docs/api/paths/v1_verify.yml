@@ -4,7 +4,7 @@ get:
   parameters:
     - in: header
       name: Authorization
-      description: Basic {token}
+      description: Bearer {token}
       required: true
       schema:
         type: string
@@ -14,12 +14,12 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/user.yaml
+            $ref: ../components/schemas/user.yml
 
     400:
       allOf:
         - description: token不正确
-        - $ref: ../components/responses/400.yaml
+        - $ref: ../components/responses/400.yml
 
     500:
-      $ref: ../components/responses/500.yaml
+      $ref: ../components/responses/500.yml

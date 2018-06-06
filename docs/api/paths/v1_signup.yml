@@ -31,6 +31,6 @@ post:
     400:
       allOf:
         - description: 缺少账号或密码
-        - $ref: ../components/responses/400.yaml
+        - $ref: ../components/responses/400.yml
     500:
-      $ref: ../components/responses/500.yaml
+      $ref: ../components/responses/500.yml

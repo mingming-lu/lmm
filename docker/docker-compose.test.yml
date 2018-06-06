@@ -1,0 +1,15 @@
+version: "3"
+services:
+  api:
+    env_file:
+      - ./api/.test.env
+    environment:
+      DATABASE_NAME: lmm_test
+    working_dir: /go/src/lmm/api
+    command: bash
+  app:
+    command: echo "not implemented"
+  image:
+    command: echo "not implemented"
+  manager:
+    command: echo "not implemented"

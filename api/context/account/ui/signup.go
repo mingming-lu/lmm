@@ -16,6 +16,7 @@ func SignUp(c *elesion.Context) {
 	err := json.NewDecoder(c.Request.Body).Decode(auth)
 	if err != nil {
 		c.Status(http.StatusBadRequest).String(http.StatusText(http.StatusBadRequest))
+		return
 	}
 	id, err := uc.SignUp(auth.Name, auth.Password)
 	switch err {

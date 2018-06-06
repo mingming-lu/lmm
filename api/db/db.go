@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 
@@ -18,12 +19,16 @@ var (
 	ErrNoRows        = errors.New(sql.ErrNoRows.Error())
 )
 
-var defaultDatabaseName = "lmm"
+var (
+	dbName     = os.Getenv("DATABASE_NAME")
+	connParams = "parseTime=true"
+	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
+)
 var mux sync.Mutex
 
 func SetDefaultDatabaseName(name string) {
 	mux.Lock()
-	defaultDatabaseName = name
+	dbName = name
 	mux.Unlock()
 }
 
@@ -57,18 +62,19 @@ func (values Values) Where() string {
 }
 
 func New() *DB {
-	super, err := sql.Open("mysql", "root:@/?parseTime=true")
+	conn, err := sql.Open("mysql", dbSrcName+dbName+"?"+connParams)
 	if err != nil {
 		panic(err)
 	}
-	return &DB{DB: super}
+	return &DB{DB: conn}
 }
 
+// Deprecated: select database on creating db connection
 func Default() *DB {
-	if defaultDatabaseName == "" {
-		panic("Default database has not been set")
-	}
-	return New().Use(defaultDatabaseName)
+	// if dbName == "" {
+	// 	panic("Default database has not been set")
+	// }
+	return New()
 }
 
 func (db *DB) CreateDatabase(name string) *DB {
@@ -87,6 +93,7 @@ func (db *DB) DropDatabase(name string) *DB {
 	return db
 }
 
+// Deprecated: select database on creating db connection instead of use
 func (db *DB) Use(database string) *DB {
 	_, err := db.Exec("USE " + database)
 	if err != nil {

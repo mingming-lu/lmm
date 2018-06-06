@@ -5,17 +5,17 @@ servers:
 
 paths:
   /v1/signup:
-    $ref: ./paths/v1_signup.yaml
+    $ref: ./paths/v1_signup.yml
   /v1/signin:
-    $ref: ./paths/v1_signin.yaml
+    $ref: ./paths/v1_signin.yml
   /v1/verify:
-    $ref: ./paths/v1_verify.yaml
+    $ref: ./paths/v1_verify.yml
   /v1/blog:
-    $ref: ./paths/v1_blog.yaml
+    $ref: ./paths/v1_blog.yml
   /v1/blog/{blog_id}:
-    $ref: ./paths/v1_blog_blog_id.yaml
+    $ref: ./paths/v1_blog_blog_id.yml
   /v1/blog/{blog_id}/category:
-    $ref: ./paths/v1_blog_blog_id_category.yaml
+    $ref: ./paths/v1_blog_blog_id_category.yml
 
 tags:
   - name: signup

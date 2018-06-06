@@ -45,7 +45,7 @@ export default {
       this.files.forEach(file => {
         formData.append('src', file)
       })
-      axios.post('https://api.lmm.im/v1/images', formData, {
+      axios.post(process.env.API_URL_BASE + '/v1/images', formData, {
         headers: {
           Authorization: localStorage.getItem('token')
         }
