@@ -117,7 +117,11 @@ func (r *Request) ScanBody(schema interface{}) error {
 }
 
 func NewContext(rw ResponseWriter, r *Request) *Context {
-	return &Context{Request: r, rw: rw}
+	return &Context{
+		Request: r,
+		rw:      rw,
+		values:  make(Values),
+	}
 }
 
 func (c *Context) Status(code int) *Context {
