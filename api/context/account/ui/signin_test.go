@@ -4,8 +4,8 @@ import (
 	"io"
 	"lmm/api/context/account/appservice"
 	testingService "lmm/api/context/account/domain/service/testing"
+	"lmm/api/http"
 	"lmm/api/testing"
-	"net/http"
 	"strings"
 )
 
@@ -16,7 +16,7 @@ func TestPostV1SignIn_400_InvalidInput(t *testing.T) {
 
 	tester := testing.NewTester(t)
 	tester.Is(http.StatusBadRequest, res.StatusCode())
-	tester.Is(http.StatusText(http.StatusBadRequest)+"\n", res.Body())
+	tester.Is(http.Status(http.StatusBadRequest)+"\n", res.Body())
 }
 
 func TestPostV1SignIn_400_EmptyUserName(t *testing.T) {
