@@ -4,15 +4,15 @@ import (
 	"lmm/api/context/account/domain/repository"
 	testingService "lmm/api/context/account/domain/service/testing"
 	"lmm/api/testing"
-	"lmm/api/utils/uuid"
 )
 
 func TestSignUp(t *testing.T) {
 	tester := testing.NewTester(t)
 	repo := repository.New()
+	app := New(repo)
 
-	name, password := uuid.New()[:32], uuid.New()
-	id, err := New(repo).SignUp(name, password)
+	name, password := randomUserNameAndPassword()
+	id, err := app.SignUp(name, password)
 	tester.NoError(err)
 
 	user, err := repo.FindByName(name)
@@ -24,23 +24,23 @@ func TestSignUp(t *testing.T) {
 
 func TestSignUp_Duplicate(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := repository.New()
+	app := New(repository.New())
 
-	name, password := uuid.New()[:32], uuid.New()
-	id, err := New(repo).SignUp(name, password)
+	name, password := randomUserNameAndPassword()
+	id, err := app.SignUp(name, password)
 	tester.NoError(err)
 	tester.Not(uint64(0), id)
 
-	id, err = New(repo).SignUp(name, password)
+	id, err = app.SignUp(name, password)
 	tester.Is(ErrDuplicateUserName, err)
 	tester.Is(uint64(0), id)
 }
 
 func TestSignUp_EmptyUserName(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := repository.New()
+	app := New(repository.New())
 
-	id, err := New(repo).SignUp("", uuid.New())
+	id, err := app.SignUp("", "password")
 	tester.Error(err)
 	tester.Is(uint64(id), id)
 	tester.Is(ErrEmptyUserNameOrPassword, err)
@@ -48,8 +48,9 @@ func TestSignUp_EmptyUserName(t *testing.T) {
 
 func TestSignUp_EmptyPassword(t *testing.T) {
 	tester := testing.NewTester(t)
+	app := New(repository.New())
 
-	id, err := New(repository.New()).SignUp(uuid.New()[:32], "")
+	id, err := app.SignUp("username", "")
 	tester.Error(err)
 	tester.Is(uint64(id), id)
 	tester.Is(ErrEmptyUserNameOrPassword, err)
@@ -57,8 +58,9 @@ func TestSignUp_EmptyPassword(t *testing.T) {
 
 func TestSignUp_EmptyUserNameAndPassword(t *testing.T) {
 	tester := testing.NewTester(t)
+	app := New(repository.New())
 
-	id, err := New(repository.New()).SignUp("", "")
+	id, err := app.SignUp("", "")
 	tester.Error(err)
 	tester.Is(uint64(id), id)
 	tester.Is(ErrEmptyUserNameOrPassword, err)
@@ -66,8 +68,10 @@ func TestSignUp_EmptyUserNameAndPassword(t *testing.T) {
 
 func TestSignUp_Exception(t *testing.T) {
 	tester := testing.NewTester(t)
+	app := New(testingService.NewMockedRepo())
 
-	id, err := New(testingService.NewMockedRepo()).SignUp("foobar", "1234")
+	name, password := randomUserNameAndPassword()
+	id, err := app.SignUp(name, password)
 
 	tester.Error(err)
 	tester.Is(uint64(0), id)
