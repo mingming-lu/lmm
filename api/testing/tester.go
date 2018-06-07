@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type M = testing.M
 type T = testing.T
 
 type Tester struct {
