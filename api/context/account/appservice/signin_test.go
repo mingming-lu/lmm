@@ -1,47 +1,46 @@
 package appservice
 
 import (
-	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	testingService "lmm/api/context/account/domain/service/testing"
 	"lmm/api/testing"
 )
 
 func TestSignIn_Success(t *testing.T) {
-	testing.InitTable("user")
 	tester := testing.NewTester(t)
-	uc := New(repository.New())
+	app := New(repository.New())
 
-	m := testingService.NewUser()
-	user, err := uc.SignIn(m.Name, m.Password)
+	name, password := randomUserNameAndPassword()
+	app.SignUp(name, password)
 
+	user, err := app.SignIn(name, password)
 	tester.NoError(err)
-	tester.Is(m.ID, user.ID)
-	tester.Is(m.Name, user.Name)
-	tester.Isa(&model.User{}, user)
+	tester.Is(name, user.Name())
+	tester.NoError(user.VerifyPassword(password))
 }
 
 func TestSignIn_InvalidPassword(t *testing.T) {
-	testing.InitTable("user")
 	tester := testing.NewTester(t)
-	uc := New(repository.New())
+	app := New(repository.New())
 
-	m := testingService.NewUser()
-	user, err := uc.SignIn(m.Name, "1234")
+	name, password := randomUserNameAndPassword()
+	app.SignUp(name, password)
 
+	user, err := app.SignIn(name, "1234")
 	tester.Error(err)
 	tester.Nil(user)
 	tester.Is(ErrInvalidUserNameOrPassword, err)
 }
 
 func TestSignIn_NoSuchUser(t *testing.T) {
-	testing.InitTable("user")
 	tester := testing.NewTester(t)
-	uc := New(repository.New())
+	app := New(repository.New())
 
-	res, err := uc.SignIn("foobar", "1234")
+	name, password := randomUserNameAndPassword()
+	user, err := app.SignIn(name, password)
+
 	tester.Error(err)
-	tester.Nil(res)
+	tester.Nil(user)
 	tester.Is(ErrInvalidUserNameOrPassword, err)
 }
 
@@ -59,7 +58,7 @@ func TestSignIn_EmptyPassword(t *testing.T) {
 	tester := testing.NewTester(t)
 	uc := New(repository.New())
 
-	res, err := uc.SignIn("user", "")
+	res, err := uc.SignIn("username", "")
 	tester.Error(err)
 	tester.Nil(res)
 	tester.Is(ErrEmptyUserNameOrPassword, err)
@@ -67,9 +66,9 @@ func TestSignIn_EmptyPassword(t *testing.T) {
 
 func TestSignIn_EmptyUserNameAndPassword(t *testing.T) {
 	tester := testing.NewTester(t)
-	uc := New(repository.New())
+	app := New(repository.New())
 
-	res, err := uc.SignIn("", "")
+	res, err := app.SignIn("", "")
 	tester.Error(err)
 	tester.Nil(res)
 	tester.Is(ErrEmptyUserNameOrPassword, err)
@@ -77,8 +76,11 @@ func TestSignIn_EmptyUserNameAndPassword(t *testing.T) {
 
 func TestSignIn_Exception(t *testing.T) {
 	tester := testing.NewTester(t)
+	app := New(testingService.NewMockedRepo())
 
-	user, err := New(testingService.NewMockedRepo()).SignIn("foobar", "1234")
+	name, password := randomUserNameAndPassword()
+	app.SignUp(name, password)
+	user, err := app.SignIn(name, password)
 
 	tester.Error(err)
 	tester.Nil(user)
