@@ -2,7 +2,9 @@ package appservice
 
 import (
 	"errors"
+	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
+	"lmm/api/db"
 )
 
 var (
@@ -24,4 +26,25 @@ type Usecase struct {
 
 func New(repo repository.Repository) *Usecase {
 	return &Usecase{repo: repo}
+}
+
+// SignIn is a usecase which users sign in with a account
+func (uc *Usecase) SignIn(name, password string) (*model.User, error) {
+	if name == "" || password == "" {
+		return nil, ErrEmptyUserNameOrPassword
+	}
+
+	user, err := uc.repo.FindByName(name)
+	if err != nil {
+		if err.Error() == db.ErrNoRows.Error() {
+			return nil, ErrInvalidUserNameOrPassword
+		}
+		return nil, err
+	}
+
+	if user.VerifyPassword(password) != nil {
+		return nil, ErrInvalidUserNameOrPassword
+	}
+
+	return user, nil
 }
