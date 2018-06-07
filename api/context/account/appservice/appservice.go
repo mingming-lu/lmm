@@ -67,7 +67,13 @@ func (app *AppService) SignIn(name, password string) (*model.User, error) {
 		return nil, ErrInvalidUserNameOrPassword
 	}
 
-	return user, nil
+	return model.NewUser(
+		user.ID(),
+		user.Name(),
+		user.Password(),
+		service.EncodeToken(user.Token()),
+		user.CreatedAt(),
+	), nil
 }
 
 func (app *AppService) VerifyToken(encodedToken string) (user *model.User, err error) {

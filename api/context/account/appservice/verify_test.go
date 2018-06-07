@@ -15,11 +15,15 @@ func TestVerify_Success(t *testing.T) {
 	app.SignUp(name, password)
 	user, _ := app.SignIn(name, password)
 
-	sameUser, err := app.VerifyToken(service.EncodeToken(user.Token()))
+	sameUser, err := app.VerifyToken(user.Token())
 
 	tester.NoError(err)
 	tester.Isa(&model.User{}, sameUser)
-	tester.Is(user, sameUser)
+	tester.Is(user.ID(), sameUser.ID())
+
+	rawToken, err := service.DecodeToken(user.Token())
+	tester.NoError(err)
+	tester.Is(rawToken, sameUser.Token())
 }
 
 func TestVerify_InvalidToken(t *testing.T) {
