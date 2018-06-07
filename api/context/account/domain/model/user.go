@@ -55,21 +55,6 @@ func (u *User) Token() string {
 	return u.token
 }
 
-func (u *User) EncodedToken() string {
-	return encodeToken(u.Token())
-}
-
-func (u *User) VerityToken(encryptedToken string) error {
-	rawToken, err := decodeToken(encryptedToken)
-	if err != nil {
-		return err
-	}
-	if rawToken == u.Token() {
-		return nil
-	}
-	return ErrInvalidToken
-}
-
 func (u *User) CreatedAt() time.Time {
 	return u.createdAt
 }

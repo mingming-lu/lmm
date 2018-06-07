@@ -3,6 +3,7 @@ package appservice
 import (
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
+	"lmm/api/context/account/domain/service"
 	"lmm/api/testing"
 )
 
@@ -14,7 +15,7 @@ func TestVerify_Success(t *testing.T) {
 	app.SignUp(name, password)
 	user, _ := app.SignIn(name, password)
 
-	sameUser, err := app.VerifyToken(user.EncodedToken())
+	sameUser, err := app.VerifyToken(service.EncodeToken(user.Token()))
 
 	tester.NoError(err)
 	tester.Isa(&model.User{}, sameUser)
