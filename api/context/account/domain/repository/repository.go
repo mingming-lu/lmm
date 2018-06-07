@@ -2,7 +2,6 @@ package repository
 
 import (
 	"lmm/api/context/account/domain/model"
-	"lmm/api/db"
 	"lmm/api/domain/repository"
 	"time"
 
@@ -64,28 +63,6 @@ func (repo *repo) FindByName(name string) (*model.User, error) {
 
 func (repo *repo) FindByToken(token string) (*model.User, error) {
 	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
-	defer stmt.Close()
-
-	var (
-		userID        uint64
-		userName      string
-		userPassword  string
-		userGUID      string
-		userToken     string
-		userCreatedAt time.Time
-	)
-	err := stmt.QueryRow(token).Scan(&userID, &userName, &userPassword, &userGUID, &userToken, &userCreatedAt)
-	if err != nil {
-		return nil, errors.New(err.Error())
-	}
-	return model.NewUser(userID, userName, userPassword, userGUID, userToken, userCreatedAt), nil
-}
-
-func FindByToken(token string) (*model.User, error) {
-	db := db.New()
 	defer db.Close()
 
 	stmt := db.MustPrepare(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
