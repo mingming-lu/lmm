@@ -106,6 +106,7 @@ type Context struct {
 	rw      ResponseWriter
 	Request *Request
 	values  Values
+	logger  Logger
 }
 
 func (c *Context) Values() Values {
