@@ -20,7 +20,7 @@ type Response struct {
 
 // User model is a Entry
 type User struct {
-	model.Entry
+	model.Entity
 	Name      string
 	Password  string
 	GUID      string
