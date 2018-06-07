@@ -2,6 +2,7 @@ package appservice
 
 import (
 	"errors"
+	"lmm/api/context/account/domain/factory"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/db"
@@ -20,16 +21,39 @@ type Auth struct {
 	Password string `json:"password"`
 }
 
-type Usecase struct {
+type AppService struct {
 	repo repository.Repository
 }
 
-func New(repo repository.Repository) *Usecase {
+func New(repo repository.Repository) *AppService {
 	return &Usecase{repo: repo}
 }
 
+func (app *AppService) SignUp(name, password string) (uint64, error) {
+	if name == "" || password == "" {
+		return 0, ErrEmptyUserNameOrPassword
+	}
+
+	m, err := factory.NewUser(name, password)
+	if err != nil {
+		return 0, err
+	}
+	err = uc.repo.Add(m)
+	if err != nil {
+		key, _, ok := repository.CheckErrorDuplicate(err.Error())
+		if !ok {
+			return 0, err
+		}
+		if key == "name" {
+			return 0, ErrDuplicateUserName
+		}
+		return 0, err
+	}
+	return user.ID(), nil
+}
+
 // SignIn is a usecase which users sign in with a account
-func (uc *Usecase) SignIn(name, password string) (*model.User, error) {
+func (app *AppService) SignIn(name, password string) (*model.User, error) {
 	if name == "" || password == "" {
 		return nil, ErrEmptyUserNameOrPassword
 	}
