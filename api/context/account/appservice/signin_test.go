@@ -1,6 +1,7 @@
 package appservice
 
 import (
+	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	testingService "lmm/api/context/account/domain/service/testing"
 	"lmm/api/testing"
@@ -15,6 +16,7 @@ func TestSignIn_Success(t *testing.T) {
 
 	user, err := app.SignIn(name, password)
 	tester.NoError(err)
+	tester.Isa(&model.User{}, user)
 	tester.Is(name, user.Name())
 	tester.NoError(user.VerifyPassword(password))
 }

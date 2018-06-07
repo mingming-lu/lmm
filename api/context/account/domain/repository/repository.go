@@ -64,7 +64,7 @@ func (repo *repo) FindByToken(token string) (*model.User, error) {
 	db := repo.DB()
 	defer db.Close()
 
-	stmt := db.MustPrepare(`SELECT id, name, password, guid, token, created_at FROM user WHERE token = ?`)
+	stmt := db.MustPrepare(`SELECT id, name, password, token, created_at FROM user WHERE token = ?`)
 	defer stmt.Close()
 
 	var (
