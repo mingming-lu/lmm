@@ -12,17 +12,15 @@ type User struct {
 	id        uint64
 	name      string
 	password  string
-	guid      string
 	token     string
 	createdAt time.Time
 }
 
-func NewUser(id uint64, name, password, guid, token string, createdAt time.Time) *User {
+func NewUser(id uint64, name, password, token string, createdAt time.Time) *User {
 	return &User{
 		id:        id,
 		name:      name,
 		password:  password,
-		guid:      guid,
 		token:     token,
 		createdAt: createdAt,
 	}
@@ -49,12 +47,23 @@ func (u *User) UpdatePassword(password string) error {
 	return nil
 }
 
-func (u *User) GUID() string {
-	return u.guid
-}
-
 func (u *User) Token() string {
 	return u.token
+}
+
+func (u *User) EncodedToken() string {
+	return encodeToken(u.Token())
+}
+
+func (u *User) VerityToken(encryptedToken string) error {
+	rawToken, err := decodeToken(encryptedToken)
+	if err != nil {
+		return err
+	}
+	if rawToken == u.Token() {
+		return nil
+	}
+	return ErrInvalidToken
 }
 
 func (u *User) CreatedAt() time.Time {

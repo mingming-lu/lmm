@@ -4,7 +4,6 @@ import (
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/service"
 	"lmm/api/db"
-	"lmm/api/utils/sha256"
 )
 
 // SignIn is a usecase which users sign in with a account
@@ -22,13 +21,11 @@ func (uc *Usecase) SignIn(name, password string) (*model.User, error) {
 	}
 
 	// validate password
-	encoded := sha256.Hex([]byte(user.GUID + password))
-	if encoded != user.Password {
+	if encoded != user.Password() {
 		return nil, ErrInvalidUserNameOrPassword
 	}
 
-	encodedToken := service.EncodeToken(user.Token)
-	user.Token = encodedToken
+	user.Token = service.EncodeToken(user.Token())
 
 	return user, nil
 }

@@ -20,9 +20,9 @@ func SignIn(c *http.Context) {
 	switch err {
 	case nil:
 		c.Status(http.StatusOK).JSON(SignInResponse{
-			ID:    user.ID,
-			Name:  user.Name,
-			Token: user.Token,
+			ID:    user.ID(),
+			Name:  user.Name(),
+			Token: user.Token(),
 		})
 	case appservice.ErrEmptyUserNameOrPassword:
 		c.Status(http.StatusBadRequest).String(err.Error())

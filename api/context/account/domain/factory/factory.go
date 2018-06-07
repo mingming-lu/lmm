@@ -20,5 +20,5 @@ func NewUser(name, password string) (*model.User, error) {
 		return nil, err
 	}
 
-	return model.NewUser(userID, name, string(hashedPassword), uuid.New(), uuid.New(), time.Now()), nil
+	return model.NewUser(userID, name, string(hashedPassword), uuid.New(), time.Now()), nil
 }
