@@ -31,7 +31,7 @@ func (repo *repo) Add(user *model.User) error {
 	stmt := db.MustPrepare(`INSERT INTO user (id, name, password, token, created_at) VALUES (?, ?, ?, ?, ?)`)
 	defer stmt.Close()
 
-	_, err := stmt.Exec(user.Name(), user.Password(), user.Token(), user.CreatedAt().UTC())
+	_, err := stmt.Exec(user.ID(), user.Name(), user.Password(), user.Token(), user.CreatedAt().UTC())
 	if err != nil {
 		return err
 	}
