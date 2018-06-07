@@ -38,8 +38,12 @@ func (u *User) Password() string {
 	return u.password
 }
 
-func (u *User) UpdatePassword(password string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func (u *User) VerifyPassword(rawPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(u.password), []byte(rawPassword))
+}
+
+func (u *User) UpdatePassword(rawPassword string) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}

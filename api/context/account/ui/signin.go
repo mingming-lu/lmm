@@ -22,7 +22,7 @@ func SignIn(c *http.Context) {
 		c.Status(http.StatusOK).JSON(SignInResponse{
 			ID:    user.ID(),
 			Name:  user.Name(),
-			Token: user.Token(),
+			Token: user.EncodedToken(),
 		})
 	case appservice.ErrEmptyUserNameOrPassword:
 		c.Status(http.StatusBadRequest).String(err.Error())
