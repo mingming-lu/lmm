@@ -5,7 +5,9 @@ import (
 	"lmm/api/context/account/domain/factory"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
+	"lmm/api/context/account/domain/service"
 	"lmm/api/db"
+	repoUtil "lmm/api/domain/repository"
 )
 
 var (
@@ -26,7 +28,7 @@ type AppService struct {
 }
 
 func New(repo repository.Repository) *AppService {
-	return &Usecase{repo: repo}
+	return &AppService{repo: repo}
 }
 
 func (app *AppService) SignUp(name, password string) (uint64, error) {
@@ -34,13 +36,13 @@ func (app *AppService) SignUp(name, password string) (uint64, error) {
 		return 0, ErrEmptyUserNameOrPassword
 	}
 
-	m, err := factory.NewUser(name, password)
+	user, err := factory.NewUser(name, password)
 	if err != nil {
 		return 0, err
 	}
-	err = uc.repo.Add(m)
+	err = app.repo.Add(user)
 	if err != nil {
-		key, _, ok := repository.CheckErrorDuplicate(err.Error())
+		key, _, ok := repoUtil.CheckErrorDuplicate(err.Error())
 		if !ok {
 			return 0, err
 		}
@@ -58,7 +60,7 @@ func (app *AppService) SignIn(name, password string) (*model.User, error) {
 		return nil, ErrEmptyUserNameOrPassword
 	}
 
-	user, err := uc.repo.FindByName(name)
+	user, err := app.repo.FindByName(name)
 	if err != nil {
 		if err.Error() == db.ErrNoRows.Error() {
 			return nil, ErrInvalidUserNameOrPassword
@@ -70,5 +72,18 @@ func (app *AppService) SignIn(name, password string) (*model.User, error) {
 		return nil, ErrInvalidUserNameOrPassword
 	}
 
+	return user, nil
+}
+
+func (app *AppService) VerifyToken(encodedToken string) (user *model.User, err error) {
+	token, err := service.DecodeToken(encodedToken)
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+
+	user, err = app.repo.FindByToken(token)
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
 	return user, nil
 }
