@@ -18,11 +18,6 @@ var (
 	ErrInvalidUserNameOrPassword = errors.New("Invalid user name or password")
 )
 
-type Auth struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-}
-
 type AppService struct {
 	repo repository.Repository
 }
