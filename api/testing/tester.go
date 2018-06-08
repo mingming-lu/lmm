@@ -64,3 +64,7 @@ func (t *Tester) Output(expectedRegexp string, f func(), msgAndArgs ...interface
 
 	return assert.Regexp(t, expectedRegexp, buf.String(), msgAndArgs...)
 }
+
+func (t *Tester) Regexp(expected, actual string, msgAndArgs ...interface{}) bool {
+	return assert.Regexp(t, expected, actual, msgAndArgs...)
+}
