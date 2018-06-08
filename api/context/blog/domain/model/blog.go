@@ -35,14 +35,14 @@ func (b *Blog) update() {
 	b.updatedAt = time.Now()
 }
 
-func (b *Blog) UpdateTitle() error {
+func (b *Blog) UpdateTitle(title string) {
+	b.title = title
 	b.update()
-	return nil
 }
 
-func (b *Blog) UpdateText() error {
+func (b *Blog) UpdateText(text string) {
 	b.update()
-	return nil
+	b.text = text
 }
 
 func (b *Blog) ID() uint64 {
