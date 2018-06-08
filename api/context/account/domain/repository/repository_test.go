@@ -1,54 +1,59 @@
 package repository
 
 import (
+	"lmm/api/context/account/domain/factory"
 	"lmm/api/context/account/domain/model"
-	testingService "lmm/api/context/account/domain/service/testing"
 	"lmm/api/db"
 	"lmm/api/testing"
-	"lmm/api/utils/sha256"
+	"lmm/api/utils/uuid"
 )
 
-func TestSave(t *testing.T) {
-	testing.InitTable("user")
+func TestAdd(t *testing.T) {
 	tester := testing.NewTester(t)
-
 	repo := New()
-	m := model.NewUser("foobar", "1234")
-	user, err := repo.Put(m)
+
+	name, password := uuid.New()[:32], uuid.New()
+	user, err := factory.NewUser(name, password)
 	tester.NoError(err)
-	tester.Is(uint64(1), user.ID)
-	tester.Is("foobar", user.Name)
+
+	err = repo.Add(user)
+	tester.NoError(err)
 
 	db := db.New()
 	defer db.Close()
 
-	stmt := db.MustPrepare("SELECT * FROM user WHERE id = ?")
+	stmt := db.MustPrepare("SELECT name, token FROM user WHERE id = ?")
 	defer stmt.Close()
 
-	r := stmt.QueryRow(user.ID)
-	r.Scan(&m)
-	tester.Is(uint64(1), m.ID)
+	var (
+		userName  string
+		userToken string
+	)
+	err = stmt.QueryRow(user.ID()).Scan(&userName, &userToken)
+
+	tester.NoError(err)
+	tester.Is(user.Name(), userName)
+	tester.Is(user.Token(), userToken)
 }
 
 func TestFindByName_Success(t *testing.T) {
-	testing.InitTable("user")
 	tester := testing.NewTester(t)
-	user := testingService.NewUser()
-	user.Password = sha256.Hex([]byte(user.GUID + user.Password))
-
 	repo := New()
-	found, err := repo.FindByName(user.Name)
 
+	name, password := uuid.New()[:32], uuid.New()
+	user, _ := factory.NewUser(name, password)
+	repo.Add(user)
+
+	sameUser, err := repo.FindByName(user.Name())
 	tester.NoError(err)
-	tester.Isa(&model.User{}, found)
-	tester.Is(user, found)
+	tester.Isa(&model.User{}, sameUser)
+	tester.Is(user.ID(), sameUser.ID())
 }
 
 func TestFindByName_NotFound(t *testing.T) {
-	testing.InitTable("user")
 	tester := testing.NewTester(t)
-
 	repo := New()
+
 	found, err := repo.FindByName("foo")
 
 	tester.Error(err)
@@ -57,22 +62,21 @@ func TestFindByName_NotFound(t *testing.T) {
 }
 
 func TestFindByToken_Success(t *testing.T) {
-	testing.InitTable("user")
 	tester := testing.NewTester(t)
-
-	user := testingService.NewUser()
 	repo := New()
 
-	found, err := repo.FindByToken(user.Token)
+	name, password := uuid.New()[:32], uuid.New()
+	user, _ := factory.NewUser(name, password)
+	repo.Add(user)
+
+	found, err := repo.FindByToken(user.Token())
 	tester.NoError(err)
 	tester.Isa(&model.User{}, found)
-	tester.Is(user.Name, found.Name)
+	tester.Is(user.ID(), found.ID())
 }
 
 func TestFindByToken_NotFound(t *testing.T) {
-	testing.InitTable("user")
 	tester := testing.NewTester(t)
-
 	repo := New()
 
 	found, err := repo.FindByToken("1234")

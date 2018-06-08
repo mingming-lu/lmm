@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type M = testing.M
 type T = testing.T
 
 type Tester struct {
@@ -62,4 +63,8 @@ func (t *Tester) Output(expectedRegexp string, f func(), msgAndArgs ...interface
 	log.SetOutput(os.Stderr)
 
 	return assert.Regexp(t, expectedRegexp, buf.String(), msgAndArgs...)
+}
+
+func (t *Tester) Regexp(expected, actual string, msgAndArgs ...interface{}) bool {
+	return assert.Regexp(t, expected, actual, msgAndArgs...)
 }

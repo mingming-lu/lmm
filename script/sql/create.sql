@@ -2,7 +2,6 @@ CREATE TABLE IF NOT EXISTS user (
 	id int unsigned NOT NULL AUTO_INCREMENT,
 	name varchar(32) NOT NULL UNIQUE,
 	password varchar(128) NOT NULL,
-	guid varchar(36) NOT NULL UNIQUE,
 	token varchar(36) NOT NULL UNIQUE,
 	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id)
