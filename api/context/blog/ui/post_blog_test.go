@@ -20,6 +20,19 @@ func TestPostBlog_Success(t *testing.T) {
 
 	res := postBlog(headers, testing.StructToRequestBody(blog))
 	tester.Is(http.StatusCreated, res.StatusCode())
+	tester.Regexp(`/blog/\d+`, res.Header().Get("Location"))
+}
+
+func TestPostBlog_Unauthorized(t *testing.T) {
+	tester := testing.NewTester(t)
+
+	blog := Blog{
+		Title: "blog title",
+		Text:  "blog text",
+	}
+
+	res := postBlog(nil, testing.StructToRequestBody(blog))
+	tester.Is(http.StatusUnauthorized, res.StatusCode())
 }
 
 func postBlog(headers map[string]string, requestBody io.Reader) *testing.Response {
