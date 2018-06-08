@@ -1,22 +1,29 @@
 package appservice
 
 import (
+	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/context/account/domain/service"
-	testingService "lmm/api/context/account/domain/service/testing"
 	"lmm/api/testing"
 )
 
 func TestVerify_Success(t *testing.T) {
-	testing.InitTable("user")
 	tester := testing.NewTester(t)
+	app := New(repository.New())
 
-	origin := testingService.NewUser()
-	token := service.EncodeToken(origin.Token)
-	user, err := New(repository.New()).VerifyToken(token)
+	name, password := randomUserNameAndPassword()
+	app.SignUp(name, password)
+	user, _ := app.SignIn(name, password)
+
+	sameUser, err := app.VerifyToken(user.Token())
 
 	tester.NoError(err)
-	tester.Is(origin.ID, user.ID)
+	tester.Isa(&model.User{}, sameUser)
+	tester.Is(user.ID(), sameUser.ID())
+
+	rawToken, err := service.DecodeToken(user.Token())
+	tester.NoError(err)
+	tester.Is(rawToken, sameUser.Token())
 }
 
 func TestVerify_InvalidToken(t *testing.T) {

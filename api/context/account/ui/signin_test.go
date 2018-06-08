@@ -3,15 +3,14 @@ package ui
 import (
 	"io"
 	"lmm/api/context/account/appservice"
-	testingService "lmm/api/context/account/domain/service/testing"
+	"lmm/api/context/account/domain/factory"
 	"lmm/api/http"
 	"lmm/api/testing"
+	"lmm/api/utils/uuid"
 	"strings"
 )
 
 func TestPostV1SignIn_400_InvalidInput(t *testing.T) {
-	testing.InitTable("user")
-
 	res := postSignIn(strings.NewReader("not a json"))
 
 	tester := testing.NewTester(t)
@@ -20,8 +19,6 @@ func TestPostV1SignIn_400_InvalidInput(t *testing.T) {
 }
 
 func TestPostV1SignIn_400_EmptyUserName(t *testing.T) {
-	testing.InitTable("user")
-
 	requestBody := testing.StructToRequestBody(Auth{Name: "", Password: "1234"})
 	res := postSignIn(requestBody)
 
@@ -31,8 +28,6 @@ func TestPostV1SignIn_400_EmptyUserName(t *testing.T) {
 }
 
 func TestPostV1SignIn_400_EmptyPassword(t *testing.T) {
-	testing.InitTable("user")
-
 	requestBody := testing.StructToRequestBody(Auth{Name: "foobar", Password: ""})
 	res := postSignIn(requestBody)
 
@@ -42,8 +37,6 @@ func TestPostV1SignIn_400_EmptyPassword(t *testing.T) {
 }
 
 func TestPostV1SignIn_400_EmptyUserNameAndPassword(t *testing.T) {
-	testing.InitTable("user")
-
 	requestBody := testing.StructToRequestBody(Auth{Name: "", Password: ""})
 	res := postSignIn(requestBody)
 
@@ -53,10 +46,10 @@ func TestPostV1SignIn_400_EmptyUserNameAndPassword(t *testing.T) {
 }
 
 func TestPostV1SignIn_404_InvalidUserName(t *testing.T) {
-	testing.InitTable("user")
-	user := testingService.NewUser()
+	name, password := uuid.New()[:32], uuid.New()
+	factory.NewUser(name, password)
 
-	requestBody := testing.StructToRequestBody(Auth{Name: user.Name, Password: "123"})
+	requestBody := testing.StructToRequestBody(Auth{Name: "name", Password: password})
 	res := postSignIn(requestBody)
 
 	tester := testing.NewTester(t)
@@ -65,10 +58,10 @@ func TestPostV1SignIn_404_InvalidUserName(t *testing.T) {
 }
 
 func TestPostV1SignIn_404_InvalidPassword(t *testing.T) {
-	testing.InitTable("user")
-	user := testingService.NewUser()
+	name, password := uuid.New()[:32], uuid.New()
+	factory.NewUser(name, password)
 
-	requestBody := testing.StructToRequestBody(Auth{Name: "123", Password: user.Password})
+	requestBody := testing.StructToRequestBody(Auth{Name: name, Password: "1234"})
 	res := postSignIn(requestBody)
 
 	tester := testing.NewTester(t)
@@ -77,10 +70,8 @@ func TestPostV1SignIn_404_InvalidPassword(t *testing.T) {
 }
 
 func TestPostV1SignIn_404_InvalidUserNameAndPassword(t *testing.T) {
-	testing.InitTable("user")
-	testingService.NewUser()
-
-	requestBody := testing.StructToRequestBody(Auth{Name: "123", Password: "123"})
+	name, password := uuid.New()[:32], uuid.New()
+	requestBody := testing.StructToRequestBody(Auth{Name: name, Password: password})
 	res := postSignIn(requestBody)
 
 	tester := testing.NewTester(t)
