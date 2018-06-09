@@ -1,8 +1,14 @@
 package appservice
 
 import (
+	"errors"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/repository"
+	repoUtil "lmm/api/domain/repository"
+)
+
+var (
+	ErrBlogTitleDuplicated = errors.New("blog title duplicated")
 )
 
 type AppService struct {
@@ -18,5 +24,16 @@ func (app *AppService) PostNewBlog(userID uint64, title, text string) (uint64, e
 	if err != nil {
 		return uint64(0), err
 	}
-	return blog.ID(), app.repo.Add(blog)
+	err = app.repo.Add(blog)
+	if err != nil {
+		key, _, ok := repoUtil.CheckErrorDuplicate(err.Error())
+		if !ok {
+			return 0, err
+		}
+		if key == "title" {
+			return 0, ErrBlogTitleDuplicated
+		}
+		return 0, err
+	}
+	return blog.ID(), err
 }
