@@ -3,12 +3,14 @@ package appservice
 import (
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
+	"os"
 )
 
 func Main(m *testing.M) {
-	m.Run()
+	code := m.Run()
+	os.Exit(code)
 }
 
 func randomUserNameAndPassword() (string, string) {
-	return uuid.New()[:32], uuid.New()
+	return uuid.New()[:31], uuid.New()
 }

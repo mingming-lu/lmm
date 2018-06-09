@@ -46,7 +46,7 @@ func TestPostV1SignIn_400_EmptyUserNameAndPassword(t *testing.T) {
 }
 
 func TestPostV1SignIn_404_InvalidUserName(t *testing.T) {
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	factory.NewUser(name, password)
 
 	requestBody := testing.StructToRequestBody(Auth{Name: "name", Password: password})
@@ -58,7 +58,7 @@ func TestPostV1SignIn_404_InvalidUserName(t *testing.T) {
 }
 
 func TestPostV1SignIn_404_InvalidPassword(t *testing.T) {
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	factory.NewUser(name, password)
 
 	requestBody := testing.StructToRequestBody(Auth{Name: name, Password: "1234"})
@@ -70,7 +70,7 @@ func TestPostV1SignIn_404_InvalidPassword(t *testing.T) {
 }
 
 func TestPostV1SignIn_404_InvalidUserNameAndPassword(t *testing.T) {
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	requestBody := testing.StructToRequestBody(Auth{Name: name, Password: password})
 	res := postSignIn(requestBody)
 
