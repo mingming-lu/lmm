@@ -12,7 +12,7 @@ func TestAdd(t *testing.T) {
 	tester := testing.NewTester(t)
 	repo := New()
 
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	user, err := factory.NewUser(name, password)
 	tester.NoError(err)
 
@@ -40,7 +40,7 @@ func TestFindByName_Success(t *testing.T) {
 	tester := testing.NewTester(t)
 	repo := New()
 
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	user, _ := factory.NewUser(name, password)
 	repo.Add(user)
 
@@ -65,7 +65,7 @@ func TestFindByToken_Success(t *testing.T) {
 	tester := testing.NewTester(t)
 	repo := New()
 
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	user, _ := factory.NewUser(name, password)
 	repo.Add(user)
 

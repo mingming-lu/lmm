@@ -16,7 +16,7 @@ func TestPostV1Signup(t *testing.T) {
 	router := testing.NewRouter()
 	router.POST("/v1/signup", SignUp)
 
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	reqeustBody := testing.StructToRequestBody(Auth{Name: name, Password: password})
 
 	res := testing.NewResponse()
@@ -29,7 +29,7 @@ func TestPostV1Signup(t *testing.T) {
 func TestPostV1Signup_Duplicate(t *testing.T) {
 	tester := testing.NewTester(t)
 
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	user, _ := factory.NewUser(name, password)
 	repository.New().Add(user)
 
@@ -55,8 +55,6 @@ func TestPostV1SignUp_400_EmptyUserName(t *testing.T) {
 }
 
 func TestPostV1SignUp_400_EmptyPassword(t *testing.T) {
-	testing.InitTable("user")
-
 	requestBody := testing.StructToRequestBody(Auth{Name: "foobar", Password: ""})
 	res := postSignUp(requestBody)
 
@@ -66,8 +64,6 @@ func TestPostV1SignUp_400_EmptyPassword(t *testing.T) {
 }
 
 func TestPostV1SignUp_400_EmptyUserNameAndPassword(t *testing.T) {
-	testing.InitTable("user")
-
 	requestBody := testing.StructToRequestBody(Auth{Name: "", Password: ""})
 	res := postSignUp(requestBody)
 
