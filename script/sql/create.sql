@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 	UNIQUE `token` (`token`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
-CREATE TABLE IF NOT EXISTS blog (
+CREATE TABLE IF NOT EXISTS `blog` (
 	`id` bigint unsigned NOT NULL AUTO_INCREMENT,
 	`user` bigint unsigned NOT NULL,
 	`title` varchar(255) NOT NULL,
