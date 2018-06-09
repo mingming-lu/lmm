@@ -9,7 +9,7 @@ import (
 
 func TestNewUser(t *testing.T) {
 	tester := testing.NewTester(t)
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 
 	user, err := NewUser(name, password)
 	tester.NoError(err)
