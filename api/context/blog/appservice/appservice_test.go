@@ -13,7 +13,7 @@ import (
 var user *account.User
 
 func TestMain(m *testing.M) {
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	user, _ = accountFactory.NewUser(name, password)
 	accountRepository.New().Add(user)
 

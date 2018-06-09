@@ -15,7 +15,7 @@ var user *accountModel.User
 func TestMain(m *testing.M) {
 	var err error
 
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	user, err = accountFactory.NewUser(name, password)
 	if err != nil {
 		panic(err)

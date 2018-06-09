@@ -11,7 +11,7 @@ func TestAddBlog(t *testing.T) {
 	tester := testing.NewTester(t)
 	repo := NewBlogRepository()
 
-	name, password := uuid.New()[:32], uuid.New()
+	name, password := uuid.New()[:31], uuid.New()
 	title, text := uuid.New(), uuid.New()
 	user, _ := accountFactory.NewUser(name, password)
 	blog, _ := factory.NewBlog(user.ID(), title, text)
