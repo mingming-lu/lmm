@@ -55,8 +55,6 @@ func TestPostV1SignUp_400_EmptyUserName(t *testing.T) {
 }
 
 func TestPostV1SignUp_400_EmptyPassword(t *testing.T) {
-	testing.InitTable("user")
-
 	requestBody := testing.StructToRequestBody(Auth{Name: "foobar", Password: ""})
 	res := postSignUp(requestBody)
 
@@ -66,8 +64,6 @@ func TestPostV1SignUp_400_EmptyPassword(t *testing.T) {
 }
 
 func TestPostV1SignUp_400_EmptyUserNameAndPassword(t *testing.T) {
-	testing.InitTable("user")
-
 	requestBody := testing.StructToRequestBody(Auth{Name: "", Password: ""})
 	res := postSignUp(requestBody)
 
