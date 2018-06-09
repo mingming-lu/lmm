@@ -7,8 +7,8 @@ import (
 	"lmm/api/utils/uuid"
 )
 
-func TestAddBlog(t *testing.T) {
-	tester := testing.NewTester(t)
+func TestAddBlog_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
 	repo := NewBlogRepository()
 
 	name, password := uuid.New()[:31], uuid.New()
@@ -17,7 +17,7 @@ func TestAddBlog(t *testing.T) {
 	blog, _ := factory.NewBlog(user.ID(), title, text)
 	err := repo.Add(blog)
 
-	tester.NoError(err)
+	t.NoError(err)
 
 	var (
 		userID    uint64
