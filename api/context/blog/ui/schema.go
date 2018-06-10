@@ -1,6 +1,7 @@
 package ui
 
 type Blog struct {
+	ID    string `json:"id"`
 	Title string `json:"title"`
 	Text  string `json:"text"`
 }
@@ -12,6 +13,7 @@ type BlogListResponse struct {
 }
 
 type BlogResponse struct {
+	ID        string `json:"id"`
 	Title     string `json:"title"`
 	Text      string `json:"text"`
 	CreatedAt string `json:"created_at"`
