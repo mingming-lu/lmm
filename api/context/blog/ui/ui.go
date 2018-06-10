@@ -31,6 +31,34 @@ func PostBlog(c *http.Context) {
 	c.Status(http.StatusCreated).String("success")
 }
 
+func GetAllBlog(c *http.Context) {
+	app := appservice.New(repository.NewBlogRepository())
+	blogItems, page, hasNextPage, err := app.FindAllBlog(
+		c.Request.Query("count"),
+		c.Request.Query("page"),
+	)
+
+	switch err {
+	case nil:
+		blogList := make([]BlogResponse, len(blogItems))
+		for index, blogItem := range blogItems {
+			blogList[index].Title = blogItem.Title()
+			blogList[index].Text = blogItem.Text()
+			blogList[index].CreatedAt = blogItem.CreatedAt().UTC().String()
+			blogList[index].UpdatedAt = blogItem.UpdatedAt().UTC().String()
+		}
+		c.Status(http.StatusOK).JSON(BlogListResponse{
+			Blog:        blogList,
+			Page:        page,
+			HasNextPage: hasNextPage,
+		})
+	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
+		c.Status(http.StatusBadRequest).String(err.Error())
+	default:
+		http.InternalServerError(c)
+	}
+}
+
 func GetBlog(c *http.Context) {
 	app := appservice.New(repository.NewBlogRepository())
 	blog, err := app.FindBlogByID(c.Request.Path.Params("blog"))

@@ -17,7 +17,8 @@ func main() {
 	router.GET("/v1/verify", auth.BearerAuth(account.Verify))
 
 	// // blog
-	router.GET("/v1/blog/:blog", blog.Get)
+	router.GET("/v1/blog", blog.GetAllBlog)
+	router.GET("/v1/blog/:blog", blog.GetBlog)
 	// router.GET("/v1/users/:user/blog", blog.GetList)
 	router.POST("/v1/blog", auth.BearerAuth(blog.PostBlog))
 	// router.PUT("/v1/blog/:blog", blog.Update)

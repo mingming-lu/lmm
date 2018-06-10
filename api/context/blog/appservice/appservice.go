@@ -13,6 +13,8 @@ import (
 var (
 	ErrBlogTitleDuplicated = errors.New("blog title duplicated")
 	ErrNoSuchBlog          = errors.New("no such blog")
+	ErrInvalidCount        = errors.New("invalid count")
+	ErrInvalidPage         = errors.New("invalid page")
 )
 
 type AppService struct {
@@ -40,6 +42,40 @@ func (app *AppService) PostNewBlog(userID uint64, title, text string) (uint64, e
 		return 0, err
 	}
 	return blog.ID(), err
+}
+
+func (app *AppService) FindAllBlog(countStr, pageStr string) ([]*model.Blog, int, bool, error) {
+	var (
+		count int
+		page  int
+		err   error
+	)
+	if countStr == "" {
+		count = 10
+	} else {
+		count, err = strings.StrToInt(countStr)
+		if err != nil {
+			return nil, 0, false, ErrInvalidCount
+		}
+	}
+	if pageStr == "" {
+		page = 1
+	} else {
+		page, err = strings.StrToInt(pageStr)
+		if err != nil {
+			return nil, 0, false, ErrInvalidPage
+		}
+	}
+
+	blogList, err := app.repo.FindAll(count, page)
+	if err != nil {
+		return nil, 0, false, err
+	}
+
+	if len(blogList) <= count {
+		return blogList, page, false, nil
+	}
+	return blogList[:count], page, true, nil
 }
 
 func (app *AppService) FindBlogByID(idStr string) (*model.Blog, error) {
