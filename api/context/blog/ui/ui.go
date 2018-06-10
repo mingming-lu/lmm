@@ -6,6 +6,7 @@ import (
 	"lmm/api/context/blog/appservice"
 	"lmm/api/context/blog/domain/repository"
 	"lmm/api/http"
+	"lmm/api/utils/strings"
 	"log"
 )
 
@@ -42,6 +43,7 @@ func GetAllBlog(c *http.Context) {
 	case nil:
 		blogList := make([]BlogResponse, len(blogItems))
 		for index, blogItem := range blogItems {
+			blogList[index].ID = strings.Uint64ToStr(blogItem.ID())
 			blogList[index].Title = blogItem.Title()
 			blogList[index].Text = blogItem.Text()
 			blogList[index].CreatedAt = blogItem.CreatedAt().UTC().String()
@@ -65,6 +67,7 @@ func GetBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.Status(http.StatusOK).JSON(BlogResponse{
+			ID:        strings.Uint64ToStr(blog.ID()),
 			Title:     blog.Title(),
 			Text:      blog.Text(),
 			CreatedAt: blog.CreatedAt().UTC().String(),
@@ -72,6 +75,22 @@ func GetBlog(c *http.Context) {
 		})
 	case appservice.ErrNoSuchBlog:
 		c.Status(http.StatusNotFound).String(err.Error())
+	default:
+		http.InternalServerError(c)
+	}
+}
+
+func UpdateBlog(c *http.Context) {
+	user := c.Values().Get("user").(*account.User)
+	app := appservice.New(repository.NewBlogRepository())
+
+	blog := Blog{}
+	c.Request.ScanBody(&blog)
+
+	err := app.EditBlog(user.ID(), c.Request.Path.Params("blog"), blog.Title, blog.Text)
+	switch err {
+	case nil:
+		c.Status(http.StatusOK).String("success")
 	default:
 		http.InternalServerError(c)
 	}

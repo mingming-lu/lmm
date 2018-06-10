@@ -15,6 +15,7 @@ var (
 	ErrNoSuchBlog          = errors.New("no such blog")
 	ErrInvalidCount        = errors.New("invalid count")
 	ErrInvalidPage         = errors.New("invalid page")
+	ErrNoPermission        = errors.New("no permission")
 )
 
 type AppService struct {
@@ -92,4 +93,25 @@ func (app *AppService) FindBlogByID(idStr string) (*model.Blog, error) {
 		return nil, err
 	}
 	return blog, nil
+}
+
+func (app *AppService) EditBlog(userID uint64, blogIDStr, title, text string) error {
+	blogID, err := strings.StrToUint64(blogIDStr)
+	if err != nil {
+		return ErrNoSuchBlog
+	}
+
+	blog, err := app.repo.FindByID(blogID)
+	if err != nil {
+		return err
+	}
+
+	if blog.UserID() != userID {
+		return ErrNoPermission
+	}
+
+	blog.UpdateTitle(title)
+	blog.UpdateText(text)
+
+	return app.repo.Update(blog)
 }

@@ -9,6 +9,7 @@ import (
 type BlogRepository interface {
 	repository.Repository
 	Add(blog *model.Blog) error
+	Update(blog *model.Blog) error
 	FindAll(int, int) ([]*model.Blog, error)
 	FindByID(id uint64) (*model.Blog, error)
 }
@@ -100,4 +101,18 @@ func (repo *blogRepo) FindByID(id uint64) (*model.Blog, error) {
 		return nil, err
 	}
 	return model.NewBlog(blogID, blogWriter, blogTitle, blogText, blogCreateAt, blogUpdaedAt), nil
+}
+
+func (repo *blogRepo) Update(blog *model.Blog) error {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`UPDATE blog SET title = ?, text = ? WHERE id = ? and user = ?`)
+	defer stmt.Close()
+
+	_, err := stmt.Exec(blog.Title(), blog.Text(), blog.ID(), blog.UserID())
+	if err != nil {
+		return err
+	}
+	return nil
 }
