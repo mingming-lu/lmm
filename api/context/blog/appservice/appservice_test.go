@@ -1,6 +1,7 @@
 package appservice
 
 import (
+	"fmt"
 	accountFactory "lmm/api/context/account/domain/factory"
 	account "lmm/api/context/account/domain/model"
 	accountRepository "lmm/api/context/account/domain/repository"
@@ -59,4 +60,40 @@ func TestPostNewBlog_DuplicateTitle(tt *testing.T) {
 
 	_, err = app.PostNewBlog(user.ID(), title, text)
 	t.Is(ErrBlogTitleDuplicated, err)
+}
+
+func TestFindBlogByID_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	title, text := uuid.New(), uuid.New()
+	blogID, err := app.PostNewBlog(user.ID(), title, text)
+
+	t.NoError(err)
+
+	blog, err := app.FindBlogByID(fmt.Sprintf("%d", blogID))
+	t.NoError(err)
+	t.Is(blogID, blog.ID())
+	t.Is(title, blog.Title())
+	t.Is(text, blog.Text())
+}
+
+func TestFindBlogByID_InvalidID(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	blog, err := app.FindBlogByID("NAN")
+	t.Is(ErrNoSuchBlog, err)
+	t.Nil(blog)
+}
+func TestFindBlogByID_NotFound(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	blog, err := app.FindBlogByID("112233")
+	t.Is(ErrNoSuchBlog, err)
+	t.Nil(blog)
 }
