@@ -30,3 +30,21 @@ func PostBlog(c *http.Context) {
 	c.Header("Location", fmt.Sprintf("/blog/%d", blogID))
 	c.Status(http.StatusCreated).String("success")
 }
+
+func GetBlog(c *http.Context) {
+	app := appservice.New(repository.NewBlogRepository())
+	blog, err := app.FindBlogByID(c.Request.Path.Params("blog"))
+	switch err {
+	case nil:
+		c.Status(http.StatusOK).JSON(BlogResponse{
+			Title:     blog.Title(),
+			Text:      blog.Text(),
+			CreatedAt: blog.CreatedAt().UTC().String(),
+			UpdatedAt: blog.UpdatedAt().UTC().String(),
+		})
+	case appservice.ErrNoSuchBlog:
+		c.Status(http.StatusNotFound).String(err.Error())
+	default:
+		http.InternalServerError(c)
+	}
+}
