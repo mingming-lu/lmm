@@ -36,13 +36,19 @@ func (b *Blog) update() {
 }
 
 func (b *Blog) UpdateTitle(title string) {
+	if b.title == title {
+		return
+	}
 	b.title = title
 	b.update()
 }
 
 func (b *Blog) UpdateText(text string) {
-	b.update()
+	if b.text == text {
+		return
+	}
 	b.text = text
+	b.update()
 }
 
 func (b *Blog) ID() uint64 {
