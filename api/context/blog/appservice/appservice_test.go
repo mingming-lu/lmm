@@ -9,6 +9,7 @@ import (
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 	"os"
+	"time"
 )
 
 var user *account.User
@@ -60,6 +61,96 @@ func TestPostNewBlog_DuplicateTitle(tt *testing.T) {
 
 	_, err = app.PostNewBlog(user.ID(), title, text)
 	t.Is(ErrBlogTitleDuplicated, err)
+}
+
+func TestFindAllBlog_OrderByCreatedTime(tt *testing.T) {
+	testing.Lock()
+	testing.InitTable("blog")
+
+	t := testing.NewTester(tt)
+	app := New(repository.NewBlogRepository())
+
+	app.PostNewBlog(user.ID(), uuid.New(), uuid.New())
+	time.Sleep(1 * time.Second)
+	app.PostNewBlog(user.ID(), uuid.New(), uuid.New())
+
+	blogList, page, hasNextPage, err := app.FindAllBlog("", "")
+	t.NoError(err)
+	t.False(hasNextPage)
+	t.Is(1, page)
+	t.Is(2, len(blogList))
+	t.True(blogList[0].CreatedAt().After(blogList[1].CreatedAt()))
+
+	testing.Unlock()
+}
+
+func TestFindAllBlog_DefaultCount(tt *testing.T) {
+	testing.Lock()
+	testing.InitTable("blog")
+
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	for i := 0; i < 12; i++ {
+		_, err := app.PostNewBlog(user.ID(), uuid.New(), uuid.New())
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	blogList, page, hasNextPage, err := app.FindAllBlog("", "")
+
+	t.NoError(err)
+	t.True(hasNextPage)
+	t.Is(1, page)
+	t.Is(10, len(blogList))
+
+	blogList, page, hasNextPage, err = app.FindAllBlog("", fmt.Sprintf("%d", page+1))
+	t.NoError(err)
+	t.False(hasNextPage)
+	t.Is(2, page)
+	t.Is(2, len(blogList))
+
+	blogList, page, hasNextPage, err = app.FindAllBlog("", fmt.Sprintf("%d", page+1))
+	t.NoError(err)
+	t.False(hasNextPage)
+	t.Is(3, page)
+	t.Is(0, len(blogList))
+
+	testing.Unlock()
+}
+
+func TestFindAllBlog_GivenCount(tt *testing.T) {
+	testing.Lock()
+	testing.InitTable("blog")
+
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	blogIDs := make([]uint64, 0)
+	for i := 0; i < 5; i++ {
+		blogID, err := app.PostNewBlog(user.ID(), uuid.New(), uuid.New())
+		if err != nil {
+			panic(err)
+		}
+		blogIDs = append(blogIDs, blogID)
+	}
+
+	blogList, page, hasNextPage, err := app.FindAllBlog("3", "")
+	t.NoError(err)
+	t.True(hasNextPage)
+	t.Is(1, page)
+	t.Is(3, len(blogList))
+
+	blogList, page, hasNextPage, err = app.FindAllBlog("3", fmt.Sprintf("%d", page+1))
+	t.NoError(err)
+	t.False(hasNextPage)
+	t.Is(2, page)
+	t.Is(2, len(blogList))
+
+	testing.Unlock()
 }
 
 func TestFindBlogByID_Success(tt *testing.T) {
