@@ -2,10 +2,10 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 
-	"github.com/akinaru-lu/errors"
 	_ "github.com/go-sql-driver/mysql"
 )
 

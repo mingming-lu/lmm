@@ -5,7 +5,7 @@ import (
 	model "lmm/api/domain/model/blog"
 )
 
-func Add(userID uint64, title, text string) (uint64, error) {
+func Add(id, userID uint64, title, text string) (uint64, error) {
 	d := db.Default()
 	defer d.Close()
 

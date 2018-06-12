@@ -24,6 +24,9 @@ dev:
 test:
 	make docker-compose args="-f docker-compose.test.yml" cmd="run $(target)"
 
+test-api:
+	make test target=api
+
 cli: script
 	make docker-compose cmd="run cli python $(target)"
 
