@@ -2,6 +2,7 @@ package repository
 
 import (
 	"lmm/api/context/blog/domain/model"
+	sql "lmm/api/db"
 	"lmm/api/domain/repository"
 	"time"
 )
@@ -110,9 +111,16 @@ func (repo *blogRepo) Update(blog *model.Blog) error {
 	stmt := db.MustPrepare(`UPDATE blog SET title = ?, text = ? WHERE id = ? and user = ?`)
 	defer stmt.Close()
 
-	_, err := stmt.Exec(blog.Title(), blog.Text(), blog.ID(), blog.UserID())
+	res, err := stmt.Exec(blog.Title(), blog.Text(), blog.ID(), blog.UserID())
 	if err != nil {
 		return err
+	}
+	rowsAffeted, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffeted == 0 {
+		return sql.ErrNoChange
 	}
 	return nil
 }
