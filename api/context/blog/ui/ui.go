@@ -74,7 +74,7 @@ func GetBlog(c *http.Context) {
 			UpdatedAt: blog.UpdatedAt().UTC().String(),
 		})
 	case appservice.ErrNoSuchBlog:
-		c.Status(http.StatusNotFound).String(err.Error())
+		c.Status(http.StatusNotFound).String(appservice.ErrNoSuchBlog.Error())
 	default:
 		http.InternalServerError(c)
 	}
@@ -93,8 +93,10 @@ func UpdateBlog(c *http.Context) {
 		c.Status(http.StatusOK).String("success")
 	case appservice.ErrBlogNoChange:
 		c.Status(http.StatusNoContent)
+	case appservice.ErrNoPermission:
+		c.Status(http.StatusForbidden).String(appservice.ErrNoSuchBlog.Error())
 	case appservice.ErrNoSuchBlog:
-		c.Status(http.StatusNotFound).String(err.Error())
+		c.Status(http.StatusNotFound).String(appservice.ErrNoSuchBlog.Error())
 	default:
 		http.InternalServerError(c)
 	}
