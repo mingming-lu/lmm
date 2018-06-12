@@ -10,7 +10,7 @@ type BlogRepository interface {
 	repository.Repository
 	Add(blog *model.Blog) error
 	Update(blog *model.Blog) error
-	FindAll(int, int) ([]*model.Blog, error)
+	FindAll(count, page int) ([]*model.Blog, error)
 	FindByID(id uint64) (*model.Blog, error)
 }
 

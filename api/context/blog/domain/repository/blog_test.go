@@ -54,6 +54,46 @@ func TestAddBlog_DuplicateTitle(tt *testing.T) {
 	t.Regexp(`Duplicate entry '[\w\d-]+' for key 'title'`, err.Error())
 }
 
+func TestFindAllBlog_FetchOneMore(tt *testing.T) {
+	testing.Lock()
+	defer testing.Unlock()
+
+	testing.InitTable("blog")
+
+	t := testing.NewTester(tt)
+	repo := NewBlogRepository()
+
+	name, password := uuid.New()[:31], uuid.New()
+	user, _ := accountFactory.NewUser(name, password)
+
+	title, text := uuid.New(), uuid.New()
+	blog, _ := factory.NewBlog(user.ID(), title, text)
+	t.NoError(repo.Add(blog))
+
+	title, text = uuid.New(), uuid.New()
+	blog, _ = factory.NewBlog(user.ID(), title, text)
+	t.NoError(repo.Add(blog))
+
+	blogList, err := repo.FindAll(1, 1)
+	t.NoError(err)
+	t.Is(2, len(blogList))
+}
+
+func TestFindAllBlog_EmptyList(tt *testing.T) {
+	testing.Lock()
+	defer testing.Unlock()
+
+	testing.InitTable("blog")
+
+	t := testing.NewTester(tt)
+	repo := NewBlogRepository()
+
+	blogList, err := repo.FindAll(100, 1)
+	t.NoError(err)
+	t.NotNil(blogList)
+	t.Is(0, len(blogList))
+}
+
 func TestFindBlogByID_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := NewBlogRepository()
