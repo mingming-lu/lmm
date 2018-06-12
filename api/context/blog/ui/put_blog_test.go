@@ -104,6 +104,29 @@ func TestUpdateBlog_NoChange(tt *testing.T) {
 	t.Is(http.StatusNoContent, res.StatusCode())
 }
 
+func TestUpdateBlog_EmptyTitle(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	repo := repository.NewBlogRepository()
+
+	title, text := uuid.New(), uuid.New()
+	blog, err := factory.NewBlog(user.ID(), title, text)
+	t.NoError(err)
+	t.NoError(repo.Add(blog))
+
+	requestBody := Blog{
+		Title: "",
+		Text:  blog.Text(),
+	}
+
+	headers := make(map[string]string)
+	headers["Authorization"] = "Bearer " + user.Token()
+
+	res := putBlog(headers, blog.ID(), testing.StructToRequestBody(requestBody))
+	t.Is(http.StatusBadRequest, res.StatusCode())
+	t.Is(appservice.ErrEmptyBlogTitle.Error()+"\n", res.Body())
+}
+
 func TestUpdateBlog_NoPermission(tt *testing.T) {
 	t := testing.NewTester(tt)
 

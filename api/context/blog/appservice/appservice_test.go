@@ -64,6 +64,16 @@ func TestPostNewBlog_DuplicateTitle(tt *testing.T) {
 	t.Is(ErrBlogTitleDuplicated, err)
 }
 
+func TestPostNewBlog_EmptyTitle(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	blogID, err := app.PostNewBlog(user.ID(), "", uuid.New())
+	t.Is(ErrEmptyBlogTitle, err)
+	t.Is(uint64(0), blogID)
+}
+
 func TestFindAllBlog_OrderByCreatedTime(tt *testing.T) {
 	testing.Lock()
 	defer testing.Unlock()
@@ -254,4 +264,17 @@ func TestEditBlog_NoChange(tt *testing.T) {
 
 	err := app.EditBlog(user.ID(), fmt.Sprintf("%d", blog.ID()), blog.Title(), blog.Text())
 	t.Is(ErrBlogNoChange, err)
+}
+
+func TestEditBlog_EmptyTitle(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	title, text := uuid.New(), uuid.New()
+	blog, _ := factory.NewBlog(user.ID(), title, text)
+	repo.Add(blog)
+
+	err := app.EditBlog(user.ID(), fmt.Sprintf("%d", blog.ID()), "", blog.Text())
+	t.Is(ErrEmptyBlogTitle, err)
 }

@@ -2,9 +2,11 @@ package ui
 
 import (
 	"io"
+	"lmm/api/context/blog/appservice"
 	"lmm/api/http"
 	"lmm/api/testing"
 	"lmm/api/usecase/auth"
+	"lmm/api/utils/uuid"
 )
 
 func TestPostBlog_Success(tt *testing.T) {
@@ -33,6 +35,22 @@ func TestPostBlog_Unauthorized(tt *testing.T) {
 
 	res := postBlog(nil, testing.StructToRequestBody(blog))
 	t.Is(http.StatusUnauthorized, res.StatusCode())
+}
+
+func TestPostBlog_EmptyTitle(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	headers := make(map[string]string)
+	headers["Authorization"] = "Bearer " + user.Token()
+
+	blog := Blog{
+		Title: "",
+		Text:  uuid.New(),
+	}
+
+	res := postBlog(headers, testing.StructToRequestBody(blog))
+	t.Is(http.StatusBadRequest, res.StatusCode())
+	t.Is(appservice.ErrEmptyBlogTitle.Error()+"\n", res.Body())
 }
 
 func postBlog(headers map[string]string, requestBody io.Reader) *testing.Response {

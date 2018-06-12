@@ -23,13 +23,15 @@ func PostBlog(c *http.Context) {
 
 	app := appservice.New(repository.NewBlogRepository())
 	blogID, err := app.PostNewBlog(user.ID(), blog.Title, blog.Text)
-	if err != nil {
+	switch err {
+	case nil:
+		c.Header("Location", fmt.Sprintf("/blog/%d", blogID))
+		c.Status(http.StatusCreated).String("success")
+	case appservice.ErrEmptyBlogTitle:
+		c.Status(http.StatusBadRequest).String(appservice.ErrEmptyBlogTitle.Error())
+	default:
 		http.InternalServerError(c)
-		return
 	}
-
-	c.Header("Location", fmt.Sprintf("/blog/%d", blogID))
-	c.Status(http.StatusCreated).String("success")
 }
 
 func GetAllBlog(c *http.Context) {
@@ -93,6 +95,8 @@ func UpdateBlog(c *http.Context) {
 		c.Status(http.StatusOK).String("success")
 	case appservice.ErrBlogNoChange:
 		c.Status(http.StatusNoContent)
+	case appservice.ErrEmptyBlogTitle:
+		c.Status(http.StatusBadRequest).String(appservice.ErrEmptyBlogTitle.Error())
 	case appservice.ErrNoPermission:
 		c.Status(http.StatusForbidden).String(appservice.ErrNoSuchBlog.Error())
 	case appservice.ErrNoSuchBlog:
