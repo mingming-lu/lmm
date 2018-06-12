@@ -31,6 +31,9 @@ func (b *Blog) update() {
 }
 
 func (b *Blog) UpdateTitle(title string) {
+	if title == "" {
+		return
+	}
 	if b.title == title {
 		return
 	}

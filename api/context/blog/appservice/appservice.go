@@ -13,6 +13,7 @@ import (
 var (
 	ErrBlogTitleDuplicated = errors.New("blog title duplicated")
 	ErrNoSuchBlog          = errors.New("no such blog")
+	ErrEmptyBlogTitle      = errors.New("blog title cannot be empty")
 	ErrBlogNoChange        = errors.New("blog no change")
 	ErrInvalidCount        = errors.New("invalid count")
 	ErrInvalidPage         = errors.New("invalid page")
@@ -112,6 +113,10 @@ func (app *AppService) EditBlog(userID uint64, blogIDStr, title, text string) er
 	}
 
 	lastUpdated := blog.UpdatedAt()
+
+	if title == "" {
+		return ErrEmptyBlogTitle
+	}
 
 	blog.UpdateTitle(title)
 	blog.UpdateText(text)
