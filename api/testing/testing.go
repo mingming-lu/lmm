@@ -8,6 +8,8 @@ func init() {
 	InitTableAll()
 }
 
+// notice that this gay cannot lock other go application
+// for example: go test ./...
 var mutex sync.Mutex
 
 func Lock() {
