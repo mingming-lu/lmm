@@ -125,5 +125,5 @@ func (app *AppService) EditBlog(userID uint64, blogIDStr, title, text string) er
 		return ErrNoSuchBlog
 	}
 
-	return err
+	return err // unknown error or nil
 }

@@ -120,6 +120,7 @@ func (repo *blogRepo) Update(blog *model.Blog) error {
 		return err
 	}
 	if rowsAffeted == 0 {
+		// wether or not the blog with id exists, return no change
 		return sql.ErrNoChange
 	}
 	return nil
