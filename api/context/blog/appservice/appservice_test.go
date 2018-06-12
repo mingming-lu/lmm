@@ -214,7 +214,7 @@ func TestEditBlog_Success(tt *testing.T) {
 	t.Is(newText, blog.Text())
 }
 
-func TestEidtBlog_NoPermission(tt *testing.T) {
+func TestEditBlog_NoPermission(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
 	app := New(repo)
@@ -228,4 +228,30 @@ func TestEidtBlog_NoPermission(tt *testing.T) {
 
 	err := app.EditBlog(suspicious.ID(), fmt.Sprintf("%d", blog.ID()), "new title", "new text")
 	t.Is(ErrNoPermission, err)
+}
+
+func TestEditBlog_NoSuchBlog(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	title, text := uuid.New(), uuid.New()
+	blog, _ := factory.NewBlog(user.ID(), title, text)
+
+	// notice that I didn' save that blog and here I reverse the title and the text to exclude ErrBlogNoChange
+	err := app.EditBlog(user.ID(), fmt.Sprintf("%d", blog.ID()), text, title)
+	t.Is(ErrNoSuchBlog, err)
+}
+
+func TestEditBlog_NoChange(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	title, text := uuid.New(), uuid.New()
+	blog, _ := factory.NewBlog(user.ID(), title, text)
+	repo.Add(blog)
+
+	err := app.EditBlog(user.ID(), fmt.Sprintf("%d", blog.ID()), blog.Title(), blog.Text())
+	t.Is(ErrBlogNoChange, err)
 }
