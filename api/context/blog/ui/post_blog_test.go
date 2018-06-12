@@ -7,8 +7,8 @@ import (
 	"lmm/api/usecase/auth"
 )
 
-func TestPostBlog_Success(t *testing.T) {
-	tester := testing.NewTester(t)
+func TestPostBlog_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
 
 	headers := make(map[string]string)
 	headers["Authorization"] = "Bearer " + user.Token()
@@ -19,12 +19,12 @@ func TestPostBlog_Success(t *testing.T) {
 	}
 
 	res := postBlog(headers, testing.StructToRequestBody(blog))
-	tester.Is(http.StatusCreated, res.StatusCode())
-	tester.Regexp(`/blog/\d+`, res.Header().Get("Location"))
+	t.Is(http.StatusCreated, res.StatusCode())
+	t.Regexp(`/blog/\d+`, res.Header().Get("Location"))
 }
 
-func TestPostBlog_Unauthorized(t *testing.T) {
-	tester := testing.NewTester(t)
+func TestPostBlog_Unauthorized(tt *testing.T) {
+	t := testing.NewTester(tt)
 
 	blog := Blog{
 		Title: "blog title",
@@ -32,7 +32,7 @@ func TestPostBlog_Unauthorized(t *testing.T) {
 	}
 
 	res := postBlog(nil, testing.StructToRequestBody(blog))
-	tester.Is(http.StatusUnauthorized, res.StatusCode())
+	t.Is(http.StatusUnauthorized, res.StatusCode())
 }
 
 func postBlog(headers map[string]string, requestBody io.Reader) *testing.Response {

@@ -5,31 +5,31 @@ import (
 	"time"
 )
 
-func TestNewBlog(t *testing.T) {
-	tester := testing.NewTester(t)
+func TestNewBlog(tt *testing.T) {
+	t := testing.NewTester(tt)
 
 	created := time.Now()
 	updated := time.Now()
 	blog := NewBlog(uint64(100), uint64(101), "title", "text", created, updated)
 
-	tester.Is(uint64(100), blog.ID())
-	tester.Is(uint64(101), blog.UserID())
-	tester.Is("title", blog.Title())
-	tester.Is("text", blog.Text())
-	tester.Is(created, blog.CreatedAt())
-	tester.Is(updated, blog.UpdatedAt())
+	t.Is(uint64(100), blog.ID())
+	t.Is(uint64(101), blog.UserID())
+	t.Is("title", blog.Title())
+	t.Is("text", blog.Text())
+	t.Is(created, blog.CreatedAt())
+	t.Is(updated, blog.UpdatedAt())
 }
 
-func TestBlogUpdateTitle(t *testing.T) {
-	tester := testing.NewTester(t)
+func TestBlogUpdateTitle(tt *testing.T) {
+	t := testing.NewTester(tt)
 
 	now := time.Now()
 	blog := NewBlog(uint64(1), uint64(1), "title", "text", now, now)
 	blog.UpdateTitle("new title")
 
-	tester.Is("new title", blog.Title())
-	tester.Is("text", blog.Text())
-	tester.True(blog.UpdatedAt().After(blog.CreatedAt()))
+	t.Is("new title", blog.Title())
+	t.Is("text", blog.Text())
+	t.True(blog.UpdatedAt().After(blog.CreatedAt()))
 }
 
 func TestBlogUpdateTitle_NoChange(tt *testing.T) {
