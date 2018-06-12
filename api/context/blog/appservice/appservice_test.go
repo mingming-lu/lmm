@@ -5,6 +5,7 @@ import (
 	accountFactory "lmm/api/context/account/domain/factory"
 	account "lmm/api/context/account/domain/model"
 	accountRepository "lmm/api/context/account/domain/repository"
+	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/repository"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -187,4 +188,44 @@ func TestFindBlogByID_NotFound(tt *testing.T) {
 	blog, err := app.FindBlogByID("112233")
 	t.Is(ErrNoSuchBlog, err)
 	t.Nil(blog)
+}
+
+func TestEditBlog_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	title, text := uuid.New(), uuid.New()
+	blog, _ := factory.NewBlog(user.ID(), title, text)
+	repo.Add(blog)
+
+	blog, err := repo.FindByID(blog.ID())
+	t.NoError(err)
+	t.Is(title, blog.Title())
+	t.Is(text, blog.Text())
+
+	newTitle, newText := uuid.New(), uuid.New()
+
+	app.EditBlog(user.ID(), fmt.Sprintf("%d", blog.ID()), newTitle, newText)
+
+	blog, err = repo.FindByID(blog.ID())
+	t.NoError(err)
+	t.Is(newTitle, blog.Title())
+	t.Is(newText, blog.Text())
+}
+
+func TestEidtBlog_NoPermission(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := repository.NewBlogRepository()
+	app := New(repo)
+
+	title, text := uuid.New(), uuid.New()
+	blog, _ := factory.NewBlog(user.ID(), title, text)
+	repo.Add(blog)
+
+	suspicious, _ := accountFactory.NewUser(uuid.New()[:31], uuid.New())
+	accountRepository.New().Add(suspicious)
+
+	err := app.EditBlog(suspicious.ID(), fmt.Sprintf("%d", blog.ID()), "new title", "new text")
+	t.Is(ErrNoPermission, err)
 }
