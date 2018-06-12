@@ -29,6 +29,9 @@ func New(repo repository.BlogRepository) *AppService {
 }
 
 func (app *AppService) PostNewBlog(userID uint64, title, text string) (uint64, error) {
+	if title == "" {
+		return 0, ErrEmptyBlogTitle
+	}
 	blog, err := factory.NewBlog(userID, title, text)
 	if err != nil {
 		return uint64(0), err
