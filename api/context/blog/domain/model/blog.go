@@ -1,13 +1,8 @@
 package model
 
 import (
-	"errors"
 	"lmm/api/domain/model"
 	"time"
-)
-
-var (
-	ErrBlogUnregisterd = errors.New("blog unregisred")
 )
 
 type Blog struct {
