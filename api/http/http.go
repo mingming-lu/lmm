@@ -9,6 +9,7 @@ import (
 const (
 	StatusOK                  = http.StatusOK
 	StatusCreated             = http.StatusCreated
+	StatusNoContent           = http.StatusNoContent
 	StatusBadRequest          = http.StatusBadRequest
 	StatusUnauthorized        = http.StatusUnauthorized
 	StatusNotFound            = http.StatusNotFound

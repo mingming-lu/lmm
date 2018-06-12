@@ -91,6 +91,10 @@ func UpdateBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.Status(http.StatusOK).String("success")
+	case appservice.ErrBlogNoChange:
+		c.Status(http.StatusNoContent)
+	case appservice.ErrNoSuchBlog:
+		c.Status(http.StatusNotFound).String(err.Error())
 	default:
 		http.InternalServerError(c)
 	}
