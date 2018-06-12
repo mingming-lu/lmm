@@ -3,6 +3,7 @@ package repository
 import (
 	accountFactory "lmm/api/context/account/domain/factory"
 	"lmm/api/context/blog/domain/factory"
+	"lmm/api/db"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 )
@@ -120,4 +121,43 @@ func TestFindBlogByID_NotFound(tt *testing.T) {
 	blog, err := repo.FindByID(uint64(777))
 	t.Error(err, "sql: no rows in result set")
 	t.Nil(blog)
+}
+
+func TestEditBlog_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewBlogRepository()
+
+	name, password := uuid.New()[:31], uuid.New()
+	user, _ := accountFactory.NewUser(name, password)
+
+	title, text := uuid.New(), uuid.New()
+	blog, _ := factory.NewBlog(user.ID(), title, text)
+	t.NoError(repo.Add(blog))
+
+	// no change
+	t.Error(db.ErrNoChange, repo.Update(blog))
+
+	blog.UpdateTitle("new title")
+	blog.UpdateText("new text")
+
+	t.NoError(repo.Update(blog))
+
+	blog, _ = repo.FindByID(blog.ID())
+
+	t.Is("new title", blog.Title())
+	t.Is("new text", blog.Text())
+}
+
+func TestEditBlog_NoSuchBlog(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewBlogRepository()
+
+	name, password := uuid.New()[:31], uuid.New()
+	user, _ := accountFactory.NewUser(name, password)
+
+	title, text := uuid.New(), uuid.New()
+	blog, _ := factory.NewBlog(user.ID(), title, text)
+
+	// notice that it was not be saved
+	t.Is(db.ErrNoChange, repo.Update(blog))
 }
