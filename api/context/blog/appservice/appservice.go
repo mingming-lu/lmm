@@ -13,6 +13,7 @@ import (
 var (
 	ErrBlogTitleDuplicated = errors.New("blog title duplicated")
 	ErrNoSuchBlog          = errors.New("no such blog")
+	ErrBlogNoChange        = errors.New("blog no change")
 	ErrInvalidCount        = errors.New("invalid count")
 	ErrInvalidPage         = errors.New("invalid page")
 	ErrNoPermission        = errors.New("no permission")
@@ -103,15 +104,26 @@ func (app *AppService) EditBlog(userID uint64, blogIDStr, title, text string) er
 
 	blog, err := app.repo.FindByID(blogID)
 	if err != nil {
-		return err
+		return ErrNoSuchBlog
 	}
 
 	if blog.UserID() != userID {
 		return ErrNoPermission
 	}
 
+	lastUpdated := blog.UpdatedAt()
+
 	blog.UpdateTitle(title)
 	blog.UpdateText(text)
 
-	return app.repo.Update(blog)
+	if blog.UpdatedAt().Equal(lastUpdated) {
+		return ErrBlogNoChange
+	}
+
+	err = app.repo.Update(blog)
+	if err == db.ErrNoChange {
+		return ErrNoSuchBlog
+	}
+
+	return err
 }
