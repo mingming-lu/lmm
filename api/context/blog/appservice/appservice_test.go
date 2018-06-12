@@ -66,6 +66,8 @@ func TestPostNewBlog_DuplicateTitle(tt *testing.T) {
 
 func TestFindAllBlog_OrderByCreatedTime(tt *testing.T) {
 	testing.Lock()
+	defer testing.Unlock()
+
 	testing.InitTable("blog")
 
 	t := testing.NewTester(tt)
@@ -81,12 +83,12 @@ func TestFindAllBlog_OrderByCreatedTime(tt *testing.T) {
 	t.Is(1, page)
 	t.Is(2, len(blogList))
 	t.True(blogList[0].CreatedAt().After(blogList[1].CreatedAt()))
-
-	testing.Unlock()
 }
 
 func TestFindAllBlog_DefaultCount(tt *testing.T) {
 	testing.Lock()
+	defer testing.Unlock()
+
 	testing.InitTable("blog")
 
 	t := testing.NewTester(tt)
@@ -118,12 +120,12 @@ func TestFindAllBlog_DefaultCount(tt *testing.T) {
 	t.False(hasNextPage)
 	t.Is(3, page)
 	t.Is(0, len(blogList))
-
-	testing.Unlock()
 }
 
 func TestFindAllBlog_GivenCount(tt *testing.T) {
 	testing.Lock()
+	defer testing.Unlock()
+
 	testing.InitTable("blog")
 
 	t := testing.NewTester(tt)
@@ -150,8 +152,6 @@ func TestFindAllBlog_GivenCount(tt *testing.T) {
 	t.False(hasNextPage)
 	t.Is(2, page)
 	t.Is(2, len(blogList))
-
-	testing.Unlock()
 }
 
 func TestFindBlogByID_Success(tt *testing.T) {
