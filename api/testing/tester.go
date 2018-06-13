@@ -24,6 +24,10 @@ func (t *Tester) Nil(o interface{}, msgAndArgs ...interface{}) bool {
 	return assert.Nil(t, o, msgAndArgs...)
 }
 
+func (t *Tester) NotNil(o interface{}, msgAndArgs ...interface{}) bool {
+	return assert.NotNil(t, o, msgAndArgs...)
+}
+
 func (t *Tester) True(value bool, msgAndArgs ...interface{}) bool {
 	return assert.True(t, value, msgAndArgs...)
 }
