@@ -11,11 +11,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type URLParams = httprouter.Params
+type PathParams = httprouter.Params
 
 type Path struct {
 	raw    string
-	params URLParams
+	params PathParams
 }
 
 func (p *Path) String() string {
@@ -41,7 +41,7 @@ type Request struct {
 	*URL
 }
 
-func NewRequest(req *http.Request, params URLParams) *Request {
+func NewRequest(req *http.Request, params PathParams) *Request {
 	path := &Path{
 		raw:    req.URL.Path,
 		params: params,
