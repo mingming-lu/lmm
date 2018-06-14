@@ -117,6 +117,7 @@ func (app *AppService) EditBlog(userID uint64, blogIDStr, title, text string) er
 
 	lastUpdated := blog.UpdatedAt()
 
+	// TODO move validation to model
 	if title == "" {
 		return ErrEmptyBlogTitle
 	}
