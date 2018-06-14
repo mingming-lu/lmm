@@ -2,6 +2,7 @@ package repository
 
 import (
 	"lmm/api/context/blog/domain/model"
+	sql "lmm/api/db"
 	"lmm/api/domain/repository"
 )
 
@@ -21,7 +22,7 @@ func NewCategoryRepository() CategoryRepository {
 }
 
 func (repo *categoryRepo) Add(category *model.Category) error {
-	db := c.DB()
+	db := repo.DB()
 	defer db.Close()
 
 	stmt := db.MustPrepare(`INSERT INTO category (id, name) VALUES (?, ?)`)
@@ -32,7 +33,21 @@ func (repo *categoryRepo) Add(category *model.Category) error {
 }
 
 func (repo *categoryRepo) Update(category *model.Category) error {
-	panic("not implemented")
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`UPDATE category SET name = ? WHERE id = ?`)
+	defer stmt.Close()
+
+	res, err := stmt.Exec(category.Name(), category.ID())
+	rowsAffeted, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffeted == 0 {
+		// wether or not the blog with id exists, return no change
+		return sql.ErrNoChange
+	}
 	return nil
 }
 
