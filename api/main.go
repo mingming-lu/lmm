@@ -26,8 +26,8 @@ func main() {
 	// router.PUT("/v1/blog/:blog/category", blog.SetCategory)
 	// router.DELETE("/v1/blog/:blog/category", blog.DeleteCategory)
 
-	// // category
-	// router.GET("/v1/users/:user/categories", category.GetByUser)
+	// category
+	router.POST("/v1/categories", blog.PostCategory)
 	// router.POST("/v1/categories", category.Register)
 	// router.PUT("/v1/categories/:category", category.Update)
 	// router.DELETE("/v1/categories/:category", category.Delete)

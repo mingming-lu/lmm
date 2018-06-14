@@ -105,3 +105,20 @@ func UpdateBlog(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func PostCategory(c *http.Context) {
+	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
+
+	category := Category{}
+	c.Request.ScanBody(&category)
+
+	categoryID, err := app.AddNewCategory(category.Name)
+	switch err {
+	case nil:
+		c.Header("Location", fmt.Sprintf("/categories/%d", categoryID))
+		c.Status(http.StatusCreated).String("success")
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
