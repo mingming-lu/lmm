@@ -90,9 +90,14 @@ func UpdateBlog(c *http.Context) {
 	app := appservice.New(repository.NewBlogRepository())
 
 	blog := Blog{}
-	c.Request.ScanBody(&blog)
+	err := c.Request.ScanBody(&blog)
+	if err != nil {
+		log.Println(err)
+		http.BadRequest(c)
+		return
+	}
 
-	err := app.EditBlog(user.ID(), c.Request.Path.Params("blog"), blog.Title, blog.Text)
+	err = app.EditBlog(user.ID(), c.Request.Path.Params("blog"), blog.Title, blog.Text)
 	switch err {
 	case nil:
 		c.Status(http.StatusOK).String("success")
@@ -114,7 +119,12 @@ func PostCategory(c *http.Context) {
 	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
 
 	category := Category{}
-	c.Request.ScanBody(&category)
+	err := c.Request.ScanBody(&category)
+	if err != nil {
+		log.Println(err)
+		http.BadRequest(c)
+		return
+	}
 
 	categoryID, err := app.AddNewCategory(category.Name)
 	switch err {
