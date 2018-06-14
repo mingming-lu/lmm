@@ -20,7 +20,7 @@ func NewCategoryRepository() CategoryRepository {
 	return new(categoryRepo)
 }
 
-func (c *categoryRepo) Add(category *model.Category) error {
+func (repo *categoryRepo) Add(category *model.Category) error {
 	db := c.DB()
 	defer db.Close()
 
@@ -31,12 +31,12 @@ func (c *categoryRepo) Add(category *model.Category) error {
 	return err
 }
 
-func (c *categoryRepo) Update(category *model.Category) error {
+func (repo *categoryRepo) Update(category *model.Category) error {
 	panic("not implemented")
 	return nil
 }
 
-func (c *categoryRepo) FindAll(count, page int) ([]*model.Category, error) {
+func (repo *categoryRepo) FindAll(count, page int) ([]*model.Category, error) {
 	panic("not implemented")
 	return nil, nil
 }
