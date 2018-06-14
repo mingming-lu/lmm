@@ -66,3 +66,22 @@ func (app *CategoryApp) FindAllCategories() ([]*model.Category, error) {
 
 	return categories, nil
 }
+
+func (app *CategoryApp) Remove(idStr string) error {
+	id, err := strings.StrToUint64(idStr)
+	if err != nil {
+		return ErrNoSuchCategory
+	}
+
+	category, err := app.repo.FindByID(id)
+	if err != nil {
+		return ErrNoSuchBlog
+	}
+
+	err = app.repo.Remove(category)
+	if err.Error() == db.ErrNoRows.Error() {
+		return ErrNoSuchCategory
+	}
+
+	return nil
+}

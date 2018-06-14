@@ -12,6 +12,7 @@ type CategoryRepository interface {
 	Update(categoryRepo *model.Category) error
 	FindAll() ([]*model.Category, error)
 	FindByID(id uint64) (*model.Category, error)
+	Remove(category *model.Category) error
 }
 
 type categoryRepo struct {
@@ -103,4 +104,28 @@ func (repo *categoryRepo) FindByID(id uint64) (*model.Category, error) {
 	}
 
 	return model.NewCategory(categoryID, categoryName)
+}
+
+func (repo *categoryRepo) Remove(category *model.Category) error {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`DELETE FROM category WHERE id = ? AND name = ?`)
+	defer stmt.Close()
+
+	res, err := stmt.Exec(category.ID(), category.Name())
+	if err != nil {
+		return err
+	}
+
+	rowsAffeted, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffeted == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
 }

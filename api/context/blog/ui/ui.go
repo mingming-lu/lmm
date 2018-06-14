@@ -177,3 +177,20 @@ func GetAllCategoris(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func DeleteCategory(c *http.Context) {
+	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
+
+	categoryID := c.Request.Path.Params("category")
+
+	err := app.Remove(categoryID)
+	switch err {
+	case nil:
+		c.Status(http.StatusNoContent)
+	case appservice.ErrNoSuchCategory:
+		c.Status(http.StatusBadRequest).String(appservice.ErrNoSuchCategory.Error())
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}

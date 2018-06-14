@@ -30,9 +30,9 @@ func main() {
 	router.GET("/v1/categories", blog.GetAllCategoris)
 	router.POST("/v1/categories", blog.PostCategory)
 	router.PUT("/v1/categories/:category", blog.UpdateCategory)
+	router.DELETE("/v1/categories/:category", blog.DeleteCategory)
 	// router.POST("/v1/categories", category.Register)
 	// router.PUT("/v1/categories/:category", category.Update)
-	// router.DELETE("/v1/categories/:category", category.Delete)
 
 	// // tag
 	// router.GET("/v1/users/:user/tags", tag.GetByUser)

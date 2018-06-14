@@ -35,6 +35,10 @@ func (r *Router) PUT(path string, handler Handler) {
 	r.Handle(http.MethodPut, path, handler)
 }
 
+func (r *Router) DELETE(path string, handler Handler) {
+	r.Handle(http.MethodDelete, path, handler)
+}
+
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r.router.ServeHTTP(w, req)
 }
