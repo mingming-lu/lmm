@@ -14,8 +14,8 @@ func PostBlog(c *http.Context) {
 	blog := Blog{}
 	err := c.Request.ScanBody(&blog)
 	if err != nil {
-		http.BadRequest(c)
 		log.Println(err)
+		http.BadRequest(c)
 		return
 	}
 
@@ -30,6 +30,7 @@ func PostBlog(c *http.Context) {
 	case appservice.ErrEmptyBlogTitle:
 		c.Status(http.StatusBadRequest).String(appservice.ErrEmptyBlogTitle.Error())
 	default:
+		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
@@ -59,6 +60,7 @@ func GetAllBlog(c *http.Context) {
 	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
 		c.Status(http.StatusBadRequest).String(err.Error())
 	default:
+		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
@@ -78,6 +80,7 @@ func GetBlog(c *http.Context) {
 	case appservice.ErrNoSuchBlog:
 		c.Status(http.StatusNotFound).String(appservice.ErrNoSuchBlog.Error())
 	default:
+		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
@@ -102,6 +105,7 @@ func UpdateBlog(c *http.Context) {
 	case appservice.ErrNoSuchBlog:
 		c.Status(http.StatusNotFound).String(appservice.ErrNoSuchBlog.Error())
 	default:
+		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
