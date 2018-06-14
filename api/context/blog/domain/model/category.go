@@ -34,7 +34,7 @@ func (c *Category) Name() string {
 	return c.name
 }
 
-func (c *Category) UpdateCategory(newName string) error {
+func (c *Category) UpdateName(newName string) error {
 	if c.validateName(newName) != nil {
 		return ErrInvalidCategoryName
 	}

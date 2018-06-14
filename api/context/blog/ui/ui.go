@@ -122,3 +122,25 @@ func PostCategory(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func UpdateCagegory(c *http.Context) {
+	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
+
+	categoryID := c.Request.Path.Params("category")
+	category := Category{}
+	err := c.Request.ScanBody(&category)
+	if err != nil {
+		log.Println(err)
+		http.BadRequest(c)
+		return
+	}
+
+	err = app.UpdateCategory(categoryID, category.Name)
+	switch err {
+	case nil:
+		c.Status(http.StatusOK).String("success")
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}

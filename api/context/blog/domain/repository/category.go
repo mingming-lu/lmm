@@ -11,6 +11,7 @@ type CategoryRepository interface {
 	Add(category *model.Category) error
 	Update(categoryRepo *model.Category) error
 	FindAll(count, page int) ([]*model.Category, error)
+	FindByID(id uint64) (*model.Category, error)
 }
 
 type categoryRepo struct {
@@ -54,4 +55,24 @@ func (repo *categoryRepo) Update(category *model.Category) error {
 func (repo *categoryRepo) FindAll(count, page int) ([]*model.Category, error) {
 	panic("not implemented")
 	return nil, nil
+}
+
+func (repo *categoryRepo) FindByID(id uint64) (*model.Category, error) {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`SELECT id, name FROM category WHERE id = ?`)
+	defer stmt.Close()
+
+	var (
+		categoryID   uint64
+		categoryName string
+	)
+
+	err := stmt.QueryRow(id).Scan(&categoryID, &categoryName)
+	if err != nil {
+		return nil, err
+	}
+
+	return model.NewCategory(categoryID, categoryName)
 }
