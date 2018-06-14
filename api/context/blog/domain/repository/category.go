@@ -21,7 +21,14 @@ func NewCategoryRepository() CategoryRepository {
 }
 
 func (c *categoryRepo) Add(category *model.Category) error {
-	return nil
+	db := c.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`INSERT INTO category (id, name) VALUES (?, ?)`)
+	defer stmt.Close()
+
+	_, err := stmt.Exec(category.ID(), category.Name())
+	return err
 }
 
 func (c *categoryRepo) Update(category *model.Category) error {
