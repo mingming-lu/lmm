@@ -158,3 +158,22 @@ func UpdateCategory(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func GetAllCategoris(c *http.Context) {
+	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
+
+	models, err := app.FindAllCategories()
+	switch err {
+	case nil:
+		categories := make([]*Category, len(models))
+		for index, model := range models {
+			categories[index].Name = model.Name()
+		}
+		c.Status(http.StatusOK).JSON(CategoriesResponse{
+			Categories: categories,
+		})
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}

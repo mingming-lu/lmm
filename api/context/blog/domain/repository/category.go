@@ -10,7 +10,7 @@ type CategoryRepository interface {
 	repository.Repository
 	Add(category *model.Category) error
 	Update(categoryRepo *model.Category) error
-	FindAll(count, page int) ([]*model.Category, error)
+	FindAll() ([]*model.Category, error)
 	FindByID(id uint64) (*model.Category, error)
 }
 
@@ -52,9 +52,37 @@ func (repo *categoryRepo) Update(category *model.Category) error {
 	return nil
 }
 
-func (repo *categoryRepo) FindAll(count, page int) ([]*model.Category, error) {
-	panic("not implemented")
-	return nil, nil
+func (repo *categoryRepo) FindAll() ([]*model.Category, error) {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`SELECT id, name FROM category ORDER BY name`)
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		categoryID   uint64
+		categoryName string
+	)
+
+	categories := make([]*model.Category, 0)
+	for rows.Next() {
+		err = rows.Scan(&categoryID, &categoryName)
+		if err != nil {
+			return nil, err
+		}
+		category, err := model.NewCategory(categoryID, categoryName)
+		if err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+
+	return categories, nil
 }
 
 func (repo *categoryRepo) FindByID(id uint64) (*model.Category, error) {

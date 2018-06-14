@@ -57,3 +57,12 @@ func (app *CategoryApp) UpdateCategory(categoryIDStr, newName string) error {
 
 	return nil
 }
+
+func (app *CategoryApp) FindAllCategories() ([]*model.Category, error) {
+	categories, err := app.repo.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return categories, nil
+}

@@ -23,3 +23,7 @@ type BlogResponse struct {
 type Category struct {
 	Name string `json:"name"`
 }
+
+type CategoriesResponse struct {
+	Categories []*Category `json:"categories"`
+}

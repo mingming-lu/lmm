@@ -27,6 +27,7 @@ func main() {
 	// router.DELETE("/v1/blog/:blog/category", blog.DeleteCategory)
 
 	// category
+	router.GET("/v1/categories", blog.GetAllCategoris)
 	router.POST("/v1/categories", blog.PostCategory)
 	router.PUT("/v1/categories/:category", blog.UpdateCategory)
 	// router.POST("/v1/categories", category.Register)
