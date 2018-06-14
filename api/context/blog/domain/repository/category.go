@@ -32,9 +32,11 @@ func (c *categoryRepo) Add(category *model.Category) error {
 }
 
 func (c *categoryRepo) Update(category *model.Category) error {
+	panic("not implemented")
 	return nil
 }
 
 func (c *categoryRepo) FindAll(count, page int) ([]*model.Category, error) {
+	panic("not implemented")
 	return nil, nil
 }
