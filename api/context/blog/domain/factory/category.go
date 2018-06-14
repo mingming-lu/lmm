@@ -10,5 +10,5 @@ func NewCategory(name string) (*model.Category, error) {
 	if err != nil {
 		return nil, err
 	}
-	return model.NewCategory(name)
+	return model.NewCategory(id, name)
 }
