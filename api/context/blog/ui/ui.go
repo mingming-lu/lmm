@@ -21,7 +21,7 @@ func PostBlog(c *http.Context) {
 
 	user := c.Values().Get("user").(*account.User)
 
-	app := appservice.New(repository.NewBlogRepository())
+	app := appservice.NewBlogApp(repository.NewBlogRepository())
 	blogID, err := app.PostNewBlog(user.ID(), blog.Title, blog.Text)
 	switch err {
 	case nil:
@@ -36,7 +36,7 @@ func PostBlog(c *http.Context) {
 }
 
 func GetAllBlog(c *http.Context) {
-	app := appservice.New(repository.NewBlogRepository())
+	app := appservice.NewBlogApp(repository.NewBlogRepository())
 	blogItems, page, hasNextPage, err := app.FindAllBlog(
 		c.Request.Query("count"),
 		c.Request.Query("page"),
@@ -66,7 +66,7 @@ func GetAllBlog(c *http.Context) {
 }
 
 func GetBlog(c *http.Context) {
-	app := appservice.New(repository.NewBlogRepository())
+	app := appservice.NewBlogApp(repository.NewBlogRepository())
 	blog, err := app.FindBlogByID(c.Request.Path.Params("blog"))
 	switch err {
 	case nil:
@@ -87,7 +87,7 @@ func GetBlog(c *http.Context) {
 
 func UpdateBlog(c *http.Context) {
 	user := c.Values().Get("user").(*account.User)
-	app := appservice.New(repository.NewBlogRepository())
+	app := appservice.NewBlogApp(repository.NewBlogRepository())
 
 	blog := Blog{}
 	err := c.Request.ScanBody(&blog)

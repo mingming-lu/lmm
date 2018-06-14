@@ -20,15 +20,15 @@ var (
 	ErrNoPermission        = errors.New("no permission")
 )
 
-type AppService struct {
+type BlogApp struct {
 	repo repository.BlogRepository
 }
 
-func New(repo repository.BlogRepository) *AppService {
-	return &AppService{repo: repo}
+func NewBlogApp(repo repository.BlogRepository) *BlogApp {
+	return &BlogApp{repo: repo}
 }
 
-func (app *AppService) PostNewBlog(userID uint64, title, text string) (uint64, error) {
+func (app *BlogApp) PostNewBlog(userID uint64, title, text string) (uint64, error) {
 	if title == "" {
 		return 0, ErrEmptyBlogTitle
 	}
@@ -50,7 +50,7 @@ func (app *AppService) PostNewBlog(userID uint64, title, text string) (uint64, e
 	return blog.ID(), err
 }
 
-func (app *AppService) FindAllBlog(countStr, pageStr string) ([]*model.Blog, int, bool, error) {
+func (app *BlogApp) FindAllBlog(countStr, pageStr string) ([]*model.Blog, int, bool, error) {
 	var (
 		count int
 		page  int
@@ -84,7 +84,7 @@ func (app *AppService) FindAllBlog(countStr, pageStr string) ([]*model.Blog, int
 	return blogList[:count], page, true, nil
 }
 
-func (app *AppService) FindBlogByID(idStr string) (*model.Blog, error) {
+func (app *BlogApp) FindBlogByID(idStr string) (*model.Blog, error) {
 	id, err := strings.StrToUint64(idStr)
 	if err != nil {
 		return nil, ErrNoSuchBlog
@@ -100,7 +100,7 @@ func (app *AppService) FindBlogByID(idStr string) (*model.Blog, error) {
 	return blog, nil
 }
 
-func (app *AppService) EditBlog(userID uint64, blogIDStr, title, text string) error {
+func (app *BlogApp) EditBlog(userID uint64, blogIDStr, title, text string) error {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
 		return ErrNoSuchBlog

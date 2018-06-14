@@ -16,7 +16,7 @@ func TestGetAllBlog_OK(tt *testing.T) {
 	testing.InitTable("blog")
 
 	repo := repository.NewBlogRepository()
-	app := appservice.New(repo)
+	app := appservice.NewBlogApp(repo)
 
 	t := testing.NewTester(tt)
 

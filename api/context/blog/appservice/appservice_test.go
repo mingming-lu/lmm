@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 func TestPostNewBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	title, text := uuid.New(), uuid.New()
 	blogID, err := app.PostNewBlog(user.ID(), title, text)
@@ -54,7 +54,7 @@ func TestPostNewBlog_Success(tt *testing.T) {
 func TestPostNewBlog_DuplicateTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	title, text := uuid.New(), uuid.New()
 	_, err := app.PostNewBlog(user.ID(), title, text)
@@ -67,7 +67,7 @@ func TestPostNewBlog_DuplicateTitle(tt *testing.T) {
 func TestPostNewBlog_EmptyTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	blogID, err := app.PostNewBlog(user.ID(), "", uuid.New())
 	t.Is(ErrEmptyBlogTitle, err)
@@ -81,7 +81,7 @@ func TestFindAllBlog_OrderByCreatedTime(tt *testing.T) {
 	testing.InitTable("blog")
 
 	t := testing.NewTester(tt)
-	app := New(repository.NewBlogRepository())
+	app := NewBlogApp(repository.NewBlogRepository())
 
 	app.PostNewBlog(user.ID(), uuid.New(), uuid.New())
 	time.Sleep(1 * time.Second)
@@ -103,7 +103,7 @@ func TestFindAllBlog_DefaultCount(tt *testing.T) {
 
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	for i := 0; i < 12; i++ {
 		_, err := app.PostNewBlog(user.ID(), uuid.New(), uuid.New())
@@ -140,7 +140,7 @@ func TestFindAllBlog_GivenCount(tt *testing.T) {
 
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	blogIDs := make([]uint64, 0)
 	for i := 0; i < 5; i++ {
@@ -167,7 +167,7 @@ func TestFindAllBlog_GivenCount(tt *testing.T) {
 func TestFindBlogByID_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	title, text := uuid.New(), uuid.New()
 	blogID, err := app.PostNewBlog(user.ID(), title, text)
@@ -184,7 +184,7 @@ func TestFindBlogByID_Success(tt *testing.T) {
 func TestFindBlogByID_InvalidID(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	blog, err := app.FindBlogByID("NAN")
 	t.Is(ErrNoSuchBlog, err)
@@ -193,7 +193,7 @@ func TestFindBlogByID_InvalidID(tt *testing.T) {
 func TestFindBlogByID_NotFound(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	blog, err := app.FindBlogByID("112233")
 	t.Is(ErrNoSuchBlog, err)
@@ -203,7 +203,7 @@ func TestFindBlogByID_NotFound(tt *testing.T) {
 func TestEditBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)
@@ -227,7 +227,7 @@ func TestEditBlog_Success(tt *testing.T) {
 func TestEditBlog_NoPermission(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)
@@ -243,7 +243,7 @@ func TestEditBlog_NoPermission(tt *testing.T) {
 func TestEditBlog_NoSuchBlog(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)
@@ -256,7 +256,7 @@ func TestEditBlog_NoSuchBlog(tt *testing.T) {
 func TestEditBlog_NoChange(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)
@@ -269,7 +269,7 @@ func TestEditBlog_NoChange(tt *testing.T) {
 func TestEditBlog_EmptyTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := repository.NewBlogRepository()
-	app := New(repo)
+	app := NewBlogApp(repo)
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)
