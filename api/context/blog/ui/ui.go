@@ -137,7 +137,7 @@ func PostCategory(c *http.Context) {
 	}
 }
 
-func UpdateCagegory(c *http.Context) {
+func UpdateCategory(c *http.Context) {
 	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
 
 	categoryID := c.Request.Path.Params("category")
