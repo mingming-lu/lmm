@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -125,33 +124,24 @@ func NewContext(rw ResponseWriter, r *Request) *Context {
 	}
 }
 
-func (c *Context) Status(code int) *Context {
-	c.rw.WriteHeader(code)
-	return c
-}
-
 func (c *Context) Header(key, value string) *Context {
 	c.rw.Header().Add(key, value)
 	return c
 }
 
-func (c *Context) JSON(data interface{}) *Context {
+func (c *Context) JSON(statusCode int, data interface{}) {
 	c.rw.Header().Set("Content-Type", "application/json")
-	encoder := json.NewEncoder(c.rw)
-	encoder.SetIndent("", "  ")
-	encoder.Encode(data)
-	return c
+	if err := json.NewEncoder(c.rw).Encode(data); err != nil {
+		panic(err)
+	}
+	c.rw.WriteHeader(statusCode)
 }
 
-func (c *Context) String(s string) *Context {
+func (c *Context) String(statusCode int, s string) {
 	c.rw.Header().Set("Content-Type", "text/plain")
 	if !strings.HasSuffix(s, "\n") {
 		s += "\n"
 	}
 	c.rw.Write([]byte(s))
-	return c
-}
-
-func (c *Context) Stringf(format string, a ...interface{}) *Context {
-	return c.String(fmt.Sprintf(format, a...))
+	c.rw.WriteHeader(statusCode)
 }
