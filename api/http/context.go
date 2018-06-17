@@ -131,17 +131,17 @@ func (c *Context) Header(key, value string) *Context {
 
 func (c *Context) JSON(statusCode int, data interface{}) {
 	c.rw.Header().Set("Content-Type", "application/json")
+	c.rw.WriteHeader(statusCode)
 	if err := json.NewEncoder(c.rw).Encode(data); err != nil {
 		panic(err)
 	}
-	c.rw.WriteHeader(statusCode)
 }
 
 func (c *Context) String(statusCode int, s string) {
 	c.rw.Header().Set("Content-Type", "text/plain")
+	c.rw.WriteHeader(statusCode)
 	if !strings.HasSuffix(s, "\n") {
 		s += "\n"
 	}
 	c.rw.Write([]byte(s))
-	c.rw.WriteHeader(statusCode)
 }
