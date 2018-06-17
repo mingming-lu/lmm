@@ -25,10 +25,9 @@ func PostBlog(c *http.Context) {
 	blogID, err := app.PostNewBlog(user.ID(), blog.Title, blog.Text)
 	switch err {
 	case nil:
-		c.Header("Location", fmt.Sprintf("/blog/%d", blogID))
-		c.Status(http.StatusCreated).String("success")
+		c.Header("Location", fmt.Sprintf("/blog/%d", blogID)).String(http.StatusCreated, "success")
 	case appservice.ErrEmptyBlogTitle:
-		c.Status(http.StatusBadRequest).String(appservice.ErrEmptyBlogTitle.Error())
+		c.String(http.StatusBadRequest, appservice.ErrEmptyBlogTitle.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -52,13 +51,13 @@ func GetAllBlog(c *http.Context) {
 			blogList[index].CreatedAt = blogItem.CreatedAt().UTC().String()
 			blogList[index].UpdatedAt = blogItem.UpdatedAt().UTC().String()
 		}
-		c.Status(http.StatusOK).JSON(BlogListResponse{
+		c.JSON(http.StatusOK, BlogListResponse{
 			Blog:        blogList,
 			Page:        page,
 			HasNextPage: hasNextPage,
 		})
 	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
-		c.Status(http.StatusBadRequest).String(err.Error())
+		c.String(http.StatusBadRequest, err.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -70,7 +69,7 @@ func GetBlog(c *http.Context) {
 	blog, err := app.FindBlogByID(c.Request.Path.Params("blog"))
 	switch err {
 	case nil:
-		c.Status(http.StatusOK).JSON(BlogResponse{
+		c.JSON(http.StatusOK, BlogResponse{
 			ID:        strings.Uint64ToStr(blog.ID()),
 			Title:     blog.Title(),
 			Text:      blog.Text(),
@@ -78,7 +77,7 @@ func GetBlog(c *http.Context) {
 			UpdatedAt: blog.UpdatedAt().UTC().String(),
 		})
 	case appservice.ErrNoSuchBlog:
-		c.Status(http.StatusNotFound).String(appservice.ErrNoSuchBlog.Error())
+		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -100,15 +99,15 @@ func UpdateBlog(c *http.Context) {
 	err = app.EditBlog(user.ID(), c.Request.Path.Params("blog"), blog.Title, blog.Text)
 	switch err {
 	case nil:
-		c.Status(http.StatusOK).String("success")
+		c.String(http.StatusOK, "success")
 	case appservice.ErrBlogNoChange:
-		c.Status(http.StatusNoContent)
+		http.NoContent(c)
 	case appservice.ErrEmptyBlogTitle:
-		c.Status(http.StatusBadRequest).String(appservice.ErrEmptyBlogTitle.Error())
+		c.String(http.StatusBadRequest, appservice.ErrEmptyBlogTitle.Error())
 	case appservice.ErrNoPermission:
-		c.Status(http.StatusForbidden).String(appservice.ErrNoSuchBlog.Error())
+		c.String(http.StatusForbidden, appservice.ErrNoSuchBlog.Error())
 	case appservice.ErrNoSuchBlog:
-		c.Status(http.StatusNotFound).String(appservice.ErrNoSuchBlog.Error())
+		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)

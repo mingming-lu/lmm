@@ -25,7 +25,11 @@ func Serve(addr string, r *Router) {
 }
 
 func HandleStatus(c *Context, code int) {
-	c.Status(code).String(http.StatusText(code))
+	c.String(code, http.StatusText(code))
+}
+
+func NoContent(c *Context) {
+	HandleStatus(c, http.StatusNoContent)
 }
 
 func BadRequest(c *Context) {
