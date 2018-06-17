@@ -21,15 +21,15 @@ func SignIn(c *http.Context) {
 	user, err := appservice.New(repository.New()).SignIn(auth.Name, auth.Password)
 	switch err {
 	case nil:
-		c.Status(http.StatusOK).JSON(SignInResponse{
+		c.JSON(http.StatusOK, SignInResponse{
 			ID:    user.ID(),
 			Name:  user.Name(),
 			Token: user.Token(),
 		})
 	case appservice.ErrEmptyUserNameOrPassword:
-		c.Status(http.StatusBadRequest).String(err.Error())
+		c.String(http.StatusBadRequest, appservice.ErrEmptyUserNameOrPassword.Error())
 	case appservice.ErrInvalidUserNameOrPassword:
-		c.Status(http.StatusNotFound).String(err.Error())
+		c.String(http.StatusNotFound, appservice.ErrInvalidUserNameOrPassword.Error())
 	default:
 		http.InternalServerError(c)
 	}
@@ -46,9 +46,9 @@ func SignUp(c *http.Context) {
 	id, err := uc.SignUp(auth.Name, auth.Password)
 	switch err {
 	case nil:
-		c.Header("Location", fmt.Sprintf("/users/%d", id)).Status(http.StatusCreated).String("Success")
+		c.Header("Location", fmt.Sprintf("/users/%d", id)).String(http.StatusCreated, "Success")
 	case appservice.ErrDuplicateUserName:
-		c.Status(http.StatusBadRequest).String(appservice.ErrDuplicateUserName.Error())
+		c.String(http.StatusBadRequest, appservice.ErrDuplicateUserName.Error())
 	default:
 		http.InternalServerError(c)
 	}
@@ -60,7 +60,7 @@ func Verify(c *http.Context) {
 		http.Unauthorized(c)
 		return
 	}
-	c.Status(http.StatusOK).JSON(VerifyResponse{
+	c.JSON(http.StatusOK, VerifyResponse{
 		ID:   user.ID(),
 		Name: user.Name(),
 	})
