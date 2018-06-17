@@ -28,6 +28,10 @@ func HandleStatus(c *Context, code int) {
 	c.String(code, http.StatusText(code))
 }
 
+func NoContent(c *Context) {
+	HandleStatus(c, http.StatusNoContent)
+}
+
 func BadRequest(c *Context) {
 	HandleStatus(c, StatusBadRequest)
 }
