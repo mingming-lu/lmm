@@ -11,7 +11,7 @@ var (
 )
 
 var (
-	patternValidCategoryName = regexp.MustCompile(`^[\w\s-_]{1,31}$`)
+	patternValidCategoryName = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_]{1,31}$")
 )
 
 type Category struct {
