@@ -3,10 +3,15 @@ package model
 import (
 	"errors"
 	"lmm/api/domain/model"
+	"regexp"
 )
 
 var (
 	ErrInvalidCategoryName = errors.New("invalid category name")
+)
+
+var (
+	patternValidCategoryName = regexp.MustCompile(`^[\w\s-_]{1,31}$`)
 )
 
 type Category struct {
@@ -43,6 +48,8 @@ func (c *Category) UpdateName(newName string) error {
 }
 
 func (c *Category) validateName(name string) error {
-	// TODO validating name by regexp
+	if !patternValidCategoryName.MatchString(name) {
+		return ErrInvalidCategoryName
+	}
 	return nil
 }
