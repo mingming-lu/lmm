@@ -128,8 +128,7 @@ func PostCategory(c *http.Context) {
 	categoryID, err := app.AddNewCategory(category.Name)
 	switch err {
 	case nil:
-		c.Header("Location", fmt.Sprintf("/categories/%d", categoryID))
-		c.Status(http.StatusCreated).String("success")
+		c.Header("Location", fmt.Sprintf("/categories/%d", categoryID)).String(http.StatusCreated, "success")
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -151,7 +150,7 @@ func UpdateCategory(c *http.Context) {
 	err = app.UpdateCategory(categoryID, category.Name)
 	switch err {
 	case nil:
-		c.Status(http.StatusOK).String("success")
+		c.String(http.StatusOK, "success")
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -168,7 +167,7 @@ func GetAllCategoris(c *http.Context) {
 		for index, model := range models {
 			categories[index].Name = model.Name()
 		}
-		c.Status(http.StatusOK).JSON(CategoriesResponse{
+		c.JSON(http.StatusOK, CategoriesResponse{
 			Categories: categories,
 		})
 	default:
@@ -185,9 +184,9 @@ func DeleteCategory(c *http.Context) {
 	err := app.Remove(categoryID)
 	switch err {
 	case nil:
-		c.Status(http.StatusNoContent)
+		http.NoContent(c)
 	case appservice.ErrNoSuchCategory:
-		c.Status(http.StatusBadRequest).String(appservice.ErrNoSuchCategory.Error())
+		c.String(http.StatusBadRequest, appservice.ErrNoSuchCategory.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
