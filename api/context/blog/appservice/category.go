@@ -51,7 +51,7 @@ func (app *CategoryApp) UpdateCategory(categoryIDStr, newName string) error {
 
 	category, err := app.repo.FindByID(categoryID)
 	if err != nil {
-		return ErrNoSuchBlog
+		return ErrNoSuchCategory
 	}
 
 	err = category.UpdateName(newName)
@@ -61,7 +61,7 @@ func (app *CategoryApp) UpdateCategory(categoryIDStr, newName string) error {
 
 	err = app.repo.Update(category)
 	if err == db.ErrNoChange {
-		return ErrNoSuchBlog
+		return ErrNoSuchCategory
 	}
 
 	return nil
@@ -84,7 +84,7 @@ func (app *CategoryApp) Remove(idStr string) error {
 
 	category, err := app.repo.FindByID(id)
 	if err != nil {
-		return ErrNoSuchBlog
+		return ErrNoSuchCategory
 	}
 
 	err = app.repo.Remove(category)
