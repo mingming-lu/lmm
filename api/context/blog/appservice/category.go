@@ -88,10 +88,12 @@ func (app *CategoryApp) Remove(idStr string) error {
 		return ErrNoSuchCategory
 	}
 
-	err = app.repo.Remove(category)
-	if err.Error() == db.ErrNoRows.Error() {
+	switch app.repo.Remove(category) {
+	case nil:
+		return nil
+	case db.ErrNoRows:
 		return ErrNoSuchCategory
+	default:
+		return err
 	}
-
-	return nil
 }
