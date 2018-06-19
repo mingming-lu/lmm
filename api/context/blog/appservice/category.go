@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	ErrCategoryNoChanged     = errors.New("category no changed")
 	ErrDuplicateCategoryName = errors.New("duplicate category name")
 	ErrNoSuchCategory        = errors.New("no such category")
 )
@@ -61,7 +62,7 @@ func (app *CategoryApp) UpdateCategory(categoryIDStr, newName string) error {
 
 	err = app.repo.Update(category)
 	if err == db.ErrNoChange {
-		return ErrNoSuchCategory
+		return ErrCategoryNoChanged
 	}
 
 	return nil
