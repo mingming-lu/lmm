@@ -26,11 +26,11 @@ func main() {
 	// router.PUT("/v1/blog/:blog/category", blog.SetCategory)
 	// router.DELETE("/v1/blog/:blog/category", blog.DeleteCategory)
 
-	// // category
-	// router.GET("/v1/users/:user/categories", category.GetByUser)
-	// router.POST("/v1/categories", category.Register)
-	// router.PUT("/v1/categories/:category", category.Update)
-	// router.DELETE("/v1/categories/:category", category.Delete)
+	// category
+	router.GET("/v1/categories", blog.GetAllCategoris)
+	router.POST("/v1/categories", auth.BearerAuth(blog.PostCategory))
+	router.PUT("/v1/categories/:category", auth.BearerAuth(blog.UpdateCategory))
+	router.DELETE("/v1/categories/:category", auth.BearerAuth(blog.DeleteCategory))
 
 	// // tag
 	// router.GET("/v1/users/:user/tags", tag.GetByUser)

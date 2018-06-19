@@ -19,3 +19,11 @@ type BlogResponse struct {
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }
+
+type Category struct {
+	Name string `json:"name"`
+}
+
+type CategoriesResponse struct {
+	Categories []*Category `json:"categories"`
+}
