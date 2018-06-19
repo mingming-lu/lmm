@@ -13,6 +13,7 @@ import (
 var (
 	ErrCategoryNoChanged     = errors.New("category no changed")
 	ErrDuplicateCategoryName = errors.New("duplicate category name")
+	ErrInvalidCategoryName   = errors.New("invalid category name")
 	ErrNoSuchCategory        = errors.New("no such category")
 )
 
@@ -27,7 +28,7 @@ func NewCategoryApp(repo repository.CategoryRepository) *CategoryApp {
 func (app *CategoryApp) AddNewCategory(name string) (uint64, error) {
 	category, err := factory.NewCategory(name)
 	if err != nil {
-		return 0, err
+		return 0, ErrInvalidCategoryName
 	}
 
 	err = app.repo.Add(category)
@@ -57,7 +58,7 @@ func (app *CategoryApp) UpdateCategoryName(categoryIDStr, newName string) error 
 
 	err = category.UpdateName(newName)
 	if err != nil {
-		return model.ErrInvalidCategoryName
+		return ErrInvalidCategoryName
 	}
 
 	err = app.repo.Update(category)
