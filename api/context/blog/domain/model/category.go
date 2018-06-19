@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"lmm/api/domain/model"
+	"lmm/api/utils/strings"
 	"regexp"
 )
 
@@ -11,7 +12,7 @@ var (
 )
 
 var (
-	patternValidCategoryName = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_]{1,31}$")
+	patternValidCategoryName = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_ ]{1,31}$")
 )
 
 type Category struct {
@@ -21,13 +22,16 @@ type Category struct {
 }
 
 func NewCategory(id uint64, name string) (*Category, error) {
+	name, err := validateCategoryName(name)
+	if err != nil {
+		return nil, ErrInvalidCategoryName
+	}
+
 	c := &Category{
 		id:   id,
 		name: name,
 	}
-	if c.validateName(c.name) != nil {
-		return nil, ErrInvalidCategoryName
-	}
+
 	return c, nil
 }
 
@@ -40,16 +44,18 @@ func (c *Category) Name() string {
 }
 
 func (c *Category) UpdateName(newName string) error {
-	if c.validateName(newName) != nil {
+	newName, err := validateCategoryName(newName)
+	if err != nil {
 		return ErrInvalidCategoryName
 	}
 	c.name = newName
 	return nil
 }
 
-func (c *Category) validateName(name string) error {
+func validateCategoryName(name string) (string, error) {
+	name = strings.TrimSpace(name)
 	if !patternValidCategoryName.MatchString(name) {
-		return ErrInvalidCategoryName
+		return "", ErrInvalidCategoryName
 	}
-	return nil
+	return name, nil
 }

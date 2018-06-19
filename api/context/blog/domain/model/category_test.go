@@ -41,6 +41,28 @@ func TestNewCategory_JapaneseCharacters(tt *testing.T) {
 	t.Is(name, category.Name())
 }
 
+func TestNewCategory_IncludingSpace(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	id := testing.GenerateID()
+	name := "a b c"
+	category, err := NewCategory(id, name)
+
+	t.NoError(err)
+	t.Is(id, category.ID())
+	t.Is(name, category.Name())
+}
+
+func TestNewCategory_AllSpace(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	id := testing.GenerateID()
+	name := "   "
+	_, err := NewCategory(id, name)
+
+	t.Is(ErrInvalidCategoryName, err)
+}
+
 func TestNewCategory_EmptyName(tt *testing.T) {
 	t := testing.NewTester(tt)
 

@@ -21,3 +21,7 @@ func StrToUint64(s string) (uint64, error) {
 func ReplaceAll(s, old, new string) string {
 	return strings.Replace(s, old, new, -1)
 }
+
+func TrimSpace(s string) string {
+	return strings.TrimSpace(s)
+}
