@@ -129,6 +129,8 @@ func PostCategory(c *http.Context) {
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/categories/%d", categoryID)).String(http.StatusCreated, "success")
+	case appservice.ErrInvalidCategoryName, appservice.ErrDuplicateCategoryName:
+		c.String(http.StatusBadRequest, err.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -147,10 +149,17 @@ func UpdateCategory(c *http.Context) {
 		return
 	}
 
-	err = app.UpdateCategory(categoryID, category.Name)
+	err = app.UpdateCategoryName(categoryID, category.Name)
+
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "success")
+	case appservice.ErrCategoryNoChanged:
+		http.NoContent(c)
+	case appservice.ErrInvalidCategoryName:
+		c.String(http.StatusBadRequest, appservice.ErrInvalidCategoryName.Error())
+	case appservice.ErrNoSuchCategory:
+		c.String(http.StatusNotFound, appservice.ErrNoSuchCategory.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -186,7 +195,7 @@ func DeleteCategory(c *http.Context) {
 	case nil:
 		http.NoContent(c)
 	case appservice.ErrNoSuchCategory:
-		c.String(http.StatusBadRequest, appservice.ErrNoSuchCategory.Error())
+		c.String(http.StatusNotFound, appservice.ErrNoSuchCategory.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
