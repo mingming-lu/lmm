@@ -6,11 +6,13 @@ import (
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/domain/repository"
 	"lmm/api/db"
+	repoUtil "lmm/api/domain/repository"
 	"lmm/api/utils/strings"
 )
 
 var (
-	ErrNoSuchCategory = errors.New("no such category")
+	ErrDuplicateCategoryName = errors.New("duplicate category name")
+	ErrNoSuchCategory        = errors.New("no such category")
 )
 
 type CategoryApp struct {
@@ -29,6 +31,13 @@ func (app *CategoryApp) AddNewCategory(name string) (uint64, error) {
 
 	err = app.repo.Add(category)
 	if err != nil {
+		key, _, ok := repoUtil.CheckErrorDuplicate(err.Error())
+		if !ok {
+			return 0, err
+		}
+		if key == "name" {
+			return 0, ErrDuplicateCategoryName
+		}
 		return 0, err
 	}
 	return category.ID(), nil
