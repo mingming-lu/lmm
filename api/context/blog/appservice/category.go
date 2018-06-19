@@ -44,7 +44,7 @@ func (app *CategoryApp) AddNewCategory(name string) (uint64, error) {
 	return category.ID(), nil
 }
 
-func (app *CategoryApp) UpdateCategory(categoryIDStr, newName string) error {
+func (app *CategoryApp) UpdateCategoryName(categoryIDStr, newName string) error {
 	categoryID, err := strings.StrToUint64(categoryIDStr)
 	if err != nil {
 		return ErrNoSuchCategory
