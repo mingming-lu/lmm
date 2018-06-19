@@ -2,7 +2,6 @@ package appservice
 
 import (
 	"fmt"
-	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/domain/repository"
 	"lmm/api/domain/factory"
 	"lmm/api/testing"
@@ -30,7 +29,7 @@ func TestAddNewCategory_InvalidName(tt *testing.T) {
 	app := NewCategoryApp(repo)
 
 	id, err := app.AddNewCategory("")
-	t.Is(model.ErrInvalidCategoryName, err)
+	t.Is(ErrInvalidCategoryName, err)
 	t.Is(uint64(0), id)
 }
 
@@ -90,7 +89,7 @@ func TestUpdateCategoryName_InvalidCategoryName(tt *testing.T) {
 
 	newName := "#$%"
 	err = app.UpdateCategoryName(fmt.Sprint(id), newName)
-	t.Is(model.ErrInvalidCategoryName, err)
+	t.Is(ErrInvalidCategoryName, err)
 }
 
 func TestUpdateCategoryName_CategoryNameNoChanged(tt *testing.T) {
