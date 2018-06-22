@@ -4,7 +4,7 @@ import (
 	"fmt"
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/blog/appservice"
-	"lmm/api/context/blog/domain/repository"
+	"lmm/api/context/blog/repository"
 	"lmm/api/http"
 	"lmm/api/utils/strings"
 	"log"

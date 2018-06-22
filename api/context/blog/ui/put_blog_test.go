@@ -8,7 +8,7 @@ import (
 	accountService "lmm/api/context/account/domain/service"
 	"lmm/api/context/blog/appservice"
 	"lmm/api/context/blog/domain/factory"
-	"lmm/api/context/blog/domain/repository"
+	"lmm/api/context/blog/repository"
 	"lmm/api/http"
 	"lmm/api/testing"
 	"lmm/api/usecase/auth"

@@ -3,7 +3,7 @@ package ui
 import (
 	"encoding/json"
 	"lmm/api/context/blog/appservice"
-	"lmm/api/context/blog/domain/repository"
+	"lmm/api/context/blog/repository"
 	"lmm/api/http"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
