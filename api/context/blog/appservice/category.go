@@ -4,7 +4,7 @@ import (
 	"errors"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
-	"lmm/api/context/blog/domain/repository"
+	"lmm/api/context/blog/repository"
 	"lmm/api/db"
 	repoUtil "lmm/api/domain/repository"
 	"lmm/api/utils/strings"
