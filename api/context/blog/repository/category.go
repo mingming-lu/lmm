@@ -64,6 +64,7 @@ func (repo *categoryRepo) FindAll() ([]*model.Category, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var (
 		categoryID   uint64

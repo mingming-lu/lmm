@@ -55,6 +55,7 @@ func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, error) {
 	if err != nil {
 		return nil, nil
 	}
+	defer rows.Close()
 
 	var (
 		blogID        uint64
