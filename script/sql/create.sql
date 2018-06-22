@@ -27,13 +27,12 @@ CREATE TABLE IF NOT EXISTS `category` (
 	UNIQUE `name` (`name`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
-CREATE TABLE IF NOT EXISTS blog_category (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	blog int unsigned NOT NULL,
-	category int unsigned NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE(blog),
-	INDEX `category` (category)
+CREATE TABLE IF NOT EXISTS `blog_category` (
+	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`blog` INT UNSIGNED NOT NULL,
+	`category` INT UNSIGNED NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE `blog_category` (`blog`, `category`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS tag (
