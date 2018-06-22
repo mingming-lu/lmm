@@ -170,3 +170,41 @@ func (repo *blogRepo) Update(blog *model.Blog) error {
 	}
 	return nil
 }
+
+func (repo *blogRepo) SetBlogCategory(blog *model.Blog, category *model.Category) error {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`
+		INSERT INTO blog_category (blog, category)
+		VALUES(?, ?)
+		ON DUPLICATE KEY UPDATE category = ?
+	`)
+	defer stmt.Close()
+
+	_, err := stmt.Exec(blog.ID(), category.ID(), category.ID())
+	return err
+}
+
+func (repo *blogRepo) RemoveBlogCategory(blog *model.Blog) error {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`DELETE FROM blog_category WHERE blog = ?`)
+	defer stmt.Close()
+
+	res, err := stmt.Exec(blog.ID())
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
+	return nil
+}
