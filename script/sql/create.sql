@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS `blog_category` (
 	`blog` INT UNSIGNED NOT NULL,
 	`category` INT UNSIGNED NOT NULL,
 	PRIMARY KEY (`id`),
-	UNIQUE `blog_category` (`blog`, `category`)
+	UNIQUE `blog` (`blog`),
+	INDEX `blog_category` (`blog`, `category`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS tag (
