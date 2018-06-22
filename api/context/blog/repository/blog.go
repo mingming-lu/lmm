@@ -12,7 +12,10 @@ type BlogRepository interface {
 	Add(blog *model.Blog) error
 	Update(blog *model.Blog) error
 	FindAll(count, page int) ([]*model.Blog, error)
+	FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, error)
 	FindByID(id uint64) (*model.Blog, error)
+	SetBlogCategory(blog *model.Blog, category *model.Category) error
+	RemoveBlogCategory(blog *model.Blog) error
 }
 
 type blogRepo struct {
@@ -81,7 +84,7 @@ func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, error) {
 	return blogList, nil
 }
 
-func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page uint) ([]*model.Blog, error) {
+func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, error) {
 	db := repo.DB()
 	defer db.Close()
 
