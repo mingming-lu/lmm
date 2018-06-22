@@ -5,7 +5,7 @@ import (
 	accountFactory "lmm/api/context/account/domain/factory"
 	accountRepository "lmm/api/context/account/domain/repository"
 	"lmm/api/context/blog/domain/factory"
-	"lmm/api/context/blog/domain/repository"
+	"lmm/api/context/blog/repository"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 	"time"

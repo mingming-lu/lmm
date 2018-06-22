@@ -2,7 +2,7 @@ package appservice
 
 import (
 	"fmt"
-	"lmm/api/context/blog/domain/repository"
+	"lmm/api/context/blog/repository"
 	"lmm/api/domain/factory"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"

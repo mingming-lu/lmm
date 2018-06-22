@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"lmm/api/context/blog/domain/factory"
-	"lmm/api/context/blog/domain/repository"
+	"lmm/api/context/blog/repository"
 	"lmm/api/http"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
