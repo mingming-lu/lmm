@@ -112,7 +112,12 @@ func (repo *categoryRepo) FindByBlog(blog *model.Blog) (*model.Category, error) 
 	db := repo.DB()
 	defer db.Close()
 
-	stmt := db.MustPrepare(`SELECT id, name FROM blog_category WHERE blog = ?`)
+	stmt := db.MustPrepare(`
+		SELECT c.id, c.name
+		FROM blog_category AS bc
+		INNER JOIN category AS c ON c.id = bc.category
+		WHERE bc.blog = ?
+	`)
 	defer stmt.Close()
 
 	var (
