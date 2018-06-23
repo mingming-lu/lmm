@@ -1,9 +1,10 @@
 package repository
 
 import (
+	accountFactory "lmm/api/context/account/domain/factory"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
-	"lmm/api/db"
+	infra "lmm/api/db"
 	"lmm/api/domain/repository"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -52,7 +53,7 @@ func TestUpdateCategory_NoSuchCategory(tt *testing.T) {
 	category := newCategory()
 
 	err := repo.Update(category)
-	t.Isa(db.ErrNoChange, err)
+	t.Isa(infra.ErrNoChange, err)
 }
 
 func TestFindAllCategories_Success(tt *testing.T) {
@@ -117,7 +118,67 @@ func TestFindCategoryByID_NoSuch(tt *testing.T) {
 
 	categoryFound, err := repo.FindByID(category.ID())
 
-	t.Is(db.ErrNoRows, err)
+	t.Is(infra.ErrNoRows, err)
+	t.Nil(categoryFound)
+}
+
+func TestFindCategoryByBlog_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewCategoryRepository()
+
+	db := repo.DB()
+	defer db.Close()
+
+	insertBlogCategory := db.MustPrepare(`INSERT INTO blog_category (blog, category) VALUES(?, ?)`)
+	defer insertBlogCategory.Close()
+
+	category := newCategory()
+	repo.Add(category)
+
+	user, _ := accountFactory.NewUser("username", "userpassword")
+	blog, _ := factory.NewBlog(user.ID(), "blog title", "blog text")
+
+	insertBlogCategory.Exec(blog.ID(), category.ID())
+
+	categoryFound, err := repo.FindByBlog(blog)
+	t.NoError(err)
+	t.Is(category.ID(), categoryFound.ID())
+}
+
+func TestFindCategoryByBlog_CategoryNotSet(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewCategoryRepository()
+
+	category := newCategory()
+	repo.Add(category)
+
+	user, _ := accountFactory.NewUser("username", "userpassword")
+	blog, _ := factory.NewBlog(user.ID(), "blog title", "blog text")
+
+	categoryFound, err := repo.FindByBlog(blog)
+	t.Is(infra.ErrNoRows, err)
+	t.Nil(categoryFound)
+}
+
+func TestFindCategoryByBlog_NoSuchCategory(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewCategoryRepository()
+
+	db := repo.DB()
+	defer db.Close()
+
+	insertBlogCategory := db.MustPrepare(`INSERT INTO blog_category (blog, category) VALUES(?, ?)`)
+	defer insertBlogCategory.Close()
+
+	category := newCategory()
+
+	user, _ := accountFactory.NewUser("username", "userpassword")
+	blog, _ := factory.NewBlog(user.ID(), "blog title", "blog text")
+
+	insertBlogCategory.Exec(blog.ID(), category.ID())
+
+	categoryFound, err := repo.FindByBlog(blog)
+	t.Is(infra.ErrNoRows, err)
 	t.Nil(categoryFound)
 }
 
@@ -133,7 +194,7 @@ func TestRemoveCategory_Success(tt *testing.T) {
 	t.NoError(err)
 
 	category, err = repo.FindByID(category.ID())
-	t.Is(db.ErrNoRows, err)
+	t.Is(infra.ErrNoRows, err)
 	t.Nil(category)
 }
 
@@ -146,7 +207,7 @@ func TestRemoveCategory_NoSuch(tt *testing.T) {
 
 	err := repo.Remove(category)
 
-	t.Is(db.ErrNoRows, err)
+	t.Is(infra.ErrNoRows, err)
 }
 
 func TestRemoveCategory_Removed(tt *testing.T) {
@@ -160,7 +221,7 @@ func TestRemoveCategory_Removed(tt *testing.T) {
 
 	t.NoError(err)
 
-	t.Is(db.ErrNoRows, repo.Remove(category))
+	t.Is(infra.ErrNoRows, repo.Remove(category))
 }
 
 func newCategory() *model.Category {
