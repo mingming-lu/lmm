@@ -12,6 +12,7 @@ type CategoryRepository interface {
 	Update(categoryRepo *model.Category) error
 	FindAll() ([]*model.Category, error)
 	FindByID(id uint64) (*model.Category, error)
+	FindByBlog(blog *model.Blog) (*model.Category, error)
 	Remove(category *model.Category) error
 }
 
@@ -100,6 +101,31 @@ func (repo *categoryRepo) FindByID(id uint64) (*model.Category, error) {
 	)
 
 	err := stmt.QueryRow(id).Scan(&categoryID, &categoryName)
+	if err != nil {
+		return nil, err
+	}
+
+	return model.NewCategory(categoryID, categoryName)
+}
+
+func (repo *categoryRepo) FindByBlog(blog *model.Blog) (*model.Category, error) {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`
+		SELECT c.id, c.name
+		FROM blog_category AS bc
+		INNER JOIN category AS c ON c.id = bc.category
+		WHERE bc.blog = ?
+	`)
+	defer stmt.Close()
+
+	var (
+		categoryID   uint64
+		categoryName string
+	)
+
+	err := stmt.QueryRow(blog.ID()).Scan(&categoryID, &categoryName)
 	if err != nil {
 		return nil, err
 	}
