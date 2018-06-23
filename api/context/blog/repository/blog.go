@@ -99,7 +99,7 @@ func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page in
 		FROM blog_category AS bc
 		INNER JOIN blog AS b ON b.id = bc.blog
 		WHERE bc.category = ?
-		ORDER BY b.created_at
+		ORDER BY bc.blog DESC
 		LIMIT ?
 		OFFSET ?
 	`)
