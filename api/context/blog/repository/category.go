@@ -12,6 +12,7 @@ type CategoryRepository interface {
 	Update(categoryRepo *model.Category) error
 	FindAll() ([]*model.Category, error)
 	FindByID(id uint64) (*model.Category, error)
+	FindByName(name string) (*model.Category, error)
 	FindByBlog(blog *model.Blog) (*model.Category, error)
 	Remove(category *model.Category) error
 }
@@ -101,6 +102,26 @@ func (repo *categoryRepo) FindByID(id uint64) (*model.Category, error) {
 	)
 
 	err := stmt.QueryRow(id).Scan(&categoryID, &categoryName)
+	if err != nil {
+		return nil, err
+	}
+
+	return model.NewCategory(categoryID, categoryName)
+}
+
+func (repo *categoryRepo) FindByName(name string) (*model.Category, error) {
+	db := repo.DB()
+	defer db.Close()
+
+	stmt := db.MustPrepare(`SELECT id, name FROM category WHERE name = ?`)
+	defer stmt.Close()
+
+	var (
+		categoryID   uint64
+		categoryName string
+	)
+
+	err := stmt.QueryRow(name).Scan(&categoryID, &categoryName)
 	if err != nil {
 		return nil, err
 	}

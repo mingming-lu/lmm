@@ -22,9 +22,8 @@ func main() {
 	router.POST("/v1/blog", auth.BearerAuth(blog.PostBlog))
 	router.PUT("/v1/blog/:blog", auth.BearerAuth(blog.UpdateBlog))
 	// // blog category
-	// router.GET("/v1/blog/:blog/category", blog.GetCategory)
-	// router.PUT("/v1/blog/:blog/category", blog.SetCategory)
-	// router.DELETE("/v1/blog/:blog/category", blog.DeleteCategory)
+	router.GET("/v1/blog/:blog/category", blog.GetBlogCagetory)
+	router.PUT("/v1/blog/:blog/category", blog.SetBlogCategory)
 
 	// category
 	router.GET("/v1/categories", blog.GetAllCategoris)

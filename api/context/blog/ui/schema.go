@@ -8,7 +8,6 @@ type Blog struct {
 
 type BlogListResponse struct {
 	Blog        []BlogResponse `json:"blog"`
-	Page        int            `json:"page"`
 	HasNextPage bool           `json:"has_next_page"`
 }
 

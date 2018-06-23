@@ -4,11 +4,21 @@ import (
 	"fmt"
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/blog/appservice"
+	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/repository"
 	"lmm/api/http"
 	"lmm/api/utils/strings"
 	"log"
 )
+
+var app *appservice.AppService
+
+func init() {
+	app = appservice.New(
+		repository.NewBlogRepository(),
+		repository.NewCategoryRepository(),
+	)
+}
 
 func PostBlog(c *http.Context) {
 	blog := Blog{}
@@ -36,7 +46,7 @@ func PostBlog(c *http.Context) {
 
 func GetAllBlog(c *http.Context) {
 	app := appservice.NewBlogApp(repository.NewBlogRepository())
-	blogItems, page, hasNextPage, err := app.FindAllBlog(
+	blogItems, hasNextPage, err := app.FindAllBlog(
 		c.Request.Query("count"),
 		c.Request.Query("page"),
 	)
@@ -53,7 +63,6 @@ func GetAllBlog(c *http.Context) {
 		}
 		c.JSON(http.StatusOK, BlogListResponse{
 			Blog:        blogList,
-			Page:        page,
 			HasNextPage: hasNextPage,
 		})
 	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
@@ -85,7 +94,11 @@ func GetBlog(c *http.Context) {
 }
 
 func UpdateBlog(c *http.Context) {
-	user := c.Values().Get("user").(*account.User)
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
 	app := appservice.NewBlogApp(repository.NewBlogRepository())
 
 	blog := Blog{}
@@ -110,6 +123,31 @@ func UpdateBlog(c *http.Context) {
 		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
+
+func SetBlogCategory(c *http.Context) {
+	_, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	category := Category{}
+	if err := c.Request.ScanBody(&category); err != nil {
+		log.Println(err)
+		http.BadRequest(c)
+		return
+	}
+
+	err := app.SetBlogCategory(c.Request.Path.Params("blog"), category.Name)
+	switch err {
+	case nil:
+		c.String(http.StatusOK, "success")
+	case service.ErrNoSuchBlog, service.ErrNoSuchCategory:
+		c.String(http.StatusBadRequest, err.Error())
+	default:
 		http.InternalServerError(c)
 	}
 }
@@ -181,6 +219,20 @@ func GetAllCategoris(c *http.Context) {
 		})
 	default:
 		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
+
+func GetBlogCagetory(c *http.Context) {
+	category, err := app.GetCategoryOfBlog(c.Request.Path.Params("blog"))
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, category)
+	case service.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
+	case service.ErrCategoryNotSet:
+		c.String(http.StatusNotFound, service.ErrCategoryNotSet.Error())
+	default:
 		http.InternalServerError(c)
 	}
 }
