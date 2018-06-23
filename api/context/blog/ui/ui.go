@@ -36,7 +36,7 @@ func PostBlog(c *http.Context) {
 
 func GetAllBlog(c *http.Context) {
 	app := appservice.NewBlogApp(repository.NewBlogRepository())
-	blogItems, page, hasNextPage, err := app.FindAllBlog(
+	blogItems, hasNextPage, err := app.FindAllBlog(
 		c.Request.Query("count"),
 		c.Request.Query("page"),
 	)
@@ -53,7 +53,6 @@ func GetAllBlog(c *http.Context) {
 		}
 		c.JSON(http.StatusOK, BlogListResponse{
 			Blog:        blogList,
-			Page:        page,
 			HasNextPage: hasNextPage,
 		})
 	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
