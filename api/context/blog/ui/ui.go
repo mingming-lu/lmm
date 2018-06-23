@@ -223,6 +223,20 @@ func GetAllCategoris(c *http.Context) {
 	}
 }
 
+func GetBlogCagetory(c *http.Context) {
+	category, err := app.GetCategoryOfBlog(c.Request.Path.Params("blog"))
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, category)
+	case service.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
+	case service.ErrCategoryNotSet:
+		c.String(http.StatusNotFound, service.ErrCategoryNotSet.Error())
+	default:
+		http.InternalServerError(c)
+	}
+}
+
 func DeleteCategory(c *http.Context) {
 	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
 
