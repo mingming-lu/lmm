@@ -50,7 +50,7 @@ func (app *BlogApp) PostNewBlog(userID uint64, title, text string) (uint64, erro
 	return blog.ID(), err
 }
 
-func (app *BlogApp) FindAllBlog(countStr, pageStr string) ([]*model.Blog, int, bool, error) {
+func (app *BlogApp) FindAllBlog(countStr, pageStr string) ([]*model.Blog, bool, error) {
 	var (
 		count int
 		page  int
@@ -61,7 +61,7 @@ func (app *BlogApp) FindAllBlog(countStr, pageStr string) ([]*model.Blog, int, b
 	} else {
 		count, err = strings.StrToInt(countStr)
 		if err != nil {
-			return nil, 0, false, ErrInvalidCount
+			return nil, false, ErrInvalidCount
 		}
 	}
 	if pageStr == "" {
@@ -69,19 +69,11 @@ func (app *BlogApp) FindAllBlog(countStr, pageStr string) ([]*model.Blog, int, b
 	} else {
 		page, err = strings.StrToInt(pageStr)
 		if err != nil {
-			return nil, 0, false, ErrInvalidPage
+			return nil, false, ErrInvalidPage
 		}
 	}
 
-	blogList, err := app.repo.FindAll(count, page)
-	if err != nil {
-		return nil, 0, false, err
-	}
-
-	if len(blogList) <= count {
-		return blogList, page, false, nil
-	}
-	return blogList[:count], page, true, nil
+	return app.repo.FindAll(count, page)
 }
 
 func (app *BlogApp) FindBlogByID(idStr string) (*model.Blog, error) {
