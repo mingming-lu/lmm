@@ -2,13 +2,11 @@ package repository
 
 import (
 	"lmm/api/context/blog/domain/model"
-	sql "lmm/api/db"
-	"lmm/api/domain/repository"
+	"lmm/api/storage"
 	"time"
 )
 
 type BlogRepository interface {
-	repository.Repository
 	Add(blog *model.Blog) error
 	Update(blog *model.Blog) error
 	FindAll(count, page int) ([]*model.Blog, bool, error)
@@ -19,18 +17,15 @@ type BlogRepository interface {
 }
 
 type blogRepo struct {
-	repository.Default
+	db *storage.DB
 }
 
-func NewBlogRepository() BlogRepository {
-	return new(blogRepo)
+func NewBlogRepository(db *storage.DB) BlogRepository {
+	return &blogRepo{db: db}
 }
 
 func (repo *blogRepo) Add(blog *model.Blog) error {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`INSERT INTO blog (id, user, title, text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
+	stmt := repo.db.MustPrepare(`INSERT INTO blog (id, user, title, text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
 	defer stmt.Close()
 
 	_, err := stmt.Exec(blog.ID(), blog.UserID(), blog.Title(), blog.Text(), blog.CreatedAt().UTC(), blog.UpdatedAt().UTC())
@@ -42,10 +37,7 @@ func (repo *blogRepo) Add(blog *model.Blog) error {
 }
 
 func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, bool, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`
+	stmt := repo.db.MustPrepare(`
 		SELECT id, user, title, text, created_at, updated_at
 		FROM blog
 		ORDER BY created_at DESC
@@ -91,10 +83,7 @@ func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, bool, error) {
 }
 
 func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, bool, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`
+	stmt := repo.db.MustPrepare(`
 		SELECT b.id, b.user, b.title, b.text, b.created_at, b.updated_at
 		FROM blog_category AS bc
 		INNER JOIN blog AS b ON b.id = bc.blog
@@ -141,10 +130,7 @@ func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page in
 }
 
 func (repo *blogRepo) FindByID(id uint64) (*model.Blog, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`SELECT id, user, title, text, created_at, updated_at FROM blog WHERE id = ?`)
+	stmt := repo.db.MustPrepare(`SELECT id, user, title, text, created_at, updated_at FROM blog WHERE id = ?`)
 	defer stmt.Close()
 
 	var (
@@ -165,10 +151,7 @@ func (repo *blogRepo) FindByID(id uint64) (*model.Blog, error) {
 }
 
 func (repo *blogRepo) Update(blog *model.Blog) error {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`UPDATE blog SET title = ?, text = ? WHERE id = ? and user = ?`)
+	stmt := repo.db.MustPrepare(`UPDATE blog SET title = ?, text = ? WHERE id = ? and user = ?`)
 	defer stmt.Close()
 
 	res, err := stmt.Exec(blog.Title(), blog.Text(), blog.ID(), blog.UserID())
@@ -181,16 +164,13 @@ func (repo *blogRepo) Update(blog *model.Blog) error {
 	}
 	if rowsAffeted == 0 {
 		// wether or not the blog with id exists, return no change
-		return sql.ErrNoChange
+		return storage.ErrNoChange
 	}
 	return nil
 }
 
 func (repo *blogRepo) SetBlogCategory(blog *model.Blog, category *model.Category) error {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`
+	stmt := repo.db.MustPrepare(`
 		INSERT INTO blog_category (blog, category)
 		VALUES(?, ?)
 		ON DUPLICATE KEY UPDATE category = ?
@@ -202,10 +182,7 @@ func (repo *blogRepo) SetBlogCategory(blog *model.Blog, category *model.Category
 }
 
 func (repo *blogRepo) RemoveBlogCategory(blog *model.Blog) error {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`DELETE FROM blog_category WHERE blog = ?`)
+	stmt := repo.db.MustPrepare(`DELETE FROM blog_category WHERE blog = ?`)
 	defer stmt.Close()
 
 	res, err := stmt.Exec(blog.ID())
@@ -218,7 +195,7 @@ func (repo *blogRepo) RemoveBlogCategory(blog *model.Blog) error {
 		return err
 	}
 	if rowsAffected == 0 {
-		return sql.ErrNoRows
+		return storage.ErrNoRows
 	}
 
 	return nil

@@ -4,8 +4,8 @@ import (
 	accountFactory "lmm/api/context/account/domain/factory"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
-	infra "lmm/api/db"
-	"lmm/api/domain/repository"
+	"lmm/api/repository"
+	"lmm/api/storage"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 	"sort"
@@ -13,7 +13,7 @@ import (
 
 func TestNewAddCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 
@@ -24,7 +24,7 @@ func TestNewAddCategory_Success(tt *testing.T) {
 
 func TestNewAddCategory_Duplicated(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 
@@ -38,7 +38,7 @@ func TestNewAddCategory_Duplicated(tt *testing.T) {
 
 func TestUpdateCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 
@@ -48,12 +48,12 @@ func TestUpdateCategory_Success(tt *testing.T) {
 
 func TestUpdateCategory_NoSuchCategory(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 
 	err := repo.Update(category)
-	t.Isa(infra.ErrNoChange, err)
+	t.Isa(storage.ErrNoChange, err)
 }
 
 func TestFindAllCategories_Success(tt *testing.T) {
@@ -62,7 +62,7 @@ func TestFindAllCategories_Success(tt *testing.T) {
 	testing.InitTable("category")
 
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	for i := 0; i < 10; i++ {
 		repo.Add(newCategory())
@@ -88,7 +88,7 @@ func TestFindAllCategories_NoOne(tt *testing.T) {
 	testing.InitTable("category")
 
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	categories, err := repo.FindAll()
 	t.NoError(err)
@@ -97,7 +97,7 @@ func TestFindAllCategories_NoOne(tt *testing.T) {
 
 func TestFindCategoryByID_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 	repo.Add(category)
@@ -111,25 +111,22 @@ func TestFindCategoryByID_Success(tt *testing.T) {
 
 func TestFindCategoryByID_NoSuch(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 	// repo.Add(category)
 
 	categoryFound, err := repo.FindByID(category.ID())
 
-	t.Is(infra.ErrNoRows, err)
+	t.Is(storage.ErrNoRows, err)
 	t.Nil(categoryFound)
 }
 
 func TestFindCategoryByBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
-	db := repo.DB()
-	defer db.Close()
-
-	insertBlogCategory := db.MustPrepare(`INSERT INTO blog_category (blog, category) VALUES(?, ?)`)
+	insertBlogCategory := testing.DB().MustPrepare(`INSERT INTO blog_category (blog, category) VALUES(?, ?)`)
 	defer insertBlogCategory.Close()
 
 	category := newCategory()
@@ -147,7 +144,7 @@ func TestFindCategoryByBlog_Success(tt *testing.T) {
 
 func TestFindCategoryByBlog_CategoryNotSet(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 	repo.Add(category)
@@ -156,18 +153,15 @@ func TestFindCategoryByBlog_CategoryNotSet(tt *testing.T) {
 	blog, _ := factory.NewBlog(user.ID(), "blog title", "blog text")
 
 	categoryFound, err := repo.FindByBlog(blog)
-	t.Is(infra.ErrNoRows, err)
+	t.Is(storage.ErrNoRows, err)
 	t.Nil(categoryFound)
 }
 
 func TestFindCategoryByBlog_NoSuchCategory(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
-	db := repo.DB()
-	defer db.Close()
-
-	insertBlogCategory := db.MustPrepare(`INSERT INTO blog_category (blog, category) VALUES(?, ?)`)
+	insertBlogCategory := testing.DB().MustPrepare(`INSERT INTO blog_category (blog, category) VALUES(?, ?)`)
 	defer insertBlogCategory.Close()
 
 	category := newCategory()
@@ -178,13 +172,13 @@ func TestFindCategoryByBlog_NoSuchCategory(tt *testing.T) {
 	insertBlogCategory.Exec(blog.ID(), category.ID())
 
 	categoryFound, err := repo.FindByBlog(blog)
-	t.Is(infra.ErrNoRows, err)
+	t.Is(storage.ErrNoRows, err)
 	t.Nil(categoryFound)
 }
 
 func TestRemoveCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 	repo.Add(category)
@@ -194,25 +188,25 @@ func TestRemoveCategory_Success(tt *testing.T) {
 	t.NoError(err)
 
 	category, err = repo.FindByID(category.ID())
-	t.Is(infra.ErrNoRows, err)
+	t.Is(storage.ErrNoRows, err)
 	t.Nil(category)
 }
 
 func TestRemoveCategory_NoSuch(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 	// repo.Add(category)
 
 	err := repo.Remove(category)
 
-	t.Is(infra.ErrNoRows, err)
+	t.Is(storage.ErrNoRows, err)
 }
 
 func TestRemoveCategory_Removed(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository()
+	repo := NewCategoryRepository(testing.DB())
 
 	category := newCategory()
 	repo.Add(category)
@@ -221,7 +215,7 @@ func TestRemoveCategory_Removed(tt *testing.T) {
 
 	t.NoError(err)
 
-	t.Is(infra.ErrNoRows, repo.Remove(category))
+	t.Is(storage.ErrNoRows, repo.Remove(category))
 }
 
 func newCategory() *model.Category {
