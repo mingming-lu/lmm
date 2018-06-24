@@ -28,7 +28,7 @@ type DB struct {
 	*sql.DB
 }
 
-func New() *DB {
+func NewDB() *DB {
 	conn, err := sql.Open("mysql", dbSrcName+dbName+"?"+connParams)
 	if err != nil {
 		panic(err)
