@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -22,6 +23,10 @@ var (
 	dbName     = os.Getenv("DATABASE_NAME")
 	connParams = "parseTime=true"
 	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
+)
+
+var (
+	ErrPatternDuplicate = regexp.MustCompile(`Error 1062: Duplicate entry '([-\w]+)' for key '(\w+)'`)
 )
 
 type DB struct {
@@ -63,4 +68,14 @@ func (db *DB) MustPrepare(query string) *sql.Stmt {
 func (db *DB) MustPreparef(format string, args ...interface{}) *sql.Stmt {
 	query := fmt.Sprintf(format, args...)
 	return db.MustPrepare(query)
+}
+
+func CheckErrorDuplicate(errMsg string) (key string, entry string, ok bool) {
+	matched := ErrPatternDuplicate.FindStringSubmatch(errMsg)
+	if len(matched) == 3 {
+		key = matched[2]
+		entry = matched[1]
+		ok = true
+	}
+	return key, entry, ok
 }
