@@ -8,7 +8,7 @@ import (
 
 func TestSignUp(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := repository.New()
+	repo := repository.New(testing.DB())
 	app := New(repo)
 
 	name, password := randomUserNameAndPassword()
@@ -24,7 +24,7 @@ func TestSignUp(t *testing.T) {
 
 func TestSignUp_Duplicate(t *testing.T) {
 	tester := testing.NewTester(t)
-	app := New(repository.New())
+	app := New(repository.New(testing.DB()))
 
 	name, password := randomUserNameAndPassword()
 	id, err := app.SignUp(name, password)
@@ -38,7 +38,7 @@ func TestSignUp_Duplicate(t *testing.T) {
 
 func TestSignUp_EmptyUserName(t *testing.T) {
 	tester := testing.NewTester(t)
-	app := New(repository.New())
+	app := New(repository.New(testing.DB()))
 
 	id, err := app.SignUp("", "password")
 	tester.Error(err)
@@ -48,7 +48,7 @@ func TestSignUp_EmptyUserName(t *testing.T) {
 
 func TestSignUp_EmptyPassword(t *testing.T) {
 	tester := testing.NewTester(t)
-	app := New(repository.New())
+	app := New(repository.New(testing.DB()))
 
 	id, err := app.SignUp("username", "")
 	tester.Error(err)
@@ -58,7 +58,7 @@ func TestSignUp_EmptyPassword(t *testing.T) {
 
 func TestSignUp_EmptyUserNameAndPassword(t *testing.T) {
 	tester := testing.NewTester(t)
-	app := New(repository.New())
+	app := New(repository.New(testing.DB()))
 
 	id, err := app.SignUp("", "")
 	tester.Error(err)

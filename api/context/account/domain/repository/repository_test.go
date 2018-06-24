@@ -3,14 +3,14 @@ package repository
 import (
 	"lmm/api/context/account/domain/factory"
 	"lmm/api/context/account/domain/model"
-	"lmm/api/db"
+	"lmm/api/storage"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 )
 
 func TestAdd(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New()
+	repo := New(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, err := factory.NewUser(name, password)
@@ -19,10 +19,7 @@ func TestAdd(t *testing.T) {
 	err = repo.Add(user)
 	tester.NoError(err)
 
-	db := db.New()
-	defer db.Close()
-
-	stmt := db.MustPrepare("SELECT name, token FROM user WHERE id = ?")
+	stmt := testing.DB().MustPrepare("SELECT name, token FROM user WHERE id = ?")
 	defer stmt.Close()
 
 	var (
@@ -38,7 +35,7 @@ func TestAdd(t *testing.T) {
 
 func TestFindByName_Success(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New()
+	repo := New(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ := factory.NewUser(name, password)
@@ -52,18 +49,18 @@ func TestFindByName_Success(t *testing.T) {
 
 func TestFindByName_NotFound(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New()
+	repo := New(testing.DB())
 
 	found, err := repo.FindByName("foo")
 
 	tester.Error(err)
 	tester.Nil(found)
-	tester.Is(db.ErrNoRows, err)
+	tester.Is(storage.ErrNoRows.Error(), err.Error())
 }
 
 func TestFindByToken_Success(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New()
+	repo := New(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ := factory.NewUser(name, password)
@@ -77,10 +74,10 @@ func TestFindByToken_Success(t *testing.T) {
 
 func TestFindByToken_NotFound(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New()
+	repo := New(testing.DB())
 
 	found, err := repo.FindByToken("1234")
 	tester.Error(err)
-	tester.Is(db.ErrNoRows, err)
+	tester.Is(storage.ErrNoRows.Error(), err.Error())
 	tester.Nil(found)
 }

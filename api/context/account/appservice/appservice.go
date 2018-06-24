@@ -6,8 +6,7 @@ import (
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/context/account/domain/service"
-	"lmm/api/db"
-	repoUtil "lmm/api/domain/repository"
+	"lmm/api/storage"
 )
 
 var (
@@ -37,7 +36,7 @@ func (app *AppService) SignUp(name, password string) (uint64, error) {
 	}
 	err = app.repo.Add(user)
 	if err != nil {
-		key, _, ok := repoUtil.CheckErrorDuplicate(err.Error())
+		key, _, ok := storage.CheckErrorDuplicate(err.Error())
 		if !ok {
 			return 0, err
 		}
@@ -57,7 +56,7 @@ func (app *AppService) SignIn(name, password string) (*model.User, error) {
 
 	user, err := app.repo.FindByName(name)
 	if err != nil {
-		if err.Error() == db.ErrNoRows.Error() {
+		if err.Error() == storage.ErrNoRows.Error() {
 			return nil, ErrInvalidUserNameOrPassword
 		}
 		return nil, err

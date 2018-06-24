@@ -3,17 +3,15 @@ package testing
 import (
 	"errors"
 	"lmm/api/context/account/domain/model"
-	"lmm/api/domain/repository"
 	"lmm/api/testing"
 )
 
 type MockedRepo struct {
-	repository.Repository
 	testing.Mock
 }
 
 func NewMockedRepo() *MockedRepo {
-	return &MockedRepo{Repository: &repository.Default{}}
+	return &MockedRepo{}
 }
 
 func (repo *MockedRepo) Add(*model.User) error {
