@@ -5,8 +5,7 @@ import (
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
-	"lmm/api/db"
-	repoUtil "lmm/api/domain/repository"
+	"lmm/api/storage"
 	"lmm/api/utils/strings"
 )
 
@@ -33,7 +32,7 @@ func (app *CategoryApp) AddNewCategory(name string) (uint64, error) {
 
 	err = app.repo.Add(category)
 	if err != nil {
-		key, _, ok := repoUtil.CheckErrorDuplicate(err.Error())
+		key, _, ok := storage.CheckErrorDuplicate(err.Error())
 		if !ok {
 			return 0, err
 		}
@@ -62,7 +61,7 @@ func (app *CategoryApp) UpdateCategoryName(categoryIDStr, newName string) error 
 	}
 
 	err = app.repo.Update(category)
-	if err == db.ErrNoChange {
+	if err == storage.ErrNoChange {
 		return ErrCategoryNoChanged
 	}
 
@@ -92,7 +91,7 @@ func (app *CategoryApp) Remove(idStr string) error {
 	switch app.repo.Remove(category) {
 	case nil:
 		return nil
-	case db.ErrNoRows:
+	case storage.ErrNoRows:
 		return ErrNoSuchCategory
 	default:
 		return err

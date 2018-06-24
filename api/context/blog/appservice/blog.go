@@ -5,8 +5,7 @@ import (
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
-	"lmm/api/db"
-	repoUtil "lmm/api/domain/repository"
+	"lmm/api/storage"
 	"lmm/api/utils/strings"
 )
 
@@ -38,7 +37,7 @@ func (app *BlogApp) PostNewBlog(userID uint64, title, text string) (uint64, erro
 	}
 	err = app.repo.Add(blog)
 	if err != nil {
-		key, _, ok := repoUtil.CheckErrorDuplicate(err.Error())
+		key, _, ok := storage.CheckErrorDuplicate(err.Error())
 		if !ok {
 			return 0, err
 		}
@@ -84,7 +83,7 @@ func (app *BlogApp) FindBlogByID(idStr string) (*model.Blog, error) {
 
 	blog, err := app.repo.FindByID(id)
 	if err != nil {
-		if err.Error() == db.ErrNoRows.Error() {
+		if err.Error() == storage.ErrNoRows.Error() {
 			return nil, ErrNoSuchBlog
 		}
 		return nil, err
@@ -122,7 +121,7 @@ func (app *BlogApp) EditBlog(userID uint64, blogIDStr, title, text string) error
 	}
 
 	err = app.repo.Update(blog)
-	if err == db.ErrNoChange {
+	if err == storage.ErrNoChange {
 		return ErrNoSuchBlog
 	}
 

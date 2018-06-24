@@ -14,7 +14,7 @@ var user *account.User
 func TestMain(m *testing.M) {
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ = accountFactory.NewUser(name, password)
-	accountRepository.New().Add(user)
+	accountRepository.New(testing.DB()).Add(user)
 
 	code := m.Run()
 	os.Exit(code)
