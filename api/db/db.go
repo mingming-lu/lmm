@@ -34,6 +34,17 @@ func New() *DB {
 	return &DB{DB: conn}
 }
 
+func (db *DB) Close() error {
+	return errors.New(`
+		DB.Close is unexpected to be called after every use.\n
+		See https://golang.org/pkg/database/sql/#DB.Close
+	`)
+}
+
+func (db *DB) CloseNow() error {
+	return db.DB.Close()
+}
+
 func (db *DB) MustPrepare(query string) *sql.Stmt {
 	stmt, err := db.Prepare(query)
 	if err != nil {
