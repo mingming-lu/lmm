@@ -1,10 +1,12 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -29,6 +31,11 @@ type DB struct {
 func New() *DB {
 	conn, err := sql.Open("mysql", dbSrcName+dbName+"?"+connParams)
 	if err != nil {
+		panic(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := conn.PingContext(ctx); err != nil {
 		panic(err)
 	}
 	return &DB{DB: conn}
