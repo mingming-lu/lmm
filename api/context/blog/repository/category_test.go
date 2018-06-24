@@ -4,7 +4,6 @@ import (
 	accountFactory "lmm/api/context/account/domain/factory"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
-	"lmm/api/repository"
 	"lmm/api/storage"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -33,7 +32,7 @@ func TestNewAddCategory_Duplicated(tt *testing.T) {
 	t.NoError(err)
 
 	err = repo.Add(category)
-	t.True(repository.ErrPatternDuplicate.Match([]byte(err.Error())))
+	t.True(storage.ErrPatternDuplicate.Match([]byte(err.Error())))
 }
 
 func TestUpdateCategory_Success(tt *testing.T) {
