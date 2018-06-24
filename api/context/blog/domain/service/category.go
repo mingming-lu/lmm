@@ -3,7 +3,7 @@ package service
 import (
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
-	"lmm/api/db"
+	"lmm/api/storage"
 	"lmm/api/utils/strings"
 )
 
@@ -24,7 +24,7 @@ func (s *CategoryService) GetCategoryByID(idStr string) (*model.Category, error)
 	switch err {
 	case nil:
 		return category, nil
-	case db.ErrNoRows:
+	case storage.ErrNoRows:
 		return nil, ErrNoSuchCategory
 	default:
 		return nil, err
@@ -36,7 +36,7 @@ func (s *CategoryService) GetCategoryByName(name string) (*model.Category, error
 	switch err {
 	case nil:
 		return category, nil
-	case db.ErrNoRows:
+	case storage.ErrNoRows:
 		return nil, ErrNoSuchCategory
 	default:
 		return nil, err
@@ -48,7 +48,7 @@ func (s *CategoryService) GetCategoryOf(blog *model.Blog) (*model.Category, erro
 	switch err {
 	case nil:
 		return category, nil
-	case db.ErrNoRows:
+	case storage.ErrNoRows:
 		return nil, ErrCategoryNotSet
 	default:
 		return nil, err

@@ -3,7 +3,7 @@ package service
 import (
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
-	"lmm/api/db"
+	"lmm/api/storage"
 	"lmm/api/utils/strings"
 )
 
@@ -24,7 +24,7 @@ func (s *BlogService) GetBlogByID(blogIDStr string) (*model.Blog, error) {
 	switch err {
 	case nil:
 		return blog, nil
-	case db.ErrNoRows:
+	case storage.ErrNoRows:
 		return nil, ErrNoSuchBlog
 	default:
 		return nil, err
