@@ -1,18 +1,10 @@
 package service
 
 import (
-	"errors"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
-)
-
-var (
-	ErrCategoryNoChanged     = errors.New("category no changed")
-	ErrDuplicateCategoryName = errors.New("duplicate category name")
-	ErrInvalidCategoryName   = errors.New("invalid category name")
-	ErrNoSuchCategory        = errors.New("no such category")
 )
 
 type CategoryService struct {

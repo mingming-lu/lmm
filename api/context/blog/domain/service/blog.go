@@ -1,21 +1,10 @@
 package service
 
 import (
-	"errors"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
-)
-
-var (
-	ErrBlogTitleDuplicated = errors.New("blog title duplicated")
-	ErrNoSuchBlog          = errors.New("no such blog")
-	ErrEmptyBlogTitle      = errors.New("blog title cannot be empty")
-	ErrBlogNoChange        = errors.New("blog no change")
-	ErrInvalidCount        = errors.New("invalid count")
-	ErrInvalidPage         = errors.New("invalid page")
-	ErrNoPermission        = errors.New("no permission")
 )
 
 type BlogService struct {
