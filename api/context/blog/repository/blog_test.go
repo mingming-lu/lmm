@@ -75,8 +75,9 @@ func TestFindAllBlog_FetchOneMore(tt *testing.T) {
 	blog, _ = factory.NewBlog(user.ID(), title, text)
 	t.NoError(repo.Add(blog))
 
-	blogList, err := repo.FindAll(1, 1)
+	blogList, nextPage, err := repo.FindAll(1, 1)
 	t.NoError(err)
+	t.Is(-1, nextPage)
 	t.Is(1, len(blogList))
 }
 
@@ -89,8 +90,9 @@ func TestFindAllBlog_EmptyList(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := NewBlogRepository(testing.DB())
 
-	blogList, err := repo.FindAll(100, 1)
+	blogList, nextPage, err := repo.FindAll(100, 1)
 	t.NoError(err)
+	t.Is(-1, nextPage)
 	t.NotNil(blogList)
 	t.Is(0, len(blogList))
 }
@@ -109,36 +111,43 @@ func TestFindAllBlogByCategory(tt *testing.T) {
 	c1, _ := model.NewCategory(1, "c1")
 	c2, _ := model.NewCategory(1, "c2")
 
-	if blogList, err := repo.FindAllByCategory(c1, 5, 1); err == nil {
+	if blogList, nextPage, err := repo.FindAllByCategory(c1, 5, 1); err == nil {
 		t.Is(5, len(blogList))
+		t.Is(-1, nextPage)
 
-		blogList, err = repo.FindAllByCategory(c1, 5, 2)
+		blogList, nextPage, err = repo.FindAllByCategory(c1, 5, nextPage)
 		t.NoError(err)
+		t.Is(-1, nextPage)
 		t.NotNil(blogList)
 		t.Is(0, len(blogList))
 	} else {
 		t.Fatalf(err.Error())
 	}
 
-	if blogList, err := repo.FindAllByCategory(c2, 2, 1); err == nil {
+	if blogList, nextPage, err := repo.FindAllByCategory(c2, 2, 1); err == nil {
+		t.Is(2, len(blogList))
+		t.Is(2, nextPage)
+
+		blogList, nextPage, err = repo.FindAllByCategory(c2, 2, nextPage)
+		t.NoError(err)
+		t.Is(3, nextPage)
 		t.Is(2, len(blogList))
 
-		blogList, err = repo.FindAllByCategory(c2, 2, 2)
+		blogList, nextPage, err = repo.FindAllByCategory(c2, 2, nextPage)
 		t.NoError(err)
-		t.Is(2, len(blogList))
-
-		blogList, err = repo.FindAllByCategory(c2, 2, 3)
-		t.NoError(err)
+		t.Is(-1, nextPage)
 		t.Is(1, len(blogList))
 	} else {
 		t.Fatalf(err.Error())
 	}
 
-	if blogList, err := repo.FindAllByCategory(c2, 10, 1); err == nil {
+	if blogList, nextPage, err := repo.FindAllByCategory(c2, 10, 1); err == nil {
 		t.Is(5, len(blogList))
+		t.Is(-1, nextPage)
 
-		blogList, err = repo.FindAllByCategory(c2, 10, 2)
+		blogList, nextPage, err = repo.FindAllByCategory(c2, 10, 2)
 		t.NoError(err)
+		t.Is(-1, nextPage)
 		t.Is(0, len(blogList))
 	} else {
 		t.Fatalf(err.Error())
@@ -213,6 +222,11 @@ func TestEditBlog_NoSuchBlog(tt *testing.T) {
 }
 
 func TestSetBlogCategory_Success(tt *testing.T) {
+	testing.Lock()
+	defer testing.Unlock()
+
+	testing.InitTable("category")
+
 	t := testing.NewTester(tt)
 	repo := NewBlogRepository(testing.DB())
 
@@ -226,15 +240,17 @@ func TestSetBlogCategory_Success(tt *testing.T) {
 	category := newCategory()
 	t.NoError(repo.SetBlogCategory(blog, category))
 
-	blogList, err := repo.FindAllByCategory(category, 10, 1)
+	blogList, nextPage, err := repo.FindAllByCategory(category, 10, 1)
 	t.NoError(err)
+	t.Is(-1, nextPage)
 	t.Is(1, len(blogList))
 	t.Is(blog.ID(), blogList[0].ID())
 
 	otherCategory := newCategory()
 	t.NoError(repo.SetBlogCategory(blog, otherCategory), "on duplicate")
-	blogList, err = repo.FindAllByCategory(otherCategory, 10, 1)
+	blogList, nextPage, err = repo.FindAllByCategory(otherCategory, 10, 1)
 	t.NoError(err)
+	t.Is(-1, nextPage)
 	t.Is(1, len(blogList))
 	t.Is(blog.ID(), blogList[0].ID())
 }

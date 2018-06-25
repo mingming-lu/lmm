@@ -9,8 +9,8 @@ import (
 type BlogRepository interface {
 	Add(blog *model.Blog) error
 	Update(blog *model.Blog) error
-	FindAll(count, page int) ([]*model.Blog, error)
-	FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, error)
+	FindAll(count, page int) ([]*model.Blog, int, error)
+	FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, int, error)
 	FindByID(id uint64) (*model.Blog, error)
 	SetBlogCategory(blog *model.Blog, category *model.Category) error
 	RemoveBlogCategory(blog *model.Blog) error
@@ -36,7 +36,7 @@ func (repo *blogRepo) Add(blog *model.Blog) error {
 	return nil
 }
 
-func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, error) {
+func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, int, error) {
 	stmt := repo.db.MustPrepare(`
 		SELECT id, user, title, text, created_at, updated_at
 		FROM blog
@@ -48,7 +48,7 @@ func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, error) {
 
 	rows, err := stmt.Query(count, (page-1)*count)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 	defer rows.Close()
 
@@ -66,7 +66,7 @@ func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, error) {
 	for rows.Next() {
 		err = rows.Scan(&blogID, &blogWriter, &blogTitle, &blogText, &blogCreatedAt, &blogUpdated)
 		if err != nil {
-			return nil, err
+			return nil, -1, err
 		}
 		blogList = append(blogList, model.NewBlog(
 			blogID, blogWriter, blogTitle, blogText, blogCreatedAt, blogUpdated,
@@ -74,13 +74,19 @@ func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
-	return blogList, nil
+	nextPage := -1
+	if len(blogList) > count {
+		blogList = blogList[:count]
+		nextPage = page + 1
+	}
+
+	return blogList, nextPage, nil
 }
 
-func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, error) {
+func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, int, error) {
 	stmt := repo.db.MustPrepare(`
 		SELECT b.id, b.user, b.title, b.text, b.created_at, b.updated_at
 		FROM blog_category AS bc
@@ -92,9 +98,9 @@ func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page in
 	`)
 	defer stmt.Close()
 
-	rows, err := stmt.Query(category.ID(), count, (page-1)*count)
+	rows, err := stmt.Query(category.ID(), count+1, (page-1)*count)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 	defer rows.Close()
 
@@ -112,17 +118,23 @@ func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page in
 		if err := rows.Scan(
 			&blogID, &blogWriter, &blogTitle, &blogText, &blogCreatedAt, &blogUpdatedAt,
 		); err != nil {
-			return nil, err
+			return nil, -1, err
 		}
 		blog := model.NewBlog(blogID, blogWriter, blogTitle, blogText, blogCreatedAt, blogUpdatedAt)
 		blogList = append(blogList, blog)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
-	return blogList, nil
+	nextPage := -1
+	if len(blogList) > count {
+		blogList = blogList[:count]
+		nextPage = page + 1
+	}
+
+	return blogList, nextPage, nil
 }
 
 func (repo *blogRepo) FindByID(id uint64) (*model.Blog, error) {
