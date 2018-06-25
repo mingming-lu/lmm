@@ -2,6 +2,7 @@ package main
 
 import (
 	account "lmm/api/context/account/ui"
+	blog "lmm/api/context/blog/ui"
 	"lmm/api/storage"
 
 	"lmm/api/http"
@@ -17,11 +18,11 @@ func main() {
 	router.POST("/v1/signin", accountUI.SignIn)
 	router.GET("/v1/verify", accountUI.BearerAuth(accountUI.Verify))
 
-	// blogUI := blog.New(db)
-	// // // blog
+	blogUI := blog.New(db)
+	// blog
 	// router.GET("/v1/blog", blog.GetAllBlog)
 	// router.GET("/v1/blog/:blog", blog.GetBlog)
-	// router.POST("/v1/blog", auth.BearerAuth(blogUI.PostBlog))
+	router.POST("/v1/blog", accountUI.BearerAuth(blogUI.PostBlog))
 	// router.PUT("/v1/blog/:blog", auth.BearerAuth(blog.UpdateBlog))
 	// // // blog category
 	// router.GET("/v1/blog/:blog/category", blog.GetBlogCagetory)

@@ -19,17 +19,8 @@ func New(db *storage.DB) *UI {
 }
 
 func (ui *UI) PostBlog(c *http.Context) {
-	blog := Blog{}
-	err := c.Request.ScanBody(&blog)
-	if err != nil {
-		log.Println(err)
-		http.BadRequest(c)
-		return
-	}
-
 	user := c.Values().Get("user").(*account.User)
-
-	blogID, err := ui.app.PostNewBlog(user, blog.Title, blog.Text)
+	blogID, err := ui.app.PostNewBlog(user, c.Request.Body)
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/blog/%d", blogID)).String(http.StatusCreated, "success")
