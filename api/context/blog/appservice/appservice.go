@@ -1,9 +1,11 @@
 package appservice
 
 import (
+	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/repository"
+	"lmm/api/storage"
 )
 
 type AppService struct {
@@ -11,13 +13,20 @@ type AppService struct {
 	categoryService *service.CategoryService
 }
 
-func New(
-	blogRepo repository.BlogRepository,
-	categoryRepo repository.CategoryRepository) *AppService {
+func New(db *storage.DB) *AppService {
 	return &AppService{
-		blogService:     service.NewBlogService(blogRepo),
-		categoryService: service.NewCategoryService(categoryRepo),
+		blogService:     service.NewBlogService(repository.NewBlogRepository(db)),
+		categoryService: service.NewCategoryService(repository.NewCategoryRepository(db)),
 	}
+}
+
+func (app *AppService) PostNewBlog(user *account.User, title, text string) (uint64, error) {
+	blog, err := app.blogService.PostBlog(user.ID(), title, text)
+	if err != nil {
+		return 0, err
+	}
+
+	return blog.ID(), err
 }
 
 func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, error) {
