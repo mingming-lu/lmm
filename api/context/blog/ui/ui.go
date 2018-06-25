@@ -62,39 +62,31 @@ func (ui *UI) GetBlog(c *http.Context) {
 	}
 }
 
-// func UpdateBlog(c *http.Context) {
-// 	user, ok := c.Values().Get("user").(*account.User)
-// 	if !ok {
-// 		http.Unauthorized(c)
-// 		return
-// 	}
-// 	app := appservice.NewBlogApp(repository.NewBlogRepository())
-//
-// 	blog := Blog{}
-// 	err := c.Request.ScanBody(&blog)
-// 	if err != nil {
-// 		log.Println(err)
-// 		http.BadRequest(c)
-// 		return
-// 	}
-//
-// 	err = app.EditBlog(user.ID(), c.Request.Path.Params("blog"), blog.Title, blog.Text)
-// 	switch err {
-// 	case nil:
-// 		c.String(http.StatusOK, "success")
-// 	case appservice.ErrBlogNoChange:
-// 		http.NoContent(c)
-// 	case appservice.ErrEmptyBlogTitle:
-// 		c.String(http.StatusBadRequest, appservice.ErrEmptyBlogTitle.Error())
-// 	case appservice.ErrNoPermission:
-// 		c.String(http.StatusForbidden, appservice.ErrNoSuchBlog.Error())
-// 	case appservice.ErrNoSuchBlog:
-// 		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
-// 	default:
-// 		log.Println(err)
-// 		http.InternalServerError(c)
-// 	}
-// }
+func (ui *UI) UpdateBlog(c *http.Context) {
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	err := ui.app.EditBlog(user, c.Request.Query("blog"), c.Request.Body)
+	switch err {
+	case nil:
+		c.String(http.StatusOK, "success")
+	case appservice.ErrBlogNoChange:
+		http.NoContent(c)
+	case appservice.ErrEmptyBlogTitle:
+		c.String(http.StatusBadRequest, appservice.ErrEmptyBlogTitle.Error())
+	case appservice.ErrNoPermission:
+		c.String(http.StatusForbidden, appservice.ErrNoSuchBlog.Error())
+	case appservice.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
+
 //
 // func SetBlogCategory(c *http.Context) {
 // 	_, ok := c.Values().Get("user").(*account.User)

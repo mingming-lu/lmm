@@ -5,7 +5,6 @@ import "errors"
 // blog
 var (
 	ErrInvalidBlogID  = errors.New("invalid blog id")
-	ErrNoSuchBlog     = errors.New("no such blog")
 	ErrCategoryNotSet = errors.New("category not set")
 )
 

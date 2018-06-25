@@ -10,7 +10,12 @@ import (
 
 var (
 	ErrBlogTitleDuplicated = errors.New("blog title duplicated")
+	ErrNoSuchBlog          = errors.New("no such blog")
 	ErrEmptyBlogTitle      = errors.New("blog title cannot be empty")
+	ErrBlogNoChange        = errors.New("blog no change")
+	ErrInvalidCount        = errors.New("invalid count")
+	ErrInvalidPage         = errors.New("invalid page")
+	ErrNoPermission        = errors.New("no permission")
 )
 
 type BlogService struct {
@@ -57,10 +62,6 @@ func (s *BlogService) GetBlogListByPage(count, page int) ([]*model.Blog, bool, e
 }
 
 func (s *BlogService) GetBlogByID(id uint64) (*model.Blog, error) {
-	// blogID, err := strings.StrToUint64(blogIDStr)
-	// if err != nil {
-	// 	return nil, ErrInvalidBlogID
-	// }
 	blog, err := s.repo.FindByID(id)
 	switch err {
 	case nil:
@@ -70,6 +71,38 @@ func (s *BlogService) GetBlogByID(id uint64) (*model.Blog, error) {
 	default:
 		return nil, err
 	}
+}
+
+func (s *BlogService) EditBlog(userID, blogID uint64, title, text string) error {
+	blog, err := s.repo.FindByID(blogID)
+	if err != nil {
+		return ErrNoSuchBlog
+	}
+
+	if blog.UserID() != userID {
+		return ErrNoPermission
+	}
+
+	lastUpdated := blog.UpdatedAt()
+
+	// TODO move validation to model
+	if title == "" {
+		return ErrEmptyBlogTitle
+	}
+
+	blog.UpdateTitle(title)
+	blog.UpdateText(text)
+
+	if blog.UpdatedAt().Equal(lastUpdated) {
+		return ErrBlogNoChange
+	}
+
+	err = s.repo.Update(blog)
+	if err == storage.ErrNoChange {
+		return ErrNoSuchBlog
+	}
+
+	return err
 }
 
 func (s *BlogService) SetBlogCategory(blog *model.Blog, category *model.Category) error {

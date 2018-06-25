@@ -112,6 +112,20 @@ func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, err
 	return category, nil
 }
 
+func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBody io.ReadCloser) error {
+	blogID, err := strings.StrToUint64(blogIDStr)
+	if err != nil {
+		return ErrNoSuchBlog
+	}
+
+	content := BlogContent{}
+	if err := json.NewDecoder(requestBody).Decode(content); err != nil {
+		return err
+	}
+
+	return app.blogService.EditBlog(user.ID(), blogID, content.Title, content.Text)
+}
+
 func (app *AppService) SetBlogCategory(blogIDStr, categoryName string) error {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {

@@ -20,10 +20,10 @@ func main() {
 
 	blogUI := blog.New(db)
 	// blog
-	// router.GET("/v1/blog", blog.GetAllBlog)
-	// router.GET("/v1/blog/:blog", blog.GetBlog)
+	router.GET("/v1/blog", blogUI.GetAllBlog)
+	router.GET("/v1/blog/:blog", blogUI.GetBlog)
 	router.POST("/v1/blog", accountUI.BearerAuth(blogUI.PostBlog))
-	// router.PUT("/v1/blog/:blog", auth.BearerAuth(blog.UpdateBlog))
+	router.PUT("/v1/blog/:blog", auth.BearerAuth(blog.UpdateBlog))
 	// // // blog category
 	// router.GET("/v1/blog/:blog/category", blog.GetBlogCagetory)
 	// router.PUT("/v1/blog/:blog/category", blog.SetBlogCategory)
