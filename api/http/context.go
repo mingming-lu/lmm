@@ -94,11 +94,11 @@ func (rw *responseWriter) WriteHeader(statusCode int) {
 type Values map[string]interface{}
 
 func (vs Values) Set(key string, v interface{}) {
-	vs[key] = v
+	vs[strings.ToLower(key)] = v
 }
 
 func (vs Values) Get(key string) interface{} {
-	return vs[key]
+	return vs[strings.ToLower(key)]
 }
 
 type Context struct {
