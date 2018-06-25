@@ -46,7 +46,7 @@ func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, int, error) {
 	`)
 	defer stmt.Close()
 
-	rows, err := stmt.Query(count, (page-1)*count)
+	rows, err := stmt.Query(count+1, (page-1)*count)
 	if err != nil {
 		return nil, -1, err
 	}

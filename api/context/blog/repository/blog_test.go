@@ -55,30 +55,45 @@ func TestAddBlog_DuplicateTitle(tt *testing.T) {
 	t.Regexp(`Duplicate entry '[\w\d-]+' for key 'title'`, err.Error())
 }
 
-func TestFindAllBlog_FetchOneMore(tt *testing.T) {
+func TestFindAllBlog_Paging(tt *testing.T) {
 	testing.Lock()
 	defer testing.Unlock()
 
 	testing.InitTable("blog")
-
 	t := testing.NewTester(tt)
+
 	repo := NewBlogRepository(testing.DB())
+	createBlogListWithCategory(repo, 10)
 
-	name, password := uuid.New()[:31], uuid.New()
-	user, _ := accountFactory.NewUser(name, password)
+	blogList, nextPage, err := repo.FindAll(8, 1)
+	t.NoError(err)
+	t.Is(2, nextPage)
+	t.Is(8, len(blogList))
 
-	title, text := uuid.New(), uuid.New()
-	blog, _ := factory.NewBlog(user.ID(), title, text)
-	t.NoError(repo.Add(blog))
-
-	title, text = uuid.New(), uuid.New()
-	blog, _ = factory.NewBlog(user.ID(), title, text)
-	t.NoError(repo.Add(blog))
-
-	blogList, nextPage, err := repo.FindAll(1, 1)
+	blogList, nextPage, err = repo.FindAll(8, 2)
 	t.NoError(err)
 	t.Is(-1, nextPage)
-	t.Is(1, len(blogList))
+	t.Is(2, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(10, 1)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(10, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(10, 2)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(0, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(20, 1)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(10, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(1, 11)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(0, len(blogList))
 }
 
 func TestFindAllBlog_EmptyList(tt *testing.T) {
