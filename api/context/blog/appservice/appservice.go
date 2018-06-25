@@ -80,14 +80,23 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}
 
 	blogList, hasNextPage, err := app.blogService.GetBlogListByPage(count, page)
+	if err != nil {
+		return nil, err
+	}
+
 	blogPage := make([]*Blog, len(blogList))
 
 	for index, blog := range blogList {
-		blogPage[index].ID = blog.ID()
-		blogPage[index].Title = blog.Title()
-		blogPage[index].Text = blog.Text()
-		blogPage[index].CreatedAt = blog.CreatedAt().UTC().String()
-		blogPage[index].UpdatedAt = blog.UpdatedAt().UTC().String()
+		data := &Blog{
+			ID: blog.ID(),
+			BlogContent: BlogContent{
+				Title: blog.Title(),
+				Text:  blog.Text(),
+			},
+			CreatedAt: blog.CreatedAt().UTC().String(),
+			UpdatedAt: blog.UpdatedAt().UTC().String(),
+		}
+		blogPage[index] = data
 	}
 
 	return &BlogListPage{
