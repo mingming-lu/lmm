@@ -13,24 +13,25 @@ func main() {
 
 	accountUI := account.New(db)
 	// account
-	router.POST("/v1/signup", account.SignUp)
-	router.POST("/v1/signin", account.SignIn)
-	router.GET("/v1/verify", auth.BearerAuth(account.Verify))
+	router.POST("/v1/signup", accountUI.SignUp)
+	router.POST("/v1/signin", accountUI.SignIn)
+	router.GET("/v1/verify", accountUI.BearerAuth(accountUI.Verify))
 
-	// // blog
-	router.GET("/v1/blog", blog.GetAllBlog)
-	router.GET("/v1/blog/:blog", blog.GetBlog)
-	router.POST("/v1/blog", auth.BearerAuth(blog.PostBlog))
-	router.PUT("/v1/blog/:blog", auth.BearerAuth(blog.UpdateBlog))
-	// // blog category
-	router.GET("/v1/blog/:blog/category", blog.GetBlogCagetory)
-	router.PUT("/v1/blog/:blog/category", blog.SetBlogCategory)
+	// blogUI := blog.New(db)
+	// // // blog
+	// router.GET("/v1/blog", blog.GetAllBlog)
+	// router.GET("/v1/blog/:blog", blog.GetBlog)
+	// router.POST("/v1/blog", auth.BearerAuth(blogUI.PostBlog))
+	// router.PUT("/v1/blog/:blog", auth.BearerAuth(blog.UpdateBlog))
+	// // // blog category
+	// router.GET("/v1/blog/:blog/category", blog.GetBlogCagetory)
+	// router.PUT("/v1/blog/:blog/category", blog.SetBlogCategory)
 
-	// category
-	router.GET("/v1/categories", blog.GetAllCategoris)
-	router.POST("/v1/categories", auth.BearerAuth(blog.PostCategory))
-	router.PUT("/v1/categories/:category", auth.BearerAuth(blog.UpdateCategory))
-	router.DELETE("/v1/categories/:category", auth.BearerAuth(blog.DeleteCategory))
+	// // category
+	// router.GET("/v1/categories", blog.GetAllCategoris)
+	// router.POST("/v1/categories", auth.BearerAuth(blog.PostCategory))
+	// router.PUT("/v1/categories/:category", auth.BearerAuth(blog.UpdateCategory))
+	// router.DELETE("/v1/categories/:category", auth.BearerAuth(blog.DeleteCategory))
 
 	// // tag
 	// router.GET("/v1/users/:user/tags", tag.GetByUser)
