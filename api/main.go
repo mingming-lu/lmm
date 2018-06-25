@@ -2,15 +2,16 @@ package main
 
 import (
 	account "lmm/api/context/account/ui"
-	blog "lmm/api/context/blog/ui"
-	"lmm/api/usecase/auth"
+	"lmm/api/storage"
 
 	"lmm/api/http"
 )
 
 func main() {
+	db := storage.NewDB()
 	router := http.NewRouter()
 
+	accountUI := account.New(db)
 	// account
 	router.POST("/v1/signup", account.SignUp)
 	router.POST("/v1/signin", account.SignIn)
