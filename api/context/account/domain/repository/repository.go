@@ -2,33 +2,29 @@ package repository
 
 import (
 	"lmm/api/context/account/domain/model"
-	"lmm/api/domain/repository"
+	"lmm/api/storage"
 	"time"
 
 	"github.com/akinaru-lu/errors"
 )
 
 type Repository interface {
-	repository.Repository
 	Add(*model.User) error
 	FindByName(string) (*model.User, error)
 	FindByToken(string) (*model.User, error)
 }
 
 type repo struct {
-	repository.Default
+	db *storage.DB
 }
 
-func New() Repository {
-	return new(repo)
+func New(db *storage.DB) Repository {
+	return &repo{db: db}
 }
 
 // Put puts a new user into repository and return a User model with generated id
 func (repo *repo) Add(user *model.User) error {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`INSERT INTO user (id, name, password, token, created_at) VALUES (?, ?, ?, ?, ?)`)
+	stmt := repo.db.MustPrepare(`INSERT INTO user (id, name, password, token, created_at) VALUES (?, ?, ?, ?, ?)`)
 	defer stmt.Close()
 
 	_, err := stmt.Exec(user.ID(), user.Name(), user.Password(), user.Token(), user.CreatedAt().UTC())
@@ -40,10 +36,7 @@ func (repo *repo) Add(user *model.User) error {
 
 // FindByName return a user model determined by name
 func (repo *repo) FindByName(name string) (*model.User, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`SELECT id, name, password, token, created_at FROM user WHERE name = ?`)
+	stmt := repo.db.MustPrepare(`SELECT id, name, password, token, created_at FROM user WHERE name = ?`)
 	defer stmt.Close()
 
 	var (
@@ -61,10 +54,7 @@ func (repo *repo) FindByName(name string) (*model.User, error) {
 }
 
 func (repo *repo) FindByToken(token string) (*model.User, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`SELECT id, name, password, token, created_at FROM user WHERE token = ?`)
+	stmt := repo.db.MustPrepare(`SELECT id, name, password, token, created_at FROM user WHERE token = ?`)
 	defer stmt.Close()
 
 	var (

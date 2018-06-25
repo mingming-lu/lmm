@@ -5,67 +5,44 @@ import (
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/blog/appservice"
 	"lmm/api/context/blog/domain/service"
-	"lmm/api/context/blog/repository"
 	"lmm/api/http"
-	"lmm/api/utils/strings"
+	"lmm/api/storage"
 	"log"
 )
 
-var app *appservice.AppService
-
-func init() {
-	app = appservice.New(
-		repository.NewBlogRepository(),
-		repository.NewCategoryRepository(),
-	)
+type UI struct {
+	app *appservice.AppService
 }
 
-func PostBlog(c *http.Context) {
-	blog := Blog{}
-	err := c.Request.ScanBody(&blog)
-	if err != nil {
-		log.Println(err)
-		http.BadRequest(c)
-		return
-	}
+func New(db *storage.DB) *UI {
+	app := appservice.New(db)
+	return &UI{app: app}
+}
 
+func (ui *UI) PostBlog(c *http.Context) {
 	user := c.Values().Get("user").(*account.User)
-
-	app := appservice.NewBlogApp(repository.NewBlogRepository())
-	blogID, err := app.PostNewBlog(user.ID(), blog.Title, blog.Text)
+	blogID, err := ui.app.PostNewBlog(user, c.Request.Body)
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/blog/%d", blogID)).String(http.StatusCreated, "success")
-	case appservice.ErrEmptyBlogTitle:
-		c.String(http.StatusBadRequest, appservice.ErrEmptyBlogTitle.Error())
+	case service.ErrEmptyBlogTitle:
+		c.String(http.StatusBadRequest, service.ErrEmptyBlogTitle.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
 
-func GetAllBlog(c *http.Context) {
-	app := appservice.NewBlogApp(repository.NewBlogRepository())
-	blogItems, hasNextPage, err := app.FindAllBlog(
+func (ui *UI) GetAllBlog(c *http.Context) {
+	blogPage, err := ui.app.GetBlogListByPage(
 		c.Request.Query("count"),
 		c.Request.Query("page"),
 	)
 
 	switch err {
 	case nil:
-		blogList := make([]BlogResponse, len(blogItems))
-		for index, blogItem := range blogItems {
-			blogList[index].ID = strings.Uint64ToStr(blogItem.ID())
-			blogList[index].Title = blogItem.Title()
-			blogList[index].Text = blogItem.Text()
-			blogList[index].CreatedAt = blogItem.CreatedAt().UTC().String()
-			blogList[index].UpdatedAt = blogItem.UpdatedAt().UTC().String()
-		}
-		c.JSON(http.StatusOK, BlogListResponse{
-			Blog:        blogList,
-			HasNextPage: hasNextPage,
-		})
-	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
+		c.JSON(http.StatusOK, blogPage)
+	case service.ErrInvalidCount, service.ErrInvalidPage:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
 		log.Println(err)
@@ -73,75 +50,52 @@ func GetAllBlog(c *http.Context) {
 	}
 }
 
-func GetBlog(c *http.Context) {
-	app := appservice.NewBlogApp(repository.NewBlogRepository())
-	blog, err := app.FindBlogByID(c.Request.Path.Params("blog"))
+func (ui *UI) GetBlog(c *http.Context) {
+	blog, err := ui.app.GetBlogByID(c.Request.Path.Params("blog"))
 	switch err {
 	case nil:
-		c.JSON(http.StatusOK, BlogResponse{
-			ID:        strings.Uint64ToStr(blog.ID()),
-			Title:     blog.Title(),
-			Text:      blog.Text(),
-			CreatedAt: blog.CreatedAt().UTC().String(),
-			UpdatedAt: blog.UpdatedAt().UTC().String(),
-		})
-	case appservice.ErrNoSuchBlog:
-		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
+		c.JSON(http.StatusOK, blog)
+	case service.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
 
-func UpdateBlog(c *http.Context) {
+func (ui *UI) UpdateBlog(c *http.Context) {
 	user, ok := c.Values().Get("user").(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
 	}
-	app := appservice.NewBlogApp(repository.NewBlogRepository())
 
-	blog := Blog{}
-	err := c.Request.ScanBody(&blog)
-	if err != nil {
-		log.Println(err)
-		http.BadRequest(c)
-		return
-	}
-
-	err = app.EditBlog(user.ID(), c.Request.Path.Params("blog"), blog.Title, blog.Text)
+	err := ui.app.EditBlog(user, c.Request.Path.Params("blog"), c.Request.Body)
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "success")
-	case appservice.ErrBlogNoChange:
+	case service.ErrBlogNoChange:
 		http.NoContent(c)
-	case appservice.ErrEmptyBlogTitle:
-		c.String(http.StatusBadRequest, appservice.ErrEmptyBlogTitle.Error())
-	case appservice.ErrNoPermission:
-		c.String(http.StatusForbidden, appservice.ErrNoSuchBlog.Error())
-	case appservice.ErrNoSuchBlog:
-		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
+	case service.ErrEmptyBlogTitle:
+		c.String(http.StatusBadRequest, service.ErrEmptyBlogTitle.Error())
+	case service.ErrNoPermission:
+		c.String(http.StatusForbidden, service.ErrNoSuchBlog.Error())
+	case service.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
 
-func SetBlogCategory(c *http.Context) {
+func (ui *UI) SetBlogCategory(c *http.Context) {
 	_, ok := c.Values().Get("user").(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
 	}
 
-	category := Category{}
-	if err := c.Request.ScanBody(&category); err != nil {
-		log.Println(err)
-		http.BadRequest(c)
-		return
-	}
-
-	err := app.SetBlogCategory(c.Request.Path.Params("blog"), category.Name)
+	err := ui.app.SetBlogCategory(c.Request.Path.Params("blog"), c.Request.Body)
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "success")
@@ -152,22 +106,18 @@ func SetBlogCategory(c *http.Context) {
 	}
 }
 
-func PostCategory(c *http.Context) {
-	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
-
-	category := Category{}
-	err := c.Request.ScanBody(&category)
-	if err != nil {
-		log.Println(err)
-		http.BadRequest(c)
+func (ui *UI) PostCategory(c *http.Context) {
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
 		return
 	}
 
-	categoryID, err := app.AddNewCategory(category.Name)
+	categoryID, err := ui.app.RegisterNewCategory(user, c.Request.Body)
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/categories/%d", categoryID)).String(http.StatusCreated, "success")
-	case appservice.ErrInvalidCategoryName, appservice.ErrDuplicateCategoryName:
+	case service.ErrInvalidCategoryName, service.ErrDuplicateCategoryName:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
 		log.Println(err)
@@ -175,56 +125,42 @@ func PostCategory(c *http.Context) {
 	}
 }
 
-func UpdateCategory(c *http.Context) {
-	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
-
-	categoryID := c.Request.Path.Params("category")
-	category := Category{}
-	err := c.Request.ScanBody(&category)
-	if err != nil {
-		log.Println(err)
-		http.BadRequest(c)
+func (ui *UI) UpdateCategory(c *http.Context) {
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
 		return
 	}
 
-	err = app.UpdateCategoryName(categoryID, category.Name)
-
+	err := ui.app.EditCategory(user, c.Request.Path.Params("category"), c.Request.Body)
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "success")
-	case appservice.ErrCategoryNoChanged:
+	case service.ErrCategoryNoChanged:
 		http.NoContent(c)
-	case appservice.ErrInvalidCategoryName:
-		c.String(http.StatusBadRequest, appservice.ErrInvalidCategoryName.Error())
-	case appservice.ErrNoSuchCategory:
-		c.String(http.StatusNotFound, appservice.ErrNoSuchCategory.Error())
+	case service.ErrInvalidCategoryName:
+		c.String(http.StatusBadRequest, service.ErrInvalidCategoryName.Error())
+	case service.ErrNoSuchCategory:
+		c.String(http.StatusNotFound, service.ErrNoSuchCategory.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
 
-func GetAllCategoris(c *http.Context) {
-	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
-
-	models, err := app.FindAllCategories()
+func (ui *UI) GetAllCategoris(c *http.Context) {
+	categories, err := ui.app.GetAllCategories()
 	switch err {
 	case nil:
-		categories := make([]*Category, len(models))
-		for index, model := range models {
-			categories[index].Name = model.Name()
-		}
-		c.JSON(http.StatusOK, CategoriesResponse{
-			Categories: categories,
-		})
+		c.JSON(http.StatusOK, categories)
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
 
-func GetBlogCagetory(c *http.Context) {
-	category, err := app.GetCategoryOfBlog(c.Request.Path.Params("blog"))
+func (ui *UI) GetBlogCagetory(c *http.Context) {
+	category, err := ui.app.GetCategoryOfBlog(c.Request.Path.Params("blog"))
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, category)
@@ -237,17 +173,13 @@ func GetBlogCagetory(c *http.Context) {
 	}
 }
 
-func DeleteCategory(c *http.Context) {
-	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
-
-	categoryID := c.Request.Path.Params("category")
-
-	err := app.Remove(categoryID)
+func (ui *UI) DeleteCategory(c *http.Context) {
+	err := ui.app.RemoveCategoryByID(c.Request.Path.Params("category"))
 	switch err {
 	case nil:
 		http.NoContent(c)
-	case appservice.ErrNoSuchCategory:
-		c.String(http.StatusNotFound, appservice.ErrNoSuchCategory.Error())
+	case service.ErrNoSuchCategory:
+		c.String(http.StatusNotFound, service.ErrNoSuchCategory.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)

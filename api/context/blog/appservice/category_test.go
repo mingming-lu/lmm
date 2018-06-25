@@ -10,7 +10,7 @@ import (
 
 func TestAddNewCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	name := uuid.New()[:31]
@@ -25,7 +25,7 @@ func TestAddNewCategory_Success(tt *testing.T) {
 
 func TestAddNewCategory_InvalidName(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	id, err := app.AddNewCategory("")
@@ -35,7 +35,7 @@ func TestAddNewCategory_InvalidName(tt *testing.T) {
 
 func TestAddNewCategory_DuplicatedName(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	name := uuid.New()[:31]
@@ -48,7 +48,7 @@ func TestAddNewCategory_DuplicatedName(tt *testing.T) {
 
 func TestUpdateCategoryName_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	name := uuid.New()[:31]
@@ -61,7 +61,7 @@ func TestUpdateCategoryName_Success(tt *testing.T) {
 
 func TestUpdateCategoryName_InvalidID(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	err := app.UpdateCategoryName("?", "new name")
@@ -70,7 +70,7 @@ func TestUpdateCategoryName_InvalidID(tt *testing.T) {
 
 func TestUpdateCategoryName_NoSuchCategory(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	id, _ := factory.Default().GenerateID()
@@ -80,7 +80,7 @@ func TestUpdateCategoryName_NoSuchCategory(tt *testing.T) {
 
 func TestUpdateCategoryName_InvalidCategoryName(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	name := uuid.New()[:31]
@@ -94,7 +94,7 @@ func TestUpdateCategoryName_InvalidCategoryName(tt *testing.T) {
 
 func TestUpdateCategoryName_CategoryNameNoChanged(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	name := uuid.New()[:31]
@@ -107,7 +107,7 @@ func TestUpdateCategoryName_CategoryNameNoChanged(tt *testing.T) {
 
 func TestRemoveCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	name := uuid.New()[:31]
@@ -119,7 +119,7 @@ func TestRemoveCategory_Success(tt *testing.T) {
 
 func TestRemoveCategory_InvalidID(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	t.Is(ErrNoSuchCategory, app.Remove("?"))
@@ -127,7 +127,7 @@ func TestRemoveCategory_InvalidID(tt *testing.T) {
 
 func TestRemoveCategory_NoSuchCategory(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository()
+	repo := repository.NewCategoryRepository(testing.DB())
 	app := NewCategoryApp(repo)
 
 	id, _ := factory.Default().GenerateID()

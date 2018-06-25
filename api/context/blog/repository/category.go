@@ -2,12 +2,10 @@ package repository
 
 import (
 	"lmm/api/context/blog/domain/model"
-	sql "lmm/api/db"
-	"lmm/api/domain/repository"
+	"lmm/api/storage"
 )
 
 type CategoryRepository interface {
-	repository.Repository
 	Add(category *model.Category) error
 	Update(categoryRepo *model.Category) error
 	FindAll() ([]*model.Category, error)
@@ -18,18 +16,15 @@ type CategoryRepository interface {
 }
 
 type categoryRepo struct {
-	repository.Default
+	db *storage.DB
 }
 
-func NewCategoryRepository() CategoryRepository {
-	return new(categoryRepo)
+func NewCategoryRepository(db *storage.DB) CategoryRepository {
+	return &categoryRepo{db: db}
 }
 
 func (repo *categoryRepo) Add(category *model.Category) error {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`INSERT INTO category (id, name) VALUES (?, ?)`)
+	stmt := repo.db.MustPrepare(`INSERT INTO category (id, name) VALUES (?, ?)`)
 	defer stmt.Close()
 
 	_, err := stmt.Exec(category.ID(), category.Name())
@@ -37,10 +32,7 @@ func (repo *categoryRepo) Add(category *model.Category) error {
 }
 
 func (repo *categoryRepo) Update(category *model.Category) error {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`UPDATE category SET name = ? WHERE id = ?`)
+	stmt := repo.db.MustPrepare(`UPDATE category SET name = ? WHERE id = ?`)
 	defer stmt.Close()
 
 	res, err := stmt.Exec(category.Name(), category.ID())
@@ -50,16 +42,13 @@ func (repo *categoryRepo) Update(category *model.Category) error {
 	}
 	if rowsAffeted == 0 {
 		// wether or not the blog with id exists, return no change
-		return sql.ErrNoChange
+		return storage.ErrNoChange
 	}
 	return nil
 }
 
 func (repo *categoryRepo) FindAll() ([]*model.Category, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`SELECT id, name FROM category ORDER BY name`)
+	stmt := repo.db.MustPrepare(`SELECT id, name FROM category ORDER BY name`)
 	defer stmt.Close()
 
 	rows, err := stmt.Query()
@@ -90,10 +79,7 @@ func (repo *categoryRepo) FindAll() ([]*model.Category, error) {
 }
 
 func (repo *categoryRepo) FindByID(id uint64) (*model.Category, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`SELECT id, name FROM category WHERE id = ?`)
+	stmt := repo.db.MustPrepare(`SELECT id, name FROM category WHERE id = ?`)
 	defer stmt.Close()
 
 	var (
@@ -110,10 +96,7 @@ func (repo *categoryRepo) FindByID(id uint64) (*model.Category, error) {
 }
 
 func (repo *categoryRepo) FindByName(name string) (*model.Category, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`SELECT id, name FROM category WHERE name = ?`)
+	stmt := repo.db.MustPrepare(`SELECT id, name FROM category WHERE name = ?`)
 	defer stmt.Close()
 
 	var (
@@ -130,10 +113,7 @@ func (repo *categoryRepo) FindByName(name string) (*model.Category, error) {
 }
 
 func (repo *categoryRepo) FindByBlog(blog *model.Blog) (*model.Category, error) {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`
+	stmt := repo.db.MustPrepare(`
 		SELECT c.id, c.name
 		FROM blog_category AS bc
 		INNER JOIN category AS c ON c.id = bc.category
@@ -155,10 +135,7 @@ func (repo *categoryRepo) FindByBlog(blog *model.Blog) (*model.Category, error) 
 }
 
 func (repo *categoryRepo) Remove(category *model.Category) error {
-	db := repo.DB()
-	defer db.Close()
-
-	stmt := db.MustPrepare(`DELETE FROM category WHERE id = ? AND name = ?`)
+	stmt := repo.db.MustPrepare(`DELETE FROM category WHERE id = ? AND name = ?`)
 	defer stmt.Close()
 
 	res, err := stmt.Exec(category.ID(), category.Name())
@@ -172,7 +149,7 @@ func (repo *categoryRepo) Remove(category *model.Category) error {
 	}
 
 	if rowsAffeted == 0 {
-		return sql.ErrNoRows
+		return storage.ErrNoRows
 	}
 
 	return nil

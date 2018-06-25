@@ -4,21 +4,22 @@ import (
 	"fmt"
 	"lmm/api/context/account/appservice"
 	"lmm/api/context/account/domain/model"
-	"lmm/api/context/account/domain/repository"
 	"lmm/api/http"
+	"lmm/api/storage"
 	"log"
 )
 
-func SignIn(c *http.Context) {
-	auth := Auth{}
-	err := c.Request.ScanBody(&auth)
-	if err != nil {
-		http.BadRequest(c)
-		log.Println(err)
-		return
-	}
+type UI struct {
+	app *appservice.AppService
+}
 
-	user, err := appservice.New(repository.New()).SignIn(auth.Name, auth.Password)
+func New(db *storage.DB) *UI {
+	app := appservice.New(db)
+	return &UI{app: app}
+}
+
+func (ui *UI) SignIn(c *http.Context) {
+	user, err := ui.app.SignIn(c.Request.Body)
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, SignInResponse{
@@ -35,15 +36,14 @@ func SignIn(c *http.Context) {
 	}
 }
 
-func SignUp(c *http.Context) {
-	uc := appservice.New(repository.New())
+func (ui *UI) SignUp(c *http.Context) {
 	auth := &Auth{}
 	err := c.Request.ScanBody(&auth)
 	if err != nil {
 		http.BadRequest(c)
 		return
 	}
-	id, err := uc.SignUp(auth.Name, auth.Password)
+	id, err := ui.app.SignUp(c.Request.Body)
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/users/%d", id)).String(http.StatusCreated, "Success")
@@ -54,7 +54,7 @@ func SignUp(c *http.Context) {
 	}
 }
 
-func Verify(c *http.Context) {
+func (ui *UI) Verify(c *http.Context) {
 	user, ok := c.Values().Get("user").(*model.User)
 	if !ok {
 		http.Unauthorized(c)
@@ -64,4 +64,17 @@ func Verify(c *http.Context) {
 		ID:   user.ID(),
 		Name: user.Name(),
 	})
+}
+
+func (ui *UI) BearerAuth(handler http.Handler) http.Handler {
+	return func(c *http.Context) {
+		user, err := ui.app.BearerAuth(c.Request.Header.Get("Authorization"))
+		if err != nil {
+			log.Println(err)
+			http.Unauthorized(c)
+			return
+		}
+		c.Values().Set("user", user)
+		handler(c)
+	}
 }

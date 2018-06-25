@@ -9,7 +9,7 @@ import (
 
 func TestVerify_Success(t *testing.T) {
 	tester := testing.NewTester(t)
-	app := New(repository.New())
+	app := New(repository.New(testing.DB()))
 
 	name, password := randomUserNameAndPassword()
 	app.SignUp(name, password)
@@ -29,7 +29,7 @@ func TestVerify_Success(t *testing.T) {
 func TestVerify_InvalidToken(t *testing.T) {
 	tester := testing.NewTester(t)
 
-	user, err := New(repository.New()).VerifyToken("invalid")
+	user, err := New(repository.New(testing.DB())).VerifyToken("invalid")
 	tester.Error(ErrInvalidToken, err)
 	tester.Nil(user)
 }
