@@ -36,8 +36,8 @@ type BlogContent struct {
 }
 
 type BlogListPage struct {
-	Blog        []*Blog `json:"blog"`
-	HasNextPage bool    `json:"has_next_page"`
+	Blog     []*Blog `json:"blog"`
+	NextPage int     `json:"next_page"`
 }
 
 type Category struct {
@@ -79,7 +79,7 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 		return nil, service.ErrInvalidPage
 	}
 
-	blogList, hasNextPage, err := app.blogService.GetBlogListByPage(count, page)
+	blogList, nextPage, err := app.blogService.GetBlogListByPage(count, page)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +100,8 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}
 
 	return &BlogListPage{
-		Blog:        blogPage,
-		HasNextPage: hasNextPage,
+		Blog:     blogPage,
+		NextPage: nextPage,
 	}, nil
 }
 

@@ -1,4 +1,4 @@
-package appservice
+package service
 
 import (
 	accountFactory "lmm/api/context/account/domain/factory"
@@ -9,16 +9,9 @@ import (
 	"os"
 )
 
-var (
-	app  *AppService
-	user *account.User
-)
+var user *account.User
 
 func TestMain(m *testing.M) {
-	// init app
-	app = New(testing.DB())
-
-	// init user
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ = accountFactory.NewUser(name, password)
 	accountRepository.New(testing.DB()).Add(user)
