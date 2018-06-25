@@ -1,10 +1,18 @@
 package service
 
 import (
+	"errors"
+	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
-	"lmm/api/utils/strings"
+)
+
+var (
+	ErrCategoryNoChanged     = errors.New("category no changed")
+	ErrDuplicateCategoryName = errors.New("duplicate category name")
+	ErrInvalidCategoryName   = errors.New("invalid category name")
+	ErrNoSuchCategory        = errors.New("no such category")
 )
 
 type CategoryService struct {
@@ -15,12 +23,23 @@ func NewCategoryService(repo repository.CategoryRepository) *CategoryService {
 	return &CategoryService{repo: repo}
 }
 
-func (s *CategoryService) GetCategoryByID(idStr string) (*model.Category, error) {
-	categoryID, err := strings.StrToUint64(idStr)
+func (s *CategoryService) RegisterCategory(name string) (*model.Category, error) {
+	category, err := factory.NewCategory(name)
 	if err != nil {
-		return nil, ErrInvalidCategoryID
+		return nil, err
 	}
-	category, err := s.repo.FindByID(categoryID)
+	if err := s.repo.Add(category); err != nil {
+		return nil, err
+	}
+	return category, nil
+}
+
+func (s *CategoryService) GetAllCategories() ([]*model.Category, error) {
+	return s.repo.FindAll()
+}
+
+func (s *CategoryService) GetCategoryByID(id uint64) (*model.Category, error) {
+	category, err := s.repo.FindByID(id)
 	switch err {
 	case nil:
 		return category, nil
@@ -53,4 +72,17 @@ func (s *CategoryService) GetCategoryOf(blog *model.Blog) (*model.Category, erro
 	default:
 		return nil, err
 	}
+}
+
+func (s *CategoryService) UpdateCategory(category *model.Category) error {
+	return s.repo.Update(category)
+}
+
+func (s *CategoryService) RemoveCategoryByID(id uint64) error {
+	category, err := s.repo.FindByID(id)
+	if err != nil {
+		return ErrNoSuchCategory
+	}
+
+	return s.repo.Remove(category)
 }

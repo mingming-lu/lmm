@@ -11,5 +11,4 @@ var (
 // category
 var (
 	ErrInvalidCategoryID = errors.New("invalid category id")
-	ErrNoSuchCategory    = errors.New("no such category")
 )

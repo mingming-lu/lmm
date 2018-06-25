@@ -106,78 +106,58 @@ func (ui *UI) SetBlogCategory(c *http.Context) {
 	}
 }
 
-//
-// func PostCategory(c *http.Context) {
-// 	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
-//
-// 	category := Category{}
-// 	err := c.Request.ScanBody(&category)
-// 	if err != nil {
-// 		log.Println(err)
-// 		http.BadRequest(c)
-// 		return
-// 	}
-//
-// 	categoryID, err := app.AddNewCategory(category.Name)
-// 	switch err {
-// 	case nil:
-// 		c.Header("Location", fmt.Sprintf("/categories/%d", categoryID)).String(http.StatusCreated, "success")
-// 	case appservice.ErrInvalidCategoryName, appservice.ErrDuplicateCategoryName:
-// 		c.String(http.StatusBadRequest, err.Error())
-// 	default:
-// 		log.Println(err)
-// 		http.InternalServerError(c)
-// 	}
-// }
-//
-// func UpdateCategory(c *http.Context) {
-// 	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
-//
-// 	categoryID := c.Request.Path.Params("category")
-// 	category := Category{}
-// 	err := c.Request.ScanBody(&category)
-// 	if err != nil {
-// 		log.Println(err)
-// 		http.BadRequest(c)
-// 		return
-// 	}
-//
-// 	err = app.UpdateCategoryName(categoryID, category.Name)
-//
-// 	switch err {
-// 	case nil:
-// 		c.String(http.StatusOK, "success")
-// 	case appservice.ErrCategoryNoChanged:
-// 		http.NoContent(c)
-// 	case appservice.ErrInvalidCategoryName:
-// 		c.String(http.StatusBadRequest, appservice.ErrInvalidCategoryName.Error())
-// 	case appservice.ErrNoSuchCategory:
-// 		c.String(http.StatusNotFound, appservice.ErrNoSuchCategory.Error())
-// 	default:
-// 		log.Println(err)
-// 		http.InternalServerError(c)
-// 	}
-// }
-//
-// func GetAllCategoris(c *http.Context) {
-// 	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
-//
-// 	models, err := app.FindAllCategories()
-// 	switch err {
-// 	case nil:
-// 		categories := make([]*Category, len(models))
-// 		for index, model := range models {
-// 			categories[index].Name = model.Name()
-// 		}
-// 		c.JSON(http.StatusOK, CategoriesResponse{
-// 			Categories: categories,
-// 		})
-// 	default:
-// 		log.Println(err)
-// 		http.InternalServerError(c)
-// 	}
-// }
-//
+func (ui *UI) PostCategory(c *http.Context) {
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	categoryID, err := ui.app.RegisterNewCategory(user, c.Request.Body)
+	switch err {
+	case nil:
+		c.Header("Location", fmt.Sprintf("/categories/%d", categoryID)).String(http.StatusCreated, "success")
+	case service.ErrInvalidCategoryName, service.ErrDuplicateCategoryName:
+		c.String(http.StatusBadRequest, err.Error())
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
+
+func (ui *UI) UpdateCategory(c *http.Context) {
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	err := ui.app.EditCategory(user, c.Request.Path.Params("category"), c.Request.Body)
+	switch err {
+	case nil:
+		c.String(http.StatusOK, "success")
+	case service.ErrCategoryNoChanged:
+		http.NoContent(c)
+	case service.ErrInvalidCategoryName:
+		c.String(http.StatusBadRequest, service.ErrInvalidCategoryName.Error())
+	case service.ErrNoSuchCategory:
+		c.String(http.StatusNotFound, service.ErrNoSuchCategory.Error())
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
+
+func (ui *UI) GetAllCategoris(c *http.Context) {
+	categories, err := ui.app.GetAllCategories()
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, categories)
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
 
 func (ui *UI) GetBlogCagetory(c *http.Context) {
 	category, err := ui.app.GetCategoryOfBlog(c.Request.Path.Params("blog"))
@@ -193,20 +173,15 @@ func (ui *UI) GetBlogCagetory(c *http.Context) {
 	}
 }
 
-//
-// func DeleteCategory(c *http.Context) {
-// 	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
-//
-// 	categoryID := c.Request.Path.Params("category")
-//
-// 	err := app.Remove(categoryID)
-// 	switch err {
-// 	case nil:
-// 		http.NoContent(c)
-// 	case appservice.ErrNoSuchCategory:
-// 		c.String(http.StatusNotFound, appservice.ErrNoSuchCategory.Error())
-// 	default:
-// 		log.Println(err)
-// 		http.InternalServerError(c)
-// 	}
-// }
+func (ui *UI) DeleteCategory(c *http.Context) {
+	err := ui.app.RemoveCategoryByID(c.Request.Path.Params("category"))
+	switch err {
+	case nil:
+		http.NoContent(c)
+	case service.ErrNoSuchCategory:
+		c.String(http.StatusNotFound, service.ErrNoSuchCategory.Error())
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}

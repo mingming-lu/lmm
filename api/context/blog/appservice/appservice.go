@@ -36,12 +36,16 @@ type BlogContent struct {
 }
 
 type BlogListPage struct {
-	Blog        []*Blog
-	HasNextPage bool
+	Blog        []*Blog `json:"blog"`
+	HasNextPage bool    `json:"has_next_page"`
 }
 
 type Category struct {
 	Name string `json:"name"`
+}
+
+type Categories struct {
+	Categories []*Category `json:"categories"`
 }
 
 func (app *AppService) PostNewBlog(user *account.User, requestBody io.ReadCloser) (uint64, error) {
@@ -130,6 +134,56 @@ func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBod
 	return app.blogService.EditBlog(user.ID(), blogID, content.Title, content.Text)
 }
 
+func (app *AppService) RegisterNewCategory(user *account.User, requestBody io.ReadCloser) (uint64, error) {
+	category := Category{}
+	if err := json.NewDecoder(requestBody).Decode(&category); err != nil {
+		return 0, err
+	}
+
+	categoryModel, err := app.categoryService.RegisterCategory(category.Name)
+	if err != nil {
+		return 0, err
+	}
+
+	return categoryModel.ID(), nil
+}
+
+func (app *AppService) EditCategory(user *account.User, categoryIDStr string, requestBody io.ReadCloser) error {
+	categoryID, err := strings.StrToUint64(categoryIDStr)
+	if err != nil {
+		return err
+	}
+
+	category := Category{}
+	if err := json.NewDecoder(requestBody).Decode(&category); err != nil {
+		return err
+	}
+
+	cateogryModel, err := app.categoryService.GetCategoryByID(categoryID)
+	if err != nil {
+		return err
+	}
+	if err := cateogryModel.UpdateName(category.Name); err != nil {
+		return err
+	}
+
+	return app.categoryService.UpdateCategory(cateogryModel)
+}
+
+func (app *AppService) GetAllCategories() (*Categories, error) {
+	categoryModels, err := app.categoryService.GetAllCategories()
+	if err != nil {
+		return nil, err
+	}
+	categories := make([]*Category, len(categoryModels))
+	for index, category := range categoryModels {
+		categories[index].Name = category.Name()
+	}
+	return &Categories{
+		Categories: categories,
+	}, nil
+}
+
 func (app *AppService) SetBlogCategory(blogIDStr string, requestBody io.ReadCloser) error {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
@@ -142,11 +196,21 @@ func (app *AppService) SetBlogCategory(blogIDStr string, requestBody io.ReadClos
 	}
 
 	category := Category{}
-	json.NewDecoder(requestBody).Decode(&category)
+	if err := json.NewDecoder(requestBody).Decode(&category); err != nil {
+		return err
+	}
 
 	categoryModel, err := app.categoryService.GetCategoryByName(category.Name)
 	if err != nil {
 		return nil
 	}
 	return app.blogService.SetBlogCategory(blogModel, categoryModel)
+}
+
+func (app *AppService) RemoveCategoryByID(idStr string) error {
+	id, err := strings.StrToUint64(idStr)
+	if err != nil {
+		return err
+	}
+	return app.categoryService.RemoveCategoryByID(id)
 }
