@@ -2,7 +2,6 @@ package appservice
 
 import (
 	"errors"
-	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
 	"lmm/api/utils/strings"
@@ -24,22 +23,6 @@ type BlogApp struct {
 
 func NewBlogApp(repo repository.BlogRepository) *BlogApp {
 	return &BlogApp{repo: repo}
-}
-
-func (app *BlogApp) FindBlogByID(idStr string) (*model.Blog, error) {
-	id, err := strings.StrToUint64(idStr)
-	if err != nil {
-		return nil, ErrNoSuchBlog
-	}
-
-	blog, err := app.repo.FindByID(id)
-	if err != nil {
-		if err.Error() == storage.ErrNoRows.Error() {
-			return nil, ErrNoSuchBlog
-		}
-		return nil, err
-	}
-	return blog, nil
 }
 
 func (app *BlogApp) EditBlog(userID uint64, blogIDStr, title, text string) error {

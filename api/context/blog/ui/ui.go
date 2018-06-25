@@ -49,27 +49,19 @@ func (ui *UI) GetAllBlog(c *http.Context) {
 	}
 }
 
-//
-// func GetBlog(c *http.Context) {
-// 	app := appservice.NewBlogApp(repository.NewBlogRepository())
-// 	blog, err := app.FindBlogByID(c.Request.Path.Params("blog"))
-// 	switch err {
-// 	case nil:
-// 		c.JSON(http.StatusOK, BlogResponse{
-// 			ID:        strings.Uint64ToStr(blog.ID()),
-// 			Title:     blog.Title(),
-// 			Text:      blog.Text(),
-// 			CreatedAt: blog.CreatedAt().UTC().String(),
-// 			UpdatedAt: blog.UpdatedAt().UTC().String(),
-// 		})
-// 	case appservice.ErrNoSuchBlog:
-// 		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
-// 	default:
-// 		log.Println(err)
-// 		http.InternalServerError(c)
-// 	}
-// }
-//
+func (ui *UI) GetBlog(c *http.Context) {
+	blog, err := ui.app.GetBlogByID(c.Request.Path.Params("blog"))
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, blog)
+	case appservice.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
+
 // func UpdateBlog(c *http.Context) {
 // 	user, ok := c.Values().Get("user").(*account.User)
 // 	if !ok {

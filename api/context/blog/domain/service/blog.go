@@ -6,7 +6,6 @@ import (
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
-	"lmm/api/utils/strings"
 )
 
 var (
@@ -57,12 +56,12 @@ func (s *BlogService) GetBlogListByPage(count, page int) ([]*model.Blog, bool, e
 	return models, hasNextPage, nil
 }
 
-func (s *BlogService) GetBlogByID(blogIDStr string) (*model.Blog, error) {
-	blogID, err := strings.StrToUint64(blogIDStr)
-	if err != nil {
-		return nil, ErrInvalidBlogID
-	}
-	blog, err := s.repo.FindByID(blogID)
+func (s *BlogService) GetBlogByID(id uint64) (*model.Blog, error) {
+	// blogID, err := strings.StrToUint64(blogIDStr)
+	// if err != nil {
+	// 	return nil, ErrInvalidBlogID
+	// }
+	blog, err := s.repo.FindByID(id)
 	switch err {
 	case nil:
 		return blog, nil

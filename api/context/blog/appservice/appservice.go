@@ -88,8 +88,20 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}, nil
 }
 
+func (app *AppService) GetBlogByID(blogIDStr string) (*model.Blog, error) {
+	blogID, err := strings.StrToUint64(blogIDStr)
+	if err != nil {
+		return nil, service.ErrInvalidBlogID
+	}
+	return app.blogService.GetBlogByID(blogID)
+}
+
 func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, error) {
-	blog, err := app.blogService.GetBlogByID(blogIDStr)
+	blogID, err := strings.StrToUint64(blogIDStr)
+	if err != nil {
+		return nil, err
+	}
+	blog, err := app.blogService.GetBlogByID(blogID)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +113,11 @@ func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, err
 }
 
 func (app *AppService) SetBlogCategory(blogIDStr, categoryName string) error {
-	blog, err := app.blogService.GetBlogByID(blogIDStr)
+	blogID, err := strings.StrToUint64(blogIDStr)
+	if err != nil {
+		return err
+	}
+	blog, err := app.blogService.GetBlogByID(blogID)
 	if err != nil {
 		return err
 	}
