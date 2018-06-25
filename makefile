@@ -30,5 +30,9 @@ test-api:
 cli: script
 	make docker-compose cmd="run cli python $(target)"
 
+restart:
+	make stop
+	make
+
 stop:
 	make docker-compose cmd=down
