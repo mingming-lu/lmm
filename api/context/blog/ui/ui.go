@@ -32,34 +32,23 @@ func (ui *UI) PostBlog(c *http.Context) {
 	}
 }
 
-// func GetAllBlog(c *http.Context) {
-// 	app := appservice.NewBlogApp(repository.NewBlogRepository())
-// 	blogItems, hasNextPage, err := app.FindAllBlog(
-// 		c.Request.Query("count"),
-// 		c.Request.Query("page"),
-// 	)
-//
-// 	switch err {
-// 	case nil:
-// 		blogList := make([]BlogResponse, len(blogItems))
-// 		for index, blogItem := range blogItems {
-// 			blogList[index].ID = strings.Uint64ToStr(blogItem.ID())
-// 			blogList[index].Title = blogItem.Title()
-// 			blogList[index].Text = blogItem.Text()
-// 			blogList[index].CreatedAt = blogItem.CreatedAt().UTC().String()
-// 			blogList[index].UpdatedAt = blogItem.UpdatedAt().UTC().String()
-// 		}
-// 		c.JSON(http.StatusOK, BlogListResponse{
-// 			Blog:        blogList,
-// 			HasNextPage: hasNextPage,
-// 		})
-// 	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
-// 		c.String(http.StatusBadRequest, err.Error())
-// 	default:
-// 		log.Println(err)
-// 		http.InternalServerError(c)
-// 	}
-// }
+func (ui *UI) GetAllBlog(c *http.Context) {
+	blogPage, err := ui.app.GetBlogListByPage(
+		c.Request.Query("count"),
+		c.Request.Query("page"),
+	)
+
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, blogPage)
+	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
+		c.String(http.StatusBadRequest, err.Error())
+	default:
+		log.Println(err)
+		http.InternalServerError(c)
+	}
+}
+
 //
 // func GetBlog(c *http.Context) {
 // 	app := appservice.NewBlogApp(repository.NewBlogRepository())

@@ -44,6 +44,19 @@ func (s *BlogService) PostBlog(userID uint64, title, text string) (*model.Blog, 
 	return blog, nil
 }
 
+func (s *BlogService) GetBlogListByPage(count, page int) ([]*model.Blog, bool, error) {
+	models, err := s.repo.FindAll(count+1, page)
+	if err != nil {
+		return nil, false, err
+	}
+	hasNextPage := false
+	if len(models) > count {
+		models = models[:count]
+		hasNextPage = true
+	}
+	return models, hasNextPage, nil
+}
+
 func (s *BlogService) GetBlogByID(blogIDStr string) (*model.Blog, error) {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {

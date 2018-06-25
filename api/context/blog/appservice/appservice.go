@@ -54,6 +54,40 @@ func (app *AppService) PostNewBlog(user *account.User, requestBody io.ReadCloser
 	return blog.ID(), err
 }
 
+func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPage, error) {
+	if countStr == "" {
+		countStr = "10"
+	}
+	count, err := strings.StrToInt(countStr)
+	if err != nil {
+		return nil, ErrInvalidCount
+	}
+
+	if pageStr == "" {
+		pageStr = "1"
+	}
+	page, err := strings.StrToInt(pageStr)
+	if err != nil {
+		return nil, ErrInvalidPage
+	}
+
+	blogList, hasNextPage, err := app.blogService.GetBlogListByPage(count, page)
+	blogPage := make([]*Blog, len(blogList))
+
+	for index, blog := range blogList {
+		blogPage[index].ID = blog.ID()
+		blogPage[index].Title = blog.Title()
+		blogPage[index].Text = blog.Text()
+		blogPage[index].CreatedAt = blog.CreatedAt().UTC().String()
+		blogPage[index].UpdatedAt = blog.UpdatedAt().UTC().String()
+	}
+
+	return &BlogListPage{
+		Blog:        blogPage,
+		HasNextPage: hasNextPage,
+	}, nil
+}
+
 func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, error) {
 	blog, err := app.blogService.GetBlogByID(blogIDStr)
 	if err != nil {

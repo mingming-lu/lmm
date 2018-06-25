@@ -2,7 +2,6 @@ package appservice
 
 import (
 	"errors"
-	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
@@ -25,54 +24,6 @@ type BlogApp struct {
 
 func NewBlogApp(repo repository.BlogRepository) *BlogApp {
 	return &BlogApp{repo: repo}
-}
-
-func (app *BlogApp) PostNewBlog(userID uint64, title, text string) (uint64, error) {
-	if title == "" {
-		return 0, ErrEmptyBlogTitle
-	}
-	blog, err := factory.NewBlog(userID, title, text)
-	if err != nil {
-		return uint64(0), err
-	}
-	err = app.repo.Add(blog)
-	if err != nil {
-		key, _, ok := storage.CheckErrorDuplicate(err.Error())
-		if !ok {
-			return 0, err
-		}
-		if key == "title" {
-			return 0, ErrBlogTitleDuplicated
-		}
-		return 0, err
-	}
-	return blog.ID(), err
-}
-
-func (app *BlogApp) FindAllBlog(countStr, pageStr string) ([]*model.Blog, bool, error) {
-	var (
-		count int
-		page  int
-		err   error
-	)
-	if countStr == "" {
-		count = 10
-	} else {
-		count, err = strings.StrToInt(countStr)
-		if err != nil {
-			return nil, false, ErrInvalidCount
-		}
-	}
-	if pageStr == "" {
-		page = 1
-	} else {
-		page, err = strings.StrToInt(pageStr)
-		if err != nil {
-			return nil, false, ErrInvalidPage
-		}
-	}
-
-	return app.repo.FindAll(count, page)
 }
 
 func (app *BlogApp) FindBlogByID(idStr string) (*model.Blog, error) {
