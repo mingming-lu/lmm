@@ -23,10 +23,10 @@ func main() {
 	router.GET("/v1/blog", blogUI.GetAllBlog)
 	router.GET("/v1/blog/:blog", blogUI.GetBlog)
 	router.POST("/v1/blog", accountUI.BearerAuth(blogUI.PostBlog))
-	router.PUT("/v1/blog/:blog", auth.BearerAuth(blog.UpdateBlog))
-	// // // blog category
+	router.PUT("/v1/blog/:blog", accountUI.BearerAuth(blogUI.UpdateBlog))
+	// blog category
 	// router.GET("/v1/blog/:blog/category", blog.GetBlogCagetory)
-	// router.PUT("/v1/blog/:blog/category", blog.SetBlogCategory)
+	router.PUT("/v1/blog/:blog/category", blogUI.SetBlogCategory)
 
 	// // category
 	// router.GET("/v1/categories", blog.GetAllCategoris)

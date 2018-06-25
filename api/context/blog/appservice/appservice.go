@@ -40,6 +40,10 @@ type BlogListPage struct {
 	HasNextPage bool
 }
 
+type Category struct {
+	Name string `json:"name"`
+}
+
 func (app *AppService) PostNewBlog(user *account.User, requestBody io.ReadCloser) (uint64, error) {
 	content := BlogContent{}
 	if err := json.NewDecoder(requestBody).Decode(content); err != nil {
@@ -60,7 +64,7 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}
 	count, err := strings.StrToInt(countStr)
 	if err != nil {
-		return nil, ErrInvalidCount
+		return nil, service.ErrInvalidCount
 	}
 
 	if pageStr == "" {
@@ -68,7 +72,7 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}
 	page, err := strings.StrToInt(pageStr)
 	if err != nil {
-		return nil, ErrInvalidPage
+		return nil, service.ErrInvalidPage
 	}
 
 	blogList, hasNextPage, err := app.blogService.GetBlogListByPage(count, page)
@@ -115,7 +119,7 @@ func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, err
 func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBody io.ReadCloser) error {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
-		return ErrNoSuchBlog
+		return service.ErrNoSuchBlog
 	}
 
 	content := BlogContent{}
@@ -126,18 +130,23 @@ func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBod
 	return app.blogService.EditBlog(user.ID(), blogID, content.Title, content.Text)
 }
 
-func (app *AppService) SetBlogCategory(blogIDStr, categoryName string) error {
+func (app *AppService) SetBlogCategory(blogIDStr string, requestBody io.ReadCloser) error {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
 		return err
 	}
-	blog, err := app.blogService.GetBlogByID(blogID)
+
+	blogModel, err := app.blogService.GetBlogByID(blogID)
 	if err != nil {
 		return err
 	}
-	category, err := app.categoryService.GetCategoryByName(categoryName)
+
+	category := Category{}
+	json.NewDecoder(requestBody).Decode(&category)
+
+	categoryModel, err := app.categoryService.GetCategoryByName(category.Name)
 	if err != nil {
 		return nil
 	}
-	return app.blogService.SetBlogCategory(blog, category)
+	return app.blogService.SetBlogCategory(blogModel, categoryModel)
 }

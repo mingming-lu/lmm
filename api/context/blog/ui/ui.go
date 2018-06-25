@@ -4,6 +4,7 @@ import (
 	"fmt"
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/blog/appservice"
+	"lmm/api/context/blog/domain/service"
 	"lmm/api/http"
 	"lmm/api/storage"
 	"log"
@@ -24,8 +25,8 @@ func (ui *UI) PostBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/blog/%d", blogID)).String(http.StatusCreated, "success")
-	case appservice.ErrEmptyBlogTitle:
-		c.String(http.StatusBadRequest, appservice.ErrEmptyBlogTitle.Error())
+	case service.ErrEmptyBlogTitle:
+		c.String(http.StatusBadRequest, service.ErrEmptyBlogTitle.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -41,7 +42,7 @@ func (ui *UI) GetAllBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, blogPage)
-	case appservice.ErrInvalidCount, appservice.ErrInvalidPage:
+	case service.ErrInvalidCount, service.ErrInvalidPage:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
 		log.Println(err)
@@ -54,8 +55,8 @@ func (ui *UI) GetBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, blog)
-	case appservice.ErrNoSuchBlog:
-		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
+	case service.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -69,49 +70,42 @@ func (ui *UI) UpdateBlog(c *http.Context) {
 		return
 	}
 
-	err := ui.app.EditBlog(user, c.Request.Query("blog"), c.Request.Body)
+	err := ui.app.EditBlog(user, c.Request.Path.Params("blog"), c.Request.Body)
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "success")
-	case appservice.ErrBlogNoChange:
+	case service.ErrBlogNoChange:
 		http.NoContent(c)
-	case appservice.ErrEmptyBlogTitle:
-		c.String(http.StatusBadRequest, appservice.ErrEmptyBlogTitle.Error())
-	case appservice.ErrNoPermission:
-		c.String(http.StatusForbidden, appservice.ErrNoSuchBlog.Error())
-	case appservice.ErrNoSuchBlog:
-		c.String(http.StatusNotFound, appservice.ErrNoSuchBlog.Error())
+	case service.ErrEmptyBlogTitle:
+		c.String(http.StatusBadRequest, service.ErrEmptyBlogTitle.Error())
+	case service.ErrNoPermission:
+		c.String(http.StatusForbidden, service.ErrNoSuchBlog.Error())
+	case service.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
 
-//
-// func SetBlogCategory(c *http.Context) {
-// 	_, ok := c.Values().Get("user").(*account.User)
-// 	if !ok {
-// 		http.Unauthorized(c)
-// 		return
-// 	}
-//
-// 	category := Category{}
-// 	if err := c.Request.ScanBody(&category); err != nil {
-// 		log.Println(err)
-// 		http.BadRequest(c)
-// 		return
-// 	}
-//
-// 	err := app.SetBlogCategory(c.Request.Path.Params("blog"), category.Name)
-// 	switch err {
-// 	case nil:
-// 		c.String(http.StatusOK, "success")
-// 	case service.ErrNoSuchBlog, service.ErrNoSuchCategory:
-// 		c.String(http.StatusBadRequest, err.Error())
-// 	default:
-// 		http.InternalServerError(c)
-// 	}
-// }
+func (ui *UI) SetBlogCategory(c *http.Context) {
+	_, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	err := ui.app.SetBlogCategory(c.Request.Path.Params("blog"), c.Request.Body)
+	switch err {
+	case nil:
+		c.String(http.StatusOK, "success")
+	case service.ErrNoSuchBlog, service.ErrNoSuchCategory:
+		c.String(http.StatusBadRequest, err.Error())
+	default:
+		http.InternalServerError(c)
+	}
+}
+
 //
 // func PostCategory(c *http.Context) {
 // 	app := appservice.NewCategoryApp(repository.NewCategoryRepository())
