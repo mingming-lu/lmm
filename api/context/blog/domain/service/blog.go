@@ -1,21 +1,10 @@
 package service
 
 import (
-	"errors"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
-)
-
-var (
-	ErrBlogTitleDuplicated = errors.New("blog title duplicated")
-	ErrNoSuchBlog          = errors.New("no such blog")
-	ErrEmptyBlogTitle      = errors.New("blog title cannot be empty")
-	ErrBlogNoChange        = errors.New("blog no change")
-	ErrInvalidCount        = errors.New("invalid count")
-	ErrInvalidPage         = errors.New("invalid page")
-	ErrNoPermission        = errors.New("no permission")
 )
 
 type BlogService struct {
@@ -48,17 +37,8 @@ func (s *BlogService) PostBlog(userID uint64, title, text string) (*model.Blog, 
 	return blog, nil
 }
 
-func (s *BlogService) GetBlogListByPage(count, page int) ([]*model.Blog, bool, error) {
-	models, err := s.repo.FindAll(count+1, page)
-	if err != nil {
-		return nil, false, err
-	}
-	hasNextPage := false
-	if len(models) > count {
-		models = models[:count]
-		hasNextPage = true
-	}
-	return models, hasNextPage, nil
+func (s *BlogService) GetBlogListByPage(count, page int) ([]*model.Blog, int, error) {
+	return s.repo.FindAll(count, page)
 }
 
 func (s *BlogService) GetBlogByID(id uint64) (*model.Blog, error) {

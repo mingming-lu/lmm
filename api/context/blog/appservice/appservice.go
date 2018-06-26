@@ -36,8 +36,8 @@ type BlogContent struct {
 }
 
 type BlogListPage struct {
-	Blog        []*Blog `json:"blog"`
-	HasNextPage bool    `json:"has_next_page"`
+	Blog     []*Blog `json:"blog"`
+	NextPage int     `json:"next_page"`
 }
 
 type Category struct {
@@ -50,7 +50,7 @@ type Categories struct {
 
 func (app *AppService) PostNewBlog(user *account.User, requestBody io.ReadCloser) (uint64, error) {
 	content := BlogContent{}
-	if err := json.NewDecoder(requestBody).Decode(content); err != nil {
+	if err := json.NewDecoder(requestBody).Decode(&content); err != nil {
 		return 0, err
 	}
 
@@ -79,20 +79,29 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 		return nil, service.ErrInvalidPage
 	}
 
-	blogList, hasNextPage, err := app.blogService.GetBlogListByPage(count, page)
+	blogList, nextPage, err := app.blogService.GetBlogListByPage(count, page)
+	if err != nil {
+		return nil, err
+	}
+
 	blogPage := make([]*Blog, len(blogList))
 
 	for index, blog := range blogList {
-		blogPage[index].ID = blog.ID()
-		blogPage[index].Title = blog.Title()
-		blogPage[index].Text = blog.Text()
-		blogPage[index].CreatedAt = blog.CreatedAt().UTC().String()
-		blogPage[index].UpdatedAt = blog.UpdatedAt().UTC().String()
+		data := &Blog{
+			ID: blog.ID(),
+			BlogContent: BlogContent{
+				Title: blog.Title(),
+				Text:  blog.Text(),
+			},
+			CreatedAt: blog.CreatedAt().UTC().String(),
+			UpdatedAt: blog.UpdatedAt().UTC().String(),
+		}
+		blogPage[index] = data
 	}
 
 	return &BlogListPage{
-		Blog:        blogPage,
-		HasNextPage: hasNextPage,
+		Blog:     blogPage,
+		NextPage: nextPage,
 	}, nil
 }
 
@@ -127,7 +136,7 @@ func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBod
 	}
 
 	content := BlogContent{}
-	if err := json.NewDecoder(requestBody).Decode(content); err != nil {
+	if err := json.NewDecoder(requestBody).Decode(&content); err != nil {
 		return err
 	}
 
@@ -151,7 +160,7 @@ func (app *AppService) RegisterNewCategory(user *account.User, requestBody io.Re
 func (app *AppService) EditCategory(user *account.User, categoryIDStr string, requestBody io.ReadCloser) error {
 	categoryID, err := strings.StrToUint64(categoryIDStr)
 	if err != nil {
-		return err
+		return service.ErrInvalidCategoryID
 	}
 
 	category := Category{}
@@ -210,7 +219,7 @@ func (app *AppService) SetBlogCategory(blogIDStr string, requestBody io.ReadClos
 func (app *AppService) RemoveCategoryByID(idStr string) error {
 	id, err := strings.StrToUint64(idStr)
 	if err != nil {
-		return err
+		return service.ErrInvalidCategoryID
 	}
 	return app.categoryService.RemoveCategoryByID(id)
 }

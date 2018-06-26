@@ -16,7 +16,7 @@ var (
 	ErrAlreadyExists = errors.New("already exists")
 	ErrEmptyValues   = errors.New("empty values")
 	ErrNoChange      = errors.New("no change")
-	ErrNoRows        = errors.New(sql.ErrNoRows.Error())
+	ErrNoRows        = sql.ErrNoRows
 )
 
 var (

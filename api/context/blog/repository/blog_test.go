@@ -55,30 +55,45 @@ func TestAddBlog_DuplicateTitle(tt *testing.T) {
 	t.Regexp(`Duplicate entry '[\w\d-]+' for key 'title'`, err.Error())
 }
 
-func TestFindAllBlog_FetchOneMore(tt *testing.T) {
+func TestFindAllBlog_Paging(tt *testing.T) {
 	testing.Lock()
 	defer testing.Unlock()
 
 	testing.InitTable("blog")
-
 	t := testing.NewTester(tt)
+
 	repo := NewBlogRepository(testing.DB())
+	createBlogListWithCategory(repo, 10)
 
-	name, password := uuid.New()[:31], uuid.New()
-	user, _ := accountFactory.NewUser(name, password)
-
-	title, text := uuid.New(), uuid.New()
-	blog, _ := factory.NewBlog(user.ID(), title, text)
-	t.NoError(repo.Add(blog))
-
-	title, text = uuid.New(), uuid.New()
-	blog, _ = factory.NewBlog(user.ID(), title, text)
-	t.NoError(repo.Add(blog))
-
-	blogList, hasNextPage, err := repo.FindAll(1, 1)
+	blogList, nextPage, err := repo.FindAll(8, 1)
 	t.NoError(err)
-	t.True(hasNextPage)
-	t.Is(1, len(blogList))
+	t.Is(2, nextPage)
+	t.Is(8, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(8, 2)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(2, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(10, 1)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(10, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(10, 2)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(0, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(20, 1)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(10, len(blogList))
+
+	blogList, nextPage, err = repo.FindAll(1, 11)
+	t.NoError(err)
+	t.Is(-1, nextPage)
+	t.Is(0, len(blogList))
 }
 
 func TestFindAllBlog_EmptyList(tt *testing.T) {
@@ -90,9 +105,9 @@ func TestFindAllBlog_EmptyList(tt *testing.T) {
 	t := testing.NewTester(tt)
 	repo := NewBlogRepository(testing.DB())
 
-	blogList, hasNextPage, err := repo.FindAll(100, 1)
+	blogList, nextPage, err := repo.FindAll(100, 1)
 	t.NoError(err)
-	t.False(hasNextPage)
+	t.Is(-1, nextPage)
 	t.NotNil(blogList)
 	t.Is(0, len(blogList))
 }
@@ -111,43 +126,43 @@ func TestFindAllBlogByCategory(tt *testing.T) {
 	c1, _ := model.NewCategory(1, "c1")
 	c2, _ := model.NewCategory(1, "c2")
 
-	if blogList, hasNextPage, err := repo.FindAllByCategory(c1, 5, 1); err == nil {
-		t.False(hasNextPage)
+	if blogList, nextPage, err := repo.FindAllByCategory(c1, 5, 1); err == nil {
 		t.Is(5, len(blogList))
+		t.Is(-1, nextPage)
 
-		blogList, hasNextPage, err = repo.FindAllByCategory(c1, 5, 2)
+		blogList, nextPage, err = repo.FindAllByCategory(c1, 5, nextPage)
 		t.NoError(err)
-		t.False(hasNextPage)
+		t.Is(-1, nextPage)
 		t.NotNil(blogList)
 		t.Is(0, len(blogList))
 	} else {
 		t.Fatalf(err.Error())
 	}
 
-	if blogList, hasNextPage, err := repo.FindAllByCategory(c2, 2, 1); err == nil {
-		t.True(hasNextPage)
+	if blogList, nextPage, err := repo.FindAllByCategory(c2, 2, 1); err == nil {
+		t.Is(2, len(blogList))
+		t.Is(2, nextPage)
+
+		blogList, nextPage, err = repo.FindAllByCategory(c2, 2, nextPage)
+		t.NoError(err)
+		t.Is(3, nextPage)
 		t.Is(2, len(blogList))
 
-		blogList, hasNextPage, err = repo.FindAllByCategory(c2, 2, 2)
+		blogList, nextPage, err = repo.FindAllByCategory(c2, 2, nextPage)
 		t.NoError(err)
-		t.True(hasNextPage)
-		t.Is(2, len(blogList))
-
-		blogList, hasNextPage, err = repo.FindAllByCategory(c2, 2, 3)
-		t.NoError(err)
-		t.False(hasNextPage)
+		t.Is(-1, nextPage)
 		t.Is(1, len(blogList))
 	} else {
 		t.Fatalf(err.Error())
 	}
 
-	if blogList, hasNextPage, err := repo.FindAllByCategory(c2, 10, 1); err == nil {
-		t.False(hasNextPage)
+	if blogList, nextPage, err := repo.FindAllByCategory(c2, 10, 1); err == nil {
 		t.Is(5, len(blogList))
+		t.Is(-1, nextPage)
 
-		blogList, hasNextPage, err = repo.FindAllByCategory(c2, 10, 2)
+		blogList, nextPage, err = repo.FindAllByCategory(c2, 10, 2)
 		t.NoError(err)
-		t.False(hasNextPage)
+		t.Is(-1, nextPage)
 		t.Is(0, len(blogList))
 	} else {
 		t.Fatalf(err.Error())
@@ -222,6 +237,11 @@ func TestEditBlog_NoSuchBlog(tt *testing.T) {
 }
 
 func TestSetBlogCategory_Success(tt *testing.T) {
+	testing.Lock()
+	defer testing.Unlock()
+
+	testing.InitTable("category")
+
 	t := testing.NewTester(tt)
 	repo := NewBlogRepository(testing.DB())
 
@@ -235,17 +255,17 @@ func TestSetBlogCategory_Success(tt *testing.T) {
 	category := newCategory()
 	t.NoError(repo.SetBlogCategory(blog, category))
 
-	blogList, hasNextPage, err := repo.FindAllByCategory(category, 10, 1)
+	blogList, nextPage, err := repo.FindAllByCategory(category, 10, 1)
 	t.NoError(err)
-	t.False(hasNextPage)
+	t.Is(-1, nextPage)
 	t.Is(1, len(blogList))
 	t.Is(blog.ID(), blogList[0].ID())
 
 	otherCategory := newCategory()
 	t.NoError(repo.SetBlogCategory(blog, otherCategory), "on duplicate")
-	blogList, hasNextPage, err = repo.FindAllByCategory(otherCategory, 10, 1)
+	blogList, nextPage, err = repo.FindAllByCategory(otherCategory, 10, 1)
 	t.NoError(err)
-	t.False(hasNextPage)
+	t.Is(-1, nextPage)
 	t.Is(1, len(blogList))
 	t.Is(blog.ID(), blogList[0].ID())
 }
