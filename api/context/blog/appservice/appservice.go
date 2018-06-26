@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	account "lmm/api/context/account/domain/model"
-	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
@@ -100,7 +99,7 @@ func (app *AppService) GetBlogByID(blogIDStr string) (*Blog, error) {
 	}, nil
 }
 
-func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, error) {
+func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*Category, error) {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
 		return nil, err
@@ -113,7 +112,10 @@ func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, err
 	if err != nil {
 		return nil, err
 	}
-	return category, nil
+
+	return &Category{
+		Name: category.Name(),
+	}, nil
 }
 
 func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBody io.ReadCloser) error {
