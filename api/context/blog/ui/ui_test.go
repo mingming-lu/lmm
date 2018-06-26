@@ -5,14 +5,26 @@ import (
 	accountModel "lmm/api/context/account/domain/model"
 	accountRepository "lmm/api/context/account/domain/repository"
 	accountService "lmm/api/context/account/domain/service"
+	account "lmm/api/context/account/ui"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 	"os"
 )
 
 var user *accountModel.User
+var ui *UI
+var accountUI *account.UI
 
 func TestMain(m *testing.M) {
+	initUser()
+	ui = New(testing.DB())
+	accountUI = account.New(testing.DB())
+
+	code := m.Run()
+	os.Exit(code)
+}
+
+func initUser() {
 	var err error
 
 	name, password := uuid.New()[:31], uuid.New()
@@ -21,7 +33,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	err = accountRepository.New().Add(user)
+	err = accountRepository.New(testing.DB()).Add(user)
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +45,4 @@ func TestMain(m *testing.M) {
 		accountService.EncodeToken(user.Token()),
 		user.CreatedAt(),
 	)
-
-	code := m.Run()
-	os.Exit(code)
 }

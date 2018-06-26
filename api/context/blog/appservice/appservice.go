@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	account "lmm/api/context/account/domain/model"
-	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/repository"
 	"lmm/api/storage"
@@ -21,31 +20,6 @@ func New(db *storage.DB) *AppService {
 		blogService:     service.NewBlogService(repository.NewBlogRepository(db)),
 		categoryService: service.NewCategoryService(repository.NewCategoryRepository(db)),
 	}
-}
-
-type Blog struct {
-	ID uint64 `json:"id"`
-	BlogContent
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-}
-
-type BlogContent struct {
-	Title string `json:"title"`
-	Text  string `json:"text"`
-}
-
-type BlogListPage struct {
-	Blog     []*Blog `json:"blog"`
-	NextPage int     `json:"next_page"`
-}
-
-type Category struct {
-	Name string `json:"name"`
-}
-
-type Categories struct {
-	Categories []*Category `json:"categories"`
 }
 
 func (app *AppService) PostNewBlog(user *account.User, requestBody io.ReadCloser) (uint64, error) {
@@ -105,15 +79,27 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}, nil
 }
 
-func (app *AppService) GetBlogByID(blogIDStr string) (*model.Blog, error) {
+func (app *AppService) GetBlogByID(blogIDStr string) (*Blog, error) {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
 		return nil, service.ErrInvalidBlogID
 	}
-	return app.blogService.GetBlogByID(blogID)
+	blog, err := app.blogService.GetBlogByID(blogID)
+	if err != nil {
+		return nil, err
+	}
+	return &Blog{
+		ID: blog.ID(),
+		BlogContent: BlogContent{
+			Title: blog.Title(),
+			Text:  blog.Text(),
+		},
+		CreatedAt: blog.CreatedAt().UTC().String(),
+		UpdatedAt: blog.UpdatedAt().UTC().String(),
+	}, nil
 }
 
-func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, error) {
+func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*Category, error) {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
 		return nil, err
@@ -126,7 +112,10 @@ func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, err
 	if err != nil {
 		return nil, err
 	}
-	return category, nil
+
+	return &Category{
+		Name: category.Name(),
+	}, nil
 }
 
 func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBody io.ReadCloser) error {

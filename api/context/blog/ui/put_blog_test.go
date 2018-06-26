@@ -8,17 +8,17 @@ import (
 	accountService "lmm/api/context/account/domain/service"
 	"lmm/api/context/blog/appservice"
 	"lmm/api/context/blog/domain/factory"
+	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/repository"
 	"lmm/api/http"
 	"lmm/api/testing"
-	"lmm/api/usecase/auth"
 	"lmm/api/utils/uuid"
 )
 
 func TestUpdateBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository()
+	repo := repository.NewBlogRepository(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
@@ -29,7 +29,7 @@ func TestUpdateBlog_Success(tt *testing.T) {
 	headers["Authorization"] = "Bearer " + user.Token()
 
 	newTitle, newText := uuid.New(), uuid.New()
-	requestBody := Blog{
+	requestBody := appservice.BlogContent{
 		Title: newTitle,
 		Text:  newText,
 	}
@@ -46,14 +46,14 @@ func TestUpdateBlog_Success(tt *testing.T) {
 func TestUpdateBlog_Unauthorized(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository()
+	repo := repository.NewBlogRepository(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
 	t.NoError(err)
 	t.NoError(repo.Add(blog))
 
-	requestBody := Blog{
+	requestBody := appservice.BlogContent{
 		Title: "blog title",
 		Text:  "blog text",
 	}
@@ -69,7 +69,7 @@ func TestUpdateBlog_NoSuchBlog(tt *testing.T) {
 	blog, err := factory.NewBlog(user.ID(), title, text)
 	t.NoError(err)
 
-	requestBody := Blog{
+	requestBody := appservice.BlogContent{
 		Title: "blog title",
 		Text:  "blog text",
 	}
@@ -79,20 +79,20 @@ func TestUpdateBlog_NoSuchBlog(tt *testing.T) {
 
 	res := putBlog(headers, blog.ID(), testing.StructToRequestBody(requestBody))
 	t.Is(http.StatusNotFound, res.StatusCode())
-	t.Is(appservice.ErrNoSuchBlog.Error()+"\n", res.Body())
+	t.Is(service.ErrNoSuchBlog.Error()+"\n", res.Body())
 }
 
 func TestUpdateBlog_NoChange(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository()
+	repo := repository.NewBlogRepository(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
 	t.NoError(err)
 	t.NoError(repo.Add(blog))
 
-	requestBody := Blog{
+	requestBody := appservice.BlogContent{
 		Title: blog.Title(),
 		Text:  blog.Text(),
 	}
@@ -107,14 +107,14 @@ func TestUpdateBlog_NoChange(tt *testing.T) {
 func TestUpdateBlog_EmptyTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository()
+	repo := repository.NewBlogRepository(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
 	t.NoError(err)
 	t.NoError(repo.Add(blog))
 
-	requestBody := Blog{
+	requestBody := appservice.BlogContent{
 		Title: "",
 		Text:  blog.Text(),
 	}
@@ -124,27 +124,27 @@ func TestUpdateBlog_EmptyTitle(tt *testing.T) {
 
 	res := putBlog(headers, blog.ID(), testing.StructToRequestBody(requestBody))
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(appservice.ErrEmptyBlogTitle.Error()+"\n", res.Body())
+	t.Is(service.ErrEmptyBlogTitle.Error()+"\n", res.Body())
 }
 
 func TestUpdateBlog_NoPermission(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository()
+	repo := repository.NewBlogRepository(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
 	t.NoError(err)
 	t.NoError(repo.Add(blog))
 
-	requestBody := Blog{
+	requestBody := appservice.BlogContent{
 		Title: blog.Title(),
 		Text:  blog.Text(),
 	}
 
 	otherUser, err := accountFactory.NewUser(uuid.New()[:31], uuid.New())
 	t.NoError(err)
-	accountRepo := accountRepository.New()
+	accountRepo := accountRepository.New(testing.DB())
 	t.NoError(accountRepo.Add(otherUser))
 
 	headers := make(map[string]string)
@@ -152,7 +152,7 @@ func TestUpdateBlog_NoPermission(tt *testing.T) {
 
 	res := putBlog(headers, blog.ID(), testing.StructToRequestBody(requestBody))
 	t.Is(http.StatusForbidden, res.StatusCode())
-	t.Is(appservice.ErrNoSuchBlog.Error()+"\n", res.Body())
+	t.Is(service.ErrNoSuchBlog.Error()+"\n", res.Body())
 }
 
 func putBlog(headers map[string]string, blogID uint64, requestBody io.Reader) *testing.Response {
@@ -164,7 +164,7 @@ func putBlog(headers map[string]string, blogID uint64, requestBody io.Reader) *t
 	}
 
 	router := testing.NewRouter()
-	router.PUT("/v1/blog/:blog", auth.BearerAuth(UpdateBlog))
+	router.PUT("/v1/blog/:blog", accountUI.BearerAuth(ui.UpdateBlog))
 
 	res := testing.NewResponse()
 	router.ServeHTTP(res, request)

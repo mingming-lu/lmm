@@ -62,6 +62,7 @@ func TestFindAllBlog_GivenCount(tt *testing.T) {
 	t.NoError(err)
 	t.Is(2, blogListPage.NextPage)
 	t.Is(3, len(blogListPage.Blog))
+	t.Isa(&BlogListPage{}, blogListPage)
 
 	blogListPage, err = app.GetBlogListByPage("3", "2")
 	t.NoError(err)
@@ -82,9 +83,17 @@ func TestFindBlogByID_Success(tt *testing.T) {
 
 	blog, err := app.GetBlogByID(fmt.Sprintf("%d", blogID))
 	t.NoError(err)
-	t.Is(blogID, blog.ID())
-	t.Is(blogContent.Title, blog.Title())
-	t.Is(blogContent.Text, blog.Text())
+	t.Isa(&Blog{}, blog)
+
+	repo := repository.NewBlogRepository(testing.DB())
+
+	blogModel, err := repo.FindByID(blogID)
+	t.NoError(err)
+	t.Is(blogModel.ID(), blog.ID)
+	t.Is(blogModel.Title(), blog.Title)
+	t.Is(blogModel.Text(), blog.Text)
+	t.Is(blogModel.CreatedAt().UTC().String(), blog.CreatedAt)
+	t.Is(blogModel.UpdatedAt().UTC().String(), blog.UpdatedAt)
 }
 
 func TestFindBlogByID_InvalidID(tt *testing.T) {
