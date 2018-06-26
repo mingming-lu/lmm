@@ -50,7 +50,7 @@ type Categories struct {
 
 func (app *AppService) PostNewBlog(user *account.User, requestBody io.ReadCloser) (uint64, error) {
 	content := BlogContent{}
-	if err := json.NewDecoder(requestBody).Decode(content); err != nil {
+	if err := json.NewDecoder(requestBody).Decode(&content); err != nil {
 		return 0, err
 	}
 
@@ -136,7 +136,7 @@ func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBod
 	}
 
 	content := BlogContent{}
-	if err := json.NewDecoder(requestBody).Decode(content); err != nil {
+	if err := json.NewDecoder(requestBody).Decode(&content); err != nil {
 		return err
 	}
 
