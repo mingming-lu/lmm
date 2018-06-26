@@ -105,12 +105,24 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}, nil
 }
 
-func (app *AppService) GetBlogByID(blogIDStr string) (*model.Blog, error) {
+func (app *AppService) GetBlogByID(blogIDStr string) (*Blog, error) {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
 		return nil, service.ErrInvalidBlogID
 	}
-	return app.blogService.GetBlogByID(blogID)
+	blog, err := app.blogService.GetBlogByID(blogID)
+	if err != nil {
+		return nil, err
+	}
+	return &Blog{
+		ID: blog.ID(),
+		BlogContent: BlogContent{
+			Title: blog.Title(),
+			Text:  blog.Text(),
+		},
+		CreatedAt: blog.CreatedAt().UTC().String(),
+		UpdatedAt: blog.UpdatedAt().UTC().String(),
+	}, nil
 }
 
 func (app *AppService) GetCategoryOfBlog(blogIDStr string) (*model.Category, error) {
