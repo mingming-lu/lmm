@@ -3,9 +3,9 @@ package ui
 import (
 	"io"
 	"lmm/api/context/blog/appservice"
+	"lmm/api/context/blog/domain/service"
 	"lmm/api/http"
 	"lmm/api/testing"
-	"lmm/api/usecase/auth"
 	"lmm/api/utils/uuid"
 )
 
@@ -15,12 +15,12 @@ func TestPostBlog_Success(tt *testing.T) {
 	headers := make(map[string]string)
 	headers["Authorization"] = "Bearer " + user.Token()
 
-	blog := Blog{
+	content := appservice.BlogContent{
 		Title: "blog title",
 		Text:  "blog text",
 	}
 
-	res := postBlog(headers, testing.StructToRequestBody(blog))
+	res := postBlog(headers, testing.StructToRequestBody(content))
 	t.Is(http.StatusCreated, res.StatusCode())
 	t.Regexp(`/blog/\d+`, res.Header().Get("Location"))
 }
@@ -28,12 +28,12 @@ func TestPostBlog_Success(tt *testing.T) {
 func TestPostBlog_Unauthorized(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	blog := Blog{
+	content := appservice.BlogContent{
 		Title: "blog title",
 		Text:  "blog text",
 	}
 
-	res := postBlog(nil, testing.StructToRequestBody(blog))
+	res := postBlog(nil, testing.StructToRequestBody(content))
 	t.Is(http.StatusUnauthorized, res.StatusCode())
 }
 
@@ -43,14 +43,14 @@ func TestPostBlog_EmptyTitle(tt *testing.T) {
 	headers := make(map[string]string)
 	headers["Authorization"] = "Bearer " + user.Token()
 
-	blog := Blog{
+	blog := appservice.BlogContent{
 		Title: "",
 		Text:  uuid.New(),
 	}
 
 	res := postBlog(headers, testing.StructToRequestBody(blog))
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(appservice.ErrEmptyBlogTitle.Error()+"\n", res.Body())
+	t.Is(service.ErrEmptyBlogTitle.Error()+"\n", res.Body())
 }
 
 func postBlog(headers map[string]string, requestBody io.Reader) *testing.Response {
@@ -62,7 +62,7 @@ func postBlog(headers map[string]string, requestBody io.Reader) *testing.Respons
 	}
 
 	router := testing.NewRouter()
-	router.POST("/v1/blog", auth.BearerAuth(PostBlog))
+	router.POST("/v1/blog", accountUI.BearerAuth(ui.PostBlog))
 
 	res := testing.NewResponse()
 	router.ServeHTTP(res, request)
