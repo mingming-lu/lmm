@@ -160,7 +160,7 @@ func (app *AppService) RegisterNewCategory(user *account.User, requestBody io.Re
 func (app *AppService) EditCategory(user *account.User, categoryIDStr string, requestBody io.ReadCloser) error {
 	categoryID, err := strings.StrToUint64(categoryIDStr)
 	if err != nil {
-		return err
+		return service.ErrInvalidCategoryID
 	}
 
 	category := Category{}
@@ -219,7 +219,7 @@ func (app *AppService) SetBlogCategory(blogIDStr string, requestBody io.ReadClos
 func (app *AppService) RemoveCategoryByID(idStr string) error {
 	id, err := strings.StrToUint64(idStr)
 	if err != nil {
-		return err
+		return service.ErrInvalidCategoryID
 	}
 	return app.categoryService.RemoveCategoryByID(id)
 }
