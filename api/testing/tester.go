@@ -2,6 +2,7 @@ package testing
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -53,6 +54,13 @@ func (t *Tester) Error(err error, msgAndArgs ...interface{}) bool {
 
 func (t *Tester) NoError(err error, msgAndArgs ...interface{}) bool {
 	return assert.NoError(t, err, msgAndArgs...)
+}
+
+func (t *Tester) IsError(expected, actual error, msgAndArgs ...interface{}) bool {
+	if !assert.Error(t, expected) {
+		return assert.FailNow(t, fmt.Sprintf("expected error but got %+v", expected))
+	}
+	return assert.EqualError(t, actual, expected.Error(), msgAndArgs...)
 }
 
 func (t *Tester) Isa(expectedType, o interface{}, msgAndArgs ...interface{}) bool {
