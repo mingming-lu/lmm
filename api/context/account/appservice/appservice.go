@@ -30,7 +30,9 @@ func New(userRepo repository.UserRepository) *AppService {
 
 func (app *AppService) SignUp(requestBody io.ReadCloser) (uint64, error) {
 	auth := Auth{}
-	json.NewDecoder(requestBody).Decode(&auth)
+	if json.NewDecoder(requestBody).Decode(&auth) != nil {
+		return 0, service.ErrInvalidBody
+	}
 
 	user, err := app.userService.Register(auth.Name, auth.Password)
 	if err != nil {
@@ -42,24 +44,14 @@ func (app *AppService) SignUp(requestBody io.ReadCloser) (uint64, error) {
 // SignIn is a usecase which users sign in with a account
 func (app *AppService) SignIn(requestBody io.ReadCloser) (*model.User, error) {
 	auth := Auth{}
-	json.NewDecoder(requestBody).Decode(&auth)
+	if json.NewDecoder(requestBody).Decode(&auth) != nil {
+		return nil, service.ErrInvalidBody
+	}
 
 	user, err := app.userService.Login(auth.Name, auth.Password)
-
-	// // user, err := app.repo.FindByName(name)
-	// if err != nil {
-	// 	if err.Error() == storage.ErrNoRows.Error() {
-	// 		return nil, ErrInvalidUserNameOrPassword
-	// 	}
-	// 	return nil, err
-	// }
 	if err != nil {
 		return nil, err
 	}
-
-	// if user.VerifyPassword(password) != nil {
-	// 	return nil, ErrInvalidUserNameOrPassword
-	// }
 
 	return model.NewUser(
 		user.ID(),
