@@ -7,7 +7,6 @@ import (
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/context/account/domain/service"
-	"lmm/api/storage"
 	"regexp"
 )
 
@@ -33,9 +32,9 @@ type Auth struct {
 	Password string `json:"password"`
 }
 
-func New(db *storage.DB) *AppService {
+func New(userRepo repository.UserRepository) *AppService {
 	return &AppService{
-		userService: service.NewUserService(repository.New(db)),
+		userService: service.NewUserService(userRepo),
 	}
 }
 
