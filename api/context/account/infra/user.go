@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"errors"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/storage"
 	"time"
@@ -41,7 +40,7 @@ func (s *UserStorage) FindByName(name string) (*model.User, error) {
 	)
 	err := stmt.QueryRow(name).Scan(&userID, &userName, &userPassword, &userToken, &userCreatedAt)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 	return model.NewUser(userID, userName, userPassword, userToken, userCreatedAt), nil
 }
@@ -59,7 +58,7 @@ func (s *UserStorage) FindByToken(token string) (*model.User, error) {
 	)
 	err := stmt.QueryRow(token).Scan(&userID, &userName, &userPassword, &userToken, &userCreatedAt)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 	return model.NewUser(userID, userName, userPassword, userToken, userCreatedAt), nil
 }
