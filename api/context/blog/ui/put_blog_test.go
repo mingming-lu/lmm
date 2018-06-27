@@ -9,7 +9,7 @@ import (
 	"lmm/api/context/blog/appservice"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/service"
-	"lmm/api/context/blog/repository"
+	"lmm/api/context/blog/infra"
 	"lmm/api/http"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -18,7 +18,7 @@ import (
 func TestUpdateBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
@@ -46,7 +46,7 @@ func TestUpdateBlog_Success(tt *testing.T) {
 func TestUpdateBlog_Unauthorized(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
@@ -85,7 +85,7 @@ func TestUpdateBlog_NoSuchBlog(tt *testing.T) {
 func TestUpdateBlog_NoChange(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
@@ -107,7 +107,7 @@ func TestUpdateBlog_NoChange(tt *testing.T) {
 func TestUpdateBlog_EmptyTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
@@ -130,7 +130,7 @@ func TestUpdateBlog_EmptyTitle(tt *testing.T) {
 func TestUpdateBlog_NoPermission(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)

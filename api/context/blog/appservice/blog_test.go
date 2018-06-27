@@ -6,7 +6,7 @@ import (
 	accountRepository "lmm/api/context/account/domain/repository"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/service"
-	"lmm/api/context/blog/repository"
+	"lmm/api/context/blog/infra"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 )
@@ -85,7 +85,7 @@ func TestFindBlogByID_Success(tt *testing.T) {
 	t.NoError(err)
 	t.Isa(&Blog{}, blog)
 
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	blogModel, err := repo.FindByID(blogID)
 	t.NoError(err)
@@ -114,7 +114,7 @@ func TestFindBlogByID_NotFound(tt *testing.T) {
 
 func TestEditBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)
@@ -140,7 +140,7 @@ func TestEditBlog_Success(tt *testing.T) {
 
 func TestEditBlog_NoPermission(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)
@@ -180,7 +180,7 @@ func TestEditBlog_NoSuchBlog(tt *testing.T) {
 
 func TestEditBlog_NoChange(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)
@@ -199,7 +199,7 @@ func TestEditBlog_NoChange(tt *testing.T) {
 
 func TestEditBlog_EmptyTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, _ := factory.NewBlog(user.ID(), title, text)

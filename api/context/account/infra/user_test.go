@@ -1,4 +1,4 @@
-package repository
+package infra
 
 import (
 	"lmm/api/context/account/domain/factory"
@@ -10,7 +10,7 @@ import (
 
 func TestAdd(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New(testing.DB())
+	repo := NewUserStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, err := factory.NewUser(name, password)
@@ -35,7 +35,7 @@ func TestAdd(t *testing.T) {
 
 func TestFindByName_Success(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New(testing.DB())
+	repo := NewUserStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ := factory.NewUser(name, password)
@@ -49,7 +49,7 @@ func TestFindByName_Success(t *testing.T) {
 
 func TestFindByName_NotFound(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New(testing.DB())
+	repo := NewUserStorage(testing.DB())
 
 	found, err := repo.FindByName("foo")
 
@@ -60,7 +60,7 @@ func TestFindByName_NotFound(t *testing.T) {
 
 func TestFindByToken_Success(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New(testing.DB())
+	repo := NewUserStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ := factory.NewUser(name, password)
@@ -74,7 +74,7 @@ func TestFindByToken_Success(t *testing.T) {
 
 func TestFindByToken_NotFound(t *testing.T) {
 	tester := testing.NewTester(t)
-	repo := New(testing.DB())
+	repo := NewUserStorage(testing.DB())
 
 	found, err := repo.FindByToken("1234")
 	tester.Error(err)

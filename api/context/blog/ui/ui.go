@@ -4,9 +4,9 @@ import (
 	"fmt"
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/blog/appservice"
+	"lmm/api/context/blog/domain/repository"
 	"lmm/api/context/blog/domain/service"
 	"lmm/api/http"
-	"lmm/api/storage"
 	"log"
 )
 
@@ -14,8 +14,11 @@ type UI struct {
 	app *appservice.AppService
 }
 
-func New(db *storage.DB) *UI {
-	app := appservice.New(db)
+func New(
+	blogRepo repository.BlogRepository,
+	categoryRepo repository.CategoryRepository,
+) *UI {
+	app := appservice.New(blogRepo, categoryRepo)
 	return &UI{app: app}
 }
 

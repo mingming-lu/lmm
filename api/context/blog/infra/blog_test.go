@@ -1,9 +1,10 @@
-package repository
+package infra
 
 import (
 	accountFactory "lmm/api/context/account/domain/factory"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
+	"lmm/api/context/blog/domain/repository"
 	"lmm/api/storage"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -12,7 +13,7 @@ import (
 
 func TestAddBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	title, text := uuid.New(), uuid.New()
@@ -40,7 +41,7 @@ func TestAddBlog_Success(tt *testing.T) {
 
 func TestAddBlog_DuplicateTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	title, text := uuid.New(), uuid.New()
@@ -62,7 +63,7 @@ func TestFindAllBlog_Paging(tt *testing.T) {
 	testing.InitTable("blog")
 	t := testing.NewTester(tt)
 
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 	createBlogListWithCategory(repo, 10)
 
 	blogList, nextPage, err := repo.FindAll(8, 1)
@@ -103,7 +104,7 @@ func TestFindAllBlog_EmptyList(tt *testing.T) {
 	testing.InitTable("blog")
 
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	blogList, nextPage, err := repo.FindAll(100, 1)
 	t.NoError(err)
@@ -119,7 +120,7 @@ func TestFindAllBlogByCategory(tt *testing.T) {
 	testing.InitTable("blog")
 
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	createBlogListWithCategory(repo, 10)
 
@@ -171,7 +172,7 @@ func TestFindAllBlogByCategory(tt *testing.T) {
 
 func TestFindBlogByID_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	title, text := uuid.New(), uuid.New()
@@ -190,7 +191,7 @@ func TestFindBlogByID_Success(tt *testing.T) {
 
 func TestFindBlogByID_NotFound(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	blog, err := repo.FindByID(uint64(777))
 	t.Error(err, "sql: no rows in result set")
@@ -199,7 +200,7 @@ func TestFindBlogByID_NotFound(tt *testing.T) {
 
 func TestEditBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ := accountFactory.NewUser(name, password)
@@ -224,7 +225,7 @@ func TestEditBlog_Success(tt *testing.T) {
 
 func TestEditBlog_NoSuchBlog(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ := accountFactory.NewUser(name, password)
@@ -243,7 +244,7 @@ func TestSetBlogCategory_Success(tt *testing.T) {
 	testing.InitTable("category")
 
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	name, password := uuid.New()[:31], uuid.New()
 	user, _ := accountFactory.NewUser(name, password)
@@ -272,7 +273,7 @@ func TestSetBlogCategory_Success(tt *testing.T) {
 
 func TestRemoveBlogCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	user, _ := accountFactory.NewUser("username", "userpassword")
 	blog, _ := factory.NewBlog(user.ID(), "blogtitle", "blogtext")
@@ -304,7 +305,7 @@ func TestRemoveBlogCategory_Success(tt *testing.T) {
 
 func TestRemoveBlogCategory_NoRows(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewBlogRepository(testing.DB())
+	repo := NewBlogStorage(testing.DB())
 
 	user, _ := accountFactory.NewUser("username", "userpassword")
 	blog, _ := factory.NewBlog(user.ID(), "blogtitle", "blogtext")
@@ -314,7 +315,7 @@ func TestRemoveBlogCategory_NoRows(tt *testing.T) {
 }
 
 // blog.category.id = 1 if blog.id is even else 2
-func createBlogListWithCategory(repo BlogRepository, amount int) {
+func createBlogListWithCategory(repo repository.BlogRepository, amount int) {
 	now := time.Now()
 	insertBlog := testing.DB().MustPrepare(`
 		INSERT INTO blog (user, title, text, created_at, updated_at) VALUES(1, ?, ?, ?, ?)

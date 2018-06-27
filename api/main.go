@@ -1,7 +1,9 @@
 package main
 
 import (
+	accountInfra "lmm/api/context/account/infra"
 	account "lmm/api/context/account/ui"
+	blogInfra "lmm/api/context/blog/infra"
 	blog "lmm/api/context/blog/ui"
 	"lmm/api/storage"
 
@@ -9,16 +11,20 @@ import (
 )
 
 func main() {
-	db := storage.NewDB()
 	router := http.NewRouter()
 
-	accountUI := account.New(db)
+	db := storage.NewDB()
+
+	userRepo := accountInfra.NewUserStorage(db)
+	accountUI := account.New(userRepo)
 	// account
 	router.POST("/v1/signup", accountUI.SignUp)
 	router.POST("/v1/signin", accountUI.SignIn)
 	router.GET("/v1/verify", accountUI.BearerAuth(accountUI.Verify))
 
-	blogUI := blog.New(db)
+	blogRepo := blogInfra.NewBlogStorage(db)
+	categoryRepo := blogInfra.NewCategoryStorage(db)
+	blogUI := blog.New(blogRepo, categoryRepo)
 	// blog
 	router.GET("/v1/blog", blogUI.GetAllBlog)
 	router.GET("/v1/blog/:blog", blogUI.GetBlog)

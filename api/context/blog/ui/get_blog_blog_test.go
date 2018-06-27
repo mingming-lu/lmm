@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"lmm/api/context/blog/appservice"
 	"lmm/api/context/blog/domain/factory"
-	"lmm/api/context/blog/repository"
+	"lmm/api/context/blog/infra"
 	"lmm/api/http"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -13,7 +13,7 @@ import (
 
 func TestGetBlog_OK(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 
 	title, text := uuid.New(), uuid.New()
 	blog, err := factory.NewBlog(user.ID(), title, text)
