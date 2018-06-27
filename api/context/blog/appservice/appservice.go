@@ -1,9 +1,8 @@
 package appservice
 
 import (
+	"lmm/api/context/blog/domain/repository"
 	"lmm/api/context/blog/domain/service"
-	"lmm/api/context/blog/repository"
-	"lmm/api/storage"
 )
 
 type AppService struct {
@@ -11,9 +10,12 @@ type AppService struct {
 	categoryService *service.CategoryService
 }
 
-func New(db *storage.DB) *AppService {
+func New(
+	blogRepo repository.BlogRepository,
+	categoryRepo repository.CategoryRepository,
+) *AppService {
 	return &AppService{
-		blogService:     service.NewBlogService(repository.NewBlogRepository(db)),
-		categoryService: service.NewCategoryService(repository.NewCategoryRepository(db)),
+		blogService:     service.NewBlogService(blogRepo),
+		categoryService: service.NewCategoryService(categoryRepo),
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/domain/service"
-	"lmm/api/context/blog/repository"
+	"lmm/api/context/blog/infra"
 	"lmm/api/domain/factory"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -12,7 +12,7 @@ import (
 
 func TestAddNewCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewCategoryRepository(testing.DB())
+	repo := infra.NewCategoryStorage(testing.DB())
 
 	body := Category{
 		Name: uuid.New()[:31],
@@ -150,7 +150,7 @@ func TestRemoveCategory_Success(tt *testing.T) {
 	t.NoError(err)
 	t.NotNil(category)
 
-	repo := repository.NewCategoryRepository(testing.DB())
+	repo := infra.NewCategoryStorage(testing.DB())
 	t.NoError(repo.Add(category))
 
 	t.NoError(app.RemoveCategoryByID(fmt.Sprint(id)))

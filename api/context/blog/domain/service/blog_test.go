@@ -2,7 +2,7 @@ package service
 
 import (
 	"lmm/api/context/blog/domain/model"
-	"lmm/api/context/blog/repository"
+	"lmm/api/context/blog/infra"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 	"time"
@@ -10,7 +10,7 @@ import (
 
 func TestPostBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 	service := NewBlogService(repo)
 
 	title, text := uuid.New(), uuid.New()
@@ -34,7 +34,7 @@ func TestPostBlog_Success(tt *testing.T) {
 
 func TestPostBlog_DuplicateTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 	service := NewBlogService(repo)
 
 	title, text := uuid.New(), uuid.New()
@@ -50,7 +50,7 @@ func TestPostBlog_DuplicateTitle(tt *testing.T) {
 
 func TestPostBlog_EmptyTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 	service := NewBlogService(repo)
 
 	blog, err := service.PostBlog(user.ID(), "", uuid.New())
@@ -65,16 +65,16 @@ func TestFindAllBlog_OrderByCreatedTime(tt *testing.T) {
 	testing.InitTable("blog")
 
 	t := testing.NewTester(tt)
-	repo := repository.NewBlogRepository(testing.DB())
+	repo := infra.NewBlogStorage(testing.DB())
 	service := NewBlogService(repo)
 
 	service.PostBlog(user.ID(), uuid.New(), uuid.New())
 	time.Sleep(1 * time.Second)
 	service.PostBlog(user.ID(), uuid.New(), uuid.New())
 
-	blogList, hasNextPage, err := service.GetBlogListByPage(10, 1)
+	blogList, nextPage, err := service.GetBlogListByPage(10, 1)
 	t.NoError(err)
-	t.False(hasNextPage)
+	t.Is(-1, nextPage)
 	t.Is(2, len(blogList))
 	t.True(blogList[0].CreatedAt().After(blogList[1].CreatedAt()))
 }

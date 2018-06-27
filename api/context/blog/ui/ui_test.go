@@ -6,6 +6,7 @@ import (
 	accountRepository "lmm/api/context/account/domain/repository"
 	accountService "lmm/api/context/account/domain/service"
 	account "lmm/api/context/account/ui"
+	"lmm/api/context/blog/infra"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
 	"os"
@@ -17,7 +18,8 @@ var accountUI *account.UI
 
 func TestMain(m *testing.M) {
 	initUser()
-	ui = New(testing.DB())
+	initUI()
+
 	accountUI = account.New(testing.DB())
 
 	code := m.Run()
@@ -45,4 +47,11 @@ func initUser() {
 		accountService.EncodeToken(user.Token()),
 		user.CreatedAt(),
 	)
+}
+
+func initUI() {
+	db := testing.DB()
+	blogRepo := infra.NewBlogStorage(db)
+	categoryRepo := infra.NewCategoryStorage(db)
+	ui = New(blogRepo, categoryRepo)
 }

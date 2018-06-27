@@ -3,7 +3,7 @@ package service
 import (
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
-	"lmm/api/context/blog/repository"
+	"lmm/api/context/blog/domain/repository"
 	"lmm/api/storage"
 )
 
