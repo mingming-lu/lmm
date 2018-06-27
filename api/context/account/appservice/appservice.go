@@ -62,18 +62,12 @@ func (app *AppService) SignIn(requestBody io.ReadCloser) (*model.User, error) {
 	), nil
 }
 
-func (app *AppService) VerifyToken(encodedToken string) (user *model.User, err error) {
-	// token, err := service.DecodeToken(encodedToken)
-	// if err != nil {
-	// 	return nil, ErrInvalidToken
-	// }
-
-	// user, err = app.repo.FindByToken(token)
-	// if err != nil {
-	// 	return nil, ErrInvalidToken
-	// }
-	// return user, nil
-	return nil, nil
+func (app *AppService) VerifyToken(hashedToken string) (user *model.User, err error) {
+	user, err = app.userService.GetUserByHashedToken(hashedToken)
+	if err != nil {
+		return nil, service.ErrInvalidToken
+	}
+	return user, nil
 }
 
 func (app *AppService) BearerAuth(auth string) (*model.User, error) {
