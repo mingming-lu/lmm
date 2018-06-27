@@ -2,21 +2,11 @@ package appservice
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/context/account/domain/service"
 	"regexp"
-)
-
-var (
-	ErrDuplicateUserName         = errors.New("User name duplicated")
-	ErrEmptyUserNameOrPassword   = errors.New("Empty user name or password")
-	ErrInvalidAuthorization      = errors.New("invalid authorization")
-	ErrInvalidInput              = errors.New("Invalid input")
-	ErrInvalidToken              = errors.New("Invalid token")
-	ErrInvalidUserNameOrPassword = errors.New("Invalid user name or password")
 )
 
 var (
@@ -97,7 +87,7 @@ func (app *AppService) VerifyToken(encodedToken string) (user *model.User, err e
 func (app *AppService) BearerAuth(auth string) (*model.User, error) {
 	matched := PatternBearerAuthorization.FindStringSubmatch(auth)
 	if len(matched) != 2 {
-		return nil, ErrInvalidAuthorization
+		return nil, service.ErrInvalidAuthorization
 	}
 	token := matched[1]
 

@@ -10,7 +10,14 @@ import (
 )
 
 var (
-	ErrDuplicateUserName = errors.New("User name duplicated")
+	ErrDuplicateUserName         = errors.New("user name duplicated")
+	ErrEmptyUserNameOrPassword   = errors.New("empty user name or password")
+	ErrInvalidAuthorization      = errors.New("invalid authorization")
+	ErrInvalidInput              = errors.New("invalid input")
+	ErrInvalidToken              = errors.New("invalid token")
+	ErrInvalidUserNameOrPassword = errors.New("invalid user name or password")
+	ErrInvalidBody               = errors.New("invalid body")
+	ErrNoSuchUser                = errors.New("no such user")
 )
 
 type UserService struct {
