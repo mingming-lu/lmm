@@ -2,89 +2,112 @@ package appservice
 
 import (
 	"lmm/api/context/account/domain/model"
-	"lmm/api/context/account/domain/repository"
+	"lmm/api/context/account/domain/service"
 	testingService "lmm/api/context/account/domain/service/testing"
+	"lmm/api/context/account/infra"
 	"lmm/api/testing"
 )
 
-func TestSignIn_Success(t *testing.T) {
-	tester := testing.NewTester(t)
-	app := New(repository.New(testing.DB()))
+func TestSignIn_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := infra.NewUserStorage(testing.DB())
+	app := New(repo)
 
-	name, password := randomUserNameAndPassword()
-	app.SignUp(name, password)
+	auth := randomUserNameAndPassword()
 
-	user, err := app.SignIn(name, password)
-	tester.NoError(err)
-	tester.Isa(&model.User{}, user)
-	tester.Is(name, user.Name())
-	tester.NoError(user.VerifyPassword(password))
+	_, err := app.SignUp(testing.StructToRequestBody(auth))
+	t.NoError(err)
+
+	user, err := app.SignIn(testing.StructToRequestBody(auth))
+	t.NoError(err)
+	t.Isa(&model.User{}, user)
+	t.Is(auth.Name, user.Name())
+	t.NoError(user.VerifyPassword(auth.Password))
 }
 
-func TestSignIn_InvalidPassword(t *testing.T) {
-	tester := testing.NewTester(t)
-	app := New(repository.New(testing.DB()))
+func TestSignIn_InvalidPassword(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := infra.NewUserStorage(testing.DB())
+	app := New(repo)
 
-	name, password := randomUserNameAndPassword()
-	app.SignUp(name, password)
+	auth := randomUserNameAndPassword()
 
-	user, err := app.SignIn(name, "1234")
-	tester.Error(err)
-	tester.Nil(user)
-	tester.Is(ErrInvalidUserNameOrPassword, err)
+	_, err := app.SignUp(testing.StructToRequestBody(auth))
+	t.NoError(err)
+
+	auth.Password = "1234"
+	user, err := app.SignIn(testing.StructToRequestBody(auth))
+
+	t.Error(err)
+	t.Nil(user)
+	t.Is(service.ErrInvalidUserNameOrPassword, err)
 }
 
-func TestSignIn_NoSuchUser(t *testing.T) {
-	tester := testing.NewTester(t)
-	app := New(repository.New(testing.DB()))
+func TestSignIn_NoSuchUser(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := infra.NewUserStorage(testing.DB())
+	app := New(repo)
 
-	name, password := randomUserNameAndPassword()
-	user, err := app.SignIn(name, password)
+	auth := randomUserNameAndPassword()
+	user, err := app.SignIn(testing.StructToRequestBody(auth))
 
-	tester.Error(err)
-	tester.Nil(user)
-	tester.Is(ErrInvalidUserNameOrPassword, err)
+	t.Error(err)
+	t.Nil(user)
+	t.IsError(service.ErrInvalidUserNameOrPassword, err)
 }
 
-func TestSignIn_EmptyUserName(t *testing.T) {
-	tester := testing.NewTester(t)
-	uc := New(repository.New(testing.DB()))
+func TestSignIn_EmptyUserName(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := infra.NewUserStorage(testing.DB())
+	app := New(repo)
 
-	res, err := uc.SignIn("", "1234")
-	tester.Error(err)
-	tester.Nil(res)
-	tester.Is(ErrEmptyUserNameOrPassword, err)
+	auth := Auth{Name: "", Password: "1234"}
+
+	res, err := app.SignIn(testing.StructToRequestBody(auth))
+
+	t.Error(err)
+	t.Nil(res)
+	t.IsError(service.ErrInvalidUserNameOrPassword, err)
 }
 
-func TestSignIn_EmptyPassword(t *testing.T) {
-	tester := testing.NewTester(t)
-	uc := New(repository.New(testing.DB()))
+func TestSignIn_EmptyPassword(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := infra.NewUserStorage(testing.DB())
+	app := New(repo)
 
-	res, err := uc.SignIn("username", "")
-	tester.Error(err)
-	tester.Nil(res)
-	tester.Is(ErrEmptyUserNameOrPassword, err)
+	auth := Auth{Name: "username", Password: ""}
+
+	res, err := app.SignIn(testing.StructToRequestBody(auth))
+	t.Error(err)
+	t.Nil(res)
+	t.IsError(service.ErrInvalidUserNameOrPassword, err)
 }
 
-func TestSignIn_EmptyUserNameAndPassword(t *testing.T) {
-	tester := testing.NewTester(t)
-	app := New(repository.New(testing.DB()))
+func TestSignIn_EmptyUserNameAndPassword(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := infra.NewUserStorage(testing.DB())
+	app := New(repo)
 
-	res, err := app.SignIn("", "")
-	tester.Error(err)
-	tester.Nil(res)
-	tester.Is(ErrEmptyUserNameOrPassword, err)
+	auth := Auth{Name: "", Password: ""}
+
+	res, err := app.SignIn(testing.StructToRequestBody(auth))
+	t.Error(err)
+	t.Nil(res)
+	t.IsError(service.ErrInvalidUserNameOrPassword, err)
 }
 
-func TestSignIn_Exception(t *testing.T) {
-	tester := testing.NewTester(t)
+func TestSignIn_Exception(tt *testing.T) {
+	t := testing.NewTester(tt)
 	app := New(testingService.NewMockedRepo())
 
-	name, password := randomUserNameAndPassword()
-	app.SignUp(name, password)
-	user, err := app.SignIn(name, password)
+	auth := randomUserNameAndPassword()
 
-	tester.Error(err)
-	tester.Nil(user)
-	tester.Is("DB crashed", err.Error())
+	_, err := app.SignUp(testing.StructToRequestBody(auth))
+	t.Is("Cannot save user", err.Error())
+
+	user, err := app.SignIn(testing.StructToRequestBody(auth))
+
+	t.Error(err)
+	t.Nil(user)
+	t.Is("DB crashed", err.Error())
 }
