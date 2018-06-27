@@ -1,4 +1,4 @@
-package repository
+package infra
 
 import (
 	accountFactory "lmm/api/context/account/domain/factory"
@@ -12,7 +12,7 @@ import (
 
 func TestNewAddCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 
@@ -23,7 +23,7 @@ func TestNewAddCategory_Success(tt *testing.T) {
 
 func TestNewAddCategory_Duplicated(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 
@@ -37,7 +37,7 @@ func TestNewAddCategory_Duplicated(tt *testing.T) {
 
 func TestUpdateCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 
@@ -47,7 +47,7 @@ func TestUpdateCategory_Success(tt *testing.T) {
 
 func TestUpdateCategory_NoSuchCategory(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 
@@ -61,7 +61,7 @@ func TestFindAllCategories_Success(tt *testing.T) {
 	testing.InitTable("category")
 
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	for i := 0; i < 10; i++ {
 		repo.Add(newCategory())
@@ -87,7 +87,7 @@ func TestFindAllCategories_NoOne(tt *testing.T) {
 	testing.InitTable("category")
 
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	categories, err := repo.FindAll()
 	t.NoError(err)
@@ -96,7 +96,7 @@ func TestFindAllCategories_NoOne(tt *testing.T) {
 
 func TestFindCategoryByID_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 	repo.Add(category)
@@ -110,7 +110,7 @@ func TestFindCategoryByID_Success(tt *testing.T) {
 
 func TestFindCategoryByID_NoSuch(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 	// repo.Add(category)
@@ -123,7 +123,7 @@ func TestFindCategoryByID_NoSuch(tt *testing.T) {
 
 func TestFindCategoryByBlog_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	insertBlogCategory := testing.DB().MustPrepare(`INSERT INTO blog_category (blog, category) VALUES(?, ?)`)
 	defer insertBlogCategory.Close()
@@ -143,7 +143,7 @@ func TestFindCategoryByBlog_Success(tt *testing.T) {
 
 func TestFindCategoryByBlog_CategoryNotSet(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 	repo.Add(category)
@@ -158,7 +158,7 @@ func TestFindCategoryByBlog_CategoryNotSet(tt *testing.T) {
 
 func TestFindCategoryByBlog_NoSuchCategory(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	insertBlogCategory := testing.DB().MustPrepare(`INSERT INTO blog_category (blog, category) VALUES(?, ?)`)
 	defer insertBlogCategory.Close()
@@ -177,7 +177,7 @@ func TestFindCategoryByBlog_NoSuchCategory(tt *testing.T) {
 
 func TestRemoveCategory_Success(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 	repo.Add(category)
@@ -193,7 +193,7 @@ func TestRemoveCategory_Success(tt *testing.T) {
 
 func TestRemoveCategory_NoSuch(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 	// repo.Add(category)
@@ -205,7 +205,7 @@ func TestRemoveCategory_NoSuch(tt *testing.T) {
 
 func TestRemoveCategory_Removed(tt *testing.T) {
 	t := testing.NewTester(tt)
-	repo := NewCategoryRepository(testing.DB())
+	repo := NewCategoryStorage(testing.DB())
 
 	category := newCategory()
 	repo.Add(category)

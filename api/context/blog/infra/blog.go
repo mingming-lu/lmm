@@ -1,4 +1,4 @@
-package repository
+package infra
 
 import (
 	"lmm/api/context/blog/domain/model"
@@ -6,26 +6,16 @@ import (
 	"time"
 )
 
-type BlogRepository interface {
-	Add(blog *model.Blog) error
-	Update(blog *model.Blog) error
-	FindAll(count, page int) ([]*model.Blog, int, error)
-	FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, int, error)
-	FindByID(id uint64) (*model.Blog, error)
-	SetBlogCategory(blog *model.Blog, category *model.Category) error
-	RemoveBlogCategory(blog *model.Blog) error
-}
-
-type blogRepo struct {
+type BlogStorage struct {
 	db *storage.DB
 }
 
-func NewBlogRepository(db *storage.DB) BlogRepository {
-	return &blogRepo{db: db}
+func NewBlogStorage(db *storage.DB) *BlogStorage {
+	return &BlogStorage{db: db}
 }
 
-func (repo *blogRepo) Add(blog *model.Blog) error {
-	stmt := repo.db.MustPrepare(`INSERT INTO blog (id, user, title, text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
+func (s *BlogStorage) Add(blog *model.Blog) error {
+	stmt := s.db.MustPrepare(`INSERT INTO blog (id, user, title, text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`)
 	defer stmt.Close()
 
 	_, err := stmt.Exec(blog.ID(), blog.UserID(), blog.Title(), blog.Text(), blog.CreatedAt().UTC(), blog.UpdatedAt().UTC())
@@ -36,8 +26,8 @@ func (repo *blogRepo) Add(blog *model.Blog) error {
 	return nil
 }
 
-func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, int, error) {
-	stmt := repo.db.MustPrepare(`
+func (s *BlogStorage) FindAll(count, page int) ([]*model.Blog, int, error) {
+	stmt := s.db.MustPrepare(`
 		SELECT id, user, title, text, created_at, updated_at
 		FROM blog
 		ORDER BY created_at DESC
@@ -86,8 +76,8 @@ func (repo *blogRepo) FindAll(count, page int) ([]*model.Blog, int, error) {
 	return blogList, nextPage, nil
 }
 
-func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, int, error) {
-	stmt := repo.db.MustPrepare(`
+func (s *BlogStorage) FindAllByCategory(category *model.Category, count, page int) ([]*model.Blog, int, error) {
+	stmt := s.db.MustPrepare(`
 		SELECT b.id, b.user, b.title, b.text, b.created_at, b.updated_at
 		FROM blog_category AS bc
 		INNER JOIN blog AS b ON b.id = bc.blog
@@ -137,8 +127,8 @@ func (repo *blogRepo) FindAllByCategory(category *model.Category, count, page in
 	return blogList, nextPage, nil
 }
 
-func (repo *blogRepo) FindByID(id uint64) (*model.Blog, error) {
-	stmt := repo.db.MustPrepare(`SELECT id, user, title, text, created_at, updated_at FROM blog WHERE id = ?`)
+func (s *BlogStorage) FindByID(id uint64) (*model.Blog, error) {
+	stmt := s.db.MustPrepare(`SELECT id, user, title, text, created_at, updated_at FROM blog WHERE id = ?`)
 	defer stmt.Close()
 
 	var (
@@ -158,8 +148,8 @@ func (repo *blogRepo) FindByID(id uint64) (*model.Blog, error) {
 	return model.NewBlog(blogID, blogWriter, blogTitle, blogText, blogCreateAt, blogUpdaedAt), nil
 }
 
-func (repo *blogRepo) Update(blog *model.Blog) error {
-	stmt := repo.db.MustPrepare(`UPDATE blog SET title = ?, text = ? WHERE id = ? and user = ?`)
+func (s *BlogStorage) Update(blog *model.Blog) error {
+	stmt := s.db.MustPrepare(`UPDATE blog SET title = ?, text = ? WHERE id = ? and user = ?`)
 	defer stmt.Close()
 
 	res, err := stmt.Exec(blog.Title(), blog.Text(), blog.ID(), blog.UserID())
@@ -177,8 +167,8 @@ func (repo *blogRepo) Update(blog *model.Blog) error {
 	return nil
 }
 
-func (repo *blogRepo) SetBlogCategory(blog *model.Blog, category *model.Category) error {
-	stmt := repo.db.MustPrepare(`
+func (s *BlogStorage) SetBlogCategory(blog *model.Blog, category *model.Category) error {
+	stmt := s.db.MustPrepare(`
 		INSERT INTO blog_category (blog, category)
 		VALUES(?, ?)
 		ON DUPLICATE KEY UPDATE category = ?
@@ -189,8 +179,8 @@ func (repo *blogRepo) SetBlogCategory(blog *model.Blog, category *model.Category
 	return err
 }
 
-func (repo *blogRepo) RemoveBlogCategory(blog *model.Blog) error {
-	stmt := repo.db.MustPrepare(`DELETE FROM blog_category WHERE blog = ?`)
+func (s *BlogStorage) RemoveBlogCategory(blog *model.Blog) error {
+	stmt := s.db.MustPrepare(`DELETE FROM blog_category WHERE blog = ?`)
 	defer stmt.Close()
 
 	res, err := stmt.Exec(blog.ID())
