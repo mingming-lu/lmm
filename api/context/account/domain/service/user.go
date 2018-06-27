@@ -31,7 +31,7 @@ func NewUserService(repo repository.UserRepository) *UserService {
 func (s *UserService) Register(name, password string) (*model.User, error) {
 	user, err := factory.NewUser(name, password)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidUserNameOrPassword
 	}
 
 	err = s.repo.Add(user)
