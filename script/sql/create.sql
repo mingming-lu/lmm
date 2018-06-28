@@ -36,13 +36,13 @@ CREATE TABLE IF NOT EXISTS `blog_category` (
 	INDEX `category` (`category`, `blog`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
-CREATE TABLE IF NOT EXISTS tag (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	blog int unsigned NOT NULL,
-	name varchar(32) NOT NULL,
+CREATE TABLE IF NOT EXISTS `tag` (
+	`id` BIGINT unsigned NOT NULL AUTO_INCREMENT,
+	`blog` INT unsigned NOT NULL,
+	`name` VARCHAR(31) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (user, blog, name)
+	UNIQUE (`blog`, `name`),
+	INDEX (`name`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS image (
