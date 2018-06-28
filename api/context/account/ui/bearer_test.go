@@ -1,33 +1,45 @@
 package ui
 
 import (
+	"lmm/api/context/account/domain/factory"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/service"
-	testingService "lmm/api/context/account/domain/service/testing"
+	"lmm/api/context/account/infra"
+	"lmm/api/http"
 	"lmm/api/testing"
+	"lmm/api/utils/uuid"
 	"log"
-	"net/http"
-
-	"github.com/akinaru-lu/elesion"
 )
 
-func TestBearerAuth_Success(t *testing.T) {
-	tester := testing.NewTester(t)
-	user := testingService.NewUser()
-	handler := BearerAuth(func(c *elesion.Context) {
-		field, ok := c.Fields().Get("user").(*model.User)
-		tester.True(ok)
-		tester.Is(user.ID, field.ID)
+func TestBearerAuth_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := infra.NewUserStorage(testing.DB())
+
+	name, password := uuid.New()[:31], uuid.New()
+	user, _ := factory.NewUser(name, password)
+	repo.Add(user)
+
+	handler := ui.BearerAuth(func(c *http.Context) {
+		field, ok := c.Values().Get("user").(*model.User)
+		t.True(ok)
+		t.Is(user.ID(), field.ID())
 	})
+
 	headers := make(map[string]string, 0)
-	headers["Authorization"] = "Bearer " + service.EncodeToken(user.Token)
+	headers["Authorization"] = "Bearer " + service.EncodeToken(user.Token())
 	res := request(headers, handler)
-	tester.Is(http.StatusOK, res.StatusCode())
+	t.Is(http.StatusOK, res.StatusCode())
 }
 
 func TestBearerAuth_NoAuthorization(t *testing.T) {
 	tester := testing.NewTester(t)
-	handler := BearerAuth(func(c *elesion.Context) {
+	repo := infra.NewUserStorage(testing.DB())
+
+	name, password := uuid.New()[:31], uuid.New()
+	user, _ := factory.NewUser(name, password)
+	repo.Add(user)
+
+	handler := ui.BearerAuth(func(c *http.Context) {
 		log.Println("This message should not to be shown")
 	})
 	var res *testing.Response
@@ -37,24 +49,27 @@ func TestBearerAuth_NoAuthorization(t *testing.T) {
 	tester.Is(http.StatusUnauthorized, res.StatusCode())
 }
 
-func TestBearerAuth_NotBearerAuthorization(t *testing.T) {
-	tester := testing.NewTester(t)
-	user := testingService.NewUser()
-	handler := BearerAuth(func(c *elesion.Context) {
+func TestBearerAuth_NotBearerAuthorization(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	name, password := uuid.New()[:31], uuid.New()
+	user, _ := factory.NewUser(name, password)
+
+	handler := ui.BearerAuth(func(c *http.Context) {
 		log.Println("This message should not to be shown")
 	})
 	var res *testing.Response
-	tester.Output("", func() {
+	t.Output("", func() {
 		headers := make(map[string]string, 0)
-		headers["Authorization"] = "Basic " + service.EncodeToken(user.Token)
+		headers["Authorization"] = "Basic " + service.EncodeToken(user.Token())
 		res = request(headers, handler)
 	})
-	tester.Is(http.StatusUnauthorized, res.StatusCode())
+	t.Is(http.StatusUnauthorized, res.StatusCode())
 }
 
 func TestBearerAuth_InvaidToken(t *testing.T) {
 	tester := testing.NewTester(t)
-	handler := BearerAuth(func(c *elesion.Context) {
+	handler := ui.BearerAuth(func(c *http.Context) {
 		log.Println("This message should not to be shown")
 	})
 	var res *testing.Response
@@ -66,7 +81,7 @@ func TestBearerAuth_InvaidToken(t *testing.T) {
 	tester.Is(http.StatusUnauthorized, res.StatusCode())
 }
 
-func request(headers map[string]string, handler elesion.Handler) *testing.Response {
+func request(headers map[string]string, handler http.Handler) *testing.Response {
 	request := testing.GET("/dosomething")
 	response := testing.NewResponse()
 	if headers != nil {
