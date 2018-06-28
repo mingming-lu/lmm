@@ -5,6 +5,7 @@ import (
 	"lmm/api/context/account/appservice"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
+	"lmm/api/context/account/domain/service"
 	"lmm/api/http"
 	"log"
 )
@@ -27,29 +28,29 @@ func (ui *UI) SignIn(c *http.Context) {
 			Name:  user.Name(),
 			Token: user.Token(),
 		})
-	case appservice.ErrEmptyUserNameOrPassword:
-		c.String(http.StatusBadRequest, appservice.ErrEmptyUserNameOrPassword.Error())
-	case appservice.ErrInvalidUserNameOrPassword:
-		c.String(http.StatusNotFound, appservice.ErrInvalidUserNameOrPassword.Error())
+	case service.ErrInvalidBody:
+		http.BadRequest(c)
+	case service.ErrInvalidUserNameOrPassword:
+		c.String(http.StatusNotFound, service.ErrInvalidUserNameOrPassword.Error())
 	default:
+		log.Println(err)
 		http.InternalServerError(c)
 	}
 }
 
 func (ui *UI) SignUp(c *http.Context) {
-	auth := &Auth{}
-	err := c.Request.ScanBody(&auth)
-	if err != nil {
-		http.BadRequest(c)
-		return
-	}
 	id, err := ui.app.SignUp(c.Request.Body)
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/users/%d", id)).String(http.StatusCreated, "Success")
-	case appservice.ErrDuplicateUserName:
-		c.String(http.StatusBadRequest, appservice.ErrDuplicateUserName.Error())
+	case service.ErrDuplicateUserName:
+		c.String(http.StatusBadRequest, service.ErrDuplicateUserName.Error())
+	case service.ErrInvalidBody:
+		http.BadRequest(c)
+	case service.ErrInvalidUserNameOrPassword:
+		c.String(http.StatusBadRequest, service.ErrInvalidUserNameOrPassword.Error())
 	default:
+		log.Println(err)
 		http.InternalServerError(c)
 	}
 }

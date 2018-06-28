@@ -10,7 +10,14 @@ import (
 )
 
 var (
-	ErrDuplicateUserName = errors.New("User name duplicated")
+	ErrDuplicateUserName         = errors.New("user name duplicated")
+	ErrEmptyUserNameOrPassword   = errors.New("empty user name or password")
+	ErrInvalidAuthorization      = errors.New("invalid authorization")
+	ErrInvalidInput              = errors.New("invalid input")
+	ErrInvalidToken              = errors.New("invalid token")
+	ErrInvalidUserNameOrPassword = errors.New("invalid user name or password")
+	ErrInvalidBody               = errors.New("invalid body")
+	ErrNoSuchUser                = errors.New("no such user")
 )
 
 type UserService struct {
@@ -24,29 +31,33 @@ func NewUserService(repo repository.UserRepository) *UserService {
 func (s *UserService) Register(name, password string) (*model.User, error) {
 	user, err := factory.NewUser(name, password)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidUserNameOrPassword
 	}
 
-	if err := s.repo.Add(user); err != nil {
-		key, _, ok := storage.CheckErrorDuplicate(err.Error())
-		if !ok {
-			return nil, err
-		}
+	err = s.repo.Add(user)
+	if err == nil {
+		return user, nil
+	}
+
+	if key, _, ok := storage.CheckErrorDuplicate(err.Error()); ok {
 		if key == "name" {
 			return nil, ErrDuplicateUserName
 		}
-		return nil, err
 	}
-	return user, nil
+
+	return nil, err
 }
 
 func (s *UserService) Login(name, password string) (*model.User, error) {
 	user, err := s.repo.FindByName(name)
-	if err != nil {
+	if err == storage.ErrNoRows {
+		return nil, ErrInvalidUserNameOrPassword
+	} else if err != nil {
 		return nil, err
 	}
+
 	if err := user.VerifyPassword(password); err != nil {
-		return nil, err
+		return nil, ErrInvalidUserNameOrPassword
 	}
 	return user, nil
 }
@@ -54,7 +65,7 @@ func (s *UserService) Login(name, password string) (*model.User, error) {
 func (s *UserService) GetUserByHashedToken(hashedToken string) (*model.User, error) {
 	rawToken, err := DecodeToken(hashedToken)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidToken
 	}
 	return s.repo.FindByToken(rawToken)
 }

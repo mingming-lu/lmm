@@ -2,21 +2,11 @@ package appservice
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/context/account/domain/service"
 	"regexp"
-)
-
-var (
-	ErrDuplicateUserName         = errors.New("User name duplicated")
-	ErrEmptyUserNameOrPassword   = errors.New("Empty user name or password")
-	ErrInvalidAuthorization      = errors.New("invalid authorization")
-	ErrInvalidInput              = errors.New("Invalid input")
-	ErrInvalidToken              = errors.New("Invalid token")
-	ErrInvalidUserNameOrPassword = errors.New("Invalid user name or password")
 )
 
 var (
@@ -40,7 +30,9 @@ func New(userRepo repository.UserRepository) *AppService {
 
 func (app *AppService) SignUp(requestBody io.ReadCloser) (uint64, error) {
 	auth := Auth{}
-	json.NewDecoder(requestBody).Decode(&auth)
+	if json.NewDecoder(requestBody).Decode(&auth) != nil {
+		return 0, service.ErrInvalidBody
+	}
 
 	user, err := app.userService.Register(auth.Name, auth.Password)
 	if err != nil {
@@ -52,24 +44,14 @@ func (app *AppService) SignUp(requestBody io.ReadCloser) (uint64, error) {
 // SignIn is a usecase which users sign in with a account
 func (app *AppService) SignIn(requestBody io.ReadCloser) (*model.User, error) {
 	auth := Auth{}
-	json.NewDecoder(requestBody).Decode(&auth)
+	if json.NewDecoder(requestBody).Decode(&auth) != nil {
+		return nil, service.ErrInvalidBody
+	}
 
 	user, err := app.userService.Login(auth.Name, auth.Password)
-
-	// // user, err := app.repo.FindByName(name)
-	// if err != nil {
-	// 	if err.Error() == storage.ErrNoRows.Error() {
-	// 		return nil, ErrInvalidUserNameOrPassword
-	// 	}
-	// 	return nil, err
-	// }
 	if err != nil {
 		return nil, err
 	}
-
-	// if user.VerifyPassword(password) != nil {
-	// 	return nil, ErrInvalidUserNameOrPassword
-	// }
 
 	return model.NewUser(
 		user.ID(),
@@ -80,24 +62,18 @@ func (app *AppService) SignIn(requestBody io.ReadCloser) (*model.User, error) {
 	), nil
 }
 
-func (app *AppService) VerifyToken(encodedToken string) (user *model.User, err error) {
-	// token, err := service.DecodeToken(encodedToken)
-	// if err != nil {
-	// 	return nil, ErrInvalidToken
-	// }
-
-	// user, err = app.repo.FindByToken(token)
-	// if err != nil {
-	// 	return nil, ErrInvalidToken
-	// }
-	// return user, nil
-	return nil, nil
+func (app *AppService) VerifyToken(hashedToken string) (user *model.User, err error) {
+	user, err = app.userService.GetUserByHashedToken(hashedToken)
+	if err != nil {
+		return nil, service.ErrInvalidToken
+	}
+	return user, nil
 }
 
 func (app *AppService) BearerAuth(auth string) (*model.User, error) {
 	matched := PatternBearerAuthorization.FindStringSubmatch(auth)
 	if len(matched) != 2 {
-		return nil, ErrInvalidAuthorization
+		return nil, service.ErrInvalidAuthorization
 	}
 	token := matched[1]
 

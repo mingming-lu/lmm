@@ -11,6 +11,9 @@ func Main(m *testing.M) {
 	os.Exit(code)
 }
 
-func randomUserNameAndPassword() (string, string) {
-	return uuid.New()[:31], uuid.New()
+func randomUserNameAndPassword() Auth {
+	return Auth{
+		Name:     uuid.New()[:31],
+		Password: uuid.New(),
+	}
 }
