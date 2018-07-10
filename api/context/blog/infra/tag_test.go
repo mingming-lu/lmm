@@ -183,3 +183,36 @@ func TestFindAllTagsByBlog_NoSuchBlog(tt *testing.T) {
 	t.NotNil(tags)
 	t.Is(0, len(tags))
 }
+
+func TestUpdateTag_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	tag, err := factory.NewTag(333, "aaa")
+	t.NoError(err)
+	t.NoError(repo.Add(tag))
+
+	if tagFound, err := repo.FindByID(tag.ID()); true {
+		t.NoError(err)
+		t.Is("aaa", tagFound.Name())
+	}
+
+	t.NoError(tag.UpdateName("bbb"))
+	t.NoError(repo.Update(tag))
+
+	if tagFound, err := repo.FindByID(tag.ID()); true {
+		t.NoError(err)
+		t.Is("bbb", tagFound.Name())
+	}
+}
+
+func TestUpdateTag_NoSuchTag(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	tag, err := factory.NewTag(333, "abc")
+	t.NoError(err)
+
+	t.NoError(tag.UpdateName("bbb"))
+	t.IsErrorMsg("rows affected is expected to be 1 but got 0", repo.Update(tag))
+}
