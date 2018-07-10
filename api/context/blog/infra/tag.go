@@ -35,7 +35,7 @@ func (s *TagStorage) FindAllByBlog(blog *model.Blog) ([]*model.Tag, error) {
 }
 
 func (s *TagStorage) Update(tag *model.Tag) error {
-	return s.updateRow(`UPDATE FROM tag SET name = ? WHERE id = ?`, tag.Name(), tag.ID())
+	return s.updateRow(`UPDATE tag SET name = ? WHERE id = ?`, tag.Name(), tag.ID())
 }
 
 func (s *TagStorage) Remove(tag *model.Tag) error {
