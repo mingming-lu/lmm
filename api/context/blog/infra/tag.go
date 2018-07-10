@@ -78,7 +78,7 @@ func (s *TagStorage) selectRows(query string, args ...interface{}) ([]*model.Tag
 
 	tags := make([]*model.Tag, 0)
 	for rows.Next() {
-		err := rows.Scan(&tagID, &tagName)
+		err := rows.Scan(&tagID, &blogID, &tagName)
 		if err != nil {
 			return nil, err
 		}
