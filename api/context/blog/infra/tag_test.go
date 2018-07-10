@@ -48,3 +48,30 @@ func TestAddTag_DuplicateBlogTag(tt *testing.T) {
 	t.Is(fmt.Sprintf("%d-%s", tag.BlogID(), tag.Name()), entry)
 	t.Is("blog_tag", key)
 }
+
+func TestFindTagByID_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	name := uuid.New()[:31]
+	tag, err := factory.NewTag(11, name)
+	t.NoError(err)
+	t.NoError(repo.Add(tag))
+
+	tagFound, err := repo.FindByID(tag.ID())
+	t.NoError(err)
+	t.Is(tag, tagFound)
+}
+
+func TestFindTagByID_NotFound(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	name := uuid.New()[:31]
+	tag, err := factory.NewTag(11, name)
+	t.NoError(err)
+
+	tagFound, err := repo.FindByID(tag.ID())
+	t.IsError(storage.ErrNoRows, err)
+	t.Nil(tagFound)
+}
