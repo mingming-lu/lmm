@@ -5,6 +5,7 @@ import (
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/storage"
 	"lmm/api/testing"
+	"lmm/api/utils/strings"
 	"lmm/api/utils/uuid"
 )
 
@@ -74,4 +75,42 @@ func TestFindTagByID_NotFound(tt *testing.T) {
 	tagFound, err := repo.FindByID(tag.ID())
 	t.IsError(storage.ErrNoRows, err)
 	t.Nil(tagFound)
+}
+
+func TestFindAllTags_Empty(tt *testing.T) {
+	testing.Lock()
+	defer testing.Unlock()
+
+	testing.InitTable("tag")
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	tags, err := repo.FindAll()
+	t.NoError(err)
+	t.NotNil(tags)
+	t.Is(0, len(tags))
+}
+
+func TestFindAllTags_SortByName(tt *testing.T) {
+	testing.Lock()
+	defer testing.Unlock()
+
+	testing.InitTable("tag")
+
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	for _, name := range "gafcedbh" {
+		tag, _ := factory.NewTag(11, string(name))
+		t.NoError(repo.Add(tag))
+	}
+
+	tags, err := repo.FindAll()
+	t.NoError(err)
+
+	names := make([]string, len(tags))
+	for index, tag := range tags {
+		names[index] = tag.Name()
+	}
+	t.Is("abcdefgh", strings.Join("", names))
 }
