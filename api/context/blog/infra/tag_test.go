@@ -2,11 +2,14 @@ package infra
 
 import (
 	"fmt"
+	accountFactory "lmm/api/context/account/domain/factory"
 	"lmm/api/context/blog/domain/factory"
+	"lmm/api/context/blog/domain/model"
 	"lmm/api/storage"
 	"lmm/api/testing"
 	"lmm/api/utils/strings"
 	"lmm/api/utils/uuid"
+	"time"
 )
 
 func TestAddTag_Success(tt *testing.T) {
@@ -101,7 +104,8 @@ func TestFindAllTags_SortByName(tt *testing.T) {
 	repo := NewTagStorage(testing.DB())
 
 	for _, name := range "gafcedbh" {
-		tag, _ := factory.NewTag(11, string(name))
+		tag, err := factory.NewTag(11, string(name))
+		t.NoError(err)
 		t.NoError(repo.Add(tag))
 	}
 
@@ -113,4 +117,69 @@ func TestFindAllTags_SortByName(tt *testing.T) {
 		names[index] = tag.Name()
 	}
 	t.Is("abcdefgh", strings.Join("", names))
+}
+
+func TestFindAllTagsByBlog_Empty(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	var blog *model.Blog
+	// preparing blog data
+	if user, err := accountFactory.NewUser(uuid.New()[:31], uuid.New()); true {
+		t.NoError(err)
+		title, text := uuid.New(), uuid.New()
+		blog, err = factory.NewBlog(user.ID(), title, text)
+		t.NoError(err)
+		blogRepo := NewBlogStorage(testing.DB())
+		t.NoError(blogRepo.Add(blog))
+	}
+
+	tags, err := repo.FindAllByBlog(blog)
+	t.NoError(err)
+	t.NotNil(tags)
+	t.Is(0, len(tags))
+}
+
+func TestFindAllTagsByBlog_SortByName(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	var blog *model.Blog
+	// preparing blog data
+	if user, err := accountFactory.NewUser(uuid.New()[:31], uuid.New()); true {
+		t.NoError(err)
+		title, text := uuid.New(), uuid.New()
+		blog, err = factory.NewBlog(user.ID(), title, text)
+		t.NoError(err)
+		blogRepo := NewBlogStorage(testing.DB())
+		t.NoError(blogRepo.Add(blog))
+	}
+
+	// preparing tag data
+	for _, name := range "liknjm" {
+		tag, err := factory.NewTag(blog.ID(), string(name))
+		t.NoError(err)
+		t.NoError(repo.Add(tag))
+	}
+
+	tags, err := repo.FindAllByBlog(blog)
+	t.NoError(err)
+	names := make([]string, len(tags))
+	for index, tag := range tags {
+		names[index] = tag.Name()
+	}
+	t.Is("ijklmn", strings.Join("", names))
+}
+
+func TestFindAllTagsByBlog_NoSuchBlog(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	now := time.Now()
+	dummyBlog := model.NewBlog(1233, 123, "dummy", "for testing", now, now)
+
+	tags, err := repo.FindAllByBlog(dummyBlog)
+	t.NoError(err)
+	t.NotNil(tags)
+	t.Is(0, len(tags))
 }
