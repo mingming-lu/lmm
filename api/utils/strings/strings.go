@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+func Join(sep string, target []string) string {
+	return strings.Join(target, sep)
+}
+
 func Uint64ToStr(i uint64) string {
 	return strconv.FormatUint(i, 10)
 }

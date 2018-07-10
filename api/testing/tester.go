@@ -12,7 +12,6 @@ import (
 
 type M = testing.M
 type T = testing.T
-
 type Tester struct {
 	*T
 }
@@ -61,6 +60,10 @@ func (t *Tester) IsError(expected, actual error, msgAndArgs ...interface{}) bool
 		return assert.FailNow(t, fmt.Sprintf("expected error but got %+v", expected))
 	}
 	return assert.EqualError(t, actual, expected.Error(), msgAndArgs...)
+}
+
+func (t *Tester) IsErrorMsg(expected string, actual error, msgAndArgs ...interface{}) bool {
+	return assert.EqualError(t, actual, expected, msgAndArgs...)
 }
 
 func (t *Tester) Isa(expectedType, o interface{}, msgAndArgs ...interface{}) bool {

@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS `tag` (
 	`blog` INT unsigned NOT NULL,
 	`name` VARCHAR(31) NOT NULL,
 	PRIMARY KEY (id),
-	UNIQUE (`blog`, `name`),
-	INDEX (`name`)
+	UNIQUE `blog_tag` (`blog`, `name`),
+	INDEX `tag` (`name`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS image (
