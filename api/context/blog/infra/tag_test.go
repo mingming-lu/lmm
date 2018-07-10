@@ -216,3 +216,30 @@ func TestUpdateTag_NoSuchTag(tt *testing.T) {
 	t.NoError(tag.UpdateName("bbb"))
 	t.IsErrorMsg("rows affected is expected to be 1 but got 0", repo.Update(tag))
 }
+
+func TestRemoveTag_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	tag, err := factory.NewTag(333, "aaa")
+	t.NoError(err)
+	t.NoError(repo.Add(tag))
+
+	t.NoError(repo.Remove(tag))
+
+	tagFound, err := repo.FindByID(tag.ID())
+	t.IsError(storage.ErrNoRows, err)
+	t.Nil(tagFound)
+}
+
+func TestRemoveTag_NoSuchTag(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewTagStorage(testing.DB())
+
+	tag, err := factory.NewTag(333, "foobar")
+	t.NoError(err)
+	t.NoError(repo.Add(tag))
+
+	t.NoError(repo.Remove(tag))
+	t.IsErrorMsg("rows affected is expected to be 1 but got 0", repo.Remove(tag))
+}
