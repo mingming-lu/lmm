@@ -4,8 +4,8 @@ import (
 	"fmt"
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/blog/appservice"
+	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/repository"
-	"lmm/api/context/blog/domain/service"
 	"lmm/api/http"
 	"log"
 )
@@ -28,8 +28,8 @@ func (ui *UI) PostBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/blog/%d", blogID)).String(http.StatusCreated, "success")
-	case service.ErrEmptyBlogTitle:
-		c.String(http.StatusBadRequest, service.ErrEmptyBlogTitle.Error())
+	case domain.ErrEmptyBlogTitle:
+		c.String(http.StatusBadRequest, domain.ErrEmptyBlogTitle.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -45,7 +45,7 @@ func (ui *UI) GetAllBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, blogPage)
-	case service.ErrInvalidCount, service.ErrInvalidPage:
+	case domain.ErrInvalidCount, domain.ErrInvalidPage:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
 		log.Println(err)
@@ -58,8 +58,8 @@ func (ui *UI) GetBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, blog)
-	case service.ErrNoSuchBlog:
-		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
+	case domain.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, domain.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -77,14 +77,14 @@ func (ui *UI) UpdateBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "success")
-	case service.ErrBlogNoChange:
+	case domain.ErrBlogNoChange:
 		http.NoContent(c)
-	case service.ErrEmptyBlogTitle:
-		c.String(http.StatusBadRequest, service.ErrEmptyBlogTitle.Error())
-	case service.ErrNoPermission:
-		c.String(http.StatusForbidden, service.ErrNoSuchBlog.Error())
-	case service.ErrNoSuchBlog:
-		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
+	case domain.ErrEmptyBlogTitle:
+		c.String(http.StatusBadRequest, domain.ErrEmptyBlogTitle.Error())
+	case domain.ErrNoPermission:
+		c.String(http.StatusForbidden, domain.ErrNoSuchBlog.Error())
+	case domain.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, domain.ErrNoSuchBlog.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -102,7 +102,7 @@ func (ui *UI) SetBlogCategory(c *http.Context) {
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "success")
-	case service.ErrNoSuchBlog, service.ErrNoSuchCategory:
+	case domain.ErrNoSuchBlog, domain.ErrNoSuchCategory:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
 		http.InternalServerError(c)
@@ -120,7 +120,7 @@ func (ui *UI) PostCategory(c *http.Context) {
 	switch err {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/categories/%d", categoryID)).String(http.StatusCreated, "success")
-	case service.ErrInvalidCategoryName, service.ErrDuplicateCategoryName:
+	case domain.ErrInvalidCategoryName, domain.ErrDuplicateCategoryName:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
 		log.Println(err)
@@ -139,12 +139,12 @@ func (ui *UI) UpdateCategory(c *http.Context) {
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "success")
-	case service.ErrCategoryNoChanged:
+	case domain.ErrCategoryNoChanged:
 		http.NoContent(c)
-	case service.ErrInvalidCategoryName:
-		c.String(http.StatusBadRequest, service.ErrInvalidCategoryName.Error())
-	case service.ErrNoSuchCategory:
-		c.String(http.StatusNotFound, service.ErrNoSuchCategory.Error())
+	case domain.ErrInvalidCategoryName:
+		c.String(http.StatusBadRequest, domain.ErrInvalidCategoryName.Error())
+	case domain.ErrNoSuchCategory:
+		c.String(http.StatusNotFound, domain.ErrNoSuchCategory.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)
@@ -167,10 +167,10 @@ func (ui *UI) GetBlogCagetory(c *http.Context) {
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, category)
-	case service.ErrNoSuchBlog:
-		c.String(http.StatusNotFound, service.ErrNoSuchBlog.Error())
-	case service.ErrCategoryNotSet:
-		c.String(http.StatusNotFound, service.ErrCategoryNotSet.Error())
+	case domain.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, domain.ErrNoSuchBlog.Error())
+	case domain.ErrCategoryNotSet:
+		c.String(http.StatusNotFound, domain.ErrCategoryNotSet.Error())
 	default:
 		http.InternalServerError(c)
 	}
@@ -181,8 +181,8 @@ func (ui *UI) DeleteCategory(c *http.Context) {
 	switch err {
 	case nil:
 		http.NoContent(c)
-	case service.ErrNoSuchCategory:
-		c.String(http.StatusNotFound, service.ErrNoSuchCategory.Error())
+	case domain.ErrNoSuchCategory:
+		c.String(http.StatusNotFound, domain.ErrNoSuchCategory.Error())
 	default:
 		log.Println(err)
 		http.InternalServerError(c)

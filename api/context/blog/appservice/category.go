@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	account "lmm/api/context/account/domain/model"
-	"lmm/api/context/blog/domain/service"
+	"lmm/api/context/blog/domain"
 	"lmm/api/utils/strings"
 )
 
@@ -25,7 +25,7 @@ func (app *AppService) RegisterNewCategory(user *account.User, requestBody io.Re
 func (app *AppService) EditCategory(user *account.User, categoryIDStr string, requestBody io.ReadCloser) error {
 	categoryID, err := strings.StrToUint64(categoryIDStr)
 	if err != nil {
-		return service.ErrInvalidCategoryID
+		return domain.ErrInvalidCategoryID
 	}
 
 	category := Category{}
@@ -103,7 +103,7 @@ func (app *AppService) SetBlogCategory(blogIDStr string, requestBody io.ReadClos
 func (app *AppService) RemoveCategoryByID(idStr string) error {
 	id, err := strings.StrToUint64(idStr)
 	if err != nil {
-		return service.ErrInvalidCategoryID
+		return domain.ErrInvalidCategoryID
 	}
 	return app.categoryService.RemoveCategoryByID(id)
 }
