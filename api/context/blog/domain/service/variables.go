@@ -23,3 +23,8 @@ var (
 	ErrInvalidCategoryName   = errors.New("invalid category name")
 	ErrNoSuchCategory        = errors.New("no such category")
 )
+
+// tag
+var (
+	ErrDuplicateTagName = errors.New("duplicate tag name")
+)
