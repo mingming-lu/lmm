@@ -23,8 +23,5 @@ func (app *AppService) AddNewTagToBlog(user *account.User, blogIDStr, tagName st
 		return err
 	}
 
-	if err := app.tagRepository.Add(tag); err != nil {
-		return err
-	}
-	return nil
+	return app.tagRepository.Add(tag)
 }
