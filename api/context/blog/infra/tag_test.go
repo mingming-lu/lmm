@@ -1,10 +1,10 @@
 package infra
 
 import (
-	"fmt"
 	accountFactory "lmm/api/context/account/domain/factory"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
+	"lmm/api/context/blog/domain/service"
 	"lmm/api/storage"
 	"lmm/api/testing"
 	"lmm/api/utils/strings"
@@ -47,10 +47,7 @@ func TestAddTag_DuplicateBlogTag(tt *testing.T) {
 	t.NoError(err)
 
 	err = repo.Add(tag)
-	key, entry, ok := storage.CheckErrorDuplicate(err)
-	t.True(ok)
-	t.Is(fmt.Sprintf("%d-%s", tag.BlogID(), tag.Name()), entry)
-	t.Is("blog_tag", key)
+	t.IsError(service.ErrDuplicateTagName, err)
 }
 
 func TestFindTagByID_Success(tt *testing.T) {
