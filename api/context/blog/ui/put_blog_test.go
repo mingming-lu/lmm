@@ -7,8 +7,8 @@ import (
 	accountService "lmm/api/context/account/domain/service"
 	accountStorage "lmm/api/context/account/infra"
 	"lmm/api/context/blog/appservice"
+	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/factory"
-	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/infra"
 	"lmm/api/http"
 	"lmm/api/testing"
@@ -79,7 +79,7 @@ func TestUpdateBlog_NoSuchBlog(tt *testing.T) {
 
 	res := putBlog(headers, blog.ID(), testing.StructToRequestBody(requestBody))
 	t.Is(http.StatusNotFound, res.StatusCode())
-	t.Is(service.ErrNoSuchBlog.Error()+"\n", res.Body())
+	t.Is(domain.ErrNoSuchBlog.Error()+"\n", res.Body())
 }
 
 func TestUpdateBlog_NoChange(tt *testing.T) {
@@ -124,7 +124,7 @@ func TestUpdateBlog_EmptyTitle(tt *testing.T) {
 
 	res := putBlog(headers, blog.ID(), testing.StructToRequestBody(requestBody))
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(service.ErrEmptyBlogTitle.Error()+"\n", res.Body())
+	t.Is(domain.ErrEmptyBlogTitle.Error()+"\n", res.Body())
 }
 
 func TestUpdateBlog_NoPermission(tt *testing.T) {
@@ -152,7 +152,7 @@ func TestUpdateBlog_NoPermission(tt *testing.T) {
 
 	res := putBlog(headers, blog.ID(), testing.StructToRequestBody(requestBody))
 	t.Is(http.StatusForbidden, res.StatusCode())
-	t.Is(service.ErrNoSuchBlog.Error()+"\n", res.Body())
+	t.Is(domain.ErrNoSuchBlog.Error()+"\n", res.Body())
 }
 
 func putBlog(headers map[string]string, blogID uint64, requestBody io.Reader) *testing.Response {

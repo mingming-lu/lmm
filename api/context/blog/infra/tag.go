@@ -2,8 +2,8 @@ package infra
 
 import (
 	"fmt"
+	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/model"
-	"lmm/api/context/blog/domain/service"
 	"lmm/api/storage"
 )
 
@@ -24,7 +24,7 @@ func (s *TagStorage) Add(tag *model.Tag) error {
 	if key, _, ok := storage.CheckErrorDuplicate(err); ok {
 		switch key {
 		case "blog_tag":
-			return service.ErrDuplicateTagName
+			return domain.ErrDuplicateTagName
 		}
 	}
 	return err
