@@ -1,6 +1,7 @@
 package service
 
 import (
+	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/infra"
 	"lmm/api/testing"
@@ -44,7 +45,7 @@ func TestPostBlog_DuplicateTitle(tt *testing.T) {
 	t.Isa(&model.Blog{}, blog)
 
 	blog, err = service.PostBlog(user.ID(), title, text)
-	t.Is(ErrBlogTitleDuplicated, err)
+	t.Is(domain.ErrBlogTitleDuplicated, err)
 	t.Nil(blog)
 }
 
@@ -54,7 +55,7 @@ func TestPostBlog_EmptyTitle(tt *testing.T) {
 	service := NewBlogService(repo)
 
 	blog, err := service.PostBlog(user.ID(), "", uuid.New())
-	t.Is(ErrEmptyBlogTitle, err)
+	t.Is(domain.ErrEmptyBlogTitle, err)
 	t.Nil(blog)
 }
 

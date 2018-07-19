@@ -1,6 +1,7 @@
 package service
 
 import (
+	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/domain/repository"
@@ -28,7 +29,7 @@ func (s *CategoryService) RegisterCategory(name string) (*model.Category, error)
 	key, _, ok := storage.CheckErrorDuplicate(err)
 	if ok {
 		if key == "name" {
-			return nil, ErrDuplicateCategoryName
+			return nil, domain.ErrDuplicateCategoryName
 		}
 	}
 	return nil, err
@@ -44,7 +45,7 @@ func (s *CategoryService) GetCategoryByID(id uint64) (*model.Category, error) {
 	case nil:
 		return category, nil
 	case storage.ErrNoRows:
-		return nil, ErrNoSuchCategory
+		return nil, domain.ErrNoSuchCategory
 	default:
 		return nil, err
 	}
@@ -56,7 +57,7 @@ func (s *CategoryService) GetCategoryByName(name string) (*model.Category, error
 	case nil:
 		return category, nil
 	case storage.ErrNoRows:
-		return nil, ErrNoSuchCategory
+		return nil, domain.ErrNoSuchCategory
 	default:
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (s *CategoryService) GetCategoryOf(blog *model.Blog) (*model.Category, erro
 	case nil:
 		return category, nil
 	case storage.ErrNoRows:
-		return nil, ErrCategoryNotSet
+		return nil, domain.ErrCategoryNotSet
 	default:
 		return nil, err
 	}
@@ -80,7 +81,7 @@ func (s *CategoryService) UpdateCategory(category *model.Category) error {
 	case nil:
 		return nil
 	case storage.ErrNoChange:
-		return ErrCategoryNoChanged
+		return domain.ErrCategoryNoChanged
 	default:
 		return err
 	}
@@ -89,7 +90,7 @@ func (s *CategoryService) UpdateCategory(category *model.Category) error {
 func (s *CategoryService) RemoveCategoryByID(id uint64) error {
 	category, err := s.repo.FindByID(id)
 	if err != nil {
-		return ErrNoSuchCategory
+		return domain.ErrNoSuchCategory
 	}
 
 	return s.repo.Remove(category)
