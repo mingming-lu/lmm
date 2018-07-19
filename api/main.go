@@ -21,7 +21,8 @@ func initUIs(db *storage.DB) {
 
 	blogRepo := blogInfra.NewBlogStorage(db)
 	categoryRepo := blogInfra.NewCategoryStorage(db)
-	blogUI = blog.New(blogRepo, categoryRepo)
+	tagRepo := blogInfra.NewTagStorage(db)
+	blogUI = blog.New(blogRepo, categoryRepo, tagRepo)
 }
 
 func main() {
