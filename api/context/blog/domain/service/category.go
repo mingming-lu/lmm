@@ -25,7 +25,7 @@ func (s *CategoryService) RegisterCategory(name string) (*model.Category, error)
 	if err == nil {
 		return category, nil
 	}
-	key, _, ok := storage.CheckErrorDuplicate(err.Error())
+	key, _, ok := storage.CheckErrorDuplicate(err)
 	if ok {
 		if key == "name" {
 			return nil, ErrDuplicateCategoryName

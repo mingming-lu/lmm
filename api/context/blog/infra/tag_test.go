@@ -47,7 +47,7 @@ func TestAddTag_DuplicateBlogTag(tt *testing.T) {
 	t.NoError(err)
 
 	err = repo.Add(tag)
-	key, entry, ok := storage.CheckErrorDuplicate(err.Error())
+	key, entry, ok := storage.CheckErrorDuplicate(err)
 	t.True(ok)
 	t.Is(fmt.Sprintf("%d-%s", tag.BlogID(), tag.Name()), entry)
 	t.Is("blog_tag", key)
