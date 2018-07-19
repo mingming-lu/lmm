@@ -39,7 +39,7 @@ func (s *UserService) Register(name, password string) (*model.User, error) {
 		return user, nil
 	}
 
-	if key, _, ok := storage.CheckErrorDuplicate(err.Error()); ok {
+	if key, _, ok := storage.CheckErrorDuplicate(err); ok {
 		if key == "name" {
 			return nil, ErrDuplicateUserName
 		}
