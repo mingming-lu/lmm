@@ -53,5 +53,6 @@ func initUI() {
 	db := testing.DB()
 	blogRepo := infra.NewBlogStorage(db)
 	categoryRepo := infra.NewCategoryStorage(db)
-	ui = New(blogRepo, categoryRepo)
+	tagRepo := infra.NewTagStorage(db)
+	ui = New(blogRepo, categoryRepo, tagRepo)
 }

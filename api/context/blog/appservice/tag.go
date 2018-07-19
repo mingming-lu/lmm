@@ -1,0 +1,27 @@
+package appservice
+
+import (
+	account "lmm/api/context/account/domain/model"
+	"lmm/api/context/blog/domain"
+	"lmm/api/context/blog/domain/factory"
+	"lmm/api/utils/strings"
+)
+
+func (app *AppService) AddNewTagToBlog(user *account.User, blogIDStr, tagName string) error {
+	blogID, err := strings.StrToUint64(blogIDStr)
+	if err != nil {
+		return domain.ErrNoSuchBlog
+	}
+
+	blog, err := app.blogService.GetBlogByID(blogID)
+	if err != nil {
+		return domain.ErrNoSuchBlog
+	}
+
+	tag, err := factory.NewTag(blog.ID(), tagName)
+	if err != nil {
+		return err
+	}
+
+	return app.tagRepository.Add(tag)
+}

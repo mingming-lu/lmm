@@ -26,5 +26,6 @@ var (
 
 // tag
 var (
+	ErrInvalidTagName   = errors.New("invalid tag name")
 	ErrDuplicateTagName = errors.New("duplicate tag name")
 )

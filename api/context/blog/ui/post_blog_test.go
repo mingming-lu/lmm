@@ -3,7 +3,7 @@ package ui
 import (
 	"io"
 	"lmm/api/context/blog/appservice"
-	"lmm/api/context/blog/domain/service"
+	"lmm/api/context/blog/domain"
 	"lmm/api/http"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -50,7 +50,7 @@ func TestPostBlog_EmptyTitle(tt *testing.T) {
 
 	res := postBlog(headers, testing.StructToRequestBody(blog))
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(service.ErrEmptyBlogTitle.Error()+"\n", res.Body())
+	t.Is(domain.ErrEmptyBlogTitle.Error()+"\n", res.Body())
 }
 
 func postBlog(headers map[string]string, requestBody io.Reader) *testing.Response {

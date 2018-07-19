@@ -17,8 +17,9 @@ type UI struct {
 func New(
 	blogRepo repository.BlogRepository,
 	categoryRepo repository.CategoryRepository,
+	tagRepo repository.TagRepository,
 ) *UI {
-	app := appservice.New(blogRepo, categoryRepo)
+	app := appservice.New(blogRepo, categoryRepo, tagRepo)
 	return &UI{app: app}
 }
 
