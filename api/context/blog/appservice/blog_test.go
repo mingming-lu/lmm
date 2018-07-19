@@ -4,8 +4,8 @@ import (
 	"fmt"
 	accountFactory "lmm/api/context/account/domain/factory"
 	accountStorage "lmm/api/context/account/infra"
+	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/factory"
-	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/infra"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -100,7 +100,7 @@ func TestFindBlogByID_InvalidID(tt *testing.T) {
 	t := testing.NewTester(tt)
 
 	blog, err := app.GetBlogByID("NAN")
-	t.Is(service.ErrInvalidBlogID, err)
+	t.Is(domain.ErrInvalidBlogID, err)
 	t.Nil(blog)
 }
 
@@ -108,7 +108,7 @@ func TestFindBlogByID_NotFound(tt *testing.T) {
 	t := testing.NewTester(tt)
 
 	blog, err := app.GetBlogByID("112233")
-	t.Is(service.ErrNoSuchBlog, err)
+	t.Is(domain.ErrNoSuchBlog, err)
 	t.Nil(blog)
 }
 
@@ -155,7 +155,7 @@ func TestEditBlog_NoPermission(tt *testing.T) {
 	}
 
 	t.Is(
-		service.ErrNoPermission,
+		domain.ErrNoPermission,
 		app.EditBlog(suspicious, fmt.Sprintf("%d", blog.ID()), testing.StructToRequestBody(blogContent)),
 	)
 }
@@ -173,7 +173,7 @@ func TestEditBlog_NoSuchBlog(tt *testing.T) {
 
 	// notice that I didn' save that blog and here I reverse the title and the text to exclude ErrBlogNoChange
 	t.Is(
-		service.ErrNoSuchBlog,
+		domain.ErrNoSuchBlog,
 		app.EditBlog(user, fmt.Sprintf("%d", blog.ID()), testing.StructToRequestBody(blogContent)),
 	)
 }
@@ -192,7 +192,7 @@ func TestEditBlog_NoChange(tt *testing.T) {
 	}
 
 	t.Is(
-		service.ErrBlogNoChange,
+		domain.ErrBlogNoChange,
 		app.EditBlog(user, fmt.Sprintf("%d", blog.ID()), testing.StructToRequestBody(blogContent)),
 	)
 }
@@ -211,7 +211,7 @@ func TestEditBlog_EmptyTitle(tt *testing.T) {
 	}
 
 	t.Is(
-		service.ErrEmptyBlogTitle,
+		domain.ErrEmptyBlogTitle,
 		app.EditBlog(user, fmt.Sprintf("%d", blog.ID()), testing.StructToRequestBody(blogContent)),
 	)
 }
