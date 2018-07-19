@@ -25,7 +25,7 @@ func (s *BlogService) PostBlog(userID uint64, title, text string) (*model.Blog, 
 		return nil, err
 	}
 	if err := s.repo.Add(blog); err != nil {
-		key, _, ok := storage.CheckErrorDuplicate(err.Error())
+		key, _, ok := storage.CheckErrorDuplicate(err)
 		if !ok {
 			return nil, err
 		}
