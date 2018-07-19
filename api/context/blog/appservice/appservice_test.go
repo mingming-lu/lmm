@@ -20,7 +20,8 @@ func TestMain(m *testing.M) {
 	db := testing.DB()
 	blogRepo := infra.NewBlogStorage(db)
 	categoryRepo := infra.NewCategoryStorage(db)
-	app = New(blogRepo, categoryRepo)
+	tagRepo := infra.NewTagStorage(db)
+	app = New(blogRepo, categoryRepo, tagRepo)
 
 	// init user
 	name, password := uuid.New()[:31], uuid.New()
