@@ -1,14 +1,10 @@
 package model
 
 import (
-	"errors"
+	"lmm/api/context/blog/domain"
 	"lmm/api/domain/model"
 	"lmm/api/utils/strings"
 	"regexp"
-)
-
-var (
-	ErrInvalidTagName = errors.New("invalid tag name")
 )
 
 var (
@@ -32,7 +28,7 @@ type tagName string
 func newTagName(s string) (tagName, error) {
 	name := strings.TrimSpace(s)
 	if !patternValidCategoryName.MatchString(name) {
-		return "", ErrInvalidTagName
+		return "", domain.ErrInvalidTagName
 	}
 	return tagName(name), nil
 }
