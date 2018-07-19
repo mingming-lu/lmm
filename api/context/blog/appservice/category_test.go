@@ -2,8 +2,8 @@ package appservice
 
 import (
 	"fmt"
+	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/model"
-	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/infra"
 	"lmm/api/domain/factory"
 	"lmm/api/testing"
@@ -35,7 +35,7 @@ func TestAddNewCategory_EmptyName(tt *testing.T) {
 	}
 
 	id, err := app.RegisterNewCategory(user, testing.StructToRequestBody(body))
-	t.Is(service.ErrInvalidCategoryName, err)
+	t.Is(domain.ErrInvalidCategoryName, err)
 	t.Is(uint64(0), id)
 }
 
@@ -50,7 +50,7 @@ func TestAddNewCategory_DuplicatedName(tt *testing.T) {
 	t.NoError(err)
 
 	_, err = app.RegisterNewCategory(user, testing.StructToRequestBody(body))
-	t.Is(service.ErrDuplicateCategoryName, err)
+	t.Is(domain.ErrDuplicateCategoryName, err)
 }
 
 func TestUpdateCategoryName_Success(tt *testing.T) {
@@ -85,7 +85,7 @@ func TestUpdateCategoryName_InvalidID(tt *testing.T) {
 	}
 
 	t.Is(
-		service.ErrInvalidCategoryID,
+		domain.ErrInvalidCategoryID,
 		app.EditCategory(user, "invalid id???", testing.StructToRequestBody(body)),
 	)
 }
@@ -101,7 +101,7 @@ func TestUpdateCategoryName_NoSuchCategory(tt *testing.T) {
 
 	err := app.EditCategory(user, fmt.Sprint(id), testing.StructToRequestBody(body))
 
-	t.Is(service.ErrNoSuchCategory, err)
+	t.Is(domain.ErrNoSuchCategory, err)
 }
 
 func TestUpdateCategoryName_InvalidCategoryName(tt *testing.T) {
@@ -119,7 +119,7 @@ func TestUpdateCategoryName_InvalidCategoryName(tt *testing.T) {
 	}
 
 	t.Is(
-		service.ErrInvalidCategoryName,
+		domain.ErrInvalidCategoryName,
 		app.EditCategory(user, fmt.Sprint(id), testing.StructToRequestBody(body)),
 	)
 }
@@ -135,7 +135,7 @@ func TestUpdateCategoryName_CategoryNameNoChanged(tt *testing.T) {
 	t.NoError(err)
 
 	t.Is(
-		service.ErrCategoryNoChanged,
+		domain.ErrCategoryNoChanged,
 		app.EditCategory(user, fmt.Sprint(id), testing.StructToRequestBody(body)),
 	)
 }
@@ -159,7 +159,7 @@ func TestRemoveCategory_Success(tt *testing.T) {
 func TestRemoveCategory_InvalidID(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	t.Is(service.ErrInvalidCategoryID, app.RemoveCategoryByID("invalid id !?"))
+	t.Is(domain.ErrInvalidCategoryID, app.RemoveCategoryByID("invalid id !?"))
 }
 
 func TestRemoveCategory_NoSuchCategory(tt *testing.T) {
@@ -167,5 +167,5 @@ func TestRemoveCategory_NoSuchCategory(tt *testing.T) {
 
 	id, _ := factory.Default().GenerateID()
 	err := app.RemoveCategoryByID(fmt.Sprint(id))
-	t.Is(service.ErrNoSuchCategory, err)
+	t.Is(domain.ErrNoSuchCategory, err)
 }

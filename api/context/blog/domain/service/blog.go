@@ -1,6 +1,7 @@
 package service
 
 import (
+	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/domain/repository"
@@ -17,7 +18,7 @@ func NewBlogService(repo repository.BlogRepository) *BlogService {
 
 func (s *BlogService) PostBlog(userID uint64, title, text string) (*model.Blog, error) {
 	if title == "" {
-		return nil, ErrEmptyBlogTitle
+		return nil, domain.ErrEmptyBlogTitle
 	}
 
 	blog, err := factory.NewBlog(userID, title, text)
@@ -30,7 +31,7 @@ func (s *BlogService) PostBlog(userID uint64, title, text string) (*model.Blog, 
 			return nil, err
 		}
 		if key == "title" {
-			return nil, ErrBlogTitleDuplicated
+			return nil, domain.ErrBlogTitleDuplicated
 		}
 		return nil, err
 	}
@@ -47,7 +48,7 @@ func (s *BlogService) GetBlogByID(id uint64) (*model.Blog, error) {
 	case nil:
 		return blog, nil
 	case storage.ErrNoRows:
-		return nil, ErrNoSuchBlog
+		return nil, domain.ErrNoSuchBlog
 	default:
 		return nil, err
 	}
@@ -56,30 +57,30 @@ func (s *BlogService) GetBlogByID(id uint64) (*model.Blog, error) {
 func (s *BlogService) EditBlog(userID, blogID uint64, title, text string) error {
 	blog, err := s.repo.FindByID(blogID)
 	if err != nil {
-		return ErrNoSuchBlog
+		return domain.ErrNoSuchBlog
 	}
 
 	if blog.UserID() != userID {
-		return ErrNoPermission
+		return domain.ErrNoPermission
 	}
 
 	lastUpdated := blog.UpdatedAt()
 
 	// TODO move validation to model
 	if title == "" {
-		return ErrEmptyBlogTitle
+		return domain.ErrEmptyBlogTitle
 	}
 
 	blog.UpdateTitle(title)
 	blog.UpdateText(text)
 
 	if blog.UpdatedAt().Equal(lastUpdated) {
-		return ErrBlogNoChange
+		return domain.ErrBlogNoChange
 	}
 
 	err = s.repo.Update(blog)
 	if err == storage.ErrNoChange {
-		return ErrNoSuchBlog
+		return domain.ErrNoSuchBlog
 	}
 
 	return err

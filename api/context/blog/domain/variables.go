@@ -1,4 +1,4 @@
-package service
+package domain
 
 import "errors"
 
@@ -22,4 +22,9 @@ var (
 	ErrInvalidCategoryID     = errors.New("invalid category id")
 	ErrInvalidCategoryName   = errors.New("invalid category name")
 	ErrNoSuchCategory        = errors.New("no such category")
+)
+
+// tag
+var (
+	ErrDuplicateTagName = errors.New("duplicate tag name")
 )

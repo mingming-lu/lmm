@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	account "lmm/api/context/account/domain/model"
-	"lmm/api/context/blog/domain/service"
+	"lmm/api/context/blog/domain"
 	"lmm/api/utils/strings"
 )
 
@@ -28,7 +28,7 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}
 	count, err := strings.StrToInt(countStr)
 	if err != nil {
-		return nil, service.ErrInvalidCount
+		return nil, domain.ErrInvalidCount
 	}
 
 	if pageStr == "" {
@@ -36,7 +36,7 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 	}
 	page, err := strings.StrToInt(pageStr)
 	if err != nil {
-		return nil, service.ErrInvalidPage
+		return nil, domain.ErrInvalidPage
 	}
 
 	blogList, nextPage, err := app.blogService.GetBlogListByPage(count, page)
@@ -68,7 +68,7 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 func (app *AppService) GetBlogByID(blogIDStr string) (*Blog, error) {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
-		return nil, service.ErrInvalidBlogID
+		return nil, domain.ErrInvalidBlogID
 	}
 	blog, err := app.blogService.GetBlogByID(blogID)
 	if err != nil {
@@ -88,7 +88,7 @@ func (app *AppService) GetBlogByID(blogIDStr string) (*Blog, error) {
 func (app *AppService) EditBlog(user *account.User, blogIDStr string, requestBody io.ReadCloser) error {
 	blogID, err := strings.StrToUint64(blogIDStr)
 	if err != nil {
-		return service.ErrNoSuchBlog
+		return domain.ErrNoSuchBlog
 	}
 
 	content := BlogContent{}
