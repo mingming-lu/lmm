@@ -3,7 +3,7 @@ package appservice
 import (
 	"fmt"
 	accountFactory "lmm/api/context/account/domain/factory"
-	accountRepository "lmm/api/context/account/domain/repository"
+	accountStorage "lmm/api/context/account/infra"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/service"
 	"lmm/api/context/blog/infra"
@@ -147,7 +147,7 @@ func TestEditBlog_NoPermission(tt *testing.T) {
 	repo.Add(blog)
 
 	suspicious, _ := accountFactory.NewUser(uuid.New()[:31], uuid.New())
-	accountRepository.New(testing.DB()).Add(suspicious)
+	accountStorage.NewUserStorage(testing.DB()).Add(suspicious)
 
 	blogContent := BlogContent{
 		Title: uuid.New(),
