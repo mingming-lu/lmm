@@ -70,8 +70,11 @@ func (db *DB) MustPreparef(format string, args ...interface{}) *sql.Stmt {
 	return db.MustPrepare(query)
 }
 
-func CheckErrorDuplicate(errMsg string) (key string, entry string, ok bool) {
-	matched := ErrPatternDuplicate.FindStringSubmatch(errMsg)
+func CheckErrorDuplicate(err error) (key string, entry string, ok bool) {
+	if err == nil {
+		return "", "", false
+	}
+	matched := ErrPatternDuplicate.FindStringSubmatch(err.Error())
 	if len(matched) == 3 {
 		key = matched[2]
 		entry = matched[1]
