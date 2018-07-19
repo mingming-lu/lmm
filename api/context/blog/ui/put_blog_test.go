@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 	accountFactory "lmm/api/context/account/domain/factory"
-	accountRepository "lmm/api/context/account/domain/repository"
 	accountService "lmm/api/context/account/domain/service"
+	accountStorage "lmm/api/context/account/infra"
 	"lmm/api/context/blog/appservice"
 	"lmm/api/context/blog/domain/factory"
 	"lmm/api/context/blog/domain/service"
@@ -144,7 +144,7 @@ func TestUpdateBlog_NoPermission(tt *testing.T) {
 
 	otherUser, err := accountFactory.NewUser(uuid.New()[:31], uuid.New())
 	t.NoError(err)
-	accountRepo := accountRepository.New(testing.DB())
+	accountRepo := accountStorage.NewUserStorage(testing.DB())
 	t.NoError(accountRepo.Add(otherUser))
 
 	headers := make(map[string]string)

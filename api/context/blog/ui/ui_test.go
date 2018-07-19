@@ -3,8 +3,8 @@ package ui
 import (
 	accountFactory "lmm/api/context/account/domain/factory"
 	accountModel "lmm/api/context/account/domain/model"
-	accountRepository "lmm/api/context/account/domain/repository"
 	accountService "lmm/api/context/account/domain/service"
+	accountStorage "lmm/api/context/account/infra"
 	account "lmm/api/context/account/ui"
 	"lmm/api/context/blog/infra"
 	"lmm/api/testing"
@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 	initUser()
 	initUI()
 
-	accountUI = account.New(testing.DB())
+	accountUI = account.New(accountStorage.NewUserStorage(testing.DB()))
 
 	code := m.Run()
 	os.Exit(code)
@@ -35,7 +35,7 @@ func initUser() {
 		panic(err)
 	}
 
-	err = accountRepository.New(testing.DB()).Add(user)
+	err = accountStorage.NewUserStorage(testing.DB()).Add(user)
 	if err != nil {
 		panic(err)
 	}
