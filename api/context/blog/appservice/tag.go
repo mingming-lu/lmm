@@ -12,10 +12,17 @@ func (app *AppService) AddNewTagToBlog(user *account.User, blogIDStr, tagName st
 	if err != nil {
 		return domain.ErrNoSuchBlog
 	}
-	tag, err := factory.NewTag(blogID, tagName)
+
+	blog, err := app.blogService.GetBlogByID(blogID)
+	if err != nil {
+		return domain.ErrNoSuchBlog
+	}
+
+	tag, err := factory.NewTag(blog.ID(), tagName)
 	if err != nil {
 		return err
 	}
+
 	if err := app.tagRepository.Add(tag); err != nil {
 		return err
 	}
