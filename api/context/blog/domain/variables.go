@@ -28,4 +28,5 @@ var (
 var (
 	ErrInvalidTagName   = errors.New("invalid tag name")
 	ErrDuplicateTagName = errors.New("duplicate tag name")
+	ErrNoSuchTag        = errors.New("no such tag")
 )
