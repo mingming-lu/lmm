@@ -55,11 +55,11 @@ func main() {
 }
 
 // tag
-// router.GET("/v1/users/:user/tags", tag.GetByUser)
+// router.GET("/v1/tags", tag.GetByUser)
 // router.GET("/v1/blog/:blog/tags", tag.GetByBlog)
 // router.POST("/v1/blog/:blog/tags", tag.Register)
-// router.PUT("/v1/blog/:blog/tags/:tag", tag.Update)
-// router.DELETE("/v1/blog/:blog/tags/:tag", tag.Delete)
+// router.PUT("/v1/tags/:tag", tag.Update)
+// router.DELETE("/v1/tags/:tag", tag.Delete)
 
 // // image
 // router.GET("/v1/users/:user/images", image.GetAllImages)

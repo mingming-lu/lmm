@@ -25,3 +25,22 @@ func (app *AppService) AddNewTagToBlog(user *account.User, blogIDStr, tagName st
 
 	return app.tagRepository.Add(tag)
 }
+
+func (app *AppService) UpdateBlogTag(user *account.User, tagIDStr, tagName string) error {
+	tagID, err := strings.StrToUint64(tagIDStr)
+	if err != nil {
+		return domain.ErrNoSuchTag
+	}
+
+	// TODO using transtraction
+	tag, err := app.tagRepository.FindByID(tagID)
+	if err != nil {
+		return domain.ErrNoSuchTag
+	}
+
+	if err := tag.UpdateName(tagName); err != nil {
+		return err
+	}
+
+	return app.tagRepository.Update(tag)
+}
