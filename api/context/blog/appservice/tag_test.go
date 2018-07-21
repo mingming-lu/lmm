@@ -76,3 +76,61 @@ func TestAddNewTagToBlog_Duplicate(tt *testing.T) {
 		app.AddNewTagToBlog(user, fmt.Sprint(blog.ID()), tagName),
 	)
 }
+
+func TestUpdateTag_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	blogRepo := infra.NewBlogStorage(testing.DB())
+
+	blog, err := factory.NewBlog(user.ID(), uuid.New()[:31], uuid.New())
+	t.NoError(err)
+	t.NoError(blogRepo.Add(blog))
+
+	tagName := uuid.New()[:31]
+	tag, err := factory.NewTag(blog.ID(), tagName)
+	t.NoError(err)
+	t.NoError(app.tagRepository.Add(tag))
+
+	newTagName := uuid.New()[:31]
+	t.NoError(app.UpdateBlogTag(user, fmt.Sprint(tag.ID()), newTagName))
+}
+
+func TestUpdateTag_InvalidTagID(tt *testing.T) {
+	t := testing.NewTester(tt)
+	t.IsError(domain.ErrNoSuchTag, app.UpdateBlogTag(user, "invalid tag id", "dummy name"))
+}
+
+func TestUpdataTag_NoSuchTag(tt *testing.T) {
+	t := testing.NewTester(tt)
+	blogRepo := infra.NewBlogStorage(testing.DB())
+
+	blog, err := factory.NewBlog(user.ID(), uuid.New()[:31], uuid.New())
+	t.NoError(err)
+	t.NoError(blogRepo.Add(blog))
+
+	tagName := uuid.New()[:31]
+	tag, err := factory.NewTag(blog.ID(), tagName)
+	t.NoError(err)
+	// t.NoError(app.tagRepository.Add(tag))
+
+	newTagName := uuid.New()[:31]
+	t.IsError(domain.ErrNoSuchTag, app.UpdateBlogTag(user, fmt.Sprint(tag.ID()), newTagName))
+}
+
+func TestUpdateTag_InvalidTagName(tt *testing.T) {
+	t := testing.NewTester(tt)
+	blogRepo := infra.NewBlogStorage(testing.DB())
+
+	blog, err := factory.NewBlog(user.ID(), uuid.New()[:31], uuid.New())
+	t.NoError(err)
+	t.NoError(blogRepo.Add(blog))
+
+	tagName := uuid.New()[:31]
+	tag, err := factory.NewTag(blog.ID(), tagName)
+	t.NoError(err)
+	t.NoError(app.tagRepository.Add(tag))
+
+	if err != nil {
+		t.Fail()
+	}
+	t.IsError(domain.ErrInvalidTagName, app.UpdateBlogTag(user, fmt.Sprint(tag.ID()), uuid.New()))
+}
