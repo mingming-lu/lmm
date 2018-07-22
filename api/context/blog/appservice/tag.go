@@ -4,6 +4,7 @@ import (
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/factory"
+	"lmm/api/context/blog/domain/model"
 	"lmm/api/utils/strings"
 )
 
@@ -57,4 +58,8 @@ func (app *AppService) RemoveBlogTag(user *account.User, tagIDStr string) error 
 	}
 
 	return app.tagRepository.Remove(tag)
+}
+
+func (app *AppService) GetAllTags() ([]*model.Tag, error) {
+	return app.tagRepository.FindAll()
 }
