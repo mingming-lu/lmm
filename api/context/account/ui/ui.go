@@ -7,7 +7,6 @@ import (
 	"lmm/api/context/account/domain/repository"
 	"lmm/api/context/account/domain/service"
 	"lmm/api/http"
-	"log"
 )
 
 type UI struct {
@@ -33,7 +32,7 @@ func (ui *UI) SignIn(c *http.Context) {
 	case service.ErrInvalidUserNameOrPassword:
 		c.String(http.StatusNotFound, service.ErrInvalidUserNameOrPassword.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -50,7 +49,7 @@ func (ui *UI) SignUp(c *http.Context) {
 	case service.ErrInvalidUserNameOrPassword:
 		c.String(http.StatusBadRequest, service.ErrInvalidUserNameOrPassword.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -69,9 +68,10 @@ func (ui *UI) Verify(c *http.Context) {
 
 func (ui *UI) BearerAuth(handler http.Handler) http.Handler {
 	return func(c *http.Context) {
-		user, err := ui.app.BearerAuth(c.Request.Header.Get("Authorization"))
+		auth := c.Request.Header.Get("Authorization")
+		user, err := ui.app.BearerAuth(auth)
 		if err != nil {
-			log.Println(err)
+			c.Logger().Error("%s: '%s'", err.Error(), auth)
 			http.Unauthorized(c)
 			return
 		}
