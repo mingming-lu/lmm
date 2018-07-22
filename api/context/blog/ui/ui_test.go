@@ -6,6 +6,8 @@ import (
 	accountService "lmm/api/context/account/domain/service"
 	accountStorage "lmm/api/context/account/infra"
 	account "lmm/api/context/account/ui"
+	"lmm/api/context/blog/domain/factory"
+	"lmm/api/context/blog/domain/model"
 	"lmm/api/context/blog/infra"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
@@ -55,4 +57,18 @@ func initUI() {
 	categoryRepo := infra.NewCategoryStorage(db)
 	tagRepo := infra.NewTagStorage(db)
 	ui = New(blogRepo, categoryRepo, tagRepo)
+}
+
+func randomBlog() *model.Blog {
+	blog, err := factory.NewBlog(user.ID(), uuid.New()[:31], uuid.New())
+	if err != nil {
+		panic(err)
+	}
+
+	repo := infra.NewBlogStorage(testing.DB())
+	if err := repo.Add(blog); err != nil {
+		panic(err)
+	}
+
+	return blog
 }
