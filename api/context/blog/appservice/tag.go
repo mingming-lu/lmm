@@ -63,3 +63,17 @@ func (app *AppService) RemoveBlogTag(user *account.User, tagIDStr string) error 
 func (app *AppService) GetAllTags() ([]*model.Tag, error) {
 	return app.tagRepository.FindAll()
 }
+
+func (app *AppService) GetAllTagsOfBlog(blogIDStr string) ([]*model.Tag, error) {
+	blogID, err := strings.StrToUint64(blogIDStr)
+	if err != nil {
+		return nil, domain.ErrNoSuchBlog
+	}
+
+	blog, err := app.blogService.GetBlogByID(blogID)
+	if err != nil {
+		return nil, domain.ErrNoSuchBlog
+	}
+
+	return app.tagRepository.FindAllByBlog(blog)
+}
