@@ -7,6 +7,7 @@ import (
 	"lmm/api/context/blog/infra"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
+	"math/rand"
 )
 
 func TestAddNewTagToBlog_Success(tt *testing.T) {
@@ -169,7 +170,7 @@ func TestRemoveBlogTag_NoSuchTag(tt *testing.T) {
 	t.IsError(domain.ErrNoSuchTag, app.RemoveBlogTag(user, fmt.Sprint(tag.ID())))
 }
 
-func TestGetAllTags(tt *testing.T) {
+func TestGetAllTags_Success(tt *testing.T) {
 	testing.Lock()
 	defer testing.Unlock()
 
@@ -180,4 +181,57 @@ func TestGetAllTags(tt *testing.T) {
 	t.NoError(err)
 	t.NotNil(tags)
 	t.Is(0, len(tags))
+}
+
+func TestGetAllTagsOfBlog_Success(tt *testing.T) {
+	t := testing.NewTester(tt)
+	blogRepo := infra.NewBlogStorage(testing.DB())
+
+	blog, err := factory.NewBlog(user.ID(), uuid.New()[:31], uuid.New())
+	t.NoError(err)
+	t.NoError(blogRepo.Add(blog))
+
+	tagsNum := rand.Intn(10)
+	for i := 0; i < tagsNum; i++ {
+		t.NoError(app.AddNewTagToBlog(user, fmt.Sprint(blog.ID()), uuid.New()[:31]))
+	}
+
+	tags, err := app.tagRepository.FindAllByBlog(blog)
+	t.NoError(err)
+	t.NotNil(tags)
+	t.Is(tagsNum, len(tags))
+}
+
+func TestGetAllTagsOfBlog_Empty(tt *testing.T) {
+	t := testing.NewTester(tt)
+	blogRepo := infra.NewBlogStorage(testing.DB())
+
+	blog, err := factory.NewBlog(user.ID(), uuid.New()[:31], uuid.New())
+	t.NoError(err)
+	t.NoError(blogRepo.Add(blog))
+
+	tags, err := app.tagRepository.FindAllByBlog(blog)
+	t.NoError(err)
+	t.NotNil(tags)
+	t.Is(0, len(tags))
+}
+
+func TestGetAllTagsOfBlog_InvalidBlogID(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	tags, err := app.GetAllTagsOfBlog("@#!")
+
+	t.IsError(domain.ErrNoSuchBlog, err)
+	t.Nil(tags)
+}
+
+func TestGetAllTagsOfBlog_NoSuchBlog(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	blog, err := factory.NewBlog(user.ID(), uuid.New()[:31], uuid.New())
+	t.NoError(err)
+
+	tags, err := app.GetAllTagsOfBlog(fmt.Sprint(blog.ID()))
+	t.IsError(domain.ErrNoSuchBlog, err)
+	t.Nil(tags)
 }
