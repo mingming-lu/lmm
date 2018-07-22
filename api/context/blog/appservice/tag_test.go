@@ -168,3 +168,16 @@ func TestRemoveBlogTag_NoSuchTag(tt *testing.T) {
 
 	t.IsError(domain.ErrNoSuchTag, app.RemoveBlogTag(user, fmt.Sprint(tag.ID())))
 }
+
+func TestGetAllTags(tt *testing.T) {
+	testing.Lock()
+	defer testing.Unlock()
+
+	t := testing.NewTester(tt)
+	testing.InitTable("tag")
+
+	tags, err := app.GetAllTags()
+	t.NoError(err)
+	t.NotNil(tags)
+	t.Is(0, len(tags))
+}
