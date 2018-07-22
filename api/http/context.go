@@ -112,6 +112,10 @@ func (c *Context) Values() Values {
 	return c.values
 }
 
+func (c *Context) Logger() Logger {
+	return c.logger
+}
+
 func (r *Request) ScanBody(schema interface{}) error {
 	return json.NewDecoder(r.Request.Body).Decode(schema)
 }
@@ -121,6 +125,7 @@ func NewContext(rw ResponseWriter, r *Request) *Context {
 		Request: r,
 		rw:      rw,
 		values:  make(Values),
+		logger:  newLogger(),
 	}
 }
 
