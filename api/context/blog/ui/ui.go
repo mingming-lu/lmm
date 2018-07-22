@@ -7,7 +7,6 @@ import (
 	"lmm/api/context/blog/domain"
 	"lmm/api/context/blog/domain/repository"
 	"lmm/api/http"
-	"log"
 )
 
 type UI struct {
@@ -32,7 +31,7 @@ func (ui *UI) PostBlog(c *http.Context) {
 	case domain.ErrEmptyBlogTitle:
 		c.String(http.StatusBadRequest, domain.ErrEmptyBlogTitle.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -49,7 +48,7 @@ func (ui *UI) GetAllBlog(c *http.Context) {
 	case domain.ErrInvalidCount, domain.ErrInvalidPage:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -62,7 +61,7 @@ func (ui *UI) GetBlog(c *http.Context) {
 	case domain.ErrNoSuchBlog:
 		c.String(http.StatusNotFound, domain.ErrNoSuchBlog.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -87,7 +86,7 @@ func (ui *UI) UpdateBlog(c *http.Context) {
 	case domain.ErrNoSuchBlog:
 		c.String(http.StatusNotFound, domain.ErrNoSuchBlog.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -106,6 +105,7 @@ func (ui *UI) SetBlogCategory(c *http.Context) {
 	case domain.ErrNoSuchBlog, domain.ErrNoSuchCategory:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -124,7 +124,7 @@ func (ui *UI) PostCategory(c *http.Context) {
 	case domain.ErrInvalidCategoryName, domain.ErrDuplicateCategoryName:
 		c.String(http.StatusBadRequest, err.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -147,7 +147,7 @@ func (ui *UI) UpdateCategory(c *http.Context) {
 	case domain.ErrNoSuchCategory:
 		c.String(http.StatusNotFound, domain.ErrNoSuchCategory.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -158,7 +158,7 @@ func (ui *UI) GetAllCategoris(c *http.Context) {
 	case nil:
 		c.JSON(http.StatusOK, categories)
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -173,6 +173,7 @@ func (ui *UI) GetBlogCagetory(c *http.Context) {
 	case domain.ErrCategoryNotSet:
 		c.String(http.StatusNotFound, domain.ErrCategoryNotSet.Error())
 	default:
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
@@ -185,7 +186,7 @@ func (ui *UI) DeleteCategory(c *http.Context) {
 	case domain.ErrNoSuchCategory:
 		c.String(http.StatusNotFound, domain.ErrNoSuchCategory.Error())
 	default:
-		log.Println(err)
+		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
 	}
 }
