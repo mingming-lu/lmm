@@ -44,3 +44,17 @@ func (app *AppService) UpdateBlogTag(user *account.User, tagIDStr, tagName strin
 
 	return app.tagRepository.Update(tag)
 }
+
+func (app *AppService) RemoveBlogTag(user *account.User, tagIDStr string) error {
+	tagID, err := strings.StrToUint64(tagIDStr)
+	if err != nil {
+		return domain.ErrNoSuchTag
+	}
+
+	tag, err := app.tagRepository.FindByID(tagID)
+	if err != nil {
+		return domain.ErrNoSuchTag
+	}
+
+	return app.tagRepository.Remove(tag)
+}
