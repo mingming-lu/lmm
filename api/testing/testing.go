@@ -1,14 +1,17 @@
 package testing
 
 import (
-	"sync"
 	"lmm/api/storage"
+	"math/rand"
+	"sync"
+	"time"
 )
 
 var db *storage.DB
 
 func init() {
 	db = storage.NewDB()
+	rand.Seed(time.Now().UnixNano())
 	InitTableAll()
 }
 
