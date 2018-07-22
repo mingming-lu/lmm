@@ -125,7 +125,7 @@ func NewContext(rw ResponseWriter, r *Request) *Context {
 		Request: r,
 		rw:      rw,
 		values:  make(Values),
-		logger:  newLogger(),
+		logger:  defaultLogger,
 	}
 }
 

@@ -7,6 +7,10 @@ import (
 	"sync"
 )
 
+func init() {
+	defaultLogger = newLogger()
+}
+
 type Logger interface {
 	Info(format string, args ...interface{})
 	Warn(format string, args ...interface{})
@@ -21,6 +25,8 @@ type DefaultLogger struct {
 	warn *log.Logger
 	err  *log.Logger
 }
+
+var defaultLogger *DefaultLogger
 
 func newLogger() *DefaultLogger {
 	logger := &DefaultLogger{
