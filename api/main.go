@@ -44,6 +44,8 @@ func main() {
 	// blog category
 	router.GET("/v1/blog/:blog/category", blogUI.GetBlogCagetory)
 	router.PUT("/v1/blog/:blog/category", blogUI.SetBlogCategory)
+	// blog tag
+	router.POST("/v1/blog/:blog/tags", blogUI.NewBlogTag)
 
 	// category
 	router.GET("/v1/categories", blogUI.GetAllCategoris)
@@ -57,7 +59,6 @@ func main() {
 // tag
 // router.GET("/v1/tags", tag.GetByUser)
 // router.GET("/v1/blog/:blog/tags", tag.GetByBlog)
-// router.POST("/v1/blog/:blog/tags", tag.Register)
 // router.PUT("/v1/tags/:tag", tag.Update)
 // router.DELETE("/v1/tags/:tag", tag.Delete)
 
