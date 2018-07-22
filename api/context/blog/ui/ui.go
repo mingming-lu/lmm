@@ -190,3 +190,31 @@ func (ui *UI) DeleteCategory(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func (ui *UI) NewBlogTag(c *http.Context) {
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	tag := Tag{}
+	if err := c.Request.ScanBody(&tag); err != nil {
+		c.Logger().Warn(err.Error())
+		http.BadRequest(c)
+		return
+	}
+
+	err := ui.app.AddNewTagToBlog(user, c.Request.Path.Params("blog"), tag.Name)
+	switch err {
+	case nil:
+		c.String(http.StatusCreated, "success")
+	case domain.ErrInvalidTagName:
+		c.String(http.StatusBadRequest, domain.ErrInvalidTagName.Error())
+	case domain.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, domain.ErrNoSuchBlog.Error())
+	default:
+		c.Logger().Error(err.Error())
+		http.InternalServerError(c)
+	}
+}
