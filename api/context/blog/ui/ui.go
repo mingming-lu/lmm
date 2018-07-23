@@ -246,3 +246,22 @@ func (ui *UI) UpdateTag(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func (ui *UI) DeleteTag(c *http.Context) {
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	err := ui.app.RemoveBlogTag(user, c.Request.Path.Params("tag"))
+	switch err {
+	case nil:
+		http.NoContent(c)
+	case domain.ErrNoSuchTag:
+		c.String(http.StatusOK, domain.ErrNoSuchTag.Error())
+	default:
+		c.Logger().Error(err.Error())
+		http.InternalServerError(c)
+	}
+}
