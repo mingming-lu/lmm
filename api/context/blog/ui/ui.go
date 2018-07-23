@@ -282,6 +282,8 @@ func (ui *UI) GetAllTagsOfBlog(c *http.Context) {
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, tagsToJSON(tags))
+	case domain.ErrNoSuchBlog:
+		c.String(http.StatusNotFound, domain.ErrNoSuchBlog.Error())
 	default:
 		c.Logger().Error(err.Error())
 		http.InternalServerError(c)
