@@ -218,3 +218,31 @@ func (ui *UI) NewBlogTag(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func (ui *UI) UpdateTag(c *http.Context) {
+	user, ok := c.Values().Get("user").(*account.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	tag := Tag{}
+	if err := c.Request.ScanBody(&tag); err != nil {
+		c.Logger().Warn(err.Error())
+		http.BadRequest(c)
+		return
+	}
+
+	err := ui.app.UpdateBlogTag(user, c.Request.Path.Params("tag"), tag.Name)
+	switch err {
+	case nil:
+		c.String(http.StatusOK, "success")
+	case domain.ErrInvalidTagName:
+		c.String(http.StatusBadRequest, domain.ErrInvalidTagName.Error())
+	case domain.ErrNoSuchTag:
+		c.String(http.StatusNotFound, domain.ErrNoSuchTag.Error())
+	default:
+		c.Logger().Error(err.Error())
+		http.InternalServerError(c)
+	}
+}

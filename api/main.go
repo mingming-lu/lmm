@@ -53,13 +53,15 @@ func main() {
 	router.PUT("/v1/categories/:category", accountUI.BearerAuth(blogUI.UpdateCategory))
 	router.DELETE("/v1/categories/:category", accountUI.BearerAuth(blogUI.DeleteCategory))
 
+	// tag
+	router.PUT("/v1/tags/:tag", blogUI.UpdateTag)
+
 	http.Serve(":8002", router)
 }
 
 // tag
 // router.GET("/v1/tags", tag.GetByUser)
 // router.GET("/v1/blog/:blog/tags", tag.GetByBlog)
-// router.PUT("/v1/tags/:tag", tag.Update)
 // router.DELETE("/v1/tags/:tag", tag.Delete)
 
 // // image
