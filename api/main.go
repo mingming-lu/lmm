@@ -43,9 +43,9 @@ func main() {
 	router.PUT("/v1/blog/:blog", accountUI.BearerAuth(blogUI.UpdateBlog))
 	// blog category
 	router.GET("/v1/blog/:blog/category", blogUI.GetBlogCagetory)
-	router.PUT("/v1/blog/:blog/category", blogUI.SetBlogCategory)
+	router.PUT("/v1/blog/:blog/category", accountUI.BearerAuth(blogUI.SetBlogCategory))
 	// blog tag
-	router.POST("/v1/blog/:blog/tags", blogUI.NewBlogTag)
+	router.POST("/v1/blog/:blog/tags", accountUI.BearerAuth(blogUI.NewBlogTag))
 
 	// category
 	router.GET("/v1/categories", blogUI.GetAllCategoris)
