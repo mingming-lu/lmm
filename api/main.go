@@ -45,6 +45,7 @@ func main() {
 	router.GET("/v1/blog/:blog/category", blogUI.GetBlogCagetory)
 	router.PUT("/v1/blog/:blog/category", accountUI.BearerAuth(blogUI.SetBlogCategory))
 	// blog tag
+	router.GET("/v1/blog/:blog/tags", blogUI.GetAllTagsOfBlog)
 	router.POST("/v1/blog/:blog/tags", accountUI.BearerAuth(blogUI.NewBlogTag))
 
 	// category
@@ -60,9 +61,6 @@ func main() {
 
 	http.Serve(":8002", router)
 }
-
-// tag
-// router.GET("/v1/blog/:blog/tags", tag.GetByBlog)
 
 // // image
 // router.GET("/v1/users/:user/images", image.GetAllImages)

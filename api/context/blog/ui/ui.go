@@ -276,3 +276,14 @@ func (ui *UI) GetAllTags(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func (ui *UI) GetAllTagsOfBlog(c *http.Context) {
+	tags, err := ui.app.GetAllTagsOfBlog(c.Request.Path.Params("blog"))
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, tagsToJSON(tags))
+	default:
+		c.Logger().Error(err.Error())
+		http.InternalServerError(c)
+	}
+}
