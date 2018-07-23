@@ -265,3 +265,14 @@ func (ui *UI) DeleteTag(c *http.Context) {
 		http.InternalServerError(c)
 	}
 }
+
+func (ui *UI) GetAllTags(c *http.Context) {
+	tags, err := ui.app.GetAllTags()
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, tagsToJSON(tags))
+	default:
+		c.Logger().Error(err.Error())
+		http.InternalServerError(c)
+	}
+}
