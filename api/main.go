@@ -54,6 +54,7 @@ func main() {
 	router.DELETE("/v1/categories/:category", accountUI.BearerAuth(blogUI.DeleteCategory))
 
 	// tag
+	router.GET("/v1/tags", blogUI.GetAllTags)
 	router.PUT("/v1/tags/:tag", accountUI.BearerAuth(blogUI.UpdateTag))
 	router.DELETE("/v1/tags/:tag", accountUI.BearerAuth(blogUI.DeleteTag))
 
@@ -61,7 +62,6 @@ func main() {
 }
 
 // tag
-// router.GET("/v1/tags", tag.GetByUser)
 // router.GET("/v1/blog/:blog/tags", tag.GetByBlog)
 
 // // image

@@ -9,6 +9,7 @@ import (
 	"lmm/api/testing"
 	"lmm/api/utils/strings"
 	"lmm/api/utils/uuid"
+	"math/rand"
 	"time"
 )
 
@@ -101,7 +102,8 @@ func TestFindAllTags_SortByName(tt *testing.T) {
 	repo := NewTagStorage(testing.DB())
 
 	for _, name := range "gafcedbh" {
-		tag, err := factory.NewTag(11, string(name))
+		blogID := uint64(rand.Int63n(10) + 1)
+		tag, err := factory.NewTag(blogID, string(name))
 		t.NoError(err)
 		t.NoError(repo.Add(tag))
 	}
