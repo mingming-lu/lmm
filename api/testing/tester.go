@@ -2,6 +2,7 @@ package testing
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -82,4 +83,12 @@ func (t *Tester) Output(expectedRegexp string, f func(), msgAndArgs ...interface
 
 func (t *Tester) Regexp(expected, actual string, msgAndArgs ...interface{}) bool {
 	return assert.Regexp(t, expected, actual, msgAndArgs...)
+}
+
+func (t *Tester) JSON(expected interface{}, actual string, msgAndArgs ...interface{}) bool {
+	b, err := json.Marshal(expected)
+	if err != nil {
+		return assert.Fail(t, err.Error())
+	}
+	return assert.JSONEq(t, string(b), actual)
 }
