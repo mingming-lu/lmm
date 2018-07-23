@@ -25,8 +25,8 @@ func PUT(path string, body io.Reader) *http.Request {
 	return NewRequest(http.MethodPut, path, body)
 }
 
-func DELETE(path string, body io.Reader) *http.Request {
-	return NewRequest(http.MethodDelete, path, body)
+func DELETE(path string) *http.Request {
+	return NewRequest(http.MethodDelete, path, nil)
 }
 
 type Response struct {
