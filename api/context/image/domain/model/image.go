@@ -28,3 +28,16 @@ func (i *Image) UserID() uint64 {
 func (i *Image) CreatedAt() time.Time {
 	return i.createdAt
 }
+
+func (i *Image) WrapData(data []byte) *ImageWithData {
+	return &ImageWithData{Image: *i, data: data}
+}
+
+type ImageWithData struct {
+	Image
+	data []byte
+}
+
+func (i *ImageWithData) Data() []byte {
+	return i.data
+}
