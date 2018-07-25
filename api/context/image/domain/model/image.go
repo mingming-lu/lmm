@@ -9,14 +9,22 @@ type Image struct {
 	createdAt time.Time
 }
 
-func (i *Image) ID() string {
-	return i.id
-}
-
 func NewImage(id string, userID uint64, createdAt time.Time) *Image {
 	return &Image{
 		id:        id,
 		userID:    userID,
 		createdAt: createdAt,
 	}
+}
+
+func (i *Image) ID() string {
+	return i.id
+}
+
+func (i *Image) UserID() uint64 {
+	return i.userID
+}
+
+func (i *Image) CreatedAt() time.Time {
+	return i.createdAt
 }
