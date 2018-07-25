@@ -15,7 +15,7 @@ func NewImageStorage(db *storage.DB) *ImageStorage {
 	return &ImageStorage{db: db}
 }
 
-func (s *ImageStorage) Add(image *model.Image) error {
+func (s *ImageStorage) Add(image *model.ImageWithData) error {
 	stmt := s.db.MustPrepare(`INSERT INTO image (uid, user, created_at) VALUES (?, ?, ?)`)
 	defer stmt.Close()
 
