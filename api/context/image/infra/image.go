@@ -35,7 +35,14 @@ func (s *ImageStorage) Remove(image *model.Image) error {
 	stmt := s.db.MustPrepare(`DELETE FROM image WHERE uid = ?`)
 	defer stmt.Close()
 
-	_, err := stmt.Exec(image.ID())
+	res, err := stmt.Exec(image.ID())
+
+	if rowsAffected, e := res.RowsAffected(); e != nil {
+		return e
+	} else if rowsAffected == 0 {
+		return domain.ErrNoSuchImage
+	}
+
 	return err
 }
 
