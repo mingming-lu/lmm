@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"lmm/api/db"
 	"testing"
 
 	"github.com/akinaru-lu/errors"
@@ -9,7 +8,6 @@ import (
 
 func TestInit(t *testing.T) {
 	tester := NewTester(t)
-	db := db.Default()
 	_, err := db.Query("SHOW TABLES")
 	tester.NoError(err)
 }
