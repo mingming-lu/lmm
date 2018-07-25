@@ -45,13 +45,14 @@ CREATE TABLE IF NOT EXISTS `tag` (
 	INDEX `tag` (`name`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
-CREATE TABLE IF NOT EXISTS image (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	name varchar(255) NOT NULL,
-	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (id),
-	UNIQUE (user, name)
+CREATE TABLE IF NOT EXISTS `image` (
+	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`uid` VARCHAR(255) NOT NULL,
+	`user` INT UNSIGNED NOT NULL,
+	`created_at` TIMESTAMP NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE `uid` (`uid`),
+	INDEX `created_at` (`created_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS photo (
