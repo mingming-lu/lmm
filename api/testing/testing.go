@@ -7,16 +7,25 @@ import (
 	"time"
 )
 
-var db *storage.DB
+var (
+	cache *storage.Cache
+	db    *storage.DB
+)
 
 func init() {
 	db = storage.NewDB()
+	cache = storage.NewCacheEngine()
+
 	rand.Seed(time.Now().UnixNano())
 	InitTableAll()
 }
 
 func DB() *storage.DB {
 	return db
+}
+
+func Cache() *storage.Cache {
+	return cache
 }
 
 // notice that this gay cannot lock other go application
