@@ -5,19 +5,19 @@ import (
 )
 
 func InitTableAll() {
-	r, err := db.Query("SHOW TABLES")
+	r, err := dbEngine.Query("SHOW TABLES")
 	if err != nil {
 		log.Fatal(err)
 	}
 	for r.Next() {
 		var table string
 		r.Scan(&table)
-		db.Query("TRUNCATE TABLE " + table)
+		dbEngine.Query("TRUNCATE TABLE " + table)
 	}
 }
 
 func InitTable(name string) {
-	_, err := db.Query("TRUNCATE TABLE " + name)
+	_, err := dbEngine.Query("TRUNCATE TABLE " + name)
 	if err != nil {
 		log.Fatal(err)
 	}
