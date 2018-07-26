@@ -12,7 +12,7 @@ func TestAddImage_Success(tt *testing.T) {
 
 	model := factory.NewImage(1)
 
-	t.NoError(repo.Add(model))
+	t.NoError(repo.Add(model.WrapData(nil)))
 }
 
 func TestAddImage_Duplicate(tt *testing.T) {
@@ -21,8 +21,8 @@ func TestAddImage_Duplicate(tt *testing.T) {
 
 	model := factory.NewImage(1)
 
-	t.NoError(repo.Add(model))
-	t.IsError(domain.ErrDuplicateImageID, repo.Add(model))
+	t.NoError(repo.Add(model.WrapData(nil)))
+	t.IsError(domain.ErrDuplicateImageID, repo.Add(model.WrapData(nil)))
 }
 
 func RemoveImage_Success(tt *testing.T) {
@@ -30,7 +30,7 @@ func RemoveImage_Success(tt *testing.T) {
 	repo := NewImageStorage(testing.DB())
 
 	model := factory.NewImage(1)
-	t.NoError(repo.Add(model))
+	t.NoError(repo.Add(model.WrapData(nil)))
 	t.NoError(repo.Remove(model))
 }
 
@@ -47,7 +47,7 @@ func TestFindImageByID_Success(tt *testing.T) {
 	repo := NewImageStorage(testing.DB())
 
 	model := factory.NewImage(1)
-	t.NoError(repo.Add(model))
+	t.NoError(repo.Add(model.WrapData(nil)))
 
 	modelFound, err := repo.FindByID(model.ID())
 	t.NoError(err)
