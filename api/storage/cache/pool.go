@@ -37,15 +37,14 @@ func NewPool() *ConnPool {
 	return &ConnPool{Pool: &pool}
 }
 
-func (p *ConnPool) Get() Conn {
-	c := p.Pool.Get()
-	return &conn{Conn: c}
+func (p *ConnPool) Get() *Conn {
+	return &Conn{Conn: p.Pool.Get()}
 }
 
-func (p *ConnPool) GetContext(ctx context.Context) (Conn, error) {
+func (p *ConnPool) GetContext(ctx context.Context) (*Conn, error) {
 	c, err := p.Pool.GetContext(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &conn{Conn: c}, err
+	return &Conn{Conn: c}, err
 }

@@ -2,40 +2,24 @@ package cache
 
 import "github.com/gomodule/redigo/redis"
 
-type Conn interface {
-	redis.Conn
-
-	Ping() error
-
-	GetString(key string) (string, error)
-	SetString(key, value string) error
-
-	GetStruct(key string, dest interface{}) error
-	SetStruct(key string, value interface{}) error
-
-	GetBytes(key string) ([]byte, error)
-	SetBytes(key string, bytes []byte) error
-}
-
-type conn struct {
+type Conn struct {
 	redis.Conn
 }
 
-func (c *conn) Ping() error {
+func (c *Conn) Ping() error {
 	_, err := c.Do("PING")
 	return err
 }
 
-func (c *conn) GetString(key string) (string, error) {
+func (c *Conn) GetBytes(key string) ([]byte, error) {
+	return redis.Bytes(c.Do("GET", key))
+}
+
+func (c *Conn) GetString(key string) (string, error) {
 	return redis.String(c.Do("GET", key))
 }
 
-func (c *conn) SetString(key, value string) error {
-	_, err := c.Do("SET", key, value)
-	return err
-}
-
-func (c *conn) GetStruct(key string, dest interface{}) error {
+func (c *Conn) GetStruct(key string, dest interface{}) error {
 	values, err := redis.Values(c.Do("HGETALL", key))
 	if err != nil {
 		return err
@@ -43,16 +27,27 @@ func (c *conn) GetStruct(key string, dest interface{}) error {
 	return redis.ScanStruct(values, dest)
 }
 
-func (c *conn) SetStruct(key string, value interface{}) error {
+func (c *Conn) Set(key string, value interface{}) error {
+	_, err := c.Do("SET", key, value)
+	return err
+}
+
+func (c *Conn) SetTTL(key string, value interface{}, seconds uint) error {
+	_, err := c.Do("SETEX", seconds, value)
+	return err
+}
+
+func (c *Conn) SetStruct(key string, value interface{}) error {
 	_, err := c.Do("HMSET", redis.Args{}.Add(key).AddFlat(value)...)
 	return err
 }
 
-func (c *conn) SetBytes(key string, bytes []byte) error {
-	_, err := c.Do("SET", key, bytes)
-	return err
-}
-
-func (c *conn) GetBytes(key string) ([]byte, error) {
-	return redis.Bytes(c.Do("GET", key))
+func (c *Conn) SetStructTTL(key string, value interface{}, seconds uint) error {
+	if err := c.Send("HMSET", redis.Args{}.Add(key).AddFlat(value)...); err != nil {
+		return err
+	}
+	if err := c.Send("EXPIRE", key, seconds); err != nil {
+		return err
+	}
+	return c.Flush()
 }

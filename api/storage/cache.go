@@ -14,11 +14,11 @@ func NewCacheEngine() *Cache {
 	return &Cache{pool: cache.NewPool()}
 }
 
-func (c *Cache) Get() cache.Conn {
+func (c *Cache) Get() *cache.Conn {
 	return c.pool.Get()
 }
 
-func (c *Cache) WithContext(ctx context.Context) (cache.Conn, error) {
+func (c *Cache) WithContext(ctx context.Context) (*cache.Conn, error) {
 	return c.pool.GetContext(ctx)
 }
 
