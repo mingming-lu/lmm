@@ -12,6 +12,9 @@ type Conn interface {
 
 	GetStruct(key string, dest interface{}) error
 	SetStruct(key string, value interface{}) error
+
+	GetBytes(key string) ([]byte, error)
+	SetBytes(key string, bytes []byte) error
 }
 
 type conn struct {
@@ -43,4 +46,13 @@ func (c *conn) GetStruct(key string, dest interface{}) error {
 func (c *conn) SetStruct(key string, value interface{}) error {
 	_, err := c.Do("HMSET", redis.Args{}.Add(key).AddFlat(value)...)
 	return err
+}
+
+func (c *conn) SetBytes(key string, bytes []byte) error {
+	_, err := c.Do("SET", key, bytes)
+	return err
+}
+
+func (c *conn) GetBytes(key string) ([]byte, error) {
+	return redis.Bytes(c.Do("GET", key))
 }

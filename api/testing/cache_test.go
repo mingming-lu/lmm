@@ -11,7 +11,7 @@ func TestCacheGetConn(tt *T) {
 	t.NoError(conn.Ping())
 }
 
-func TestCacheConn_SetString(tt *T) {
+func TestCacheConn_String(tt *T) {
 	t := NewTester(tt)
 	conn := cacheEngine.Get()
 	defer func() {
@@ -30,7 +30,7 @@ func TestCacheConn_SetString(tt *T) {
 	t.Is(str, got)
 }
 
-func TestCacheConn_ScanStruct(tt *T) {
+func TestCacheConn_Struct(tt *T) {
 	t := NewTester(tt)
 	conn := cacheEngine.Get()
 	defer func() {
@@ -51,4 +51,23 @@ func TestCacheConn_ScanStruct(tt *T) {
 	container := Dummy{}
 	t.NoError(conn.GetStruct(key, &container))
 	t.Is(dummy, container)
+}
+
+func TestCacheCoon_Bytes(tt *T) {
+	t := NewTester(tt)
+	conn := cacheEngine.Get()
+	defer func() {
+		t.NoError(conn.Close())
+	}()
+
+	var (
+		key   = "MYSTERIOUS_BYTES"
+		bytes = []byte("this is a mysterious string")
+	)
+
+	t.NoError(conn.SetBytes(key, bytes))
+
+	got, err := conn.GetBytes(key)
+	t.NoError(err)
+	t.Is(bytes, got)
 }
