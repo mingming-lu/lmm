@@ -1,11 +1,17 @@
 package testing
 
-import "github.com/gomodule/redigo/redis"
+import (
+	"github.com/gomodule/redigo/redis"
+)
 
 func TestCacheGet(tt *T) {
 	t := NewTester(tt)
 
 	conn := cache.Get()
+	defer func() {
+		t.NoError(conn.Close())
+	}()
+
 	_, err := conn.Do("PING")
 	t.NoError(err)
 }
@@ -13,6 +19,9 @@ func TestCacheGet(tt *T) {
 func TestCacheConn_SetString(tt *T) {
 	t := NewTester(tt)
 	conn := cache.Get()
+	defer func() {
+		t.NoError(conn.Close())
+	}()
 
 	s := "ready go"
 
