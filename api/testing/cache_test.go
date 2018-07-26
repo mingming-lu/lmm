@@ -23,7 +23,7 @@ func TestCacheConn_String(tt *T) {
 		str = "ready go !"
 	)
 
-	t.NoError(conn.SetString(key, str))
+	t.NoError(conn.Set(key, str))
 
 	got, err := conn.GetString(key)
 	t.NoError(err)
@@ -65,7 +65,7 @@ func TestCacheCoon_Bytes(tt *T) {
 		bytes = []byte("this is a mysterious string")
 	)
 
-	t.NoError(conn.SetBytes(key, bytes))
+	t.NoError(conn.Set(key, bytes))
 
 	got, err := conn.GetBytes(key)
 	t.NoError(err)
