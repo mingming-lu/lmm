@@ -4,7 +4,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-func TestCacheGet(tt *T) {
+func TestCacheGetConn(tt *T) {
 	t := NewTester(tt)
 
 	conn := cache.Get()
