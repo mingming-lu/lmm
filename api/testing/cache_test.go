@@ -1,41 +1,38 @@
 package testing
 
-import (
-	"github.com/gomodule/redigo/redis"
-)
-
 func TestCacheGetConn(tt *T) {
 	t := NewTester(tt)
 
-	conn := cache.Get()
+	conn := cacheEngine.Get()
 	defer func() {
 		t.NoError(conn.Close())
 	}()
 
-	_, err := conn.Do("PING")
-	t.NoError(err)
+	t.NoError(conn.Ping())
 }
 
 func TestCacheConn_SetString(tt *T) {
 	t := NewTester(tt)
-	conn := cache.Get()
+	conn := cacheEngine.Get()
 	defer func() {
 		t.NoError(conn.Close())
 	}()
 
-	s := "ready go"
+	var (
+		key = "MYSTERIOUS_STR"
+		str = "ready go !"
+	)
 
-	_, err := conn.Do("SET", "MYSTERIOUS_KEY", s)
-	t.NoError(err)
+	t.NoError(conn.SetString(key, str))
 
-	sGot, err := redis.String(conn.Do("GET", "MYSTERIOUS_KEY"))
+	got, err := conn.GetString(key)
 	t.NoError(err)
-	t.Is(s, sGot)
+	t.Is(str, got)
 }
 
 func TestCacheConn_ScanStruct(tt *T) {
 	t := NewTester(tt)
-	conn := cache.Get()
+	conn := cacheEngine.Get()
 	defer func() {
 		t.NoError(conn.Close())
 	}()
@@ -44,18 +41,14 @@ func TestCacheConn_ScanStruct(tt *T) {
 		Message string `redis:"message"`
 	}
 
-	dummy := Dummy{Message: "dummy message"}
+	var (
+		key   = "MYSTERIOUS_STRUCT"
+		dummy = Dummy{Message: "dummy message"}
+	)
 
-	_, err := conn.Do("HSET", redis.Args{}.Add("MYSTERIOUS_STRUCT").AddFlat(&dummy)...)
-	t.NoError(err)
+	t.NoError(conn.SetStruct(key, &dummy))
 
-	reply, err := conn.Do("HGETALL", "MYSTERIOUS_STRUCT")
-	t.NoError(err)
-
-	values, err := redis.Values(reply, err)
-	t.NoError(err)
-
-	scanned := Dummy{}
-	t.NoError(redis.ScanStruct(values, &scanned))
-	t.Is(dummy, scanned)
+	container := Dummy{}
+	t.NoError(conn.GetStruct(key, &container))
+	t.Is(dummy, container)
 }

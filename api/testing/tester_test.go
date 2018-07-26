@@ -8,7 +8,7 @@ import (
 
 func TestInit(t *testing.T) {
 	tester := NewTester(t)
-	_, err := db.Query("SHOW TABLES")
+	_, err := dbEngine.Query("SHOW TABLES")
 	tester.NoError(err)
 }
 
