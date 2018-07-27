@@ -56,15 +56,33 @@ func (s *ImageStorage) Remove(image *model.Image) error {
 	stmt := s.db.MustPrepare(`DELETE FROM image WHERE uid = ?`)
 	defer stmt.Close()
 
+	txn, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
 	res, err := stmt.Exec(image.ID())
+	if err != nil {
+		txn.Rollback()
+		return err
+	}
 
 	if rowsAffected, e := res.RowsAffected(); e != nil {
+		txn.Rollback()
 		return e
 	} else if rowsAffected == 0 {
+		txn.Rollback()
 		return domain.ErrNoSuchImage
 	}
 
-	return err
+	if s.staticRepository != nil {
+		if err := s.staticRepository.Delete(storage.Image, image.ID()); err != nil {
+			txn.Rollback()
+			return err
+		}
+	}
+
+	return txn.Commit()
 }
 
 func (s *ImageStorage) FindByID(id string) (*model.Image, error) {
