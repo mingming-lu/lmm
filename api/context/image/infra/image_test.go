@@ -3,6 +3,7 @@ package infra
 import (
 	"lmm/api/context/image/domain"
 	"lmm/api/context/image/domain/factory"
+	"lmm/api/storage/static"
 	"lmm/api/testing"
 )
 
@@ -63,4 +64,15 @@ func TestFindImageByID_NotFound(tt *testing.T) {
 	modelFound, err := repo.FindByID(model.ID())
 	t.IsError(domain.ErrNoSuchImage, err)
 	t.Nil(modelFound)
+}
+
+func TestAddImage_StaticFile(tt *testing.T) {
+	t := testing.NewTester(tt)
+	repo := NewImageStorage(testing.DB())
+	repo.SetStaticRepository(&static.LocalStaticRepository{})
+
+	model := factory.NewImage(1)
+
+	t.NoError(repo.Add(model.WrapData(nil)))
+	t.NoError(repo.Remove(model))
 }
