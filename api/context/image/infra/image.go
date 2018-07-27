@@ -75,11 +75,13 @@ func (s *ImageStorage) Remove(image *model.Image) error {
 		return domain.ErrNoSuchImage
 	}
 
-	if s.staticRepository != nil {
-		if err := s.staticRepository.Delete(storage.Image, image.ID()); err != nil {
-			txn.Rollback()
-			return err
-		}
+	if s.staticRepository == nil {
+		return txn.Commit()
+	}
+
+	if err := s.staticRepository.Delete(storage.Image, image.ID()); err != nil {
+		txn.Rollback()
+		return err
 	}
 
 	return txn.Commit()
