@@ -8,16 +8,16 @@ import (
 )
 
 type ImageStorage struct {
-	db       *storage.DB
-	uploader storage.ImageUploader
+	db               *storage.DB
+	staticRepository storage.StaticRepository
 }
 
 func NewImageStorage(db *storage.DB) *ImageStorage {
 	return &ImageStorage{db: db}
 }
 
-func (s *ImageStorage) SetUploader(uploader storage.ImageUploader) {
-	s.uploader = uploader
+func (s *ImageStorage) SetStaticRepository(repo storage.StaticRepository) {
+	s.staticRepository = repo
 }
 
 func (s *ImageStorage) Add(image *model.ImageWithData) error {
@@ -40,11 +40,11 @@ func (s *ImageStorage) Add(image *model.ImageWithData) error {
 		return err
 	}
 
-	if s.uploader == nil {
+	if s.staticRepository == nil {
 		return txn.Commit()
 	}
 
-	if err := s.uploader.Uploade(image.ID(), image.Data()); err != nil {
+	if err := s.staticRepository.Upload(storage.Image, image.ID(), image.Data()); err != nil {
 		txn.Rollback()
 		return domain.ErrFailedToUpload
 	}
