@@ -1,14 +1,18 @@
 package factory
 
 import (
-	"lmm/api/context/image/domain/model"
-	"lmm/api/utils/uuid"
+	"encoding/base64"
 	"time"
+
+	"github.com/google/uuid"
+
+	"lmm/api/context/image/domain/model"
 )
 
 func NewImage(userID uint64) *model.Image {
-	id := uuid.New()
+	id := uuid.New().String()
+	hashedID := base64.RawURLEncoding.EncodeToString([]byte(id))
 	createdAt := time.Now()
 
-	return model.NewImage(id, userID, createdAt)
+	return model.NewImage(hashedID, userID, createdAt)
 }

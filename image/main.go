@@ -27,7 +27,9 @@ func ensureDir(name string) string {
 	path := where() + "/" + name
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, os.ModePerm)
+		if err := os.Mkdir(path, os.ModePerm); err != nil {
+			panic(err)
+		}
 	} else if err != nil {
 		log.Fatal(err)
 	}
