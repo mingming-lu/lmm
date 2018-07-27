@@ -41,5 +41,5 @@ func (repo *LocalStaticRepository) Upload(t storage.UploadType, name string, dat
 }
 
 func (repo *LocalStaticRepository) Delete(t storage.UploadType, name string) error {
-	return nil
+	return os.Remove(toDir(t) + name)
 }
