@@ -50,6 +50,14 @@ services:
     command: go run /go/src/lmm/image/main.go
     environment:
       TZ: Asia/Tokyo
+  static:
+    image: golang:1.9
+    volumes:
+      - ../static/src:/go/src/lmm/static
+      - ../static/images:/static/images
+    command: go run /go/src/lmm/static/main.go
+    environment:
+      TZ: Asia/Tokyo
   manager:
     image: node:9.9
     volumes:
@@ -90,9 +98,11 @@ services:
       - docs
       - image
       - manager
+      - static
     links:
       - api:lmm-api
       - app:lmm-app
       - docs:lmm-docs
       - image:lmm-image
       - manager:lmm-manager
+      - static:lmm-static
