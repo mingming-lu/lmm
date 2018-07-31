@@ -43,18 +43,10 @@ services:
       - ../docs/api:/usr/share/nginx/html/api
     environment:
       API_URL: api/index.yml
-  image:
-    image: golang:1.9
-    volumes:
-      - ../image:/go/src/lmm/image
-    command: go run /go/src/lmm/image/main.go
-    environment:
-      TZ: Asia/Tokyo
   static:
     image: golang:1.9
     volumes:
       - ../static/src:/go/src/lmm/static
-      - ../static/images:/static/images
     command: go run /go/src/lmm/static/main.go
     environment:
       TZ: Asia/Tokyo
@@ -96,13 +88,11 @@ services:
       - api
       - app
       - docs
-      - image
       - manager
       - static
     links:
       - api:lmm-api
       - app:lmm-app
       - docs:lmm-docs
-      - image:lmm-image
       - manager:lmm-manager
       - static:lmm-static
