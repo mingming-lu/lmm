@@ -80,6 +80,7 @@ services:
       - ./nginx/log:/var/log/nginx
       - ./nginx/conf:/etc/nginx/conf
       - ./nginx/modules/:/etc/nginx/modules
+      - ../static/images:/static/images
     environment:
       TZ: Asia/Tokyo
     ports:
