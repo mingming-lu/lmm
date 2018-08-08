@@ -72,23 +72,23 @@ export default {
   },
   methods: {
     fetchBlog () {
-      axios.get(process.env.API_URL_BASE + '/v1/users/1/blog').then(res => {
-        this.blogList = res.data
+      axios.get(process.env.API_URL_BASE + '/v1/blog').then(res => {
+        this.blogList = res.data.blog
         this.isBlogListLoaded = true
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchCategories () {
-      axios.get(process.env.API_URL_BASE + '/v1/users/1/categories').then(res => {
-        this.categories = res.data
+      axios.get(process.env.API_URL_BASE + '/v1/categories').then(res => {
+        this.categories = res.data.categories
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get(process.env.API_URL_BASE + '/v1/users/1/tags').then(res => {
-        this.tags = res.data
+      axios.get(process.env.API_URL_BASE + '/v1/tags').then(res => {
+        this.tags = res.data.tags
       }).catch(e => {
         console.log(e.response.data)
       })
