@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -24,6 +25,12 @@ var (
 	ErrTokenExpired       = errors.New("Token expired")
 	ErrNotBase64Encoded   = errors.New("Not base64 encoded")
 )
+
+func init() {
+	if len(key) == 0 {
+		log.Fatalln("token key not set")
+	}
+}
 
 // EncodeToken convert a token string into base64({timestamp}:{token}) format
 func EncodeToken(targetToken string) string {
