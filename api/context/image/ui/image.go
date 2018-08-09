@@ -86,3 +86,15 @@ func openImage(fh *multipart.FileHeader) ([]byte, error) {
 
 	return ioutil.ReadAll(f)
 }
+
+func (ui *UI) LoadImagesByPage(c *http.Context) {
+
+}
+
+func (ui *UI) SetAsPhoto(c *http.Context) {
+
+}
+
+func (ui *UI) RemoveFromPhoto(c *http.Context) {
+
+}

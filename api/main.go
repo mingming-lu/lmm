@@ -67,13 +67,9 @@ func main() {
 
 	// image
 	router.POST("/v1/images", accountUI.BearerAuth(imageUI.Upload))
+	router.GET("/v1/images", imageUI.LoadImagesByPage)
+	router.PUT("/v1/images/:image/photo", accountUI.BearerAuth(imageUI.SetAsPhoto))
+	router.DELETE("/v1/images/:image/photo", accountUI.BearerAuth(imageUI.SetAsPhoto))
 
 	http.Serve(":8002", router)
 }
-
-// // image
-// router.GET("/v1/users/:user/images", image.GetAllImages)
-// router.GET("/v1/users/:user/images/photos", image.GetPhotos)
-// router.POST("/v1/images", image.Upload)
-// router.PUT("/v1/images/putPhoto", image.PutPhoto)
-// router.PUT("/v1/images/removePhoto", image.RemovePhoto)
