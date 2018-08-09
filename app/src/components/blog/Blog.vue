@@ -63,6 +63,8 @@ export default {
     const id = match[1]
     this.blogID = id
     this.fetchBlog()
+    this.fetchCategory()
+    this.fetchTags()
     this.calcIsMobile()
     window.addEventListener('resize', this.calcIsMobile)
     window.addEventListener('scroll', this.calcProgress)
@@ -90,14 +92,34 @@ export default {
         this.title = blog.title
         this.createdAt = blog.created_at
         this.updatedAt = blog.updated_at
-        this.category = blog.category
-        this.tags = blog.tags
 
         // prepare subtitles and their links
         const text = md.render(blog.text)
         const results = this.extractSubtitles(text, this.$route.path)
         this.text = results[0]
         this.subtitles = results[1]
+      }).catch(e => {
+        if (e.response) {
+          console.log(e.response.data)
+        } else {
+          console.log(e)
+        }
+      })
+    },
+    fetchCategory: function () {
+      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/category').then(res => {
+        this.category = res.data
+      }).catch(e => {
+        if (e.response) {
+          console.log(e.response.data)
+        } else {
+          console.log(e)
+        }
+      })
+    },
+    fetchTags: function () {
+      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/tags').then(res => {
+        this.tags = res.data.tags
       }).catch(e => {
         if (e.response) {
           console.log(e.response.data)
