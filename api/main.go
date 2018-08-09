@@ -5,6 +5,8 @@ import (
 	account "lmm/api/context/account/ui"
 	blogInfra "lmm/api/context/blog/infra"
 	blog "lmm/api/context/blog/ui"
+	imageInfra "lmm/api/context/image/infra"
+	img "lmm/api/context/image/ui"
 
 	"lmm/api/http"
 	"lmm/api/storage"
@@ -13,6 +15,7 @@ import (
 var (
 	accountUI *account.UI
 	blogUI    *blog.UI
+	imageUI   *img.UI
 )
 
 func initUIs(db *storage.DB) {
@@ -23,6 +26,9 @@ func initUIs(db *storage.DB) {
 	categoryRepo := blogInfra.NewCategoryStorage(db)
 	tagRepo := blogInfra.NewTagStorage(db)
 	blogUI = blog.New(blogRepo, categoryRepo, tagRepo)
+
+	imgRepo := imageInfra.NewImageStorage(db)
+	imageUI = img.New(imgRepo)
 }
 
 func main() {
@@ -58,6 +64,9 @@ func main() {
 	router.GET("/v1/tags", blogUI.GetAllTags)
 	router.PUT("/v1/tags/:tag", accountUI.BearerAuth(blogUI.UpdateTag))
 	router.DELETE("/v1/tags/:tag", accountUI.BearerAuth(blogUI.DeleteTag))
+
+	// image
+	router.POST("/v1/images", accountUI.BearerAuth(imageUI.Upload))
 
 	http.Serve(":8002", router)
 }
