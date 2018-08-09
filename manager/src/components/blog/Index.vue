@@ -44,8 +44,8 @@ export default {
       this.fetchCategories()
     },
     fetchBlogList () {
-      axios.get(process.env.API_URL_BASE + '/v1/users/1/blog').then(res => {
-        this.blogList = res.data
+      axios.get(process.env.API_URL_BASE + '/v1/blog').then(res => {
+        this.blogList = res.data.blog
       }).catch(e => {
         console.log(e.response.data)
       })
@@ -53,8 +53,8 @@ export default {
     },
     fetchCategories () {
       this.newCategoryName = ''
-      axios.get(process.env.API_URL_BASE + '/v1/users/1/categories').then(res => {
-        this.categories = res.data
+      axios.get(process.env.API_URL_BASE + '/v1/categories').then(res => {
+        this.categories = res.data.categories
       }).catch(e => {
         console.log(e.response.data)
       })

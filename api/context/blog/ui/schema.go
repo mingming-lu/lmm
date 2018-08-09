@@ -9,17 +9,17 @@ type Tag struct {
 }
 
 type TagListEntry struct {
-	ID   uint64 `json:"id"`
 	Name string `json:"name"`
 }
 
-type Tags []TagListEntry
+type TagList struct {
+	Tags []TagListEntry `json:"tags"`
+}
 
-func tagsToJSON(models []*model.Tag) Tags {
-	tags := make(Tags, len(models))
+func tagsToJSON(models []*model.Tag) TagList {
+	tags := make([]TagListEntry, len(models))
 	for index, model := range models {
-		tags[index].ID = model.ID()
 		tags[index].Name = model.Name()
 	}
-	return tags
+	return TagList{Tags: tags}
 }
