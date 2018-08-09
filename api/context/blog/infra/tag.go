@@ -35,7 +35,7 @@ func (s *TagStorage) FindByID(id uint64) (*model.Tag, error) {
 }
 
 func (s *TagStorage) FindAll() ([]*model.Tag, error) {
-	return s.selectRows(`SELECT id, blog, name FROM tag ORDER BY name ASC`)
+	return s.selectRows(`SELECT id, blog, name FROM tag GROUP BY name ORDER BY name ASC`)
 }
 
 func (s *TagStorage) FindAllByBlog(blog *model.Blog) ([]*model.Tag, error) {

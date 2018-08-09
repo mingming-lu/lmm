@@ -25,21 +25,22 @@ export default {
     verify () {
       axios.get(process.env.API_URL_BASE + '/v1/verify', {
         headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
+          'Authorization': 'Bearer ' + localStorage.getItem('token'),
+          'Content-Type': 'application/json'
         }
       }).then(res => {
         this.username = localStorage.getItem('username')
       }).catch(e => {
         // go to /signin if 401 or other error catched
-        this.clearLocalStorage()
+        this.clearUserAuthorization()
         this.$router.push('/signin')
       })
     },
     signout () {
-      this.clearLocalStorage()
+      this.clearUserAuthorization()
       location.reload()
     },
-    clearLocalStorage () {
+    clearUserAuthorization () {
       localStorage.removeItem('token')
       localStorage.removeItem('username')
     }
