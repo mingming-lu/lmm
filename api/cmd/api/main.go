@@ -8,7 +8,8 @@ import (
 
 func main() {
 	db := storage.NewDB()
-	router := api.NewRouter(db, nil)
+	cache := storage.NewCacheEngine()
+	router := api.NewRouter(db, cache)
 
 	http.Serve(":8002", router)
 }
