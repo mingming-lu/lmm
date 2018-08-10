@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	accountInfra "lmm/api/context/account/infra"
@@ -12,28 +12,17 @@ import (
 	"lmm/api/storage"
 )
 
-var (
-	accountUI *account.UI
-	blogUI    *blog.UI
-	imageUI   *img.UI
-)
-
-func initUIs(db *storage.DB) {
+func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	userRepo := accountInfra.NewUserStorage(db)
-	accountUI = account.New(userRepo)
+	accountUI := account.New(userRepo)
 
 	blogRepo := blogInfra.NewBlogStorage(db)
 	categoryRepo := blogInfra.NewCategoryStorage(db)
 	tagRepo := blogInfra.NewTagStorage(db)
-	blogUI = blog.New(blogRepo, categoryRepo, tagRepo)
+	blogUI := blog.New(blogRepo, categoryRepo, tagRepo)
 
 	imgRepo := imageInfra.NewImageStorage(db)
-	imageUI = img.New(imgRepo)
-}
-
-func main() {
-	db := storage.NewDB()
-	initUIs(db)
+	imageUI := img.New(imgRepo)
 
 	router := http.NewRouter()
 
@@ -71,5 +60,5 @@ func main() {
 	router.PUT("/v1/images/:image/photo", accountUI.BearerAuth(imageUI.SetAsPhoto))
 	router.DELETE("/v1/images/:image/photo", accountUI.BearerAuth(imageUI.SetAsPhoto))
 
-	http.Serve(":8002", router)
+	return router
 }
