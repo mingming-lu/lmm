@@ -49,7 +49,7 @@ func (app *AppService) GetAllCategories() (*Categories, error) {
 	if err != nil {
 		return nil, err
 	}
-	categories := make([]*Category, len(categoryModels))
+	categories := make([]Category, len(categoryModels))
 	for index, category := range categoryModels {
 		categories[index].Name = category.Name()
 	}

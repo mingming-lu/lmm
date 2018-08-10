@@ -13,8 +13,8 @@ type BlogContent struct {
 }
 
 type BlogListPage struct {
-	Blog     []*Blog `json:"blog"`
-	NextPage int     `json:"next_page"`
+	Blog     []Blog `json:"blog"`
+	NextPage int    `json:"next_page"`
 }
 
 type Category struct {
@@ -22,5 +22,5 @@ type Category struct {
 }
 
 type Categories struct {
-	Categories []*Category `json:"categories"`
+	Categories []Category `json:"categories"`
 }
