@@ -41,7 +41,7 @@ export default {
         text: this.text
       }, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         alert(res.data)
@@ -65,7 +65,7 @@ export default {
         id: this.categoryID
       }, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         alert(res.data)
@@ -78,7 +78,7 @@ export default {
         name: name
       }, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         alert(res.data)
@@ -90,7 +90,7 @@ export default {
     onRemoveTag (tag) {
       axios.delete(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/tags/' + tag.id, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         alert('deleted')

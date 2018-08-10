@@ -44,10 +44,10 @@ func (app *AppService) GetBlogListByPage(countStr, pageStr string) (*BlogListPag
 		return nil, err
 	}
 
-	blogPage := make([]*Blog, len(blogList))
+	blogPage := make([]Blog, len(blogList))
 
 	for index, blog := range blogList {
-		data := &Blog{
+		data := Blog{
 			ID: blog.ID(),
 			BlogContent: BlogContent{
 				Title: blog.Title(),

@@ -64,7 +64,7 @@ export default {
         name: name
       }, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         console.log(res.data)
@@ -80,7 +80,7 @@ export default {
         name: name
       }, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         console.log(res.data)
