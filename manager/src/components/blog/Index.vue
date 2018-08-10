@@ -64,7 +64,7 @@ export default {
         name: this.newCategoryName
       }, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         alert(res.data)
@@ -79,7 +79,7 @@ export default {
         name: document.getElementById(category.name).value
       }, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         alert(res.data)
@@ -92,7 +92,7 @@ export default {
     onDeleteCategory (category) {
       axios.delete(process.env.API_URL_BASE + '/v1/categories/' + category.id, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer' + localStorage.getItem('token')
         }
       }).then(res => {
         alert('deleted')
