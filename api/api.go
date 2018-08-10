@@ -7,6 +7,7 @@ import (
 	blog "lmm/api/context/blog/ui"
 	imageInfra "lmm/api/context/image/infra"
 	img "lmm/api/context/image/ui"
+	"lmm/api/storage/static"
 
 	"lmm/api/http"
 	"lmm/api/storage"
@@ -22,6 +23,7 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	blogUI := blog.New(blogRepo, categoryRepo, tagRepo)
 
 	imgRepo := imageInfra.NewImageStorage(db)
+	imgRepo.SetStaticRepository(static.NewLocalStaticRepository())
 	imageUI := img.New(imgRepo)
 
 	router := http.NewRouter()
