@@ -9,7 +9,7 @@ services:
     command: bash
   app:
     command: echo "not implemented"
-  image:
+  static:
     command: echo "not implemented"
   manager:
     command: echo "not implemented"
