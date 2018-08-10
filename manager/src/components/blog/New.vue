@@ -31,7 +31,7 @@ export default {
         text: this.text
       }, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         alert(res.data)

@@ -47,7 +47,7 @@ export default {
       })
       axios.post(process.env.API_URL_BASE + '/v1/images', formData, {
         headers: {
-          Authorization: localStorage.getItem('token')
+          Authorization: 'Bearer ' + localStorage.getItem('token')
         }
       }).then(res => {
         alert(res.data)
