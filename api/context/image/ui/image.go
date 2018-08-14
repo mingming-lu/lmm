@@ -20,7 +20,7 @@ const (
 
 var (
 	errImageMaxSizeExceeded = errors.New("the size of image to upload is up to 2MB")
-	errNotAllowdImageType   = errors.New("only gif, jpeg, png allowed")
+	errNotAllowedImageType  = errors.New("only gif, jpeg, png allowed")
 )
 
 type UI struct {
@@ -69,7 +69,7 @@ func openImage(fh *multipart.FileHeader) ([]byte, error) {
 	switch contentType {
 	case "image/gif", "image/jpeg", "image/png":
 	default:
-		return nil, errNotAllowdImageType
+		return nil, errNotAllowedImageType
 	}
 
 	// check size
