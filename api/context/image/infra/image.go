@@ -154,3 +154,30 @@ func (s *ImageStorage) MarkAs(image *model.Image, t domain.ImageType) error {
 
 	return nil
 }
+
+func (s *ImageStorage) searchBySQL(sql string, args ...interface{}) ([]*model.Image, error) {
+	stmt := s.db.MustPrepare(sql)
+	defer stmt.Close()
+
+	itr, err := stmt.Query(args...)
+	if err != nil {
+		return nil, err
+	}
+	defer itr.Close()
+
+	var (
+		imageID   string
+		userID    uint64
+		createdAt time.Time
+	)
+
+	models := make([]*model.Image, 0)
+	for itr.Next() {
+		if err := itr.Scan(&imageID, &userID, &createdAt); err != nil {
+			return nil, err
+		}
+		models = append(models, model.NewImage(imageID, userID, createdAt))
+	}
+
+	return models, nil
+}
