@@ -47,3 +47,19 @@ func (app *AppService) FetchImages(countStr, pageStr string) ([]*model.Image, bo
 	}
 	return app.imageRepo.Find(count, page)
 }
+
+func (app *AppService) MarkImageAs(imageID, imageType string) error {
+	model, err := app.imageRepo.FindByID(imageID)
+	if err != nil {
+		return err
+	}
+	switch imageType {
+	case "":
+		return domain.ErrEmptyImageType
+	case "normal":
+		return app.imageRepo.MarkAs(model, domain.ImageTypeNormal)
+	case "photo":
+		return app.imageRepo.MarkAs(model, domain.ImageTypePhoto)
+	}
+	return domain.ErrNoSuchImageType
+}
