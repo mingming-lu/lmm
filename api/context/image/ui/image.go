@@ -8,6 +8,7 @@ import (
 
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/image/application"
+	"lmm/api/context/image/domain"
 	"lmm/api/context/image/domain/repository"
 	"lmm/api/http"
 )
@@ -88,7 +89,22 @@ func openImage(fh *multipart.FileHeader) ([]byte, error) {
 }
 
 func (ui *UI) LoadImagesByPage(c *http.Context) {
-
+	models, hasNextPage, err := ui.app.FetchImages(c.Request.Query("count"), c.Request.Query("page"))
+	switch err {
+	case nil:
+		images := make([]Image, len(models))
+		for index, model := range models {
+			images[index].Name = model.ID()
+		}
+		c.JSON(http.StatusOK, ImagesPage{
+			Images:      images,
+			HasNextPage: hasNextPage,
+		})
+	case domain.ErrInvalidPage, domain.ErrInvalidCount:
+		c.String(http.StatusBadRequest, err.Error())
+	default:
+		panic(err.Error())
+	}
 }
 
 func (ui *UI) SetAsPhoto(c *http.Context) {
