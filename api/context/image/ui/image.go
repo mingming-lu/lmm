@@ -113,6 +113,8 @@ func (ui *UI) MarkImage(c *http.Context) {
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "Success")
+	case domain.ErrEmptyImageType:
+		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrMarkImageFailed, domain.ErrNoSuchImage:
 		c.String(http.StatusNotFound, err.Error())
 	default:
