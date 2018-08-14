@@ -49,32 +49,9 @@ CREATE TABLE IF NOT EXISTS `image` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`uid` VARCHAR(255) NOT NULL,
 	`user` BIGINT UNSIGNED NOT NULL,
+	`type` TINYINT UNSIGNED NOT NULL DEFAULT 0,
 	`created_at` TIMESTAMP NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE `uid` (`uid`),
-	INDEX `created_at` (`created_at`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-
-CREATE TABLE IF NOT EXISTS photo (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	image int unsigned NOT NULL,
-	deleted tinyint unsigned NOT NULL DEFAULT 0,
-	last_modified timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (id),
-	UNIQUE `image` (`image`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-
-CREATE TABLE IF NOT EXISTS project (
-	id int unsigned NOT NULL AUTO_INCREMENT,
-	user int unsigned NOT NULL,
-	name varchar(63) NOT NULL,
-	icon varchar(255) NOT NULL DEFAULT "",
-	url varchar(255) NOT NULL DEFAULT "",
-	description varchar(1023) NOT NULL DEFAULT "",
-	created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	from_date date,
-	to_date date,
-	PRIMARY KEY (id),
-	UNIQUE (user, name)
+	INDEX `created_at` (`type`, `created_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
