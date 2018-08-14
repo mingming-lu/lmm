@@ -142,3 +142,15 @@ func (s *ImageStorage) Find(count, page int) ([]*model.Image, bool, error) {
 
 	return models, hasNextPage, nil
 }
+
+func (s *ImageStorage) MarkAs(image *model.Image, t domain.ImageType) error {
+	stmt := s.db.MustPrepare(`UPDATE image SET type = ? WHERE uid = ?`)
+	defer stmt.Close()
+
+	_, err := stmt.Exec(t, image.ID())
+	if err != nil {
+		return domain.ErrMarkImageFailed
+	}
+
+	return nil
+}

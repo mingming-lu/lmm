@@ -107,10 +107,17 @@ func (ui *UI) LoadImagesByPage(c *http.Context) {
 	}
 }
 
-func (ui *UI) SetAsPhoto(c *http.Context) {
-
-}
-
-func (ui *UI) RemoveFromPhoto(c *http.Context) {
-
+func (ui *UI) MarkImage(c *http.Context) {
+	imageID := c.Request.Path.Params("image")
+	err := ui.app.MarkImageAs(imageID, c.Request.Query("type"))
+	switch err {
+	case nil:
+		c.String(http.StatusOK, "Success")
+	case domain.ErrEmptyImageType:
+		c.String(http.StatusBadRequest, err.Error())
+	case domain.ErrMarkImageFailed, domain.ErrNoSuchImage:
+		c.String(http.StatusNotFound, err.Error())
+	default:
+		panic(err.Error())
+	}
 }

@@ -59,8 +59,7 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	// image
 	router.POST("/v1/images", accountUI.BearerAuth(imageUI.Upload))
 	router.GET("/v1/images", imageUI.LoadImagesByPage)
-	router.PUT("/v1/images/:image/photo", accountUI.BearerAuth(imageUI.SetAsPhoto))
-	router.DELETE("/v1/images/:image/photo", accountUI.BearerAuth(imageUI.SetAsPhoto))
+	router.PUT("/v1/images/:image", accountUI.BearerAuth(imageUI.MarkImage))
 
 	return router
 }
