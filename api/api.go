@@ -1,33 +1,30 @@
-package main
+package api
 
 import (
 	accountInfra "lmm/api/context/account/infra"
 	account "lmm/api/context/account/ui"
 	blogInfra "lmm/api/context/blog/infra"
 	blog "lmm/api/context/blog/ui"
+	imageInfra "lmm/api/context/image/infra"
+	img "lmm/api/context/image/ui"
+	"lmm/api/storage/static"
 
 	"lmm/api/http"
 	"lmm/api/storage"
 )
 
-var (
-	accountUI *account.UI
-	blogUI    *blog.UI
-)
-
-func initUIs(db *storage.DB) {
+func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	userRepo := accountInfra.NewUserStorage(db)
-	accountUI = account.New(userRepo)
+	accountUI := account.New(userRepo)
 
 	blogRepo := blogInfra.NewBlogStorage(db)
 	categoryRepo := blogInfra.NewCategoryStorage(db)
 	tagRepo := blogInfra.NewTagStorage(db)
-	blogUI = blog.New(blogRepo, categoryRepo, tagRepo)
-}
+	blogUI := blog.New(blogRepo, categoryRepo, tagRepo)
 
-func main() {
-	db := storage.NewDB()
-	initUIs(db)
+	imgRepo := imageInfra.NewImageStorage(db)
+	imgRepo.SetStaticRepository(static.NewLocalStaticRepository())
+	imageUI := img.New(imgRepo)
 
 	router := http.NewRouter()
 
@@ -59,12 +56,11 @@ func main() {
 	router.PUT("/v1/tags/:tag", accountUI.BearerAuth(blogUI.UpdateTag))
 	router.DELETE("/v1/tags/:tag", accountUI.BearerAuth(blogUI.DeleteTag))
 
-	http.Serve(":8002", router)
-}
+	// image
+	router.POST("/v1/images", accountUI.BearerAuth(imageUI.Upload))
+	router.GET("/v1/images", imageUI.LoadImagesByPage)
+	router.PUT("/v1/images/:image/photo", accountUI.BearerAuth(imageUI.SetAsPhoto))
+	router.DELETE("/v1/images/:image/photo", accountUI.BearerAuth(imageUI.SetAsPhoto))
 
-// // image
-// router.GET("/v1/users/:user/images", image.GetAllImages)
-// router.GET("/v1/users/:user/images/photos", image.GetPhotos)
-// router.POST("/v1/images", image.Upload)
-// router.PUT("/v1/images/putPhoto", image.PutPhoto)
-// router.PUT("/v1/images/removePhoto", image.RemovePhoto)
+	return router
+}

@@ -21,9 +21,13 @@ func toDir(t storage.UploadType) string {
 	}
 }
 
-type LocalStaticRepository struct{}
+type localStaticRepository struct{}
 
-func (repo *LocalStaticRepository) Upload(t storage.UploadType, name string, data []byte) error {
+func NewLocalStaticRepository() storage.StaticRepository {
+	return &localStaticRepository{}
+}
+
+func (repo *localStaticRepository) Upload(t storage.UploadType, name string, data []byte) error {
 	path := toDir(t)
 	file, err := os.OpenFile(path+name, os.O_RDWR|os.O_CREATE|os.O_EXCL, os.ModePerm)
 	if err != nil {
@@ -40,6 +44,6 @@ func (repo *LocalStaticRepository) Upload(t storage.UploadType, name string, dat
 	return w.Flush()
 }
 
-func (repo *LocalStaticRepository) Delete(t storage.UploadType, name string) error {
+func (repo *localStaticRepository) Delete(t storage.UploadType, name string) error {
 	return os.Remove(toDir(t) + name)
 }
