@@ -24,7 +24,7 @@ func (app *AppService) UploadImage(user *account.User, data []byte) error {
 	return app.imageRepo.Add(image.WrapData(data))
 }
 
-func (app *AppService) FetchImages(countStr, pageStr string) ([]*model.Image, bool, error) {
+func (app *AppService) FetchImagesByType(imageType, countStr, pageStr string) ([]*model.Image, bool, error) {
 	if countStr == "" {
 		countStr = "100"
 	}
@@ -45,7 +45,15 @@ func (app *AppService) FetchImages(countStr, pageStr string) ([]*model.Image, bo
 	if page < 1 {
 		return nil, false, domain.ErrInvalidPage
 	}
-	return app.imageRepo.Find(count, page)
+	switch imageType {
+	case "":
+		return app.imageRepo.Find(count, page)
+	case "normal":
+		return app.imageRepo.FindByType(domain.ImageTypeNormal, count, page)
+	case "photo":
+		return app.imageRepo.FindByType(domain.ImageTypePhoto, count, page)
+	}
+	return nil, false, domain.ErrNoSuchImageType
 }
 
 func (app *AppService) MarkImageAs(imageID, imageType string) error {
