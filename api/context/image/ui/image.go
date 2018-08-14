@@ -89,7 +89,11 @@ func openImage(fh *multipart.FileHeader) ([]byte, error) {
 }
 
 func (ui *UI) LoadImagesByPage(c *http.Context) {
-	models, hasNextPage, err := ui.app.FetchImages(c.Request.Query("count"), c.Request.Query("page"))
+	models, hasNextPage, err := ui.app.FetchImagesByType(
+		c.Request.Query("type"),
+		c.Request.Query("count"),
+		c.Request.Query("page"),
+	)
 	switch err {
 	case nil:
 		images := make([]Image, len(models))
