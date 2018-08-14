@@ -14,8 +14,17 @@ func Uint64ToStr(i uint64) string {
 }
 
 func StrToInt(s string) (int, error) {
-	n, err := StrToUint64(s)
-	return int(n), err
+	i, err := ParseInt64(s)
+	return int(i), err
+}
+
+func ParseInt64(s string) (int64, error) {
+	return strconv.ParseInt(s, 10, 64)
+}
+
+func ParseUint(s string) (uint, error) {
+	i, err := StrToUint64(s)
+	return uint(i), err
 }
 
 func StrToUint64(s string) (uint64, error) {
