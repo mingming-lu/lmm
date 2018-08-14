@@ -5,6 +5,6 @@ type Image struct {
 }
 
 type ImagesPage struct {
-	HasNextPage bool    `json:"has_next_page`
+	HasNextPage bool    `json:"has_next_page"`
 	Images      []Image `json:"images"`
 }
