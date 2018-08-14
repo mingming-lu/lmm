@@ -117,7 +117,7 @@ export default {
       })
     },
     fetchCategories () {
-      axios.get(process.env.API_URL_BASE + '/v1/users/1/categories').then(res => {
+      axios.get(process.env.API_URL_BASE + '/v1/categories').then(res => {
         this.categories = res.data
       }).catch(e => {
         console.log(e.response.data)

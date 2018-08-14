@@ -2,11 +2,19 @@
   <div class="container">
     <router-link to="/image/upload" class="title">Upload</router-link>
     <div align="left">Tip: 开关按钮用来控制是否显示在画廊</div>
-    <div v-for="image in images" :key="image.name">
+    <div v-for="image in normals" :key="image.name">
       <div class="gallery">
         <img :src="imageURL(image.name)" align="top">
-        <label class="switch">
-          <input type="checkbox" :ref="image.name" :checked="true === image.isPhoto" @click="togglePhotoSwitch(image.name)">
+        <label class="switch"> <input type="checkbox" :ref="image.name" :checked="true === image.isPhoto" @click="togglePhotoSwitch(image.name)">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div v-for="image in photos" :key="image.name">
+      <div class="gallery">
+        <img :src="imageURL(image.name)" align="top">
+        <label class="switch"> <input type="checkbox" :ref="image.name" :checked="true === image.isPhoto" @click="togglePhotoSwitch(image.name)">
           <span class="slider"></span>
         </label>
       </div>
@@ -19,31 +27,35 @@ import axios from 'axios'
 export default {
   data () {
     return {
-      images: []
+      normals: [],
+      photos: []
     }
   },
   created () {
-    this.fetchImages()
+    this.fetchNormalImages()
+    this.fetchPhotos()
   },
   methods: {
-    fetchImages () {
-      axios.all([
-        axios.get(process.env.API_URL_BASE + '/v1/users/1/images'),
-        axios.get(process.env.API_URL_BASE + '/v1/users/1/images/photos')
-      ]).then(axios.spread((resImages, resPhotos) => {
-        let images = resImages.data
-        let photos = resPhotos.data
-        images.forEach((image, index) => {
-          let isPhoto = () => {
-            return photos.filter(photo => {
-              return photo.name === image.name
-            }).length !== 0
-          }
-          images[index].isPhoto = isPhoto()
+    fetchNormalImages () {
+      axios.get(process.env.API_URL_BASE + '/v1/images?type=normal').then(res => {
+        let normals = res.data.images
+        normals.forEach((image, index) => {
+          normals[index].isPhoto = false
         })
-        this.images = images
-      })).catch(e => {
-        console.log(e.response.data)
+        this.normals = normals
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    fetchPhotos () {
+      axios.get(process.env.API_URL_BASE + '/v1/images?type=photo').then(res => {
+        let photos = res.data.images
+        photos.forEach((image, index) => {
+          photos[index].isPhoto = true
+        })
+        this.photos = photos
+      }).catch(err => {
+        console.log(err)
       })
     },
     imageURL: (name) => {
@@ -60,8 +72,7 @@ export default {
     },
     turnOnPhotoSwitch (name) {
       var sw = this.$refs[name][0]
-      axios.put(process.env.API_URL_BASE + '/v1/images/putPhoto', {
-        name: name
+      axios.put(process.env.API_URL_BASE + '/v1/images/' + name + '?type=photo', {
       }, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token')
@@ -76,8 +87,7 @@ export default {
     },
     turnOffPhotoSwitch (name) {
       var sw = this.$refs[name][0]
-      axios.put(process.env.API_URL_BASE + '/v1/images/removePhoto', {
-        name: name
+      axios.put(process.env.API_URL_BASE + '/v1/images/' + name + '?type=normal', {
       }, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token')
