@@ -121,12 +121,16 @@ func (s *ImageStorage) Find(count, page int) ([]*model.Image, bool, error) {
 		hasNextPage = true
 	}
 
-	models := make([]*model.Image, 0)
-	for itr.Next() {
-		if err := itr.Scan(&imageID, &userID, &createdAt); err != nil {
-			return nil, false, err
-		}
-		models = append(models, model.NewImage(imageID, userID, createdAt))
+	return models, hasNextPage, nil
+}
+
+func (s *ImageStorage) FindByType(t domain.ImageType, count, page int) ([]*model.Image, bool, error) {
+	models, err := s.searchBySQL(
+		`SELECT uid, user, created_at FROM image WHERE type = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+		t, count+1, (page-1)*count,
+	)
+	if err != nil {
+		return nil, false, err
 	}
 
 	hasNextPage := false
