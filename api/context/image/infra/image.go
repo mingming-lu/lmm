@@ -105,3 +105,40 @@ func (s *ImageStorage) FindByID(id string) (*model.Image, error) {
 
 	return model.NewImage(imageID, imageUploaderID, imageUploadedAt), nil
 }
+
+func (s *ImageStorage) Find(count, page int) ([]*model.Image, bool, error) {
+	stmt := s.db.MustPrepare(`
+		SELECT uid, user, created_at FROM image
+		ORDER BY created_at DESC
+		LIMIT ? OFFSET ?
+	`)
+	defer stmt.Close()
+
+	itr, err := stmt.Query(count+1, count*(page-1))
+	if err != nil {
+		return nil, false, err
+	}
+	defer itr.Close()
+
+	var (
+		imageID   string
+		userID    uint64
+		createdAt time.Time
+	)
+
+	models := make([]*model.Image, 0)
+	for itr.Next() {
+		if err := itr.Scan(&imageID, &userID, &createdAt); err != nil {
+			return nil, false, err
+		}
+		models = append(models, model.NewImage(imageID, userID, createdAt))
+	}
+
+	hasNextPage := false
+	if len(models) > count {
+		models = models[:count]
+		hasNextPage = true
+	}
+
+	return models, hasNextPage, nil
+}
