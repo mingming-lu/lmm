@@ -1,4 +1,4 @@
 package model
 
-type Entiry interface {
+type Entity interface {
 }
