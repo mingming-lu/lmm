@@ -1,29 +1,44 @@
 package model
 
 import (
-	"lmm/api/context/article/domain"
-	"lmm/api/utils/rand"
-	"lmm/api/utils/strings"
+	"errors"
+	"time"
 
-	"regexp"
+	"lmm/api/context/base/domain/model"
 )
 
 var (
-	patternArticleID    = regexp.MustCompile("[0-9a-Z]{6}")
-	patternArticleTitle = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_ ]$")
+	ErrArticleTextNoChange = errors.New("article text no change")
+	ErrTagAlreadyAdded     = errors.New("the tag has already been added")
+	ErrTagNotAdded         = errors.New("tag not added")
 )
 
-type ArticleID struct {
-	id string
+type Article struct {
+	model.Entity
+	id             ArticleID
+	text           ArticleText
+	writer         ArticleWriter
+	postAt         time.Time
+	lastModifiedAt time.Time
+	tags           []*Tag
 }
 
-var emptyArticleID ArticleID = ArticleID{id: ""}
-
-func NewArticleID(s string) (ArticleID, error) {
-	if !patternArticleID.MatchString(s) {
-		return emptyArticleID, domain.ErrInvalidArticleID
+func NewArticle(
+	articleID ArticleID,
+	text ArticleText,
+	writer ArticleWriter,
+	postAt time.Time,
+	lastModifiedAt time.Time,
+	tags []*Tag,
+) *Article {
+	return &Article{
+		id:             articleID,
+		text:           text,
+		writer:         writer,
+		postAt:         postAt,
+		lastModifiedAt: lastModifiedAt,
+		tags:           tags,
 	}
-	return ArticleID{id: s}, nil
 }
 
 func GenerateArticleID() (ArticleID, error) {
