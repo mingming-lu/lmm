@@ -9,6 +9,27 @@ CREATE TABLE IF NOT EXISTS `user` (
 	UNIQUE `token` (`token`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
+CREATE TABLE IF NOT EXISTS `article` (
+	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`uid` VARCHAR(255) NOT NULL,
+	`writer` VARCHAR(255) NOT NULL,
+	`title` VARCHAR(255) NOT NULL,
+	`text` TEXT NOT NULL,
+	`created_at` DATETIME NOT NULL,
+	`updated_at` DATETIME NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE `uid` (`uid`),
+	INDEX `created_at` (`created_at`)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+
+CREATE TABLE IF NOT EXISTS `article_tag` (
+	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`article_uid` VARCHAR(255) NOT NULL, 
+	`name` VARCHAR(255) NOT NULL,
+	PRIMARY KEY(`id`),
+	UNIQUE `article_tag` (`article_uid`, `name`)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+
 CREATE TABLE IF NOT EXISTS `blog` (
 	`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`user` BIGINT UNSIGNED NOT NULL,
