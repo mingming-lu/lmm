@@ -30,18 +30,22 @@ func (app *AppService) NewArticle(cmd command.NewArticleCommand) (string, error)
 	return article.ID().String(), nil
 }
 
-func (app *AppService) UpdateArticle(cmd command.UpdateArticleCommand) error {
-	articleID, err := model.NewArticleID(cmd.ArticleID())
+func (app *AppService) ModifyArticleText(cmd command.UpdateArticleCommand) error {
+	article, err := app.articleWithID(cmd.ArticleID())
 	if err != nil {
 		return err
 	}
 
-	article, err := model.NewArticle(articleID, cmd.Title(), cmd.Text())
+	newArticleText, err := model.NewArticleText(cmd.ArticleTitle(), cmd.ArticleBody())
 	if err != nil {
 		return err
 	}
 
-	return app.articleRepo.Update(article)
+	if err := article.ModifyText(newArticleText); err != nil {
+		return err
+	}
+
+	return app.articleRepo.Save(article)
 }
 
 func (app *AppService) NewArticleTag(cmd command.NewArticleTagCommand) (string, error) {
