@@ -48,34 +48,46 @@ func (app *AppService) ModifyArticleText(cmd command.UpdateArticleCommand) error
 	return app.articleRepo.Save(article)
 }
 
-func (app *AppService) NewArticleTag(cmd command.NewArticleTagCommand) (string, error) {
-	articleID, err := model.NewArticleID(cmd.ArticleID())
+func (app *AppService) NewArticleTag(cmd command.NewArticleTagCommand) error {
+	article, err := app.articleWithID(cmd.ArticleID())
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	tag, err := model.NewTag(articleID, cmd.Name())
-	if err != nil {
-		return "", err
-	}
-
-	if err := app.tagRepo.Save(tag); err != nil {
-		return "", err
-	}
-
-	return tag.ID().Name(), nil
+	return app.manipulateArticleTag(cmd.TagName(), article, article.AddTag)
 }
 
 func (app *AppService) RemoveArticleTag(cmd command.RemoveArticleTagCommand) error {
-	articleID, err := model.NewArticleID(cmd.ArticleID())
+	article, err := app.articleWithID(cmd.ArticleID())
 	if err != nil {
 		return err
 	}
 
-	tag, err := model.NewTag(articleID, cmd.Name())
+	return app.manipulateArticleTag(cmd.TagName(), article, article.RemoveTag)
+}
+
+func (app *AppService) articleWithID(id string) (*model.Article, error) {
+	articleID, err := model.NewArticleID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return app.articleRepo.FindByID(articleID)
+}
+
+func (app *AppService) manipulateArticleTag(
+	tagName string,
+	article *model.Article,
+	manipulation func(*model.Tag) error,
+) error {
+	tag, err := model.NewTag(article.ID(), tagName)
 	if err != nil {
 		return err
 	}
 
-	return app.tagRepo.Remove(tag.ID())
+	if err := manipulation(tag); err != nil {
+		return err
+	}
+
+	return app.articleRepo.Save(article)
 }
