@@ -1,7 +1,9 @@
-package event
+package publisher
 
 import (
 	"errors"
+	"lmm/api/context/base/domain/event"
+	"lmm/api/context/base/domain/event/subscriber"
 	"sync"
 )
 
@@ -15,19 +17,19 @@ var (
 )
 
 type DomainEventPublisher interface {
-	Publish(DomainEvent) error
-	Subscribe(DomainEvent, DomainEventSubscriber) error
+	Publish(event.DomainEvent) error
+	Subscribe(event.DomainEvent, subscriber.DomainEventSubscriber) error
 }
 
 type domainEventPublisher struct {
-	subscriberMap map[string][]DomainEventSubscriber
+	subscriberMap map[string][]subscriber.DomainEventSubscriber
 }
 
-func DomainEventPublisherInstance() DomainEventPublisher {
+func Instance() DomainEventPublisher {
 	return publisher
 }
 
-func (p *domainEventPublisher) Publish(e DomainEvent) error {
+func (p *domainEventPublisher) Publish(e event.DomainEvent) error {
 	subscribers, ok := p.subscriberMap[e.Topic()]
 	if !ok {
 		return errors.New("not subscribed topic: '" + e.Topic() + "'")
@@ -40,7 +42,7 @@ func (p *domainEventPublisher) Publish(e DomainEvent) error {
 	return nil
 }
 
-func (p *domainEventPublisher) Subscribe(e DomainEvent, sub DomainEventSubscriber) error {
+func (p *domainEventPublisher) Subscribe(e event.DomainEvent, sub subscriber.DomainEventSubscriber) error {
 	mux.Lock()
 	defer mux.Unlock()
 
@@ -50,7 +52,7 @@ func (p *domainEventPublisher) Subscribe(e DomainEvent, sub DomainEventSubscribe
 
 	subs, ok := p.subscriberMap[e.Topic()]
 	if !ok {
-		subs = make([]DomainEventSubscriber, 1, 1)
+		subs = make([]subscriber.DomainEventSubscriber, 1, 1)
 	}
 	subs = append(subs, sub)
 	p.subscriberMap[e.Topic()] = subs
