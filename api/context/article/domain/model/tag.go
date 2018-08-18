@@ -2,6 +2,7 @@ package model
 
 import (
 	"lmm/api/context/article/domain"
+	"lmm/api/domain/model"
 	"lmm/api/utils/strings"
 
 	"regexp"
@@ -12,6 +13,7 @@ var (
 )
 
 type TagID struct {
+	model.ValueObject
 	articleID ArticleID
 	name      string
 }
@@ -24,7 +26,12 @@ func (id TagID) Name() string {
 	return id.name
 }
 
+func (id TagID) Equals(anotherID TagID) bool {
+	return (id.ArticleID() == anotherID.ArticleID()) && (id.Name() == anotherID.Name())
+}
+
 type Tag struct {
+	model.Entity
 	id TagID
 }
 
@@ -40,6 +47,10 @@ func NewTag(articleID ArticleID, name string) (*Tag, error) {
 
 func (tag *Tag) ID() TagID {
 	return tag.id
+}
+
+func (tag *Tag) Equals(anotherTag *Tag) bool {
+	return tag.ID().Equals(anotherTag.ID())
 }
 
 func validateTagName(s string) (string, error) {
