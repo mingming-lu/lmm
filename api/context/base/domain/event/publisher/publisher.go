@@ -2,9 +2,10 @@ package publisher
 
 import (
 	"errors"
+	"sync"
+
 	"lmm/api/context/base/domain/event"
 	"lmm/api/context/base/domain/event/subscriber"
-	"sync"
 )
 
 var (
