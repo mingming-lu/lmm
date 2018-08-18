@@ -4,20 +4,21 @@ import (
 	"lmm/api/context/article/application/command"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/context/article/domain/repository"
+	"lmm/api/context/article/domain/service"
 )
 
 type AppService struct {
-	articleRepo repository.ArticleRepository
-	tagRepo     repository.TagRepository
+	articlePostingService service.ArticlePostingService
+	articleRepo           repository.ArticleRepository
 }
 
 func (app *AppService) NewArticle(cmd command.NewArticleCommand) (string, error) {
-	articleID, err := model.GenerateArticleID()
-	if err != nil {
-		return "", err
-	}
-
-	article, err := model.NewArticle(articleID, cmd.Title(), cmd.Text())
+	article, err := app.articlePostingService.PostingArticle(
+		cmd.User(),
+		cmd.Title(),
+		cmd.Text(),
+		cmd.TagNames(),
+	)
 	if err != nil {
 		return "", err
 	}
