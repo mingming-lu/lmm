@@ -41,64 +41,64 @@ func NewArticle(
 	}
 }
 
-func GenerateArticleID() (ArticleID, error) {
-	return NewArticleID(rand.Base62(6))
-}
-
-func (id ArticleID) String() string {
-	return id.id
-}
-
-type Article struct {
-	id    ArticleID
-	title string
-	text  string
-}
-
-func NewArticle(articleID ArticleID, title, text string) (*Article, error) {
-	title, err := validateArticleTitle(title)
-	if err != nil {
-		return nil, err
-	}
-	return &Article{id: articleID, title: title, text: text}, nil
-}
-
 func (a *Article) ID() ArticleID {
 	return a.id
 }
 
-func (a *Article) Title() string {
-	return a.title
-}
-
-func (a *Article) Text() string {
+func (a *Article) Text() ArticleText {
 	return a.text
 }
 
-func (a *Article) ChangeTitle(newTitle string) error {
-	title, err := validateArticleTitle(newTitle)
-	if err != nil {
-		return err
-	}
-	a.title = title
-	return nil
+func (a *Article) Writer() ArticleWriter {
+	return a.writer
 }
 
-func (a *Article) ChangeText(newText string) error {
+func (a *Article) PostAt() time.Time {
+	return a.postAt
+}
+
+func (a *Article) LastModifiedAt() time.Time {
+	return a.lastModifiedAt
+}
+
+func (a *Article) Tags() []*Tag {
+	return a.tags
+}
+
+func (a *Article) setLastModifiedAt(at time.Time) {
+	a.lastModifiedAt = at
+}
+
+func (a *Article) ModifyText(newText ArticleText) error {
+	if a.Text().Equals(newText) {
+		return ErrArticleTextNoChange
+	}
+	a.setLastModifiedAt(time.Now())
 	a.text = newText
 	return nil
 }
 
-func validateArticleTitle(s string) (string, error) {
-	title := strings.TrimSpace(s)
-	if title == "" {
-		return "", domain.ErrEmptyArticleTitle
+func (a *Article) AddTag(tag *Tag) error {
+	for _, t := range a.tags {
+		if tag.Equals(t) {
+			return ErrTagAlreadyAdded
+		}
 	}
-	if len(title) > 30 {
-		return "", domain.ErrArticleTitleTooLong
+	a.tags = append(a.tags, tag)
+	return nil
+}
+
+func (a *Article) RemoveTag(tag *Tag) error {
+	targetIndex := -1
+	for index, t := range a.Tags() {
+		if tag.Equals(t) {
+			targetIndex = index
+			break
+		}
 	}
-	if !patternArticleTitle.MatchString(s) {
-		return "", domain.ErrInvalidArticleTitle
+	if targetIndex == -1 {
+		return ErrTagNotAdded
 	}
-	return title, nil
+	a.tags = append(a.tags[:targetIndex], a.tags[targetIndex+1:]...)
+	return nil
 }
