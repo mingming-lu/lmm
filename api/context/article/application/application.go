@@ -8,8 +8,15 @@ import (
 )
 
 type AppService struct {
-	articlePostingService service.ArticlePostingService
+	articlePostingService *service.ArticlePostingService
 	articleRepo           repository.ArticleRepository
+}
+
+func NewAppService(articleRepo repository.ArticleRepository) *AppService {
+	return &AppService{
+		articlePostingService: service.NewArticlePostingService(articleRepo),
+		articleRepo:           articleRepo,
+	}
 }
 
 func (app *AppService) NewArticle(cmd command.NewArticleCommand) (string, error) {
