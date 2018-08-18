@@ -8,4 +8,5 @@ var (
 	ErrInvalidArticleID    = errors.New("invalid article id")
 	ErrInvalidArticleTitle = errors.New("invalid article title")
 	ErrInvalidTagName      = errors.New("invalid tag name")
+	ErrNoSuchArticle       = errors.New("no such article")
 )
