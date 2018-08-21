@@ -2,28 +2,32 @@ package application
 
 import (
 	"lmm/api/context/article/application/command"
+	"lmm/api/context/article/application/query"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/context/article/domain/repository"
 	"lmm/api/context/article/domain/service"
 )
 
-type AppService struct {
+type CommandAppService struct {
 	articlePostingService *service.ArticlePostingService
 	articleRepo           repository.ArticleRepository
 }
 
-func NewAppService(articleRepo repository.ArticleRepository) *AppService {
-	return &AppService{
+func NewCommandAppService(
+	articleFinder query.ArticleFinder,
+	articleRepo repository.ArticleRepository,
+) *CommandAppService {
+	return &CommandAppService{
 		articlePostingService: service.NewArticlePostingService(articleRepo),
 		articleRepo:           articleRepo,
 	}
 }
 
-func (app *AppService) NewArticle(cmd command.NewArticleCommand) (string, error) {
+func (app *CommandAppService) PostingArticle(cmd command.PostingArticleCommand) (string, error) {
 	article, err := app.articlePostingService.PostingArticle(
 		cmd.User(),
 		cmd.Title(),
-		cmd.Text(),
+		cmd.Body(),
 		cmd.TagNames(),
 	)
 	if err != nil {
@@ -37,7 +41,7 @@ func (app *AppService) NewArticle(cmd command.NewArticleCommand) (string, error)
 	return article.ID().String(), nil
 }
 
-func (app *AppService) ModifyArticleText(cmd command.UpdateArticleCommand) error {
+func (app *CommandAppService) ModifyArticleText(cmd command.ModifyArticleCommand) error {
 	article, err := app.articleWithID(cmd.ArticleID())
 	if err != nil {
 		return err
@@ -55,7 +59,7 @@ func (app *AppService) ModifyArticleText(cmd command.UpdateArticleCommand) error
 	return app.articleRepo.Save(article)
 }
 
-func (app *AppService) NewArticleTag(cmd command.NewArticleTagCommand) error {
+func (app *CommandAppService) NewArticleTag(cmd command.NewArticleTagCommand) error {
 	article, err := app.articleWithID(cmd.ArticleID())
 	if err != nil {
 		return err
@@ -64,7 +68,7 @@ func (app *AppService) NewArticleTag(cmd command.NewArticleTagCommand) error {
 	return app.manipulateArticleTag(cmd.TagName(), article, article.AddTag)
 }
 
-func (app *AppService) RemoveArticleTag(cmd command.RemoveArticleTagCommand) error {
+func (app *CommandAppService) RemoveArticleTag(cmd command.RemoveArticleTagCommand) error {
 	article, err := app.articleWithID(cmd.ArticleID())
 	if err != nil {
 		return err
@@ -73,7 +77,7 @@ func (app *AppService) RemoveArticleTag(cmd command.RemoveArticleTagCommand) err
 	return app.manipulateArticleTag(cmd.TagName(), article, article.RemoveTag)
 }
 
-func (app *AppService) articleWithID(id string) (*model.Article, error) {
+func (app *CommandAppService) articleWithID(id string) (*model.Article, error) {
 	articleID, err := model.NewArticleID(id)
 	if err != nil {
 		return nil, err
@@ -82,7 +86,7 @@ func (app *AppService) articleWithID(id string) (*model.Article, error) {
 	return app.articleRepo.FindByID(articleID)
 }
 
-func (app *AppService) manipulateArticleTag(
+func (app *CommandAppService) manipulateArticleTag(
 	tagName string,
 	article *model.Article,
 	manipulation func(*model.Tag) error,
