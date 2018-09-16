@@ -12,6 +12,10 @@ type ArticlePostingService struct {
 	articleRepo repository.ArticleRepository
 }
 
+func NewArticlePostingService(articleRepo repository.ArticleRepository) *ArticlePostingService {
+	return &ArticlePostingService{articleRepo: articleRepo}
+}
+
 func (s *ArticlePostingService) PostingArticle(
 	user *account.User,
 	title, text string,

@@ -4,43 +4,66 @@ import (
 	account "lmm/api/context/account/domain/model"
 )
 
-type NewArticleCommand struct {
+type PostingArticleCommand struct {
 	user     *account.User
 	title    string
-	text     string
+	body     string
 	tagNames []string
 }
 
-func (c NewArticleCommand) Title() string {
+func NewPostingArticleCommand(user *account.User, title, body string, tagNames []string) PostingArticleCommand {
+	return PostingArticleCommand{
+		user:     user,
+		title:    title,
+		body:     body,
+		tagNames: tagNames,
+	}
+}
+
+func (c PostingArticleCommand) Title() string {
 	return c.title
 }
 
-func (c NewArticleCommand) Text() string {
-	return c.text
+func (c PostingArticleCommand) Body() string {
+	return c.body
 }
 
-func (c NewArticleCommand) User() *account.User {
+func (c PostingArticleCommand) User() *account.User {
 	return c.user
 }
 
-func (c NewArticleCommand) TagNames() []string {
+func (c PostingArticleCommand) TagNames() []string {
 	return c.tagNames
 }
 
-type UpdateArticleCommand struct {
+type ModifyArticleCommand struct {
+	user         *account.User
 	articleID    string
 	articleTitle string
 	articleBody  string
 }
 
-func (c UpdateArticleCommand) ArticleID() string {
+func NewModifyArticleCommand(user *account.User, id, title, body string) ModifyArticleCommand {
+	return ModifyArticleCommand{
+		user:         user,
+		articleID:    id,
+		articleTitle: title,
+		articleBody:  body,
+	}
+}
+
+func (c ModifyArticleCommand) User() *account.User {
+	return c.user
+}
+
+func (c ModifyArticleCommand) ArticleID() string {
 	return c.articleID
 }
 
-func (c UpdateArticleCommand) ArticleTitle() string {
+func (c ModifyArticleCommand) ArticleTitle() string {
 	return c.articleTitle
 }
 
-func (c UpdateArticleCommand) ArticleBody() string {
+func (c ModifyArticleCommand) ArticleBody() string {
 	return c.articleBody
 }
