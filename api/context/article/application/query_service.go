@@ -7,19 +7,19 @@ import (
 	"lmm/api/utils/strings"
 )
 
-type QueryAppService struct {
+// ArticleQueryService is a query side application
+type ArticleQueryService struct {
 	articleFinder query.ArticleFinder
 	tagFinder     query.TagFinder
 }
 
-func NewQueryAppService(
-	articleFinder query.ArticleFinder,
-	tagFinder query.TagFinder,
-) *QueryAppService {
-	return &QueryAppService{articleFinder: articleFinder, tagFinder: tagFinder}
+// NewArticleQueryService is a constructor of ArticleQueryService
+func NewArticleQueryService(articleFinder query.ArticleFinder, tagFinder query.TagFinder) *ArticleQueryService {
+	return &ArticleQueryService{articleFinder: articleFinder, tagFinder: tagFinder}
 }
 
-func (app *QueryAppService) ListArticlesByPage(countStr, pageStr string) ([]*model.Article, bool, error) {
+// ListArticlesByPage is used for listing articles on article index page
+func (app *ArticleQueryService) ListArticlesByPage(countStr, pageStr string) ([]*model.Article, bool, error) {
 	if countStr == "" {
 		countStr = "10"
 	}
@@ -39,6 +39,7 @@ func (app *QueryAppService) ListArticlesByPage(countStr, pageStr string) ([]*mod
 	return app.articleFinder.FindArticlesByPage(count, page)
 }
 
-func (app *QueryAppService) ListAllTags() ([]*model.Tag, error) {
+// ListAllTags is used for listing all tags on article index page
+func (app *ArticleQueryService) ListAllTags() ([]*model.Tag, error) {
 	return app.tagFinder.FindAllTags()
 }
