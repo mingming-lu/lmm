@@ -9,17 +9,19 @@ import (
 
 var patternArticleID = regexp.MustCompile("[0-9a-Z]{6}")
 
+// ArticleID is the model to identify article
 type ArticleID struct {
 	model.ValueObject
 	id string
 }
 
-func NewArticleID(s string) (ArticleID, error) {
+// NewArticleID is a constructor of article id
+func NewArticleID(s string) (*ArticleID, error) {
 	id := ArticleID{}
 	if err := id.setID(s); err != nil {
-		return id, err
+		return nil, err
 	}
-	return id, nil
+	return nil, nil
 }
 
 func (id ArticleID) String() string {

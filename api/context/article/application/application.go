@@ -2,21 +2,21 @@ package application
 
 // Service is like a registry for services in article bounded context
 type Service struct {
-	articleApplicationService *ArticleApplicationService
-	articleQueryService       *ArticleQueryService
+	articleCommandService *ArticleCommandService
+	articleQueryService   *ArticleQueryService
 }
 
 // NewService is a constructor of Service
-func NewService(articleApplicationService *ArticleApplicationService, articleQueryService *ArticleQueryService) *Service {
+func NewService(articleCommandService *ArticleCommandService, articleQueryService *ArticleQueryService) *Service {
 	return &Service{
-		articleApplicationService: articleApplicationService,
-		articleQueryService:       articleQueryService,
+		articleCommandService: articleCommandService,
+		articleQueryService:   articleQueryService,
 	}
 }
 
-// ArticleApplicationService getter
-func (s *Service) ArticleApplicationService() *ArticleApplicationService {
-	return s.articleApplicationService
+// ArticleCommandService getter
+func (s *Service) ArticleCommandService() *ArticleCommandService {
+	return s.articleCommandService
 }
 
 // ArticleQueryService getter

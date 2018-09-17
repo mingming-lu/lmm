@@ -2,7 +2,6 @@ package model
 
 import (
 	"errors"
-	"time"
 
 	"lmm/api/context/base/domain/model"
 )
@@ -10,74 +9,58 @@ import (
 var (
 	ErrArticleTextNoChange = errors.New("article text no change")
 	ErrTagAlreadyAdded     = errors.New("the tag has already been added")
-	ErrTagNotAdded         = errors.New("tag not added")
+	ErrTagNotExists        = errors.New("tag not exists")
 )
 
+// Article is an aggregate root model
 type Article struct {
 	model.Entity
-	id             ArticleID
-	text           ArticleText
-	writer         ArticleWriter
-	postAt         time.Time
-	lastModifiedAt time.Time
-	tags           []*Tag
+	id     *ArticleID
+	text   *Text
+	author *Author
+	tags   []*Tag
 }
 
-func NewArticle(
-	articleID ArticleID,
-	text ArticleText,
-	writer ArticleWriter,
-	postAt time.Time,
-	lastModifiedAt time.Time,
-	tags []*Tag,
-) *Article {
+// NewArticle is a article constructor
+func NewArticle(articleID *ArticleID, text *Text, author *Author, tags []*Tag) *Article {
 	return &Article{
-		id:             articleID,
-		text:           text,
-		writer:         writer,
-		postAt:         postAt,
-		lastModifiedAt: lastModifiedAt,
-		tags:           tags,
+		id:     articleID,
+		text:   text,
+		author: author,
+		tags:   tags,
 	}
 }
 
-func (a *Article) ID() ArticleID {
+// ID returns the id of the article
+func (a *Article) ID() *ArticleID {
 	return a.id
 }
 
-func (a *Article) Text() ArticleText {
+// Text returns the text of the article
+func (a *Article) Text() *Text {
 	return a.text
 }
 
-func (a *Article) Writer() ArticleWriter {
-	return a.writer
+// Author returns the author of the article
+func (a *Article) Author() *Author {
+	return a.author
 }
 
-func (a *Article) PostAt() time.Time {
-	return a.postAt
-}
-
-func (a *Article) LastModifiedAt() time.Time {
-	return a.lastModifiedAt
-}
-
+// Tags returns all tags of the article
 func (a *Article) Tags() []*Tag {
 	return a.tags
 }
 
-func (a *Article) setLastModifiedAt(at time.Time) {
-	a.lastModifiedAt = at
-}
-
-func (a *Article) ModifyText(newText ArticleText) error {
+// EditText changes the text of the article
+func (a *Article) EditText(newText *Text) error {
 	if a.Text().Equals(newText) {
 		return ErrArticleTextNoChange
 	}
-	a.setLastModifiedAt(time.Now())
 	a.text = newText
 	return nil
 }
 
+// AddTag adds a new tag to article
 func (a *Article) AddTag(tag *Tag) error {
 	for _, t := range a.tags {
 		if tag.Equals(t) {
@@ -88,6 +71,7 @@ func (a *Article) AddTag(tag *Tag) error {
 	return nil
 }
 
+// RemoveTag removes a tag from the article
 func (a *Article) RemoveTag(tag *Tag) error {
 	targetIndex := -1
 	for index, t := range a.Tags() {
@@ -97,7 +81,7 @@ func (a *Article) RemoveTag(tag *Tag) error {
 		}
 	}
 	if targetIndex == -1 {
-		return ErrTagNotAdded
+		return ErrTagNotExists
 	}
 	a.tags = append(a.tags[:targetIndex], a.tags[targetIndex+1:]...)
 	return nil
