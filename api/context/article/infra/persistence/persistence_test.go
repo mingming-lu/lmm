@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 	db := storage.NewDB()
 	defer db.CloseNow()
 
-	articleRepository = NewArticleStorage(db)
+	articleRepository = NewArticleStorage(db, authorService)
 	articleService = service.NewArticleService(articleRepository)
 	authorService = infraService.NewAuthorAdapter(db)
 	user = initUser()
