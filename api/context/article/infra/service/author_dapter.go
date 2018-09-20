@@ -25,6 +25,9 @@ func (a *AuthorAdapter) AuthorFromUserID(userID uint64) (*model.Author, error) {
 		authorName string
 	)
 	if err := stmt.QueryRow(userID).Scan(&authorID, &authorName); err != nil {
+		if err == storage.ErrNoRows {
+			return nil, domain.ErrNoSuchUser
+		}
 		return nil, err
 	}
 	return model.NewAuthor(int64(authorID), authorName), nil
