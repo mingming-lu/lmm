@@ -64,7 +64,7 @@
     "node-sass": "^4.9.3",
     "optimize-css-assets-webpack-plugin": "^3.2.0",
     "ora": "^1.4.0",
-    "phantomjs-prebuilt": "^2.1.14",
+    "phantomjs-prebuilt": "^2.1.16",
     "portfinder": "^1.0.13",
     "postcss-import": "^11.1.0",
     "postcss-loader": "^2.1.5",
