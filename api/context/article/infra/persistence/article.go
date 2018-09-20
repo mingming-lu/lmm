@@ -1,4 +1,4 @@
-package infra
+package persistence
 
 import (
 	"database/sql"
@@ -27,9 +27,9 @@ func (s *ArticleStorage) NextID() string {
 
 // Save persist a article domain model
 func (s *ArticleStorage) Save(article *model.Article) error {
-	stmt := s.db.MustPrepare("INSERT INTO article uid, writer, title, text, created_at, updated_at" +
-		"VALUES (?, ?, ?, ?, ?, ?)" +
-		"ON DUPLICATE KEY UPDATE SET title = ?, SET text = ? updated_at = ?",
+	stmt := s.db.MustPrepare("insert into article (uid, user, title, text, created_at, updated_at) " +
+		"values (?, ?, ?, ?, ?, ?) " +
+		"on duplicate key update title = ?, text = ?, updated_at = ?",
 	)
 	defer stmt.Close()
 
