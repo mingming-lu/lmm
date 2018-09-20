@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	patternArticleTitle = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_ ]$")
+	patternArticleTitle = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_ ]{1,30}$")
 )
 
 // Text is the text content model of a article
