@@ -1,6 +1,7 @@
 package application
 
 import (
+	"lmm/api/context/article/domain"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/context/article/domain/repository"
 	"lmm/api/context/article/domain/service"
@@ -41,11 +42,20 @@ func (app *ArticleCommandService) PostNewArticle(userID uint64, title string, bo
 	return article.ID(), nil
 }
 
-// ModifyArticleText is used for modify the text of an article
-func (app *ArticleCommandService) ModifyArticleText(rawArticleID, title, body string) error {
+// EditArticleText is used for modify the text of an article
+func (app *ArticleCommandService) EditArticleText(userID uint64, rawArticleID, title, body string) error {
+	author, err := app.authorService.AuthorFromUserID(userID)
+	if err != nil {
+		return err
+	}
+
 	article, err := app.articleWithID(rawArticleID)
 	if err != nil {
 		return err
+	}
+
+	if article.Author().ID() != author.ID() {
+		return domain.ErrNotArticleAuthor
 	}
 
 	newText, err := model.NewText(title, body)

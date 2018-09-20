@@ -6,8 +6,7 @@ type PostingArticleAdaptor struct {
 	Tags  []string `json:"tags"`
 }
 
-type ModifyArticleAdaptor struct {
-	ID    string `json:"id"`
+type EditArticleAdaptor struct {
 	Title string `json:"title"`
 	Body  string `json:"body"`
 }
