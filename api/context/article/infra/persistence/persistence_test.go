@@ -3,6 +3,8 @@ package persistence
 import (
 	"os"
 
+	"github.com/google/uuid"
+
 	accountFactory "lmm/api/context/account/domain/factory"
 	account "lmm/api/context/account/domain/model"
 	accountModel "lmm/api/context/account/domain/model"
@@ -13,8 +15,6 @@ import (
 	infraService "lmm/api/context/article/infra/service"
 	"lmm/api/storage"
 	"lmm/api/testing"
-
-	"github.com/google/uuid"
 )
 
 var (
