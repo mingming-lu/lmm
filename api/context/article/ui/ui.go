@@ -4,6 +4,7 @@ import (
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/article/application"
 	"lmm/api/context/article/domain/repository"
+	"lmm/api/context/article/domain/service"
 	"lmm/api/http"
 )
 
@@ -13,9 +14,9 @@ type UI struct {
 }
 
 // NewUI returns a new ui
-func NewUI(articleRepository repository.ArticleRepository) *UI {
+func NewUI(articleRepository repository.ArticleRepository, authorService service.AuthorService) *UI {
 	appService := application.NewService(
-		application.NewArticleCommandService(articleRepository),
+		application.NewArticleCommandService(articleRepository, authorService),
 		nil,
 	)
 	return &UI{appService: appService}
@@ -43,6 +44,8 @@ func (ui *UI) PostArticle(c *http.Context) {
 	)
 	switch err {
 	case nil:
-		c.Header("Location", "articles/"+articleID.String()).String(http.StatusOK, "Success")
+		c.Header("Location", "articles/"+articleID.String()).String(http.StatusCreated, "Success")
+	default:
+		panic(err)
 	}
 }

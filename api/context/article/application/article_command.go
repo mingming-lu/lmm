@@ -14,10 +14,11 @@ type ArticleCommandService struct {
 }
 
 // NewArticleCommandService is a constructor of ArticleCommandService
-func NewArticleCommandService(articleRepository repository.ArticleRepository) *ArticleCommandService {
+func NewArticleCommandService(articleRepository repository.ArticleRepository, authorService service.AuthorService) *ArticleCommandService {
 	return &ArticleCommandService{
 		articleService:    service.NewArticleService(articleRepository),
 		articleRepository: articleRepository,
+		authorService:     authorService,
 	}
 }
 
