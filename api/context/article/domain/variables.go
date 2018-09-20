@@ -11,4 +11,5 @@ var (
 	ErrInvalidPage         = errors.New("invalid page")
 	ErrInvalidTagName      = errors.New("invalid tag name")
 	ErrNoSuchArticle       = errors.New("no such article")
+	ErrNoSuchUser          = errors.New("no such user")
 )
