@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `article` (
 	`user` BIGINT UNSIGNED NOT NULL, -- user.id
 	`uid` VARCHAR(255) NOT NULL,
 	`title` VARCHAR(255) NOT NULL,
-	`text` TEXT NOT NULL,
+	`body` TEXT NOT NULL,
 	`created_at` DATETIME NOT NULL,
 	`updated_at` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
