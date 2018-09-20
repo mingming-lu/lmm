@@ -2,22 +2,25 @@ package persistence
 
 import (
 	"database/sql"
-	"lmm/api/context/article/domain/model"
-	"lmm/api/storage"
-	"lmm/api/utils/strings"
 	"time"
 
 	"github.com/google/uuid"
+
+	"lmm/api/context/article/domain/model"
+	"lmm/api/context/article/domain/service"
+	"lmm/api/storage"
+	"lmm/api/utils/strings"
 )
 
 // ArticleStorage is a implementation of ArticleRepository
 type ArticleStorage struct {
-	db *storage.DB
+	db            *storage.DB
+	authorService service.AuthorService
 }
 
 // NewArticleStorage constructs a new article repository with concrete struct
-func NewArticleStorage(db *storage.DB) *ArticleStorage {
-	return &ArticleStorage{db: db}
+func NewArticleStorage(db *storage.DB, authorService service.AuthorService) *ArticleStorage {
+	return &ArticleStorage{db: db, authorService: authorService}
 }
 
 // NextID generate a random string
@@ -57,12 +60,33 @@ func (s *ArticleStorage) Remove(article *model.Article) error {
 
 // FindByID returns a article domain model by given id if exists
 func (s *ArticleStorage) FindByID(id *model.ArticleID) (*model.Article, error) {
-	stmt := s.db.MustPrepare("SELECT uid, writer, title, text FROM article WHERE uid = ?")
+	stmt := s.db.MustPrepare("SELECT uid, user, title, body FROM article WHERE uid = ?")
 	defer stmt.Close()
 
-	return s.modelFromRow(stmt.QueryRow(id.String()))
+	return s.userModelFromRow(stmt.QueryRow(id.String()))
 }
 
-func (s *ArticleStorage) modelFromRow(row *sql.Row) (*model.Article, error) {
-	panic("not implemented")
+func (s *ArticleStorage) userModelFromRow(row *sql.Row) (*model.Article, error) {
+	var (
+		rawArticleID string
+		userID       uint64
+		title        string
+		body         string
+	)
+	if err := row.Scan(&rawArticleID, &userID, &title, &body); err != nil {
+		return nil, err
+	}
+	author, err := s.authorService.AuthorFromUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	articleID, err := model.NewArticleID(rawArticleID)
+	if err != nil {
+		return nil, err
+	}
+	text, err := model.NewText(title, body)
+	if err != nil {
+		return nil, err
+	}
+	return model.NewArticle(articleID, text, author, make([]*model.Tag, 0)), nil
 }
