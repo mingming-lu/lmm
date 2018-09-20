@@ -21,7 +21,7 @@ func NewArticleID(s string) (*ArticleID, error) {
 	if err := id.setID(s); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &id, nil
 }
 
 func (id ArticleID) String() string {

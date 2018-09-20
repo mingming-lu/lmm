@@ -10,8 +10,8 @@ type Author struct {
 }
 
 // NewAuthor returns a new author
-func NewAuthor(id int64, name string) Author {
-	return Author{id: id, name: name}
+func NewAuthor(id int64, name string) *Author {
+	return &Author{id: id, name: name}
 }
 
 // ID returns the id of the author
