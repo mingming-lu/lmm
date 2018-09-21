@@ -6,14 +6,19 @@ docker-compose: docker
 build:
 	make docker-compose cmd=build
 
-# TODO move to Dockerfile
 install:
-	cd docker && docker-compose run --rm api bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/api && dep ensure"
-	cd docker && docker-compose run --rm image bash -c "go get -u github.com/golang/dep/cmd/dep && cd /go/src/lmm/image && dep ensure"
-	rm -rf app/node_modules
-	cd docker && docker-compose run --rm app bash -c "npm i npm@latest -g && npm --prefix /app install"
-	rm -rf manager/node_modules
-	cd docker && docker-compose run --rm manager bash -c "npm i npm@latest -g && npm --prefix /manager install"
+	make install-app
+	make install-api
+	make install-manager
+
+install-app:
+	cd docker && docker-compose run --rm app bash -c "rm -rf app/node_modules && npm --prefix /app install"
+
+install-api:
+	cd docker && docker-compose run --rm api bash -c "go get -u -v github.com/golang/dep/cmd/dep && cd /go/src/lmm/api && rm -rf vendor && dep ensure -v"
+
+install-manager:
+	cd docker && docker-compose run --rm manager bash -c "rm -rf manager/node_modules && npm --prefix /manager install"
 
 prod:
 	make docker-compose cmd=up
