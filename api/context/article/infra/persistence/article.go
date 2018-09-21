@@ -38,12 +38,12 @@ func (s *ArticleStorage) Save(article *model.Article) error {
 	_, err := stmt.Exec(
 		article.ID().String(),
 		article.Author().ID(),
-		article.Text().Title(),
-		article.Text().Body(),
+		article.Content().Text().Title(),
+		article.Content().Text().Body(),
 		now,
 		now,
-		article.Text().Title(),
-		article.Text().Body(),
+		article.Content().Text().Title(),
+		article.Content().Text().Body(),
 		now,
 	)
 

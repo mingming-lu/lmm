@@ -18,8 +18,10 @@ func TestSaveArticle(tt *testing.T) {
 	t.NoError(articleRepository.Save(article))
 
 	text, err := model.NewText("new title", "new body")
+	tags := make([]*model.Tag, 0)
+	content := model.NewContent(text, tags)
 	t.NoError(err)
-	t.NoError(article.EditText(text))
+	article.EditContent(content)
 
 	// save updated article
 	t.NoError(articleRepository.Save(article))
