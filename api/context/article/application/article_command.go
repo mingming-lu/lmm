@@ -1,6 +1,7 @@
 package application
 
 import (
+	"lmm/api/context/article/domain"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/context/article/domain/repository"
 	"lmm/api/context/article/domain/service"
@@ -41,11 +42,20 @@ func (app *ArticleCommandService) PostNewArticle(userID uint64, title string, bo
 	return article.ID(), nil
 }
 
-// ModifyArticleText is used for modify the text of an article
-func (app *ArticleCommandService) ModifyArticleText(rawArticleID, title, body string) error {
+// EditArticle is used for edit the article content
+func (app *ArticleCommandService) EditArticle(userID uint64, rawArticleID, title, body string, tagNames []string) error {
+	author, err := app.authorService.AuthorFromUserID(userID)
+	if err != nil {
+		return err
+	}
+
 	article, err := app.articleWithID(rawArticleID)
 	if err != nil {
 		return err
+	}
+
+	if article.Author().ID() != author.ID() {
+		return domain.ErrNotArticleAuthor
 	}
 
 	newText, err := model.NewText(title, body)
@@ -53,31 +63,16 @@ func (app *ArticleCommandService) ModifyArticleText(rawArticleID, title, body st
 		return err
 	}
 
-	if err := article.EditText(newText); err != nil {
+	newTags, err := app.tagsFromNames(tagNames, article.ID())
+	if err != nil {
 		return err
 	}
+
+	content, err := model.NewContent(newText, newTags)
+
+	article.EditContent(content)
 
 	return app.articleRepository.Save(article)
-}
-
-// AddTagToArticle is used for adding a new tag to an article
-func (app *ArticleCommandService) AddTagToArticle(rawArticleID, tagName string) error {
-	article, err := app.articleWithID(rawArticleID)
-	if err != nil {
-		return err
-	}
-
-	return app.manipulateArticleTag(article, article.AddTag, tagName)
-}
-
-// RemoveTagFromArticle is used for removing a tag from an article
-func (app *ArticleCommandService) RemoveTagFromArticle(rawArticleID, tagName string) error {
-	article, err := app.articleWithID(rawArticleID)
-	if err != nil {
-		return err
-	}
-
-	return app.manipulateArticleTag(article, article.RemoveTag, tagName)
 }
 
 func (app *ArticleCommandService) articleWithID(id string) (*model.Article, error) {
@@ -89,15 +84,16 @@ func (app *ArticleCommandService) articleWithID(id string) (*model.Article, erro
 	return app.articleRepository.FindByID(articleID)
 }
 
-func (app *ArticleCommandService) manipulateArticleTag(article *model.Article, manipulation func(*model.Tag) error, tagName string) error {
-	tag, err := model.NewTag(article.ID(), tagName)
-	if err != nil {
-		return err
+func (app *ArticleCommandService) tagsFromNames(tagNames []string, articleID *model.ArticleID) ([]*model.Tag, error) {
+	tags := make([]*model.Tag, len(tagNames), len(tagNames))
+
+	for i, name := range tagNames {
+		tag, err := model.NewTag(articleID, uint(i+1), name)
+		if err != nil {
+			return nil, err
+		}
+		tags[i] = tag
 	}
 
-	if err := manipulation(tag); err != nil {
-		return err
-	}
-
-	return app.articleRepository.Save(article)
+	return tags, nil
 }

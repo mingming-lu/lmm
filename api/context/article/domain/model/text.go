@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	patternArticleTitle = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_ ]{1,30}$")
+	patternArticleTitle   = regexp.MustCompile("[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_ ]")
+	articleTitleMaxLength = 140
 )
 
 // Text is the text content model of a article
@@ -55,7 +56,7 @@ func (t *Text) SetTitle(title string) error {
 	if newTitle == "" {
 		return domain.ErrEmptyArticleTitle
 	}
-	if len(newTitle) > 30 {
+	if len(newTitle) > articleTitleMaxLength {
 		return domain.ErrArticleTitleTooLong
 	}
 	if !patternArticleTitle.MatchString(newTitle) {

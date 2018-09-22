@@ -12,5 +12,6 @@ var (
 	ErrInvalidTagName             = errors.New("invalid tag name")
 	ErrNoSuchArticle              = errors.New("no such article")
 	ErrNoSuchUser                 = errors.New("no such user")
+	ErrNotArticleAuthor           = errors.New("only author allowed to edit article")
 	ErrTagsNotBelongToSameArticle = errors.New("tags are not belong to same article")
 )
