@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	patternTagName = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_ ]$")
+	patternTagName = regexp.MustCompile("^[\u4e00-\u9fa5ぁ-んァ-ンa-zA-Z0-9-_ ]{1,30}$")
 )
 
 // Tag is the tag model
