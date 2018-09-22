@@ -28,14 +28,18 @@ func (s *ArticleService) NewArticleToPost(author *model.Author, title, body stri
 	}
 
 	tags := make([]*model.Tag, len(tagNames), len(tagNames))
-
 	for i, tagName := range tagNames {
-		tag, err := model.NewTag(articleID, tagName)
+		tag, err := model.NewTag(articleID, uint(i+1), tagName)
 		if err != nil {
 			return nil, err
 		}
 		tags[i] = tag
 	}
 
-	return model.NewArticle(articleID, text, author, tags), nil
+	content, err := model.NewContent(text, tags)
+	if err != nil {
+		return nil, err
+	}
+
+	return model.NewArticle(articleID, author, content), nil
 }

@@ -7,7 +7,7 @@ import (
 	"lmm/api/domain/model"
 )
 
-var patternArticleID = regexp.MustCompile("[0-9a-zA-Z]{6}")
+var patternArticleID = regexp.MustCompile("^[0-9a-zA-Z]{8}$")
 
 // ArticleID is the model to identify article
 type ArticleID struct {
@@ -24,11 +24,11 @@ func NewArticleID(s string) (*ArticleID, error) {
 	return &id, nil
 }
 
-func (id ArticleID) String() string {
+func (id *ArticleID) String() string {
 	return id.id
 }
 
-func (id ArticleID) setID(anID string) error {
+func (id *ArticleID) setID(anID string) error {
 	if !patternArticleID.MatchString(anID) {
 		return domain.ErrInvalidArticleID
 	}
