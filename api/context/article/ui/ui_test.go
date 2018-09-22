@@ -13,9 +13,10 @@ import (
 )
 
 var (
-	router            *testing.Router
-	user              *auth.User
 	articleRepository repository.ArticleRepository
+	router            *testing.Router
+	ui                *UI
+	user              *auth.User
 )
 
 func TestMain(m *testing.M) {
@@ -26,10 +27,11 @@ func TestMain(m *testing.M) {
 	authorService := service.NewAuthorAdapter(testing.DB())
 	articleRepository = persistence.NewArticleStorage(testing.DB(), authorService)
 
-	ui := NewUI(articleRepository, authorService)
+	ui = NewUI(articleRepository, authorService)
 
 	router = testing.NewRouter()
 	router.POST("/v1/articles", auth.BearerAuth(ui.PostArticle))
+	router.PUT("/v1/articles/:articleID", auth.BearerAuth(ui.EditArticleText))
 
 	code := m.Run()
 	os.Exit(code)
