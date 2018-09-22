@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"lmm/api/context/article/domain"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/testing"
 )
@@ -60,6 +61,35 @@ func TestSaveArticle(tt *testing.T) {
 	t.Is("333", tagNamesGot[2])
 }
 
+func TestFindArticleByID(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	author, err := authorService.AuthorFromUserID(user.ID())
+	t.NoError(err)
+
+	tagNames := make([]string, 3)
+	tagNames[0], tagNames[1], tagNames[2] = "awesome2", "awesome3", "awesome1"
+	article, err := articleService.NewArticleToPost(author, "awesome title", "awesome body", tagNames)
+	t.NoError(err)
+
+	t.NoError(articleRepository.Save(article))
+
+	articleGot, err := articleRepository.FindByID(article.ID())
+	t.NoError(err)
+	t.Is(article, articleGot)
+}
+
+func TestFindArticleByID_NotFound(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	articleID, err := model.NewArticleID("notexist")
+	t.NoError(err)
+
+	article, err := articleRepository.FindByID(articleID)
+	t.IsError(domain.ErrNoSuchArticle, err)
+	t.Nil(article)
+}
+
 func selectArticleWhereUIDIs(uid string) (int, string, string, error) {
 	var (
 		articleID int
@@ -80,7 +110,7 @@ func selectArticleWhereUIDIs(uid string) (int, string, string, error) {
 
 func selectTagsWhereArticleIDIs(id int) ([]string, error) {
 	rows, err := testing.DB().Query(`
-		select name from article_tag where article_id = ?
+		select name from article_tag where article = ?
 	`, id)
 	if err != nil {
 		return nil, err
