@@ -1,15 +1,7 @@
 package model
 
 import (
-	"errors"
-
 	"lmm/api/context/base/domain/model"
-)
-
-var (
-	ErrArticleTextNoChange = errors.New("article text no change")
-	ErrTagAlreadyAdded     = errors.New("the tag has already been added")
-	ErrTagNotExists        = errors.New("tag not exists")
 )
 
 // Article is an aggregate root model
