@@ -92,3 +92,8 @@ func (t *Tester) JSON(expected interface{}, actual string, msgAndArgs ...interfa
 	}
 	return assert.JSONEq(t, string(b), actual)
 }
+
+// Are compares two collections' values
+func (t *Tester) Are(expected, actual interface{}, msgAndArgs ...interface{}) {
+	assert.EqualValues(t, expected, actual, msgAndArgs...)
+}
