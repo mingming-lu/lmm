@@ -38,3 +38,7 @@ func ReplaceAll(s, old, new string) string {
 func TrimSpace(s string) string {
 	return strings.TrimSpace(s)
 }
+
+func Repeat(s string, count int) string {
+	return strings.Repeat(s, count)
+}
