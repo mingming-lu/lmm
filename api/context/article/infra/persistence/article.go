@@ -126,10 +126,32 @@ func (s *ArticleStorage) Remove(article *model.Article) error {
 
 // FindByID returns a article domain model by given id if exists
 func (s *ArticleStorage) FindByID(id *model.ArticleID) (*model.Article, error) {
-	stmt := s.db.MustPrepare("select id, uid, user, title, body from article where uid = ?")
-	defer stmt.Close()
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, err
+	}
 
-	return s.userModelFromRow(stmt.QueryRow(id.String()))
+	stmt, err := tx.Prepare(`select id, uid, user, title, body from article where uid = ? for update`)
+	if err != nil {
+		if err := tx.Rollback(); err != nil {
+			return nil, err
+		}
+		return nil, err
+	}
+
+	article, err := s.userModelFromRow(stmt.QueryRow(id.String()))
+	if err != nil {
+		if err := tx.Rollback(); err != nil {
+			return nil, err
+		}
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return article, nil
 }
 
 func (s *ArticleStorage) userModelFromRow(row *sql.Row) (*model.Article, error) {
@@ -156,7 +178,7 @@ func (s *ArticleStorage) userModelFromRow(row *sql.Row) (*model.Article, error) 
 		return nil, err
 	}
 
-	stmt := s.db.MustPrepare("select order, name from article_tag where article_id = ?")
+	stmt := s.db.MustPrepare("select `order`, name from article_tag where article_id = ?")
 	defer stmt.Close()
 
 	rows, err := stmt.Query(id)
