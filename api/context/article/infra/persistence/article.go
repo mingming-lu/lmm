@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"lmm/api/context/article/domain"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/context/article/domain/service"
 	"lmm/api/storage"
@@ -163,6 +164,9 @@ func (s *ArticleStorage) userModelFromRow(row *sql.Row) (*model.Article, error) 
 		body         string
 	)
 	if err := row.Scan(&id, &rawArticleID, &userID, &title, &body); err != nil {
+		if err == storage.ErrNoRows {
+			return nil, domain.ErrNoSuchArticle
+		}
 		return nil, err
 	}
 	author, err := s.authorService.AuthorFromUserID(userID)
