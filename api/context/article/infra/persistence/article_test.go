@@ -36,13 +36,16 @@ func TestSaveArticle(tt *testing.T) {
 
 	// edit content
 	text, err := model.NewText("new title", "new body")
+	t.NoError(err)
 	tags := make([]*model.Tag, 0)
 	tag1, err := model.NewTag(article.ID(), 1, "111")
+	t.NoError(err)
 	tag2, err := model.NewTag(article.ID(), 2, "222")
+	t.NoError(err)
 	tag3, err := model.NewTag(article.ID(), 3, "333")
 	t.NoError(err)
 	tags = append(tags, tag1, tag2, tag3)
-	content := model.NewContent(text, tags)
+	content, err := model.NewContent(text, tags)
 	t.NoError(err)
 	article.EditContent(content)
 
