@@ -24,11 +24,11 @@ CREATE TABLE IF NOT EXISTS `article` (
 
 CREATE TABLE IF NOT EXISTS `article_tag` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`article_id` INT UNSIGNED NOT NULL,
-	`order` INT UNSIGNED NOT NULL,
+	`article` INT UNSIGNED NOT NULL, -- article.id
+	`sort` INT UNSIGNED NOT NULL,
 	`name` VARCHAR(255) NOT NULL,
 	PRIMARY KEY (`id`),
-	UNIQUE `tag_id` (`article_id`, `order`)
+	UNIQUE `tag_id` (`article`, `sort`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS `blog` (

@@ -49,7 +49,7 @@ func (s *ArticleStorage) Save(article *model.Article) error {
 	}
 
 	deleteTags, err := tx.Prepare(`
-		delete at from article_tag at left join article a on a.id = at.article_id where at.article_id = ?
+		delete at from article_tag at left join article a on a.id = at.article where at.article = ?
 	`)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
@@ -58,9 +58,9 @@ func (s *ArticleStorage) Save(article *model.Article) error {
 		return err
 	}
 
-	saveTags, err := tx.Prepare("" +
-		"insert into article_tag (article_id, `order`, name) values (?, ?, ?)" +
-		"")
+	saveTags, err := tx.Prepare(`
+		insert into article_tag (article, sort, name) values (?, ?, ?)
+	`)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
@@ -178,7 +178,7 @@ func (s *ArticleStorage) userModelFromRow(row *sql.Row) (*model.Article, error) 
 		return nil, err
 	}
 
-	stmt := s.db.MustPrepare("select `order`, name from article_tag where article_id = ?")
+	stmt := s.db.MustPrepare("select sort, name from article_tag where article = ?")
 	defer stmt.Close()
 
 	rows, err := stmt.Query(id)
