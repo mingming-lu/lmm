@@ -208,7 +208,10 @@ func (s *ArticleStorage) userModelFromRow(row *sql.Row) (*model.Article, error) 
 		tags = append(tags, tag)
 	}
 
-	content := model.NewContent(text, tags)
+	content, err := model.NewContent(text, tags)
+	if err != nil {
+		return nil, err
+	}
 
 	return model.NewArticle(articleID, author, content), nil
 }

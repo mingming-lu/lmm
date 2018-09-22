@@ -36,7 +36,10 @@ func (s *ArticleService) NewArticleToPost(author *model.Author, title, body stri
 		tags[i] = tag
 	}
 
-	content := model.NewContent(text, tags)
+	content, err := model.NewContent(text, tags)
+	if err != nil {
+		return nil, err
+	}
 
 	return model.NewArticle(articleID, author, content), nil
 }
