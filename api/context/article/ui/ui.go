@@ -84,6 +84,11 @@ func (ui *UI) EditArticleText(c *http.Context) {
 		return
 	}
 
+	if err := ui.validatePostArticleAdaptor(&article); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
 	err := ui.appService.ArticleCommandService().EditArticle(
 		user.ID(),
 		c.Request.Path.Params("articleID"),
@@ -96,6 +101,8 @@ func (ui *UI) EditArticleText(c *http.Context) {
 		http.NoContent(c)
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
+	case domain.ErrInvalidArticleID:
+		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 	case domain.ErrInvalidArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrNoSuchArticle:
