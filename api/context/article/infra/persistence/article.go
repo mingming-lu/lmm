@@ -1,13 +1,15 @@
 package persistence
 
 import (
+	"crypto/sha256"
 	"database/sql"
-	"lmm/api/context/article/domain/model"
-	"lmm/api/storage"
-	"lmm/api/utils/strings"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+
+	"lmm/api/context/article/domain/model"
+	"lmm/api/storage"
 )
 
 // ArticleStorage is a implementation of ArticleRepository
@@ -22,7 +24,7 @@ func NewArticleStorage(db *storage.DB) *ArticleStorage {
 
 // NextID generate a random string
 func (s *ArticleStorage) NextID() string {
-	return strings.ReplaceAll(uuid.New().String(), "-", "")
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(uuid.New().String())))[:8]
 }
 
 // Save persist a article domain model
