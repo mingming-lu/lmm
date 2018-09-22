@@ -15,11 +15,11 @@ func NewAuthor(id int64, name string) *Author {
 }
 
 // ID returns the id of the author
-func (a Author) ID() int64 {
+func (a *Author) ID() int64 {
 	return a.id
 }
 
 // Name returns the name of the author
-func (a Author) Name() string {
+func (a *Author) Name() string {
 	return a.name
 }
