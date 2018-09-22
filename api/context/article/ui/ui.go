@@ -1,12 +1,20 @@
 package ui
 
 import (
+	"errors"
+
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/article/application"
 	"lmm/api/context/article/domain"
 	"lmm/api/context/article/domain/repository"
 	"lmm/api/context/article/domain/service"
 	"lmm/api/http"
+)
+
+var (
+	errTitleRequired = errors.New("title required")
+	errBodyRequired  = errors.New("body requried")
+	errTagsRequired  = errors.New("tags requried")
 )
 
 // UI is the user interface to contact with network
@@ -31,21 +39,26 @@ func (ui *UI) PostArticle(c *http.Context) {
 		return
 	}
 
-	article := PostingArticleAdaptor{}
+	article := postArticleAdaptor{}
 	if err := c.Request.ScanBody(&article); err != nil {
 		http.BadRequest(c)
 		return
 	}
 
+	if err := ui.validatePostArticleAdaptor(&article); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
 	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(
 		user.ID(),
-		article.Title,
-		article.Body,
+		*article.Title,
+		*article.Body,
 		article.Tags,
 	)
 	switch err {
 	case nil:
-		c.Header("Location", "articles/"+articleID.String()).String(http.StatusCreated, "Success")
+		c.Header("Location", "/v1/articles/"+articleID.String()).String(http.StatusCreated, "Success")
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrInvalidArticleTitle:
@@ -65,17 +78,18 @@ func (ui *UI) EditArticleText(c *http.Context) {
 		return
 	}
 
-	article := EditArticleAdaptor{}
+	article := postArticleAdaptor{}
 	if err := c.Request.ScanBody(&article); err != nil {
 		http.BadRequest(c)
 		return
 	}
 
-	err := ui.appService.ArticleCommandService().EditArticleText(
+	err := ui.appService.ArticleCommandService().EditArticle(
 		user.ID(),
 		c.Request.Path.Params("articleID"),
-		article.Title,
-		article.Body,
+		*article.Title,
+		*article.Body,
+		article.Tags,
 	)
 	switch err {
 	case nil:
@@ -93,4 +107,17 @@ func (ui *UI) EditArticleText(c *http.Context) {
 	default:
 		panic(err)
 	}
+}
+
+func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdaptor) error {
+	if adaptor.Title == nil {
+		return errTitleRequired
+	}
+	if adaptor.Body == nil {
+		return errBodyRequired
+	}
+	if adaptor.Tags == nil {
+		return errTagsRequired
+	}
+	return nil
 }
