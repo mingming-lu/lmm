@@ -10,16 +10,16 @@ type TagID struct {
 }
 
 // ArticleID returns the linked article's id
-func (id TagID) ArticleID() *ArticleID {
+func (id *TagID) ArticleID() *ArticleID {
 	return id.articleID
 }
 
 // Order returns the tag's name
-func (id TagID) Order() uint {
+func (id *TagID) Order() uint {
 	return id.order
 }
 
 // Equals compares tag id with another
-func (id TagID) Equals(another *TagID) bool {
+func (id *TagID) Equals(another *TagID) bool {
 	return (id.ArticleID() == another.ArticleID()) && (id.Order() == another.Order())
 }

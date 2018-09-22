@@ -24,11 +24,11 @@ func NewArticleID(s string) (*ArticleID, error) {
 	return &id, nil
 }
 
-func (id ArticleID) String() string {
+func (id *ArticleID) String() string {
 	return id.id
 }
 
-func (id ArticleID) setID(anID string) error {
+func (id *ArticleID) setID(anID string) error {
 	if !patternArticleID.MatchString(anID) {
 		return domain.ErrInvalidArticleID
 	}
