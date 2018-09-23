@@ -3,6 +3,7 @@ package api
 import (
 	accountInfra "lmm/api/context/account/infra"
 	account "lmm/api/context/account/ui"
+	articleFetcher "lmm/api/context/article/infra/fetcher"
 	articlePersistence "lmm/api/context/article/infra/persistence"
 	articleService "lmm/api/context/article/infra/service"
 	article "lmm/api/context/article/ui"
@@ -29,9 +30,11 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	imgRepo.SetStaticRepository(static.NewLocalStaticRepository())
 	imageUI := img.New(imgRepo)
 
-	articleRepository := articlePersistence.NewArticleStorage(db)
+	authorService := articleService.NewAuthorAdapter(db)
+	articleFinder := articleFetcher.NewArticleFetcher(db)
+	articleRepository := articlePersistence.NewArticleStorage(db, authorService)
 	authorAdapter := articleService.NewAuthorAdapter(db)
-	articleUI := article.NewUI(articleRepository, authorAdapter)
+	articleUI := article.NewUI(articleFinder, articleRepository, authorAdapter)
 
 	router := http.NewRouter()
 
@@ -43,6 +46,7 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	// article
 	router.POST("/v1/articles", accountUI.BearerAuth(articleUI.PostArticle))
 	router.PUT("/v1/articles/:articleID", accountUI.BearerAuth(articleUI.EditArticleText))
+	router.GET("/v1/articles", articleUI.ListArticles)
 
 	// blog
 	router.GET("/v1/blog", blogUI.GetAllBlog)
