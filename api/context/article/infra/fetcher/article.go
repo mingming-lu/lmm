@@ -11,9 +11,14 @@ type ArticleFetcher struct {
 	db *storage.DB
 }
 
+// NewArticleFetcher creates new ArticleFetcher
+func NewArticleFetcher(db *storage.DB) *ArticleFetcher {
+	return &ArticleFetcher{db: db}
+}
+
 // ListByPage implementation
 func (f *ArticleFetcher) ListByPage(count, page uint) (*model.ArticleListView, error) {
-	stmt := f.db.MustPrepare(`select uid, title, created_at from article limit ? offset ?`)
+	stmt := f.db.MustPrepare(`select uid, title, created_at from article order by created_at desc limit ? offset ?`)
 	defer stmt.Close()
 
 	rows, err := stmt.Query(count+1, (page-1)*count)

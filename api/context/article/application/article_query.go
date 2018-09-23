@@ -22,7 +22,7 @@ func (app *ArticleQueryService) ListArticlesByPage(countStr, pageStr string) (*m
 		countStr = "5"
 	}
 	count, err := strings.ParseUint(countStr)
-	if err != nil {
+	if err != nil || count < 1 {
 		return nil, ErrInvalidCount
 	}
 
@@ -30,7 +30,7 @@ func (app *ArticleQueryService) ListArticlesByPage(countStr, pageStr string) (*m
 		pageStr = "1"
 	}
 	page, err := strings.ParseUint(pageStr)
-	if err != nil {
+	if err != nil || page < 1 {
 		return nil, ErrInvalidPage
 	}
 

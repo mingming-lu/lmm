@@ -2,6 +2,7 @@ package ui
 
 import (
 	"errors"
+	"lmm/api/context/article/domain/finder"
 
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/article/application"
@@ -24,10 +25,14 @@ type UI struct {
 }
 
 // NewUI returns a new ui
-func NewUI(articleRepository repository.ArticleRepository, authorService service.AuthorService) *UI {
+func NewUI(
+	articleFinder finder.ArticleFinder,
+	articleRepository repository.ArticleRepository,
+	authorService service.AuthorService,
+) *UI {
 	appService := application.NewService(
 		application.NewArticleCommandService(articleRepository, authorService),
-		nil,
+		application.NewArticleQueryService(articleFinder),
 	)
 	return &UI{appService: appService}
 }
@@ -139,6 +144,8 @@ func (ui *UI) ListArticles(c *http.Context) {
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, ui.articleListViewToJSON(view))
+	case application.ErrInvalidCount, application.ErrInvalidPage:
+		c.JSON(http.StatusBadRequest, err.Error())
 	default:
 		panic(err)
 	}
