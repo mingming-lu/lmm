@@ -6,6 +6,7 @@ import (
 	account "lmm/api/context/account/domain/model"
 	"lmm/api/context/article/application"
 	"lmm/api/context/article/domain"
+	"lmm/api/context/article/domain/model"
 	"lmm/api/context/article/domain/repository"
 	"lmm/api/context/article/domain/service"
 	"lmm/api/http"
@@ -39,7 +40,7 @@ func (ui *UI) PostArticle(c *http.Context) {
 		return
 	}
 
-	article := postArticleAdaptor{}
+	article := postArticleAdapter{}
 	if err := c.Request.ScanBody(&article); err != nil {
 		http.BadRequest(c)
 		return
@@ -78,7 +79,7 @@ func (ui *UI) EditArticleText(c *http.Context) {
 		return
 	}
 
-	article := postArticleAdaptor{}
+	article := postArticleAdapter{}
 	if err := c.Request.ScanBody(&article); err != nil {
 		http.BadRequest(c)
 		return
@@ -116,7 +117,7 @@ func (ui *UI) EditArticleText(c *http.Context) {
 	}
 }
 
-func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdaptor) error {
+func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 	if adaptor.Title == nil {
 		return errTitleRequired
 	}
@@ -127,4 +128,31 @@ func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdaptor) error {
 		return errTagsRequired
 	}
 	return nil
+}
+
+// ListArticles handles GET /v1/articles
+func (ui *UI) ListArticles(c *http.Context) {
+	view, err := ui.appService.ArticleQueryService().ListArticlesByPage(
+		c.Request.Query("count"),
+		c.Request.Query("page"),
+	)
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, ui.articleListViewToJSON(view))
+	default:
+		panic(err)
+	}
+}
+
+func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAdapter {
+	items := make([]articleListItem, len(view.Items()), len(view.Items()))
+	for i, item := range view.Items() {
+		items[i].ID = item.ID().String()
+		items[i].Title = item.Title()
+		items[i].PostAt = item.PostAt().UTC().String()
+	}
+	return &articleListAdapter{
+		Articles:    items,
+		HasNextPage: view.HasNextPage(),
+	}
 }
