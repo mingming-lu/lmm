@@ -10,20 +10,24 @@ import (
 type ArticleView struct {
 	model.ValueObject
 	id           *ArticleID
-	author       *Author
 	content      *Content
 	postAt       time.Time
 	lastEditedAt time.Time
 }
 
+// NewArticleView creates new ArticleView
+func NewArticleView(articleID *ArticleID, content *Content, postAt, lastEditedAt time.Time) *ArticleView {
+	return &ArticleView{
+		id:           articleID,
+		content:      content,
+		postAt:       postAt,
+		lastEditedAt: lastEditedAt,
+	}
+}
+
 // ID returns article's id
 func (v *ArticleView) ID() *ArticleID {
 	return v.id
-}
-
-// Author returns article's author
-func (v *ArticleView) Author() *Author {
-	return v.author
 }
 
 // Content returns article's content
