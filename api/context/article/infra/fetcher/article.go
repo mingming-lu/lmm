@@ -122,3 +122,28 @@ func (f *ArticleFetcher) FindByID(id *model.ArticleID) (*model.ArticleView, erro
 
 	return model.NewArticleView(articleID, content, articlePostAt, articleEditedAt), nil
 }
+
+// ListAllTags implementation
+func (f *ArticleFetcher) ListAllTags() (model.TagListView, error) {
+	stmt := f.db.MustPrepare(`select name from article_tag group by name order by name`)
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		if err == storage.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	defer rows.Close()
+
+	items := make([]*model.TagListViewItem, 0)
+	var name string
+	for rows.Next() {
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		items = append(items, model.NewTagListViewItem(name))
+	}
+	return items, nil
+}

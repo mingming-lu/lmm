@@ -48,6 +48,7 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	router.PUT("/v1/articles/:articleID", accountUI.BearerAuth(articleUI.EditArticleText))
 	router.GET("/v1/articles", articleUI.ListArticles)
 	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
+	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
 
 	// blog
 	router.GET("/v1/blog", blogUI.GetAllBlog)
