@@ -36,3 +36,12 @@ func (app *ArticleQueryService) ListArticlesByPage(countStr, pageStr string) (*m
 
 	return app.articleFinder.ListByPage(count, page)
 }
+
+// ArticleByID finds article by given id
+func (app *ArticleQueryService) ArticleByID(rawID string) (*model.ArticleView, error) {
+	articleID, err := model.NewArticleID(rawID)
+	if err != nil {
+		return nil, err
+	}
+	return app.articleFinder.FindByID(articleID)
+}

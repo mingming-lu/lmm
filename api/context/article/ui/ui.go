@@ -163,3 +163,33 @@ func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAda
 		HasNextPage: view.HasNextPage(),
 	}
 }
+
+// GetArticle handles GET /v1/articles/:articleID
+func (ui *UI) GetArticle(c *http.Context) {
+	view, err := ui.appService.ArticleQueryService().ArticleByID(
+		c.Request.Path.Params("articleID"),
+	)
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, ui.articleViewToJSON(view))
+	case domain.ErrInvalidArticleID, domain.ErrNoSuchArticle:
+		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
+	default:
+		panic(err)
+	}
+}
+
+func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
+	tags := make([]articleViewTag, len(view.Content().Tags()), len(view.Content().Tags()))
+	for i, tag := range view.Content().Tags() {
+		tags[i].Name = tag.Name()
+	}
+	return &articleViewResponse{
+		ID:           view.ID().String(),
+		Title:        view.Content().Text().Title(),
+		Body:         view.Content().Text().Body(),
+		PostAt:       view.PostAt().UTC().String(),
+		LastEditedAt: view.LastEditedAt().UTC().String(),
+		Tags:         tags,
+	}
+}
