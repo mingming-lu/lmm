@@ -45,3 +45,8 @@ func (app *ArticleQueryService) ArticleByID(rawID string) (*model.ArticleView, e
 	}
 	return app.articleFinder.FindByID(articleID)
 }
+
+// AllArticleTags gets all article tags
+func (app *ArticleQueryService) AllArticleTags() (model.TagListView, error) {
+	return app.articleFinder.ListAllTags()
+}

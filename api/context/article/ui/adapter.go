@@ -29,3 +29,9 @@ type articleViewResponse struct {
 type articleViewTag struct {
 	Name string `json:"name"`
 }
+
+type articleTagListView = []articleTagListItemView
+
+type articleTagListItemView struct {
+	Name string `json:"name"`
+}

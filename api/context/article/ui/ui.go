@@ -193,3 +193,23 @@ func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
 		Tags:         tags,
 	}
 }
+
+// GetAllArticleTags handles GET /v1/articleTags
+func (ui *UI) GetAllArticleTags(c *http.Context) {
+	view, err := ui.appService.ArticleQueryService().AllArticleTags()
+
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, ui.tagListViewToJSON(view))
+	default:
+		panic(err)
+	}
+}
+
+func (ui *UI) tagListViewToJSON(view model.TagListView) articleTagListView {
+	tags := make([]articleTagListItemView, len(view), len(view))
+	for i, tag := range view {
+		tags[i].Name = tag.Name()
+	}
+	return tags
+}
