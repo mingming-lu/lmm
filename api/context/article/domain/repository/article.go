@@ -1,11 +1,15 @@
 package repository
 
-import "lmm/api/context/article/domain/model"
+import (
+	"context"
+
+	"lmm/api/context/article/domain/model"
+)
 
 // ArticleRepository interface
 type ArticleRepository interface {
-	NextID() string
-	Save(*model.Article) error
-	Remove(*model.Article) error
-	FindByID(*model.ArticleID) (*model.Article, error)
+	NextID(context.Context) string
+	Save(context.Context, *model.Article) error
+	Remove(context.Context, *model.Article) error
+	FindByID(context.Context, *model.ArticleID) (*model.Article, error)
 }

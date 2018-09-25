@@ -1,6 +1,8 @@
 package application
 
 import (
+	"context"
+
 	"lmm/api/context/article/domain"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/context/article/domain/repository"
@@ -35,7 +37,7 @@ func (app *ArticleCommandService) PostNewArticle(userID uint64, title string, bo
 		return nil, err
 	}
 
-	if err := app.articleRepository.Save(article); err != nil {
+	if err := app.articleRepository.Save(context.TODO(), article); err != nil {
 		return nil, err
 	}
 
@@ -72,7 +74,7 @@ func (app *ArticleCommandService) EditArticle(userID uint64, rawArticleID, title
 
 	article.EditContent(content)
 
-	return app.articleRepository.Save(article)
+	return app.articleRepository.Save(context.TODO(), article)
 }
 
 func (app *ArticleCommandService) articleWithID(id string) (*model.Article, error) {
@@ -81,7 +83,7 @@ func (app *ArticleCommandService) articleWithID(id string) (*model.Article, erro
 		return nil, err
 	}
 
-	return app.articleRepository.FindByID(articleID)
+	return app.articleRepository.FindByID(context.TODO(), articleID)
 }
 
 func (app *ArticleCommandService) tagsFromNames(tagNames []string, articleID *model.ArticleID) ([]*model.Tag, error) {
