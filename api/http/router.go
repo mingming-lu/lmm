@@ -38,25 +38,13 @@ func NewRouter() *Router {
 // Handle registers handlers to handle combination of method and path
 func (r *Router) Handle(method string, path string, handler Handler) {
 	r.router.Handle(method, path, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		ctx := r.Context()
-		var cancel context.CancelFunc
-
-		if timeout > 0 {
-			ctx, cancel = context.WithTimeout(r.Context(), timeout)
-		}
-
-		if cancel != nil {
-			defer cancel()
-		}
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
 
 		c := &contextImpl{
-			Context: ctx,
-			r: &requestImpl{
-				Params:  params,
-				Request: r,
-				Values:  nil,
-			},
-			w: w,
+			keyMap: make(map[string]ContextKey),
+			req:    NewRequest(r.WithContext(ctx), params),
+			res:    w,
 		}
 		handler(c)
 	})

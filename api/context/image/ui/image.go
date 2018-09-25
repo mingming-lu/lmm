@@ -33,20 +33,20 @@ func New(imageRepo repository.ImageRepository) *UI {
 	return &UI{app: app}
 }
 
-func (ui *UI) Upload(c *http.Context) {
-	user, ok := c.Values().Get("user").(*account.User)
+func (ui *UI) Upload(c http.Context) {
+	user, ok := c.Value(c.KeyRegistry("user")).(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
 	}
 
-	if err := c.Request.ParseMultipartForm(maxFormDataSize); err != nil {
+	if err := c.Request().ParseMultipartForm(maxFormDataSize); err != nil {
 		log.Println(err.Error())
 		http.BadRequest(c)
 		return
 	}
 
-	imageSources := c.Request.MultipartForm.File["src"]
+	imageSources := c.Request().MultipartForm.File["src"]
 	if len(imageSources) > 10 {
 		c.String(http.StatusBadRequest, errUploadImagesMaxNumberExceeded)
 		return
@@ -88,11 +88,11 @@ func openImage(fh *multipart.FileHeader) ([]byte, error) {
 	return ioutil.ReadAll(f)
 }
 
-func (ui *UI) LoadImagesByPage(c *http.Context) {
+func (ui *UI) LoadImagesByPage(c http.Context) {
 	models, hasNextPage, err := ui.app.FetchImagesByType(
-		c.Request.Query("type"),
-		c.Request.Query("count"),
-		c.Request.Query("page"),
+		c.Request().QueryParam("type"),
+		c.Request().QueryParam("count"),
+		c.Request().QueryParam("page"),
 	)
 	switch err {
 	case nil:
@@ -111,9 +111,9 @@ func (ui *UI) LoadImagesByPage(c *http.Context) {
 	}
 }
 
-func (ui *UI) MarkImage(c *http.Context) {
-	imageID := c.Request.Path.Params("image")
-	err := ui.app.MarkImageAs(imageID, c.Request.Query("type"))
+func (ui *UI) MarkImage(c http.Context) {
+	imageID := c.Request().PathParam("image")
+	err := ui.app.MarkImageAs(imageID, c.Request().QueryParam("type"))
 	switch err {
 	case nil:
 		c.String(http.StatusOK, "Success")

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"lmm/api/context/article/infra/fetcher"
 	"os"
 
 	auth "lmm/api/context/account/domain/model"
@@ -25,9 +26,10 @@ func TestMain(m *testing.M) {
 	auth := authUI.New(userRepo)
 
 	authorService := service.NewAuthorAdapter(testing.DB())
+	articleFinder := fetcher.NewArticleFetcher(testing.DB())
 	articleRepository = persistence.NewArticleStorage(testing.DB(), authorService)
 
-	ui = NewUI(articleRepository, authorService)
+	ui = NewUI(articleFinder, articleRepository, authorService)
 
 	router = testing.NewRouter()
 	router.POST("/v1/articles", auth.BearerAuth(ui.PostArticle))

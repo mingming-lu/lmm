@@ -38,15 +38,15 @@ func NewUI(
 }
 
 // PostArticle handles POST /1/articles
-func (ui *UI) PostArticle(c *http.Context) {
-	user, ok := c.Values().Get("user").(*account.User)
+func (ui *UI) PostArticle(c http.Context) {
+	user, ok := c.Value(c.KeyRegistry("user")).(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
 	}
 
 	article := postArticleAdapter{}
-	if err := c.Request.ScanBody(&article); err != nil {
+	if err := c.Request().Bind(&article); err != nil {
 		http.BadRequest(c)
 		return
 	}
@@ -64,7 +64,8 @@ func (ui *UI) PostArticle(c *http.Context) {
 	)
 	switch err {
 	case nil:
-		c.Header("Location", "/v1/articles/"+articleID.String()).String(http.StatusCreated, "Success")
+		c.Header("Location", "/v1/articles/"+articleID.String())
+		c.String(http.StatusCreated, "Success")
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrInvalidArticleTitle:
@@ -77,15 +78,15 @@ func (ui *UI) PostArticle(c *http.Context) {
 }
 
 // EditArticleText handles PUT /1/article/:articleID
-func (ui *UI) EditArticleText(c *http.Context) {
-	user, ok := c.Values().Get("user").(*account.User)
+func (ui *UI) EditArticleText(c http.Context) {
+	user, ok := c.Value(c.KeyRegistry("user")).(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
 	}
 
 	article := postArticleAdapter{}
-	if err := c.Request.ScanBody(&article); err != nil {
+	if err := c.Request().Bind(&article); err != nil {
 		http.BadRequest(c)
 		return
 	}
@@ -97,7 +98,7 @@ func (ui *UI) EditArticleText(c *http.Context) {
 
 	err := ui.appService.ArticleCommandService().EditArticle(
 		user.ID(),
-		c.Request.Path.Params("articleID"),
+		c.Request().PathParam("articleID"),
 		*article.Title,
 		*article.Body,
 		article.Tags,
@@ -136,10 +137,10 @@ func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 }
 
 // ListArticles handles GET /v1/articles
-func (ui *UI) ListArticles(c *http.Context) {
+func (ui *UI) ListArticles(c http.Context) {
 	view, err := ui.appService.ArticleQueryService().ListArticlesByPage(
-		c.Request.Query("count"),
-		c.Request.Query("page"),
+		c.Request().QueryParam("count"),
+		c.Request().QueryParam("page"),
 	)
 	switch err {
 	case nil:
@@ -165,9 +166,9 @@ func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAda
 }
 
 // GetArticle handles GET /v1/articles/:articleID
-func (ui *UI) GetArticle(c *http.Context) {
+func (ui *UI) GetArticle(c http.Context) {
 	view, err := ui.appService.ArticleQueryService().ArticleByID(
-		c.Request.Path.Params("articleID"),
+		c.Request().PathParam("articleID"),
 	)
 	switch err {
 	case nil:
@@ -195,7 +196,7 @@ func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
 }
 
 // GetAllArticleTags handles GET /v1/articleTags
-func (ui *UI) GetAllArticleTags(c *http.Context) {
+func (ui *UI) GetAllArticleTags(c http.Context) {
 	view, err := ui.appService.ArticleQueryService().AllArticleTags()
 
 	switch err {
