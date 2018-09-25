@@ -1,7 +1,10 @@
 package ui
 
 import (
+	"context"
 	"fmt"
+	"log"
+
 	"lmm/api/context/account/appservice"
 	"lmm/api/context/account/domain/model"
 	"lmm/api/context/account/domain/repository"
@@ -18,8 +21,8 @@ func New(userRepo repository.UserRepository) *UI {
 	return &UI{app: app}
 }
 
-func (ui *UI) SignIn(c *http.Context) {
-	user, err := ui.app.SignIn(c.Request.Body)
+func (ui *UI) SignIn(c http.Context) {
+	user, err := ui.app.SignIn(c.Request().Body)
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, SignInResponse{
@@ -32,16 +35,16 @@ func (ui *UI) SignIn(c *http.Context) {
 	case service.ErrInvalidUserNameOrPassword:
 		c.String(http.StatusNotFound, service.ErrInvalidUserNameOrPassword.Error())
 	default:
-		c.Logger().Error(err.Error())
-		http.InternalServerError(c)
+		panic(err)
 	}
 }
 
-func (ui *UI) SignUp(c *http.Context) {
-	id, err := ui.app.SignUp(c.Request.Body)
+func (ui *UI) SignUp(c http.Context) {
+	id, err := ui.app.SignUp(c.Request().Body)
 	switch err {
 	case nil:
-		c.Header("Location", fmt.Sprintf("/users/%d", id)).String(http.StatusCreated, "Success")
+		c.Header("Location", fmt.Sprintf("/users/%d", id))
+		c.String(http.StatusCreated, "Success")
 	case service.ErrDuplicateUserName:
 		c.String(http.StatusBadRequest, service.ErrDuplicateUserName.Error())
 	case service.ErrInvalidBody:
@@ -49,13 +52,12 @@ func (ui *UI) SignUp(c *http.Context) {
 	case service.ErrInvalidUserNameOrPassword:
 		c.String(http.StatusBadRequest, service.ErrInvalidUserNameOrPassword.Error())
 	default:
-		c.Logger().Error(err.Error())
-		http.InternalServerError(c)
+		panic(err)
 	}
 }
 
-func (ui *UI) Verify(c *http.Context) {
-	user, ok := c.Values().Get("user").(*model.User)
+func (ui *UI) Verify(c http.Context) {
+	user, ok := c.Value(c.KeyRegistry("user")).(*model.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
@@ -67,15 +69,16 @@ func (ui *UI) Verify(c *http.Context) {
 }
 
 func (ui *UI) BearerAuth(handler http.Handler) http.Handler {
-	return func(c *http.Context) {
-		auth := c.Request.Header.Get("Authorization")
+	return func(c http.Context) {
+		auth := c.Request().Header.Get("Authorization")
 		user, err := ui.app.BearerAuth(auth)
 		if err != nil {
-			c.Logger().Error("%s: '%s'", err.Error(), auth)
+			log.Printf("%s: '%s'", err.Error(), auth)
 			http.Unauthorized(c)
 			return
 		}
-		c.Values().Set("user", user)
-		handler(c)
+		handler(c.With(
+			context.WithValue(context.Background(), c.KeyRegistry("user"), user)),
+		)
 	}
 }

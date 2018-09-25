@@ -1,152 +1,100 @@
 package http
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"log"
-	"net/http"
-	"net/url"
-	"strings"
-
-	"github.com/julienschmidt/httprouter"
+	"sync/atomic"
+	"time"
 )
 
-type PathParams = httprouter.Params
+// ContextKey is used to indentify context value key
+type ContextKey int32
 
-type Path struct {
-	raw    string
-	params PathParams
+// Context is a abstraction of http context
+type Context interface {
+	context.Context
+
+	Header(key, value string)
+
+	JSON(statusCode int, schema interface{})
+
+	KeyRegistry(name string) ContextKey
+
+	Request() *Request
+
+	String(statusCode int, s string)
+
+	With(ctx context.Context) Context
 }
 
-func (p *Path) String() string {
-	return p.raw
+type contextImpl struct {
+	keyCount int32
+	keyMap   map[string]ContextKey
+	req      *Request
+	res      Response
 }
 
-func (p *Path) Params(name string) string {
-	return p.params.ByName(name)
+func (c *contextImpl) Deadline() (time.Time, bool) {
+	return c.Request().Context().Deadline()
 }
 
-type URL struct {
-	*url.URL
-	Path  *Path
-	query url.Values
+func (c *contextImpl) Done() <-chan struct{} {
+	return c.Request().Context().Done()
 }
 
-func (u *URL) Query(name string) string {
-	return u.query.Get(name)
+func (c *contextImpl) Err() error {
+	return c.Request().Context().Err()
 }
 
-type Request struct {
-	*http.Request
-	*URL
+func (c *contextImpl) Value(key interface{}) interface{} {
+	return c.Request().Context().Value(key)
 }
 
-func NewRequest(req *http.Request, params PathParams) *Request {
-	path := &Path{
-		raw:    req.URL.Path,
-		params: params,
+func (c *contextImpl) Header(key, value string) {
+	if c.res.Header().Get(key) != "" {
+		log.Printf("unexpected to set same header more than once, header = %s, value = %s\n", key, value)
+		return
 	}
-	url := &URL{
-		URL:   req.URL,
-		Path:  path,
-		query: req.URL.Query(),
-	}
-	return &Request{
-		Request: req,
-		URL:     url,
-	}
+	c.res.Header().Set(key, value)
 }
 
-type ResponseWriter interface {
-	http.ResponseWriter
-	Status() int
-}
-
-type responseWriter struct {
-	headerWritten bool
-	statusCode    int
-	http.ResponseWriter
-}
-
-func newResponseWriter(w http.ResponseWriter) ResponseWriter {
-	return &responseWriter{
-		headerWritten:  false,
-		statusCode:     StatusOK,
-		ResponseWriter: w,
-	}
-}
-
-func (rw *responseWriter) Status() int {
-	return rw.statusCode
-}
-
-func (rw *responseWriter) WriteHeader(statusCode int) {
-	if statusCode > 0 && rw.statusCode != statusCode {
-		if rw.headerWritten {
-			log.Printf("status code has been written as %d, cannot be written as %d again\n", rw.statusCode, statusCode)
-			return
-		}
-		rw.statusCode = statusCode
-		rw.ResponseWriter.WriteHeader(statusCode)
-		rw.headerWritten = true
-	}
-}
-
-type Values map[string]interface{}
-
-func (vs Values) Set(key string, v interface{}) {
-	vs[strings.ToLower(key)] = v
-}
-
-func (vs Values) Get(key string) interface{} {
-	return vs[strings.ToLower(key)]
-}
-
-type Context struct {
-	rw      ResponseWriter
-	Request *Request
-	values  Values
-	logger  Logger
-}
-
-func (c *Context) Values() Values {
-	return c.values
-}
-
-func (c *Context) Logger() Logger {
-	return c.logger
-}
-
-func (r *Request) ScanBody(schema interface{}) error {
-	return json.NewDecoder(r.Request.Body).Decode(schema)
-}
-
-func NewContext(rw ResponseWriter, r *Request) *Context {
-	return &Context{
-		Request: r,
-		rw:      rw,
-		values:  make(Values),
-		logger:  defaultLogger,
-	}
-}
-
-func (c *Context) Header(key, value string) *Context {
-	c.rw.Header().Add(key, value)
-	return c
-}
-
-func (c *Context) JSON(statusCode int, data interface{}) {
-	c.rw.Header().Set("Content-Type", "application/json")
-	c.rw.WriteHeader(statusCode)
-	if err := json.NewEncoder(c.rw).Encode(data); err != nil {
+func (c *contextImpl) JSON(statusCode int, data interface{}) {
+	c.writeContentType("application/json")
+	c.res.WriteHeader(statusCode)
+	if err := json.NewEncoder(c.res).Encode(data); err != nil {
 		panic(err)
 	}
 }
 
-func (c *Context) String(statusCode int, s string) {
-	c.rw.Header().Set("Content-Type", "text/plain")
-	c.rw.WriteHeader(statusCode)
-	if !strings.HasSuffix(s, "\n") {
-		s += "\n"
+func (c *contextImpl) KeyRegistry(name string) ContextKey {
+	if key, ok := c.keyMap[name]; ok {
+		return ContextKey(key)
 	}
-	c.rw.Write([]byte(s))
+
+	newKey := ContextKey(atomic.AddInt32(&c.keyCount, 1))
+	c.keyMap[name] = newKey
+	return newKey
+}
+
+func (c *contextImpl) Request() *Request {
+	return c.req
+}
+
+func (c *contextImpl) String(statusCode int, s string) {
+	c.writeContentType("text/plain")
+	c.res.WriteHeader(statusCode)
+	if _, err := fmt.Fprint(c.res, s); err != nil {
+		panic(err)
+	}
+}
+
+func (c *contextImpl) With(ctx context.Context) Context {
+	c.req.Request = c.Request().WithContext(ctx)
+	return c
+}
+
+func (c *contextImpl) writeContentType(value string) {
+	c.Header("Content-Type", value)
 }

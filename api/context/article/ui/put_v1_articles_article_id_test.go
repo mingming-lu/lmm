@@ -20,7 +20,7 @@ func TestPutArticles_204(tt *testing.T) {
 
 	title := strings.Repeat("t", 140)
 	body := "test body"
-	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdaptor{
+	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdapter{
 		Title: &title,
 		Body:  &body,
 		Tags:  []string{"test", "testing"},
@@ -48,14 +48,14 @@ func TestPutArticles_403(tt *testing.T) {
 
 	title := strings.Repeat("t", 140)
 	body := "test body"
-	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdaptor{
+	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdapter{
 		Title: &title,
 		Body:  &body,
 		Tags:  []string{"test", "testing"},
 	}))
 
 	t.Is(http.StatusForbidden, res.StatusCode())
-	t.Is(domain.ErrNotArticleAuthor.Error()+"\n", res.Body())
+	t.Is(domain.ErrNotArticleAuthor.Error(), res.Body())
 }
 
 func TestPutArticles_404_NotFound(tt *testing.T) {
@@ -66,14 +66,14 @@ func TestPutArticles_404_NotFound(tt *testing.T) {
 
 	title := strings.Repeat("t", 140)
 	body := "test body"
-	res := putArticles("88888888", headers, testing.StructToRequestBody(postArticleAdaptor{
+	res := putArticles("88888888", headers, testing.StructToRequestBody(postArticleAdapter{
 		Title: &title,
 		Body:  &body,
 		Tags:  []string{"test", "testing"},
 	}))
 
 	t.Is(http.StatusNotFound, res.StatusCode())
-	t.Is(domain.ErrNoSuchArticle.Error()+"\n", res.Body())
+	t.Is(domain.ErrNoSuchArticle.Error(), res.Body())
 }
 
 func TestPutArticles_404_InvalidArticleID(tt *testing.T) {
@@ -84,14 +84,14 @@ func TestPutArticles_404_InvalidArticleID(tt *testing.T) {
 
 	title := strings.Repeat("t", 140)
 	body := "test body"
-	res := putArticles("dummy", headers, testing.StructToRequestBody(postArticleAdaptor{
+	res := putArticles("dummy", headers, testing.StructToRequestBody(postArticleAdapter{
 		Title: &title,
 		Body:  &body,
 		Tags:  []string{"test", "testing"},
 	}))
 
 	t.Is(http.StatusNotFound, res.StatusCode())
-	t.Is(domain.ErrNoSuchArticle.Error()+"\n", res.Body())
+	t.Is(domain.ErrNoSuchArticle.Error(), res.Body())
 }
 
 func TestPutArticles_400_TitleRequired(tt *testing.T) {
@@ -110,7 +110,7 @@ func TestPutArticles_400_TitleRequired(tt *testing.T) {
 	}))
 
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(errTitleRequired.Error()+"\n", res.Body())
+	t.Is(errTitleRequired.Error(), res.Body())
 }
 
 func TestPutArticles_400_EmptyTitle(tt *testing.T) {
@@ -124,14 +124,14 @@ func TestPutArticles_400_EmptyTitle(tt *testing.T) {
 
 	title := ""
 	body := "test body"
-	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdaptor{
+	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdapter{
 		Title: &title,
 		Body:  &body,
 		Tags:  []string{"test", "testing"},
 	}))
 
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(domain.ErrEmptyArticleTitle.Error()+"\n", res.Body())
+	t.Is(domain.ErrEmptyArticleTitle.Error(), res.Body())
 }
 
 func TestPutArticles_400_InvalidTitle(tt *testing.T) {
@@ -145,14 +145,14 @@ func TestPutArticles_400_InvalidTitle(tt *testing.T) {
 
 	title := "$&%"
 	body := "test body"
-	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdaptor{
+	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdapter{
 		Title: &title,
 		Body:  &body,
 		Tags:  []string{"test"},
 	}))
 
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(domain.ErrInvalidArticleTitle.Error()+"\n", res.Body())
+	t.Is(domain.ErrInvalidArticleTitle.Error(), res.Body())
 }
 
 func TestPutArticles_400_TitleTooLong(tt *testing.T) {
@@ -166,14 +166,14 @@ func TestPutArticles_400_TitleTooLong(tt *testing.T) {
 
 	title := strings.Repeat("t", 141)
 	body := "test body"
-	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdaptor{
+	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdapter{
 		Title: &title,
 		Body:  &body,
 		Tags:  []string{"test"},
 	}))
 
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(domain.ErrArticleTitleTooLong.Error()+"\n", res.Body())
+	t.Is(domain.ErrArticleTitleTooLong.Error(), res.Body())
 }
 
 func TestPutArticles_400_BodyRequired(tt *testing.T) {
@@ -195,7 +195,7 @@ func TestPutArticles_400_BodyRequired(tt *testing.T) {
 	}))
 
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(errBodyRequired.Error()+"\n", res.Body())
+	t.Is(errBodyRequired.Error(), res.Body())
 }
 
 func TestPutArticles_400_TagsRequired(tt *testing.T) {
@@ -217,7 +217,7 @@ func TestPutArticles_400_TagsRequired(tt *testing.T) {
 	}))
 
 	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(errTagsRequired.Error()+"\n", res.Body())
+	t.Is(errTagsRequired.Error(), res.Body())
 }
 
 func TestPutArticles_204_EmptyTags(tt *testing.T) {
@@ -231,7 +231,7 @@ func TestPutArticles_204_EmptyTags(tt *testing.T) {
 
 	title := "awesome"
 	body := ""
-	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdaptor{
+	res := putArticles(articleID.String(), headers, testing.StructToRequestBody(postArticleAdapter{
 		Title: &title,
 		Body:  &body,
 		Tags:  []string{},
