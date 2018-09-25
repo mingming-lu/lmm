@@ -105,15 +105,10 @@ type Context struct {
 	rw      ResponseWriter
 	Request *Request
 	values  Values
-	logger  Logger
 }
 
 func (c *Context) Values() Values {
 	return c.values
-}
-
-func (c *Context) Logger() Logger {
-	return c.logger
 }
 
 func (r *Request) ScanBody(schema interface{}) error {
@@ -125,7 +120,6 @@ func NewContext(rw ResponseWriter, r *Request) *Context {
 		Request: r,
 		rw:      rw,
 		values:  make(Values),
-		logger:  defaultLogger,
 	}
 }
 
