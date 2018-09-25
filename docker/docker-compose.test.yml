@@ -5,6 +5,7 @@ services:
       - ./api/.test.env
     environment:
       DATABASE_NAME: lmm_test
+      HTTP_TIMEOUT_SECOND: 1
     working_dir: /go/src/lmm/api
     command: bash
   app:
