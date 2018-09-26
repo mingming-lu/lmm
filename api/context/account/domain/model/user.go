@@ -1,10 +1,11 @@
 package model
 
 import (
-	"lmm/api/domain/model"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"lmm/api/context/base/domain/model"
 )
 
 type User struct {

@@ -4,7 +4,7 @@ import (
 	"regexp"
 
 	"lmm/api/context/article/domain"
-	"lmm/api/domain/model"
+	"lmm/api/context/base/domain/model"
 	"lmm/api/utils/strings"
 )
 
