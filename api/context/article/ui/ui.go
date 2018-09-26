@@ -39,7 +39,7 @@ func NewUI(
 
 // PostArticle handles POST /1/articles
 func (ui *UI) PostArticle(c http.Context) {
-	user, ok := c.Value(c.KeyRegistry("user")).(*account.User)
+	user, ok := c.Value(http.StrCtxKey("user")).(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
@@ -56,7 +56,7 @@ func (ui *UI) PostArticle(c http.Context) {
 		return
 	}
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(c,
 		user.ID(),
 		*article.Title,
 		*article.Body,
@@ -79,7 +79,7 @@ func (ui *UI) PostArticle(c http.Context) {
 
 // EditArticleText handles PUT /1/article/:articleID
 func (ui *UI) EditArticleText(c http.Context) {
-	user, ok := c.Value(c.KeyRegistry("user")).(*account.User)
+	user, ok := c.Value(http.StrCtxKey("user")).(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
@@ -96,7 +96,7 @@ func (ui *UI) EditArticleText(c http.Context) {
 		return
 	}
 
-	err := ui.appService.ArticleCommandService().EditArticle(
+	err := ui.appService.ArticleCommandService().EditArticle(c,
 		user.ID(),
 		c.Request().PathParam("articleID"),
 		*article.Title,
@@ -138,7 +138,7 @@ func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 
 // ListArticles handles GET /v1/articles
 func (ui *UI) ListArticles(c http.Context) {
-	view, err := ui.appService.ArticleQueryService().ListArticlesByPage(
+	view, err := ui.appService.ArticleQueryService().ListArticlesByPage(c,
 		c.Request().QueryParam("count"),
 		c.Request().QueryParam("page"),
 	)
@@ -167,7 +167,7 @@ func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAda
 
 // GetArticle handles GET /v1/articles/:articleID
 func (ui *UI) GetArticle(c http.Context) {
-	view, err := ui.appService.ArticleQueryService().ArticleByID(
+	view, err := ui.appService.ArticleQueryService().ArticleByID(c,
 		c.Request().PathParam("articleID"),
 	)
 	switch err {
@@ -197,7 +197,7 @@ func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
 
 // GetAllArticleTags handles GET /v1/articleTags
 func (ui *UI) GetAllArticleTags(c http.Context) {
-	view, err := ui.appService.ArticleQueryService().AllArticleTags()
+	view, err := ui.appService.ArticleQueryService().AllArticleTags(c)
 
 	switch err {
 	case nil:

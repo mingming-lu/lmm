@@ -11,6 +11,7 @@ services:
     environment:
       TZ: Asia/Tokyo
       DATABASE_NAME: lmm
+      HTTP_TIMEOUT_SECOND: 10
     depends_on:
       - mysql
     links:

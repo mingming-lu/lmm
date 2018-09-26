@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"context"
 	"io"
 	"net/http"
 
@@ -12,7 +13,7 @@ import (
 func TestPutArticles_204(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(user.ID(), "title", "body", []string{})
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(context.Background(), user.ID(), "title", "body", []string{})
 	t.NoError(err)
 
 	headers := make(map[string]string)
@@ -40,7 +41,7 @@ func TestPutArticles_401(tt *testing.T) {
 func TestPutArticles_403(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(user.ID(), "title", "body", []string{})
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(context.Background(), user.ID(), "title", "body", []string{})
 	t.NoError(err)
 
 	headers := make(map[string]string)
@@ -116,7 +117,7 @@ func TestPutArticles_400_TitleRequired(tt *testing.T) {
 func TestPutArticles_400_EmptyTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(user.ID(), "title", "body", []string{})
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(context.Background(), user.ID(), "title", "body", []string{})
 	t.NoError(err)
 
 	headers := make(map[string]string)
@@ -137,7 +138,7 @@ func TestPutArticles_400_EmptyTitle(tt *testing.T) {
 func TestPutArticles_400_InvalidTitle(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(user.ID(), "title", "body", []string{})
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(context.Background(), user.ID(), "title", "body", []string{})
 	t.NoError(err)
 
 	headers := make(map[string]string)
@@ -158,7 +159,7 @@ func TestPutArticles_400_InvalidTitle(tt *testing.T) {
 func TestPutArticles_400_TitleTooLong(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(user.ID(), "title", "body", []string{})
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(context.Background(), user.ID(), "title", "body", []string{})
 	t.NoError(err)
 
 	headers := make(map[string]string)
@@ -179,7 +180,7 @@ func TestPutArticles_400_TitleTooLong(tt *testing.T) {
 func TestPutArticles_400_BodyRequired(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(user.ID(), "title", "body", []string{})
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(context.Background(), user.ID(), "title", "body", []string{})
 	t.NoError(err)
 
 	headers := make(map[string]string)
@@ -201,7 +202,7 @@ func TestPutArticles_400_BodyRequired(tt *testing.T) {
 func TestPutArticles_400_TagsRequired(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(user.ID(), "title", "body", []string{})
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(context.Background(), user.ID(), "title", "body", []string{})
 	t.NoError(err)
 
 	headers := make(map[string]string)
@@ -223,7 +224,7 @@ func TestPutArticles_400_TagsRequired(tt *testing.T) {
 func TestPutArticles_204_EmptyTags(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(user.ID(), "title", "body", []string{})
+	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(context.Background(), user.ID(), "title", "body", []string{})
 	t.NoError(err)
 
 	headers := make(map[string]string)

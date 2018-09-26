@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -12,13 +13,15 @@ import (
 )
 
 var (
-	timeout time.Duration
+	timeout = 5 * time.Second
 )
 
 func init() {
 	if s := os.Getenv("HTTP_TIMEOUT_SECOND"); s != "" {
-		if i, err := strings.ParseUint(s); err != nil {
+		if i, err := strings.ParseUint(s); err == nil && i > 0 {
 			timeout = time.Duration(i) * time.Second
+		} else {
+			log.Println(err.Error())
 		}
 	}
 }
@@ -42,9 +45,8 @@ func (r *Router) Handle(method string, path string, handler Handler) {
 		defer cancel()
 
 		c := &contextImpl{
-			keyMap: make(map[string]ContextKey),
-			req:    NewRequest(r.WithContext(ctx), params),
-			res:    w,
+			req: NewRequest(r.WithContext(ctx), params),
+			res: w,
 		}
 		handler(c)
 	})

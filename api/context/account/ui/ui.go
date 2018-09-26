@@ -57,7 +57,7 @@ func (ui *UI) SignUp(c http.Context) {
 }
 
 func (ui *UI) Verify(c http.Context) {
-	user, ok := c.Value(c.KeyRegistry("user")).(*model.User)
+	user, ok := c.Value(http.StrCtxKey("user")).(*model.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
@@ -78,7 +78,7 @@ func (ui *UI) BearerAuth(handler http.Handler) http.Handler {
 			return
 		}
 		handler(c.With(
-			context.WithValue(context.Background(), c.KeyRegistry("user"), user)),
+			context.WithValue(context.Background(), http.StrCtxKey("user"), user)),
 		)
 	}
 }

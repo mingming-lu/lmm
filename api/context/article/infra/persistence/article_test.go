@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"context"
 	"lmm/api/context/article/domain"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/testing"
@@ -8,21 +9,22 @@ import (
 
 func TestSaveArticle(tt *testing.T) {
 	t := testing.NewTester(tt)
+	c := context.Background()
 
-	author, err := authorService.AuthorFromUserID(user.ID())
+	author, err := authorService.AuthorFromUserID(c, user.ID())
 	t.NoError(err)
 
 	tagNames := make([]string, 3)
 	tagNames[0], tagNames[1], tagNames[2] = "1", "2", "3"
-	article, err := articleService.NewArticleToPost(author, "title", "body", tagNames)
+	article, err := articleService.NewArticleToPost(c, author, "title", "body", tagNames)
 	t.NoError(err)
 
-	article2, err := articleService.NewArticleToPost(author, "title", "body", tagNames)
+	article2, err := articleService.NewArticleToPost(c, author, "title", "body", tagNames)
 	t.NoError(err)
 
 	// save new article
-	t.NoError(articleRepository.Save(article))
-	t.NoError(articleRepository.Save(article2))
+	t.NoError(articleRepository.Save(c, article))
+	t.NoError(articleRepository.Save(c, article2))
 
 	articleID, title, body, err := selectArticleWhereUIDIs(article.ID().String())
 	t.NoError(err)
@@ -50,7 +52,7 @@ func TestSaveArticle(tt *testing.T) {
 	article.EditContent(content)
 
 	// save updated article
-	t.NoError(articleRepository.Save(article))
+	t.NoError(articleRepository.Save(c, article))
 
 	_, title, body, err = selectArticleWhereUIDIs(article.ID().String())
 	t.NoError(err)
@@ -66,18 +68,19 @@ func TestSaveArticle(tt *testing.T) {
 
 func TestFindArticleByID(tt *testing.T) {
 	t := testing.NewTester(tt)
+	c := context.Background()
 
-	author, err := authorService.AuthorFromUserID(user.ID())
+	author, err := authorService.AuthorFromUserID(c, user.ID())
 	t.NoError(err)
 
 	tagNames := make([]string, 3)
 	tagNames[0], tagNames[1], tagNames[2] = "awesome2", "awesome3", "awesome1"
-	article, err := articleService.NewArticleToPost(author, "awesome title", "awesome body", tagNames)
+	article, err := articleService.NewArticleToPost(c, author, "awesome title", "awesome body", tagNames)
 	t.NoError(err)
 
-	t.NoError(articleRepository.Save(article))
+	t.NoError(articleRepository.Save(c, article))
 
-	articleGot, err := articleRepository.FindByID(article.ID())
+	articleGot, err := articleRepository.FindByID(c, article.ID())
 	t.NoError(err)
 	t.Is(article, articleGot)
 }
@@ -88,7 +91,7 @@ func TestFindArticleByID_NotFound(tt *testing.T) {
 	articleID, err := model.NewArticleID("notexist")
 	t.NoError(err)
 
-	article, err := articleRepository.FindByID(articleID)
+	article, err := articleRepository.FindByID(context.Background(), articleID)
 	t.IsError(domain.ErrNoSuchArticle, err)
 	t.Nil(article)
 }

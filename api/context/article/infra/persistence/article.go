@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"context"
 	"crypto/sha256"
 	"database/sql"
 	"fmt"
@@ -26,12 +27,12 @@ func NewArticleStorage(db *storage.DB, authorService service.AuthorService) *Art
 }
 
 // NextID generate a random string
-func (s *ArticleStorage) NextID() string {
+func (s *ArticleStorage) NextID(c context.Context) string {
 	return fmt.Sprintf("%x", sha256.Sum256([]byte(uuid.New().String())))[:8]
 }
 
 // Save persist a article domain model
-func (s *ArticleStorage) Save(article *model.Article) error {
+func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return err
@@ -121,12 +122,12 @@ func (s *ArticleStorage) Save(article *model.Article) error {
 }
 
 // Remove is not implemented
-func (s *ArticleStorage) Remove(article *model.Article) error {
+func (s *ArticleStorage) Remove(c context.Context, article *model.Article) error {
 	panic("not implemented")
 }
 
 // FindByID returns a article domain model by given id if exists
-func (s *ArticleStorage) FindByID(id *model.ArticleID) (*model.Article, error) {
+func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*model.Article, error) {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return nil, err
@@ -140,7 +141,7 @@ func (s *ArticleStorage) FindByID(id *model.ArticleID) (*model.Article, error) {
 		return nil, err
 	}
 
-	article, err := s.userModelFromRow(stmt.QueryRow(id.String()))
+	article, err := s.userModelFromRow(c, stmt.QueryRow(id.String()))
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return nil, err
@@ -155,7 +156,7 @@ func (s *ArticleStorage) FindByID(id *model.ArticleID) (*model.Article, error) {
 	return article, nil
 }
 
-func (s *ArticleStorage) userModelFromRow(row *sql.Row) (*model.Article, error) {
+func (s *ArticleStorage) userModelFromRow(c context.Context, row *sql.Row) (*model.Article, error) {
 	var (
 		id           int
 		rawArticleID string
@@ -169,7 +170,7 @@ func (s *ArticleStorage) userModelFromRow(row *sql.Row) (*model.Article, error) 
 		}
 		return nil, err
 	}
-	author, err := s.authorService.AuthorFromUserID(userID)
+	author, err := s.authorService.AuthorFromUserID(c, userID)
 	if err != nil {
 		return nil, err
 	}

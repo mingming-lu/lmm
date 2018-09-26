@@ -1,10 +1,14 @@
 package finder
 
-import "lmm/api/context/article/domain/model"
+import (
+	"context"
+
+	"lmm/api/context/article/domain/model"
+)
 
 // ArticleFinder defines an interface to query side
 type ArticleFinder interface {
-	FindByID(id *model.ArticleID) (*model.ArticleView, error)
-	ListAllTags() (model.TagListView, error)
-	ListByPage(count, page uint) (*model.ArticleListView, error)
+	FindByID(c context.Context, id *model.ArticleID) (*model.ArticleView, error)
+	ListAllTags(c context.Context) (model.TagListView, error)
+	ListByPage(c context.Context, count, page uint) (*model.ArticleListView, error)
 }

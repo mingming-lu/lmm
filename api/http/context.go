@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"sync/atomic"
 	"time"
 )
 
-// ContextKey is used to indentify context value key
-type ContextKey int32
+// StrCtxKey stands for string context key
+type StrCtxKey string
 
 // Context is a abstraction of http context
 type Context interface {
@@ -20,8 +19,6 @@ type Context interface {
 
 	JSON(statusCode int, schema interface{})
 
-	KeyRegistry(name string) ContextKey
-
 	Request() *Request
 
 	String(statusCode int, s string)
@@ -30,10 +27,8 @@ type Context interface {
 }
 
 type contextImpl struct {
-	keyCount int32
-	keyMap   map[string]ContextKey
-	req      *Request
-	res      Response
+	req *Request
+	res Response
 }
 
 func (c *contextImpl) Deadline() (time.Time, bool) {
@@ -66,16 +61,6 @@ func (c *contextImpl) JSON(statusCode int, data interface{}) {
 	if err := json.NewEncoder(c.res).Encode(data); err != nil {
 		panic(err)
 	}
-}
-
-func (c *contextImpl) KeyRegistry(name string) ContextKey {
-	if key, ok := c.keyMap[name]; ok {
-		return ContextKey(key)
-	}
-
-	newKey := ContextKey(atomic.AddInt32(&c.keyCount, 1))
-	c.keyMap[name] = newKey
-	return newKey
 }
 
 func (c *contextImpl) Request() *Request {
