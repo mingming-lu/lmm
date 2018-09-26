@@ -19,7 +19,7 @@ func NewArticleQueryService(articleFinder finder.ArticleFinder) *ArticleQuerySer
 }
 
 // ListArticlesByPage is used for listing articles on article index page
-func (app *ArticleQueryService) ListArticlesByPage(countStr, pageStr string) (*model.ArticleListView, error) {
+func (app *ArticleQueryService) ListArticlesByPage(c context.Context, countStr, pageStr string) (*model.ArticleListView, error) {
 	if countStr == "" {
 		countStr = "5"
 	}
@@ -36,19 +36,19 @@ func (app *ArticleQueryService) ListArticlesByPage(countStr, pageStr string) (*m
 		return nil, ErrInvalidPage
 	}
 
-	return app.articleFinder.ListByPage(context.TODO(), count, page)
+	return app.articleFinder.ListByPage(c, count, page)
 }
 
 // ArticleByID finds article by given id
-func (app *ArticleQueryService) ArticleByID(rawID string) (*model.ArticleView, error) {
+func (app *ArticleQueryService) ArticleByID(c context.Context, rawID string) (*model.ArticleView, error) {
 	articleID, err := model.NewArticleID(rawID)
 	if err != nil {
 		return nil, err
 	}
-	return app.articleFinder.FindByID(context.TODO(), articleID)
+	return app.articleFinder.FindByID(c, articleID)
 }
 
 // AllArticleTags gets all article tags
-func (app *ArticleQueryService) AllArticleTags() (model.TagListView, error) {
-	return app.articleFinder.ListAllTags(context.TODO())
+func (app *ArticleQueryService) AllArticleTags(c context.Context) (model.TagListView, error) {
+	return app.articleFinder.ListAllTags(c)
 }

@@ -141,7 +141,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 		return nil, err
 	}
 
-	article, err := s.userModelFromRow(context.TODO(), stmt.QueryRow(id.String()))
+	article, err := s.userModelFromRow(c, stmt.QueryRow(id.String()))
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return nil, err

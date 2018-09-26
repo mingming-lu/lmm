@@ -19,7 +19,7 @@ func NewArticleService(articleRepo repository.ArticleRepository) *ArticleService
 
 // NewArticleToPost build a new article that author wants to post
 func (s *ArticleService) NewArticleToPost(c context.Context, author *model.Author, title, body string, tagNames []string) (*model.Article, error) {
-	articleID, err := model.NewArticleID(s.articleRepo.NextID(context.TODO()))
+	articleID, err := model.NewArticleID(s.articleRepo.NextID(c))
 	if err != nil {
 		return nil, err
 	}
