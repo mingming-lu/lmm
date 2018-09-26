@@ -4,8 +4,8 @@ import (
 	"errors"
 	"sync"
 
-	"lmm/api/context/base/domain/event"
-	"lmm/api/context/base/domain/event/subscriber"
+	"lmm/api/domain/event"
+	"lmm/api/domain/event/subscriber"
 )
 
 var (
