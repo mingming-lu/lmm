@@ -1,7 +1,7 @@
 version: "3"
 services:
   api:
-    image: golang:1.9
+    image: golang:1.11
     volumes:
       - ../api:/go/src/lmm/api
       - ../static:/static
@@ -45,7 +45,7 @@ services:
     environment:
       API_URL: api/index.yml
   static:
-    image: golang:1.9
+    image: golang:1.11
     volumes:
       - ../static/src:/go/src/lmm/static
     command: go run /go/src/lmm/static/main.go
