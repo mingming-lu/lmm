@@ -1,15 +1,15 @@
 package api
 
 import (
-	accountInfra "lmm/api/context/account/infra"
-	account "lmm/api/context/account/ui"
-	articleFetcher "lmm/api/context/article/infra/fetcher"
-	articlePersistence "lmm/api/context/article/infra/persistence"
-	articleService "lmm/api/context/article/infra/service"
-	article "lmm/api/context/article/ui"
-	imageInfra "lmm/api/context/image/infra"
-	img "lmm/api/context/image/ui"
 	"lmm/api/http"
+	accountInfra "lmm/api/service/account/infra"
+	account "lmm/api/service/account/ui"
+	articleFetcher "lmm/api/service/article/infra/fetcher"
+	articlePersistence "lmm/api/service/article/infra/persistence"
+	articleService "lmm/api/service/article/infra/service"
+	article "lmm/api/service/article/ui"
+	imageInfra "lmm/api/service/image/infra"
+	img "lmm/api/service/image/ui"
 	"lmm/api/storage"
 	"lmm/api/storage/static"
 )
