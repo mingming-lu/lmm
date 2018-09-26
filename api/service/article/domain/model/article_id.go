@@ -3,8 +3,8 @@ package model
 import (
 	"regexp"
 
-	"lmm/api/context/article/domain"
-	"lmm/api/context/base/domain/model"
+	"lmm/api/domain/model"
+	"lmm/api/service/article/domain"
 )
 
 var patternArticleID = regexp.MustCompile("^[0-9a-zA-Z]{8}$")

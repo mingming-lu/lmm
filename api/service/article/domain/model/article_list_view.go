@@ -1,8 +1,6 @@
 package model
 
-import (
-	"lmm/api/context/base/domain/model"
-)
+import "lmm/api/domain/model"
 
 // ArticleListView is the model used to view article list
 type ArticleListView struct {

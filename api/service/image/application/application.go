@@ -1,12 +1,12 @@
 package application
 
 import (
-	account "lmm/api/context/account/domain/model"
-	"lmm/api/context/image/domain"
-	"lmm/api/context/image/domain/factory"
-	"lmm/api/context/image/domain/model"
-	"lmm/api/context/image/domain/repository"
-	"lmm/api/utils/strings"
+	account "lmm/api/service/account/domain/model"
+	"lmm/api/service/image/domain"
+	"lmm/api/service/image/domain/factory"
+	"lmm/api/service/image/domain/model"
+	"lmm/api/service/image/domain/repository"
+	"lmm/api/strings"
 )
 
 type AppService struct {

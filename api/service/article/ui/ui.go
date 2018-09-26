@@ -2,15 +2,15 @@ package ui
 
 import (
 	"errors"
-	"lmm/api/context/article/domain/finder"
 
-	account "lmm/api/context/account/domain/model"
-	"lmm/api/context/article/application"
-	"lmm/api/context/article/domain"
-	"lmm/api/context/article/domain/model"
-	"lmm/api/context/article/domain/repository"
-	"lmm/api/context/article/domain/service"
 	"lmm/api/http"
+	account "lmm/api/service/account/domain/model"
+	"lmm/api/service/article/application"
+	"lmm/api/service/article/domain"
+	"lmm/api/service/article/domain/finder"
+	"lmm/api/service/article/domain/model"
+	"lmm/api/service/article/domain/repository"
+	"lmm/api/service/article/domain/service"
 )
 
 var (

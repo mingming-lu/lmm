@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"lmm/api/context/article/domain/model"
+	"lmm/api/service/article/domain/model"
 )
 
 // AuthorService is a user adapter interface

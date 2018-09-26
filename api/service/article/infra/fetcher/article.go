@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"lmm/api/context/article/domain"
-	"lmm/api/context/article/domain/model"
+	"lmm/api/service/article/domain"
+	"lmm/api/service/article/domain/model"
 	"lmm/api/storage"
 )
 

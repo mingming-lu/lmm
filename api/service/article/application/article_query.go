@@ -3,9 +3,9 @@ package application
 import (
 	"context"
 
-	"lmm/api/context/article/domain/finder"
-	"lmm/api/context/article/domain/model"
-	"lmm/api/utils/strings"
+	"lmm/api/service/article/domain/finder"
+	"lmm/api/service/article/domain/model"
+	"lmm/api/strings"
 )
 
 // ArticleQueryService is a query side application

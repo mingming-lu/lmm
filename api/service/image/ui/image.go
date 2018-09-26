@@ -6,11 +6,11 @@ import (
 	"log"
 	"mime/multipart"
 
-	account "lmm/api/context/account/domain/model"
-	"lmm/api/context/image/application"
-	"lmm/api/context/image/domain"
-	"lmm/api/context/image/domain/repository"
 	"lmm/api/http"
+	account "lmm/api/service/account/domain/model"
+	"lmm/api/service/image/application"
+	"lmm/api/service/image/domain"
+	"lmm/api/service/image/domain/repository"
 )
 
 const (

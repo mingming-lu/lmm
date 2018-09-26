@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"lmm/api/context/base/domain/model"
+	"lmm/api/domain/model"
 )
 
 type User struct {

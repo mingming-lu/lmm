@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 
-	"lmm/api/context/account/appservice"
-	"lmm/api/context/account/domain/model"
-	"lmm/api/context/account/domain/repository"
-	"lmm/api/context/account/domain/service"
 	"lmm/api/http"
+	"lmm/api/service/account/appservice"
+	"lmm/api/service/account/domain/model"
+	"lmm/api/service/account/domain/repository"
+	"lmm/api/service/account/domain/service"
 )
 
 type UI struct {

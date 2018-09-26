@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"lmm/api/context/article/domain"
-	"lmm/api/context/article/domain/model"
-	"lmm/api/context/article/domain/service"
+	"lmm/api/service/article/domain"
+	"lmm/api/service/article/domain/model"
+	"lmm/api/service/article/domain/service"
 	"lmm/api/storage"
 )
 

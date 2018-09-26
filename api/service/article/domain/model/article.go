@@ -1,8 +1,6 @@
 package model
 
-import (
-	"lmm/api/context/base/domain/model"
-)
+import "lmm/api/domain/model"
 
 // Article is an aggregate root model
 type Article struct {

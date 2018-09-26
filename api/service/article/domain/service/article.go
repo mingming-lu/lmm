@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 
-	"lmm/api/context/article/domain/model"
-	"lmm/api/context/article/domain/repository"
+	"lmm/api/service/article/domain/model"
+	"lmm/api/service/article/domain/repository"
 )
 
 // ArticleService is a domain service to deal with article

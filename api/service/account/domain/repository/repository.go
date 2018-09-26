@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"lmm/api/context/account/domain/model"
+	"lmm/api/service/account/domain/model"
 )
 
 type UserRepository interface {

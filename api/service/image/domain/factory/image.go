@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"lmm/api/context/image/domain/model"
+	"lmm/api/service/image/domain/model"
 )
 
 func NewImage(userID uint64) *model.Image {

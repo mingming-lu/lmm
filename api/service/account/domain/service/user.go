@@ -1,9 +1,9 @@
 package service
 
 import (
-	"lmm/api/context/account/domain/factory"
-	"lmm/api/context/account/domain/model"
-	"lmm/api/context/account/domain/repository"
+	"lmm/api/service/account/domain/factory"
+	"lmm/api/service/account/domain/model"
+	"lmm/api/service/account/domain/repository"
 	"lmm/api/storage"
 
 	"github.com/akinaru-lu/errors"

@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"lmm/api/context/article/domain/model"
+	"lmm/api/service/article/domain/model"
 )
 
 // ArticleRepository interface

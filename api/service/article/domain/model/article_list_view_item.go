@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"lmm/api/context/base/domain/model"
+	"lmm/api/domain/model"
 )
 
 // ArticleListViewItem is the item struct of AriticleListView

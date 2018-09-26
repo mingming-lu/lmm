@@ -9,7 +9,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"lmm/api/utils/strings"
+	"lmm/api/strings"
 )
 
 var (

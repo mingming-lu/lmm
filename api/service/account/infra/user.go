@@ -1,9 +1,10 @@
 package infra
 
 import (
-	"lmm/api/context/account/domain/model"
-	"lmm/api/storage"
 	"time"
+
+	"lmm/api/service/account/domain/model"
+	"lmm/api/storage"
 )
 
 type UserStorage struct {

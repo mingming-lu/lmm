@@ -1,6 +1,6 @@
 package model
 
-import "lmm/api/context/base/domain/model"
+import "lmm/api/domain/model"
 
 // TagListViewItem is a model used to view tag
 type TagListViewItem struct {

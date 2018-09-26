@@ -3,9 +3,9 @@ package model
 import (
 	"regexp"
 
-	"lmm/api/context/article/domain"
-	"lmm/api/context/base/domain/model"
-	"lmm/api/utils/strings"
+	"lmm/api/domain/model"
+	"lmm/api/service/article/domain"
+	"lmm/api/strings"
 )
 
 var (

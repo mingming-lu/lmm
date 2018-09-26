@@ -3,10 +3,10 @@ package application
 import (
 	"context"
 
-	"lmm/api/context/article/domain"
-	"lmm/api/context/article/domain/model"
-	"lmm/api/context/article/domain/repository"
-	"lmm/api/context/article/domain/service"
+	"lmm/api/service/article/domain"
+	"lmm/api/service/article/domain/model"
+	"lmm/api/service/article/domain/repository"
+	"lmm/api/service/article/domain/service"
 )
 
 // ArticleCommandService is a command side application

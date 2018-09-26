@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"lmm/api/context/image/domain"
-	"lmm/api/context/image/domain/model"
+	"lmm/api/service/image/domain"
+	"lmm/api/service/image/domain/model"
 )
 
 type ImageRepository interface {

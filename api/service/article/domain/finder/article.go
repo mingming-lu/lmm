@@ -3,7 +3,7 @@ package finder
 import (
 	"context"
 
-	"lmm/api/context/article/domain/model"
+	"lmm/api/service/article/domain/model"
 )
 
 // ArticleFinder defines an interface to query side
