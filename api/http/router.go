@@ -9,7 +9,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"lmm/api/strings"
+	"lmm/api/stringutil"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 
 func init() {
 	if s := os.Getenv("HTTP_TIMEOUT_SECOND"); s != "" {
-		if i, err := strings.ParseUint(s); err == nil && i > 0 {
+		if i, err := stringutil.ParseUint(s); err == nil && i > 0 {
 			timeout = time.Duration(i) * time.Second
 		} else {
 			log.Println(err.Error())

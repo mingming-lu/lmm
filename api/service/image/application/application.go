@@ -6,7 +6,7 @@ import (
 	"lmm/api/service/image/domain/factory"
 	"lmm/api/service/image/domain/model"
 	"lmm/api/service/image/domain/repository"
-	"lmm/api/strings"
+	"lmm/api/stringutil"
 )
 
 type AppService struct {
@@ -31,14 +31,14 @@ func (app *AppService) FetchImagesByType(imageType, countStr, pageStr string) ([
 	if pageStr == "" {
 		pageStr = "1"
 	}
-	count, err := strings.StrToInt(countStr)
+	count, err := stringutil.ParseInt(countStr)
 	if err != nil {
 		return nil, false, domain.ErrInvalidCount
 	}
 	if count < 0 {
 		return nil, false, domain.ErrInvalidCount
 	}
-	page, err := strings.StrToInt(pageStr)
+	page, err := stringutil.ParseInt(pageStr)
 	if err != nil {
 		return nil, false, domain.ErrInvalidPage
 	}

@@ -2,10 +2,10 @@ package model
 
 import (
 	"regexp"
+	"strings"
 
 	"lmm/api/domain/model"
 	"lmm/api/service/article/domain"
-	"lmm/api/strings"
 )
 
 var (
