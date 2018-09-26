@@ -13,16 +13,7 @@ import (
 	accountModel "lmm/api/context/account/domain/model"
 	accountService "lmm/api/context/account/domain/service"
 	accountStorage "lmm/api/context/account/infra"
-	"lmm/api/domain/factory"
 )
-
-func GenerateID() uint64 {
-	id, err := factory.Default().GenerateID()
-	if err != nil {
-		panic(err)
-	}
-	return id
-}
 
 func StructToRequestBody(o interface{}) io.ReadCloser {
 	b, err := json.Marshal(o)

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"math/rand"
 	"os"
 
 	"github.com/google/uuid"
@@ -46,7 +47,7 @@ func TestAuthorFromUserID_OK(tt *testing.T) {
 func TestAuthorFromUserID_NoSuchUser(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	author, err := authorAdapter.AuthorFromUserID(context.Background(), testing.GenerateID())
+	author, err := authorAdapter.AuthorFromUserID(context.Background(), uint64(rand.Intn(10000)))
 	t.IsError(domain.ErrNoSuchUser, err)
 	t.Nil(author)
 }

@@ -2,13 +2,16 @@ package factory
 
 import (
 	"errors"
-	"lmm/api/context/account/domain/model"
-	"lmm/api/domain/factory"
-	"lmm/api/utils/uuid"
 	"time"
 
+	"github.com/sony/sonyflake"
 	"golang.org/x/crypto/bcrypt"
+
+	"lmm/api/context/account/domain/model"
+	"lmm/api/utils/uuid"
 )
+
+var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{})
 
 var (
 	ErrEmptyUserName = errors.New("empty user name")
@@ -24,7 +27,7 @@ func NewUser(name, password string) (*model.User, error) {
 		return nil, ErrEmptyPassword
 	}
 
-	userID, err := factory.Default().GenerateID()
+	userID, err := idGenerator.NextID()
 	if err != nil {
 		return nil, err
 	}
