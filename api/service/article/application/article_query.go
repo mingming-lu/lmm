@@ -5,7 +5,7 @@ import (
 
 	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/strings"
+	"lmm/api/stringutil"
 )
 
 // ArticleQueryService is a query side application
@@ -23,7 +23,7 @@ func (app *ArticleQueryService) ListArticlesByPage(c context.Context, countStr, 
 	if countStr == "" {
 		countStr = "5"
 	}
-	count, err := strings.ParseUint(countStr)
+	count, err := stringutil.ParseUint(countStr)
 	if err != nil || count < 1 {
 		return nil, ErrInvalidCount
 	}
@@ -31,7 +31,7 @@ func (app *ArticleQueryService) ListArticlesByPage(c context.Context, countStr, 
 	if pageStr == "" {
 		pageStr = "1"
 	}
-	page, err := strings.ParseUint(pageStr)
+	page, err := stringutil.ParseUint(pageStr)
 	if err != nil || page < 1 {
 		return nil, ErrInvalidPage
 	}

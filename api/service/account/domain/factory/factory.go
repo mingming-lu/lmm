@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"lmm/api/service/account/domain/model"
-	"lmm/api/strings"
+	"lmm/api/stringutil"
 )
 
 var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{})
@@ -38,7 +38,7 @@ func NewUser(name, password string) (*model.User, error) {
 		return nil, err
 	}
 
-	token := strings.ReplaceAll(uuid.New().String(), "-", "")
+	token := stringutil.ReplaceAll(uuid.New().String(), "-", "")
 
 	return model.NewUser(userID, name, string(hashedPassword), token, time.Now()), nil
 }
