@@ -4,11 +4,12 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sony/sonyflake"
 	"golang.org/x/crypto/bcrypt"
 
 	"lmm/api/context/account/domain/model"
-	"lmm/api/utils/uuid"
+	"lmm/api/utils/strings"
 )
 
 var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{})
@@ -37,5 +38,7 @@ func NewUser(name, password string) (*model.User, error) {
 		return nil, err
 	}
 
-	return model.NewUser(userID, name, string(hashedPassword), uuid.New(), time.Now()), nil
+	token := strings.ReplaceAll(uuid.New().String(), "-", "")
+
+	return model.NewUser(userID, name, string(hashedPassword), token, time.Now()), nil
 }
