@@ -170,7 +170,7 @@ func (s *ArticleStorage) userModelFromRow(c context.Context, row *sql.Row) (*mod
 		}
 		return nil, err
 	}
-	author, err := s.authorService.AuthorFromUserID(userID)
+	author, err := s.authorService.AuthorFromUserID(c, userID)
 	if err != nil {
 		return nil, err
 	}

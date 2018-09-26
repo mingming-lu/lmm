@@ -1,6 +1,8 @@
 package application
 
 import (
+	"context"
+
 	"lmm/api/context/article/domain/finder"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/utils/strings"
@@ -34,7 +36,7 @@ func (app *ArticleQueryService) ListArticlesByPage(countStr, pageStr string) (*m
 		return nil, ErrInvalidPage
 	}
 
-	return app.articleFinder.ListByPage(count, page)
+	return app.articleFinder.ListByPage(context.TODO(), count, page)
 }
 
 // ArticleByID finds article by given id
@@ -43,10 +45,10 @@ func (app *ArticleQueryService) ArticleByID(rawID string) (*model.ArticleView, e
 	if err != nil {
 		return nil, err
 	}
-	return app.articleFinder.FindByID(articleID)
+	return app.articleFinder.FindByID(context.TODO(), articleID)
 }
 
 // AllArticleTags gets all article tags
 func (app *ArticleQueryService) AllArticleTags() (model.TagListView, error) {
-	return app.articleFinder.ListAllTags()
+	return app.articleFinder.ListAllTags(context.TODO())
 }

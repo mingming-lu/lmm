@@ -27,12 +27,12 @@ func NewArticleCommandService(articleRepository repository.ArticleRepository, au
 
 // PostNewArticle is used for posting a new article
 func (app *ArticleCommandService) PostNewArticle(userID uint64, title string, body string, tagNames []string) (*model.ArticleID, error) {
-	author, err := app.authorService.AuthorFromUserID(userID)
+	author, err := app.authorService.AuthorFromUserID(context.TODO(), userID)
 	if err != nil {
 		return nil, err
 	}
 
-	article, err := app.articleService.NewArticleToPost(author, title, body, tagNames)
+	article, err := app.articleService.NewArticleToPost(context.TODO(), author, title, body, tagNames)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (app *ArticleCommandService) PostNewArticle(userID uint64, title string, bo
 
 // EditArticle is used for edit the article content
 func (app *ArticleCommandService) EditArticle(userID uint64, rawArticleID, title, body string, tagNames []string) error {
-	author, err := app.authorService.AuthorFromUserID(userID)
+	author, err := app.authorService.AuthorFromUserID(context.TODO(), userID)
 	if err != nil {
 		return err
 	}

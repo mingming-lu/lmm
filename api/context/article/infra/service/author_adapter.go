@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"lmm/api/context/article/domain"
 	"lmm/api/context/article/domain/model"
 	"lmm/api/storage"
@@ -17,7 +19,7 @@ func NewAuthorAdapter(db *storage.DB) *AuthorAdapter {
 }
 
 // AuthorFromUserID implements AuthorAdapter.AuthorFromUserID
-func (a *AuthorAdapter) AuthorFromUserID(userID uint64) (*model.Author, error) {
+func (a *AuthorAdapter) AuthorFromUserID(c context.Context, userID uint64) (*model.Author, error) {
 	stmt := a.db.MustPrepare(`SELECT id, name FROM user WHERE id = ?`)
 	defer stmt.Close()
 

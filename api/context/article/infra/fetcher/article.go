@@ -1,6 +1,7 @@
 package fetcher
 
 import (
+	"context"
 	"time"
 
 	"lmm/api/context/article/domain"
@@ -19,7 +20,7 @@ func NewArticleFetcher(db *storage.DB) *ArticleFetcher {
 }
 
 // ListByPage implementation
-func (f *ArticleFetcher) ListByPage(count, page uint) (*model.ArticleListView, error) {
+func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model.ArticleListView, error) {
 	stmt := f.db.MustPrepare(`select uid, title, created_at from article order by created_at desc limit ? offset ?`)
 	defer stmt.Close()
 
@@ -59,7 +60,7 @@ func (f *ArticleFetcher) ListByPage(count, page uint) (*model.ArticleListView, e
 }
 
 // FindByID implementation
-func (f *ArticleFetcher) FindByID(id *model.ArticleID) (*model.ArticleView, error) {
+func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*model.ArticleView, error) {
 	selectArticle := f.db.MustPrepare(`select id, uid, title, body, created_at, updated_at from article where uid = ?`)
 	defer selectArticle.Close()
 
@@ -124,7 +125,7 @@ func (f *ArticleFetcher) FindByID(id *model.ArticleID) (*model.ArticleView, erro
 }
 
 // ListAllTags implementation
-func (f *ArticleFetcher) ListAllTags() (model.TagListView, error) {
+func (f *ArticleFetcher) ListAllTags(c context.Context) (model.TagListView, error) {
 	stmt := f.db.MustPrepare(`select name from article_tag group by name order by name`)
 	defer stmt.Close()
 
