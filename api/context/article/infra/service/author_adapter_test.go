@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"os"
 
 	"github.com/google/uuid"
@@ -37,7 +38,7 @@ func TestAuthorFromUserID_OK(tt *testing.T) {
 	t.NoError(err)
 	t.NoError(userRepository.Add(user))
 
-	author, err := authorAdapter.AuthorFromUserID(user.ID())
+	author, err := authorAdapter.AuthorFromUserID(context.Background(), user.ID())
 	t.NoError(err)
 	t.Is(user.Name(), author.Name())
 }
@@ -45,7 +46,7 @@ func TestAuthorFromUserID_OK(tt *testing.T) {
 func TestAuthorFromUserID_NoSuchUser(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	author, err := authorAdapter.AuthorFromUserID(testing.GenerateID())
+	author, err := authorAdapter.AuthorFromUserID(context.Background(), testing.GenerateID())
 	t.IsError(domain.ErrNoSuchUser, err)
 	t.Nil(author)
 }
