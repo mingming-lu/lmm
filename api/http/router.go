@@ -52,6 +52,19 @@ func (r *Router) Handle(method string, path string, handler Handler) {
 	})
 }
 
+// HandlePanic registers handler to handle panic event
+func (r *Router) HandlePanic(handler Handler) {
+	r.router.PanicHandler = func(w http.ResponseWriter, r *http.Request, recovered interface{}) {
+		ctx := context.WithValue(context.Background(), StrCtxKey("recovered"), recovered)
+
+		c := &contextImpl{
+			req: NewRequest(r.WithContext(ctx), nil),
+			res: w,
+		}
+		handler(c)
+	}
+}
+
 // GET registers handler to handle GET method with given path
 func (r *Router) GET(path string, handler Handler) {
 	r.Handle(http.MethodGet, path, handler)
