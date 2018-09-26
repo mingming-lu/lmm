@@ -1,15 +1,15 @@
 package ui
 
 import (
-	"lmm/api/context/article/infra/fetcher"
 	"os"
 
-	auth "lmm/api/context/account/domain/model"
-	authInfra "lmm/api/context/account/infra"
-	authUI "lmm/api/context/account/ui"
-	"lmm/api/context/article/domain/repository"
-	"lmm/api/context/article/infra/persistence"
-	"lmm/api/context/article/infra/service"
+	auth "lmm/api/service/account/domain/model"
+	authInfra "lmm/api/service/account/infra"
+	authUI "lmm/api/service/account/ui"
+	"lmm/api/service/article/domain/repository"
+	"lmm/api/service/article/infra/fetcher"
+	"lmm/api/service/article/infra/persistence"
+	"lmm/api/service/article/infra/service"
 	"lmm/api/testing"
 )
 

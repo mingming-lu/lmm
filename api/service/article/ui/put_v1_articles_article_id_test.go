@@ -5,9 +5,9 @@ import (
 	"io"
 	"net/http"
 
-	"lmm/api/context/article/domain"
+	"lmm/api/service/article/domain"
+	"lmm/api/strings"
 	"lmm/api/testing"
-	"lmm/api/utils/strings"
 )
 
 func TestPutArticles_204(tt *testing.T) {

@@ -1,14 +1,15 @@
 package ui
 
 import (
-	"lmm/api/context/account/domain/factory"
-	"lmm/api/context/account/domain/model"
-	"lmm/api/context/account/domain/service"
-	"lmm/api/context/account/infra"
+	"log"
+
 	"lmm/api/http"
+	"lmm/api/service/account/domain/factory"
+	"lmm/api/service/account/domain/model"
+	"lmm/api/service/account/domain/service"
+	"lmm/api/service/account/infra"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
-	"log"
 )
 
 func TestBearerAuth_Success(tt *testing.T) {

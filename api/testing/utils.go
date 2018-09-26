@@ -8,11 +8,11 @@ import (
 
 	"github.com/google/uuid"
 
-	accountFactory "lmm/api/context/account/domain/factory"
-	account "lmm/api/context/account/domain/model"
-	accountModel "lmm/api/context/account/domain/model"
-	accountService "lmm/api/context/account/domain/service"
-	accountStorage "lmm/api/context/account/infra"
+	accountFactory "lmm/api/service/account/domain/factory"
+	account "lmm/api/service/account/domain/model"
+	accountModel "lmm/api/service/account/domain/model"
+	accountService "lmm/api/service/account/domain/service"
+	accountStorage "lmm/api/service/account/infra"
 )
 
 func StructToRequestBody(o interface{}) io.ReadCloser {

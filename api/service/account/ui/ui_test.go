@@ -1,9 +1,10 @@
 package ui
 
 import (
-	"lmm/api/context/account/infra"
-	"lmm/api/testing"
 	"os"
+
+	"lmm/api/service/account/infra"
+	"lmm/api/testing"
 )
 
 var ui *UI

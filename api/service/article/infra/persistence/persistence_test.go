@@ -5,14 +5,14 @@ import (
 
 	"github.com/google/uuid"
 
-	accountFactory "lmm/api/context/account/domain/factory"
-	account "lmm/api/context/account/domain/model"
-	accountModel "lmm/api/context/account/domain/model"
-	accountService "lmm/api/context/account/domain/service"
-	accountStorage "lmm/api/context/account/infra"
-	"lmm/api/context/article/domain/repository"
-	"lmm/api/context/article/domain/service"
-	infraService "lmm/api/context/article/infra/service"
+	accountFactory "lmm/api/service/account/domain/factory"
+	account "lmm/api/service/account/domain/model"
+	accountModel "lmm/api/service/account/domain/model"
+	accountService "lmm/api/service/account/domain/service"
+	accountStorage "lmm/api/service/account/infra"
+	"lmm/api/service/article/domain/repository"
+	"lmm/api/service/article/domain/service"
+	infraService "lmm/api/service/article/infra/service"
 	"lmm/api/storage"
 	"lmm/api/testing"
 )

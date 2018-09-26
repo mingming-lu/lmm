@@ -7,11 +7,11 @@ import (
 
 	"github.com/google/uuid"
 
-	accountFactory "lmm/api/context/account/domain/factory"
-	accountRepository "lmm/api/context/account/domain/repository"
-	accountStorage "lmm/api/context/account/infra"
-	"lmm/api/context/article/domain"
-	"lmm/api/context/article/domain/service"
+	accountFactory "lmm/api/service/account/domain/factory"
+	accountRepository "lmm/api/service/account/domain/repository"
+	accountStorage "lmm/api/service/account/infra"
+	"lmm/api/service/article/domain"
+	"lmm/api/service/article/domain/service"
 	"lmm/api/storage"
 	"lmm/api/testing"
 )

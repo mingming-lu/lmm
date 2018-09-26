@@ -2,12 +2,13 @@ package ui
 
 import (
 	"io"
-	"lmm/api/context/account/domain/factory"
-	"lmm/api/context/account/domain/service"
+	"strings"
+
 	"lmm/api/http"
+	"lmm/api/service/account/domain/factory"
+	"lmm/api/service/account/domain/service"
 	"lmm/api/testing"
 	"lmm/api/utils/uuid"
-	"strings"
 )
 
 func TestPostV1SignIn_400_InvalidInput(tt *testing.T) {

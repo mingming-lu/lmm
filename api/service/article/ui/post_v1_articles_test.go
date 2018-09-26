@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io"
 
-	"lmm/api/context/article/domain"
 	"lmm/api/http"
+	"lmm/api/service/article/domain"
+	"lmm/api/strings"
 	"lmm/api/testing"
-	"lmm/api/utils/strings"
 )
 
 func TestPostArticles_201(tt *testing.T) {
