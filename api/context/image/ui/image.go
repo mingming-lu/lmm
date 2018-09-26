@@ -34,7 +34,7 @@ func New(imageRepo repository.ImageRepository) *UI {
 }
 
 func (ui *UI) Upload(c http.Context) {
-	user, ok := c.Value(c.KeyRegistry("user")).(*account.User)
+	user, ok := c.Value(http.StrCtxKey("user")).(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return

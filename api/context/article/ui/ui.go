@@ -39,7 +39,7 @@ func NewUI(
 
 // PostArticle handles POST /1/articles
 func (ui *UI) PostArticle(c http.Context) {
-	user, ok := c.Value(c.KeyRegistry("user")).(*account.User)
+	user, ok := c.Value(http.StrCtxKey("user")).(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
@@ -79,7 +79,7 @@ func (ui *UI) PostArticle(c http.Context) {
 
 // EditArticleText handles PUT /1/article/:articleID
 func (ui *UI) EditArticleText(c http.Context) {
-	user, ok := c.Value(c.KeyRegistry("user")).(*account.User)
+	user, ok := c.Value(http.StrCtxKey("user")).(*account.User)
 	if !ok {
 		http.Unauthorized(c)
 		return

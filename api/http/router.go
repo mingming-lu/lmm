@@ -45,9 +45,8 @@ func (r *Router) Handle(method string, path string, handler Handler) {
 		defer cancel()
 
 		c := &contextImpl{
-			keyMap: make(map[string]ContextKey),
-			req:    NewRequest(r.WithContext(ctx), params),
-			res:    w,
+			req: NewRequest(r.WithContext(ctx), params),
+			res: w,
 		}
 		handler(c)
 	})
