@@ -39,5 +39,6 @@ func (r *responseImpl) WriteHeader(statusCode int) {
 		return
 	}
 	r.writer.WriteHeader(statusCode)
+	r.statusCode = statusCode
 	r.written = true
 }
