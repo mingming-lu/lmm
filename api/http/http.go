@@ -19,6 +19,8 @@ const (
 
 type Handler = func(Context)
 
+type Middleware = func(Handler) Handler
+
 func Serve(addr string, r *Router) {
 	fmt.Println("Serving at: " + addr)
 	log.Fatal(http.ListenAndServe(addr, r))
