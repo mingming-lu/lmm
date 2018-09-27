@@ -46,7 +46,7 @@ func (r *Router) Handle(method string, path string, handler Handler) {
 
 		c := &contextImpl{
 			req: NewRequest(r.WithContext(ctx), params),
-			res: w,
+			res: newResponseImpl(w),
 		}
 		handler(c)
 	})
@@ -59,7 +59,7 @@ func (r *Router) HandlePanic(handler Handler) {
 
 		c := &contextImpl{
 			req: NewRequest(r.WithContext(ctx), nil),
-			res: w,
+			res: newResponseImpl(w),
 		}
 		handler(c)
 	}
