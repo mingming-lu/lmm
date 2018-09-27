@@ -37,7 +37,7 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	articleUI := article.NewUI(articleFinder, articleRepository, authorAdapter)
 
 	router := http.NewRouter()
-	router.HandlePanic(recovered)
+	// router.HandlePanic(recovered)
 
 	// account
 	router.POST("/v1/signup", accountUI.SignUp)
