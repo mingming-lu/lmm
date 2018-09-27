@@ -1,9 +1,8 @@
 package api
 
 import (
-	"fmt"
-
 	"lmm/api/http"
+	"lmm/api/middleware"
 	accountInfra "lmm/api/service/account/infra"
 	account "lmm/api/service/account/ui"
 	articleFetcher "lmm/api/service/article/infra/fetcher"
@@ -15,12 +14,6 @@ import (
 	"lmm/api/storage"
 	"lmm/api/storage/static"
 )
-
-func recovered(c http.Context) {
-	recovered := c.Value(http.StrCtxKey("recovered"))
-	fmt.Printf("%s", recovered)
-	http.InternalServerError(c)
-}
 
 func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	userRepo := accountInfra.NewUserStorage(db)
@@ -37,7 +30,8 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	articleUI := article.NewUI(articleFinder, articleRepository, authorAdapter)
 
 	router := http.NewRouter()
-	router.HandlePanic(recovered)
+	router.Use(middleware.Recovery)
+	router.Use(middleware.Logging)
 
 	// account
 	router.POST("/v1/signup", accountUI.SignUp)

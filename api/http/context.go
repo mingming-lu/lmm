@@ -21,6 +21,8 @@ type Context interface {
 
 	Request() *Request
 
+	Response() Response
+
 	String(statusCode int, s string)
 
 	With(ctx context.Context) Context
@@ -65,6 +67,10 @@ func (c *contextImpl) JSON(statusCode int, data interface{}) {
 
 func (c *contextImpl) Request() *Request {
 	return c.req
+}
+
+func (c *contextImpl) Response() Response {
+	return c.res
 }
 
 func (c *contextImpl) String(statusCode int, s string) {

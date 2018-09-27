@@ -28,41 +28,41 @@ func init() {
 
 // Router is used to handle routing
 type Router struct {
-	router *httprouter.Router
+	middlewares []Middleware
+	router      *httprouter.Router
 }
 
 // NewRouter creates new router
 func NewRouter() *Router {
 	return &Router{
-		router: httprouter.New(),
+		middlewares: make([]Middleware, 0),
+		router:      httprouter.New(),
 	}
 }
 
 // Handle registers handlers to handle combination of method and path
 func (r *Router) Handle(method string, path string, handler Handler) {
-	r.router.Handle(method, path, func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	matryoshka := handler
+	for i := len(r.middlewares) - 1; i >= 0; i-- {
+		matryoshka = r.middlewares[i](matryoshka)
+	}
+
+	r.router.Handle(method, path, func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
 		c := &contextImpl{
-			req: NewRequest(r.WithContext(ctx), params),
-			res: w,
+			req: NewRequest(req.WithContext(ctx), params),
+			res: newResponseImpl(res),
 		}
-		handler(c)
+
+		matryoshka(c)
 	})
 }
 
-// HandlePanic registers handler to handle panic event
-func (r *Router) HandlePanic(handler Handler) {
-	r.router.PanicHandler = func(w http.ResponseWriter, r *http.Request, recovered interface{}) {
-		ctx := context.WithValue(context.Background(), StrCtxKey("recovered"), recovered)
-
-		c := &contextImpl{
-			req: NewRequest(r.WithContext(ctx), nil),
-			res: w,
-		}
-		handler(c)
-	}
+// Use registers a middleware to router
+func (r *Router) Use(middleware Middleware) {
+	r.middlewares = append(r.middlewares, middleware)
 }
 
 // GET registers handler to handle GET method with given path
