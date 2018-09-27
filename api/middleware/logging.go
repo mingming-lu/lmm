@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"lmm/api/http"
 )
@@ -11,7 +12,11 @@ import (
 var logger *zap.Logger
 
 func init() {
-	if l, err := zap.NewProduction(); err == nil {
+	cfg := zap.NewProductionConfig()
+	cfg.DisableCaller = true
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	if l, err := cfg.Build(); err == nil {
 		logger = l
 	} else {
 		panic(err)
@@ -28,12 +33,25 @@ func Logging(next http.Handler) http.Handler {
 		req := c.Request()
 		res := c.Response()
 
-		logger.Info(http.StatusText(res.StatusCode()),
-			zap.Int("status", res.StatusCode()),
-			zap.String("latency", time.Since(start).String()),
+		status := res.StatusCode()
+		fields := []zap.Field{
+			zap.Int("status", status),
+			zap.String("request_id", req.Header.Get("X-Request-ID")),
 			zap.String("method", req.Method),
-			zap.String("uri", req.RequestURI),
+			zap.String("proto", req.Proto),
 			zap.String("host", req.Host),
-		)
+			zap.String("path", req.RequestURI),
+			zap.String("remote_addr", req.RemoteAddr),
+			zap.String("ua", req.Header.Get("User-Agent")),
+			zap.String("latency", time.Since(start).String()),
+		}
+
+		if status >= 500 {
+			logger.Error(http.StatusText(status), fields...)
+		} else if status >= 400 {
+			logger.Warn(http.StatusText(status), fields...)
+		} else {
+			logger.Info(http.StatusText(status), fields...)
+		}
 	}
 }
