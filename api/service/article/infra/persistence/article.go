@@ -38,7 +38,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	saveArticle, err := tx.PrepareContext(c, `
+	saveArticle, err := tx.Prepare(c, `
 		insert into article (uid, user, title, body, created_at, updated_at)
 		values (?, ?, ?, ?, ?, ?)
 		on duplicate key update id = LAST_INSERT_ID(id), title = ?, body = ?, updated_at = ?
@@ -50,7 +50,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	deleteTags, err := tx.PrepareContext(c, `
+	deleteTags, err := tx.Prepare(c, `
 		delete at from article_tag at left join article a on a.id = at.article where at.article = ?
 	`)
 	if err != nil {
@@ -60,7 +60,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	saveTags, err := tx.PrepareContext(c, `
+	saveTags, err := tx.Prepare(c, `
 		insert into article_tag (article, sort, name) values (?, ?, ?)
 	`)
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return nil
 	}
 
-	res, err := saveArticle.ExecContext(c,
+	res, err := saveArticle.Exec(c,
 		article.ID().String(),
 		article.Author().ID(),
 		article.Content().Text().Title(),
@@ -102,7 +102,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	if _, err := deleteTags.ExecContext(c, lastID); err != nil {
+	if _, err := deleteTags.Exec(c, lastID); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
 		}
@@ -110,7 +110,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 	}
 
 	for _, tag := range article.Content().Tags() {
-		if _, err := saveTags.ExecContext(c, lastID, tag.ID().Order(), tag.Name()); err != nil {
+		if _, err := saveTags.Exec(c, lastID, tag.ID().Order(), tag.Name()); err != nil {
 			if err := tx.Rollback(); err != nil {
 				return err
 			}
@@ -133,7 +133,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 		return nil, err
 	}
 
-	stmt, err := tx.PrepareContext(c, `
+	stmt, err := tx.Prepare(c, `
 		select id, uid, user, title, body from article where uid = ? for update
 	`)
 	if err != nil {
@@ -143,7 +143,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 		return nil, err
 	}
 
-	article, err := s.userModelFromRow(c, stmt.QueryRow(id.String()))
+	article, err := s.userModelFromRow(c, stmt.QueryRow(c, id.String()))
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return nil, err
@@ -188,7 +188,7 @@ func (s *ArticleStorage) userModelFromRow(c context.Context, row *sql.Row) (*mod
 	stmt := s.db.Prepare(c, "select sort, name from article_tag where article = ?")
 	defer stmt.Close()
 
-	rows, err := stmt.QueryContext(c, id)
+	rows, err := stmt.Query(c, id)
 	if err != nil {
 		return nil, err
 	}

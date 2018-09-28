@@ -28,7 +28,7 @@ func (a *AuthorAdapter) AuthorFromUserID(c context.Context, userID uint64) (*mod
 		authorID   uint64
 		authorName string
 	)
-	if err := stmt.QueryRow(userID).Scan(&authorID, &authorName); err != nil {
+	if err := stmt.QueryRow(c, userID).Scan(&authorID, &authorName); err != nil {
 		if err == storage.ErrNoRows {
 			return nil, domain.ErrNoSuchUser
 		}

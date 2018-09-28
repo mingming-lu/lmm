@@ -30,8 +30,12 @@ func newBase(driver, dsn string) DB {
 	return &base{src: db}
 }
 
-func (db *base) Begin(c context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
-	return nil, nil
+func (db *base) Begin(c context.Context, opts *sql.TxOptions) (Tx, error) {
+	txn, err := db.src.BeginTx(c, opts)
+	if err != nil {
+		return nil, err
+	}
+	return &tx{Tx: txn}, nil
 }
 
 func (db *base) Conn(c context.Context) (*sql.Conn, error) {
@@ -54,12 +58,12 @@ func (db *base) Ping(c context.Context) error {
 	return db.src.PingContext(c)
 }
 
-func (db *base) Prepare(c context.Context, query string) *sql.Stmt {
-	stmt, err := db.src.PrepareContext(c, query)
+func (db *base) Prepare(c context.Context, query string) Stmt {
+	st, err := db.src.PrepareContext(c, query)
 	if err != nil {
 		panic(err)
 	}
-	return stmt
+	return &stmt{Stmt: st}
 }
 
 func (db *base) Query(c context.Context, query string, args ...interface{}) (*sql.Rows, error) {

@@ -27,7 +27,7 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model
 	`)
 	defer stmt.Close()
 
-	rows, err := stmt.QueryContext(c, count+1, (page-1)*count)
+	rows, err := stmt.Query(c, count+1, (page-1)*count)
 	if err != nil {
 		if err == storage.ErrNoRows {
 			return model.NewArticleListView(nil, false), nil
@@ -83,7 +83,7 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 		articleEditedAt time.Time
 	)
 
-	err := selectArticle.QueryRowContext(c, id.String()).Scan(&linkedID, &rawArticleID, &articleTitle, &articleBody, &articlePostAt, &articleEditedAt)
+	err := selectArticle.QueryRow(c, id.String()).Scan(&linkedID, &rawArticleID, &articleTitle, &articleBody, &articlePostAt, &articleEditedAt)
 	if err != nil {
 		if err == storage.ErrNoRows {
 			return nil, domain.ErrNoSuchArticle
@@ -105,7 +105,7 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 		tagName  string
 	)
 
-	rows, err := selectTags.QueryContext(c, linkedID)
+	rows, err := selectTags.Query(c, linkedID)
 	if err != nil && err != storage.ErrNoRows {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (f *ArticleFetcher) ListAllTags(c context.Context) (model.TagListView, erro
 	`)
 	defer stmt.Close()
 
-	rows, err := stmt.QueryContext(c)
+	rows, err := stmt.Query(c)
 	if err != nil {
 		if err == storage.ErrNoRows {
 			return nil, nil

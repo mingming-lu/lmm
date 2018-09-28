@@ -9,7 +9,7 @@ import (
 
 // DB is a database abstraction
 type DB interface {
-	Begin(c context.Context, opts *sql.TxOptions) (*sql.Tx, error)
+	Begin(c context.Context, opts *sql.TxOptions) (Tx, error)
 
 	Conn(c context.Context) (*sql.Conn, error)
 
@@ -19,7 +19,7 @@ type DB interface {
 
 	Exec(c context.Context, query string, args ...interface{}) (sql.Result, error)
 
-	Prepare(c context.Context, query string) *sql.Stmt
+	Prepare(c context.Context, query string) Stmt
 
 	Ping(c context.Context) error
 
