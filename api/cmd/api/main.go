@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "github.com/go-sql-driver/mysql"
 	"go.uber.org/zap"
 
 	"lmm/api/http"
@@ -26,7 +27,7 @@ func main() {
 	defer undo()
 
 	db := storage.NewDB()
-	defer db.CloseNow()
+	defer db.Close()
 
 	_ = storage.NewCacheEngine()
 

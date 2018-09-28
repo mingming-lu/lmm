@@ -8,8 +8,6 @@ import (
 	"os"
 	"regexp"
 	"time"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -47,13 +45,6 @@ func NewDB() *DB {
 }
 
 func (db *DB) Close() error {
-	return errors.New(`
-		DB.Close is unexpected to be called after every use.\n
-		See https://golang.org/pkg/database/sql/#DB.Close
-	`)
-}
-
-func (db *DB) CloseNow() error {
 	return db.DB.Close()
 }
 
