@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 
 	accountFactory "lmm/api/service/account/domain/factory"
@@ -13,7 +15,14 @@ import (
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/service"
 	"lmm/api/storage"
+	"lmm/api/storage/db"
 	"lmm/api/testing"
+)
+
+var (
+	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
+	dbName     = os.Getenv("DATABASE_NAME")
+	connParams = "parseTime=true"
 )
 
 var (
@@ -22,11 +31,14 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	db := storage.NewDB()
-	defer db.Close()
+	d := storage.NewDB()
+	defer d.Close()
 
-	authorAdapter = NewAuthorAdapter(db)
-	userRepository = accountStorage.NewUserStorage(db)
+	mysql := db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	defer mysql.Close()
+
+	authorAdapter = NewAuthorAdapter(mysql)
+	userRepository = accountStorage.NewUserStorage(d)
 	code := m.Run()
 	os.Exit(code)
 }
