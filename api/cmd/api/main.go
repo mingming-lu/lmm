@@ -20,6 +20,8 @@ import (
 
 func main() {
 	db := storage.NewDB()
+	defer db.CloseNow()
+
 	_ = storage.NewCacheEngine()
 
 	userRepo := accountInfra.NewUserStorage(db)
