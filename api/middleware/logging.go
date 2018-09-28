@@ -34,7 +34,7 @@ func (r *accessLogRecorder) accessLog(next http.Handler) http.Handler {
 			zap.String("method", req.Method),
 			zap.String("proto", req.Proto),
 			zap.String("host", req.Host),
-			zap.String("path", req.RequestURI),
+			zap.String("uri", req.RequestURI),
 			zap.String("remote_addr", req.RemoteAddr),
 			zap.String("ua", req.Header.Get("User-Agent")),
 			zap.String("latency", time.Since(start).String()),
