@@ -6,12 +6,6 @@ import (
 	"github.com/akinaru-lu/errors"
 )
 
-func TestInit(t *testing.T) {
-	tester := NewTester(t)
-	_, err := dbEngine.Query("SHOW TABLES")
-	tester.NoError(err)
-}
-
 func TestIs(t *testing.T) {
 	tester := NewTester(t)
 	tester.Is(1, 1)
