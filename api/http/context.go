@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 // StrCtxKey stands for string context key
@@ -51,7 +52,10 @@ func (c *contextImpl) Value(key interface{}) interface{} {
 
 func (c *contextImpl) Header(key, value string) {
 	if c.res.Header().Get(key) != "" {
-		log.Printf("unexpected to set same header more than once, header = %s, value = %s\n", key, value)
+		zap.L().Warn("unexpected to set same header more than once",
+			zap.String("header", key),
+			zap.String("value", value),
+		)
 		return
 	}
 	c.res.Header().Set(key, value)
@@ -61,7 +65,7 @@ func (c *contextImpl) JSON(statusCode int, data interface{}) {
 	c.writeContentType("application/json")
 	c.res.WriteHeader(statusCode)
 	if err := json.NewEncoder(c.res).Encode(data); err != nil {
-		panic(err)
+		zap.L().Panic(err.Error())
 	}
 }
 
@@ -77,7 +81,7 @@ func (c *contextImpl) String(statusCode int, s string) {
 	c.writeContentType("text/plain")
 	c.res.WriteHeader(statusCode)
 	if _, err := fmt.Fprint(c.res, s); err != nil {
-		panic(err)
+		zap.L().Panic(err.Error())
 	}
 }
 

@@ -1,6 +1,10 @@
 package http
 
-import "net/http"
+import (
+	"net/http"
+
+	"go.uber.org/zap"
+)
 
 // Response interface used by Context
 type Response interface {
@@ -36,6 +40,10 @@ func (r *responseImpl) Write(data []byte) (int, error) {
 
 func (r *responseImpl) WriteHeader(statusCode int) {
 	if r.written {
+		zap.L().Warn("unexpected to set status code more than once",
+			zap.Int("current", r.statusCode),
+			zap.Int("input", statusCode),
+		)
 		return
 	}
 	r.writer.WriteHeader(statusCode)

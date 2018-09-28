@@ -1,11 +1,8 @@
 package testing
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -69,16 +66,6 @@ func (t *Tester) IsErrorMsg(expected string, actual error, msgAndArgs ...interfa
 
 func (t *Tester) Isa(expectedType, o interface{}, msgAndArgs ...interface{}) bool {
 	return assert.IsType(t, expectedType, o, msgAndArgs...)
-}
-
-// Output matches output of given function with regexp
-func (t *Tester) Output(expectedRegexp string, f func(), msgAndArgs ...interface{}) bool {
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
-	f()
-	log.SetOutput(os.Stderr)
-
-	return assert.Regexp(t, expectedRegexp, buf.String(), msgAndArgs...)
 }
 
 func (t *Tester) Regexp(expected, actual string, msgAndArgs ...interface{}) bool {
