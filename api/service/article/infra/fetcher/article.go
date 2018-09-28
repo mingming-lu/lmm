@@ -7,24 +7,27 @@ import (
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/storage"
+	"lmm/api/storage/db"
 )
 
 // ArticleFetcher implements domain.model.finder.ArticleFinder
 type ArticleFetcher struct {
-	db *storage.DB
+	db db.DB
 }
 
 // NewArticleFetcher creates new ArticleFetcher
-func NewArticleFetcher(db *storage.DB) *ArticleFetcher {
+func NewArticleFetcher(db db.DB) *ArticleFetcher {
 	return &ArticleFetcher{db: db}
 }
 
 // ListByPage implementation
 func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model.ArticleListView, error) {
-	stmt := f.db.MustPrepare(`select uid, title, created_at from article order by created_at desc limit ? offset ?`)
+	stmt := f.db.Prepare(c, `
+		select uid, title, created_at from article order by created_at desc limit ? offset ?
+	`)
 	defer stmt.Close()
 
-	rows, err := stmt.Query(count+1, (page-1)*count)
+	rows, err := stmt.QueryContext(c, count+1, (page-1)*count)
 	if err != nil {
 		if err == storage.ErrNoRows {
 			return model.NewArticleListView(nil, false), nil
@@ -61,10 +64,14 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model
 
 // FindByID implementation
 func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*model.ArticleView, error) {
-	selectArticle := f.db.MustPrepare(`select id, uid, title, body, created_at, updated_at from article where uid = ?`)
+	selectArticle := f.db.Prepare(c, `
+		select id, uid, title, body, created_at, updated_at from article where uid = ?
+	`)
 	defer selectArticle.Close()
 
-	selectTags := f.db.MustPrepare(`select sort, name from article_tag where article = ?`)
+	selectTags := f.db.Prepare(c, `
+		select sort, name from article_tag where article = ?
+	`)
 	defer selectTags.Close()
 
 	var (
@@ -76,7 +83,7 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 		articleEditedAt time.Time
 	)
 
-	err := selectArticle.QueryRow(id.String()).Scan(&linkedID, &rawArticleID, &articleTitle, &articleBody, &articlePostAt, &articleEditedAt)
+	err := selectArticle.QueryRowContext(c, id.String()).Scan(&linkedID, &rawArticleID, &articleTitle, &articleBody, &articlePostAt, &articleEditedAt)
 	if err != nil {
 		if err == storage.ErrNoRows {
 			return nil, domain.ErrNoSuchArticle
@@ -98,7 +105,7 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 		tagName  string
 	)
 
-	rows, err := selectTags.Query(linkedID)
+	rows, err := selectTags.QueryContext(c, linkedID)
 	if err != nil && err != storage.ErrNoRows {
 		return nil, err
 	}
@@ -126,10 +133,12 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 
 // ListAllTags implementation
 func (f *ArticleFetcher) ListAllTags(c context.Context) (model.TagListView, error) {
-	stmt := f.db.MustPrepare(`select name from article_tag group by name order by name`)
+	stmt := f.db.Prepare(c, `
+		select name from article_tag group by name order by name
+	`)
 	defer stmt.Close()
 
-	rows, err := stmt.Query()
+	rows, err := stmt.QueryContext(c)
 	if err != nil {
 		if err == storage.ErrNoRows {
 			return nil, nil

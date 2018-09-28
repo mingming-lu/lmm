@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	_ "github.com/go-sql-driver/mysql"
 	"go.uber.org/zap"
 
@@ -16,7 +19,14 @@ import (
 	imageInfra "lmm/api/service/image/infra"
 	img "lmm/api/service/image/ui"
 	"lmm/api/storage"
+	featureDB "lmm/api/storage/db"
 	"lmm/api/storage/static"
+)
+
+var (
+	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
+	dbName     = os.Getenv("DATABASE_NAME")
+	connParams = "parseTime=true"
 )
 
 func main() {
@@ -38,10 +48,13 @@ func main() {
 	imgRepo.SetStaticRepository(static.NewLocalStaticRepository())
 	imageUI := img.New(imgRepo)
 
-	authorService := articleService.NewAuthorAdapter(db)
-	articleFinder := articleFetcher.NewArticleFetcher(db)
-	articleRepository := articlePersistence.NewArticleStorage(db, authorService)
-	authorAdapter := articleService.NewAuthorAdapter(db)
+	mysql := featureDB.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	defer mysql.Close()
+
+	authorService := articleService.NewAuthorAdapter(mysql)
+	articleFinder := articleFetcher.NewArticleFetcher(mysql)
+	articleRepository := articlePersistence.NewArticleStorage(mysql, authorService)
+	authorAdapter := articleService.NewAuthorAdapter(mysql)
 	articleUI := article.NewUI(articleFinder, articleRepository, authorAdapter)
 
 	router := http.NewRouter()
