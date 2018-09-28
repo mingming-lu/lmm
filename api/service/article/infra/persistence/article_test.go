@@ -104,7 +104,7 @@ func selectArticleWhereUIDIs(uid string) (int, string, string, error) {
 		body      string
 	)
 
-	err := testing.DB().QueryRow(`
+	err := mysql.QueryRow(context.Background(), `
 		select id, title, body from article where uid = ?
 	`, uid).Scan(&articleID, &title, &body)
 
@@ -116,7 +116,7 @@ func selectArticleWhereUIDIs(uid string) (int, string, string, error) {
 }
 
 func selectTagsWhereArticleIDIs(id int) ([]string, error) {
-	rows, err := testing.DB().Query(`
+	rows, err := mysql.Query(context.Background(), `
 		select name from article_tag where article = ?
 	`, id)
 	if err != nil {

@@ -45,7 +45,7 @@ func TestPutArticles_403(tt *testing.T) {
 	t.NoError(err)
 
 	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + testing.NewUser().Token()
+	headers["Authorization"] = "Bearer " + NewUser().Token()
 
 	title := strings.Repeat("t", 140)
 	body := "test body"

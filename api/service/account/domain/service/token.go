@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -12,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/akinaru-lu/errors"
 )
 
 var (
