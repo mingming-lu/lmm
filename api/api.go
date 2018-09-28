@@ -1,7 +1,10 @@
 package api
 
 import (
+	"go.uber.org/zap"
+
 	"lmm/api/http"
+	"lmm/api/log"
 	"lmm/api/middleware"
 	accountInfra "lmm/api/service/account/infra"
 	account "lmm/api/service/account/ui"
@@ -30,8 +33,14 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	articleUI := article.NewUI(articleFinder, articleRepository, authorAdapter)
 
 	router := http.NewRouter()
-	router.Use(middleware.Recovery)
-	router.Use(middleware.Logging)
+
+	accessRecorder := accessLogRecoder()
+	defer accessRecorder.Sync()
+	router.Use(middleware.NewAccessLog(accessRecorder))
+
+	recvRecoder := recoveryRecoder()
+	defer recvRecoder.Sync()
+	router.Use(middleware.NewRecovery(recvRecoder))
 
 	// account
 	router.POST("/v1/signup", accountUI.SignUp)
@@ -51,4 +60,30 @@ func NewRouter(db *storage.DB, cache *storage.Cache) *http.Router {
 	router.PUT("/v1/images/:image", accountUI.BearerAuth(imageUI.MarkImage))
 
 	return router
+}
+
+func recoveryRecoder() *zap.Logger {
+	cfg := log.DefaultZapConfig()
+	cfg.DisableCaller = true
+	cfg.DisableStacktrace = false
+	cfg.EncoderConfig.StacktraceKey = "stacktrace"
+
+	logger, err := cfg.Build()
+	if err != nil {
+		panic(err)
+	}
+
+	return logger
+}
+
+func accessLogRecoder() *zap.Logger {
+	cfg := log.DefaultZapConfig()
+	cfg.DisableCaller = true
+
+	logger, err := cfg.Build()
+	if err != nil {
+		panic(err)
+	}
+
+	return logger
 }
