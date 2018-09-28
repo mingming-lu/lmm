@@ -19,6 +19,12 @@ import (
 )
 
 func main() {
+	logger := globalRecorder()
+	defer logger.Sync()
+
+	undo := zap.ReplaceGlobals(logger)
+	defer undo()
+
 	db := storage.NewDB()
 	defer db.CloseNow()
 
@@ -39,11 +45,11 @@ func main() {
 
 	router := http.NewRouter()
 
-	accessRecorder := accessLogRecoder()
+	accessRecorder := accessLogRecorder()
 	defer accessRecorder.Sync()
 	router.Use(middleware.NewAccessLog(accessRecorder))
 
-	recvRecoder := recoveryRecoder()
+	recvRecoder := recoveryRecorder()
 	defer recvRecoder.Sync()
 	router.Use(middleware.NewRecovery(recvRecoder))
 
@@ -67,7 +73,18 @@ func main() {
 	http.Serve(":8002", router)
 }
 
-func recoveryRecoder() *zap.Logger {
+func globalRecorder() *zap.Logger {
+	cfg := log.DefaultZapConfig()
+
+	logger, err := cfg.Build()
+	if err != nil {
+		panic(err)
+	}
+
+	return logger.Named("global")
+}
+
+func recoveryRecorder() *zap.Logger {
 	cfg := log.DefaultZapConfig()
 	cfg.DisableCaller = true
 	cfg.DisableStacktrace = false
@@ -78,10 +95,10 @@ func recoveryRecoder() *zap.Logger {
 		panic(err)
 	}
 
-	return logger
+	return logger.Named("recovery")
 }
 
-func accessLogRecoder() *zap.Logger {
+func accessLogRecorder() *zap.Logger {
 	cfg := log.DefaultZapConfig()
 	cfg.DisableCaller = true
 
@@ -90,5 +107,5 @@ func accessLogRecoder() *zap.Logger {
 		panic(err)
 	}
 
-	return logger
+	return logger.Named("access_log")
 }
