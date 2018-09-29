@@ -9,15 +9,23 @@ import (
 )
 
 const (
-	weakPasswordThreshold = 20
 	minimumPasswordLength = 8
+	maximumPasswordLength = 250
+	weakPasswordThreshold = 20
+
+	_digits    = `0-9`
+	_lowerCase = `a-z`
+	_upperCase = `A-Z`
+	_symbols   = `~!@#$%^*(){}\[\]&\-_=+|\\\/:;"'<,>.?`
+	_password  = _digits + _lowerCase + _upperCase + _symbols
 )
 
 var (
-	digits           = regexp.MustCompile(`\d`)
-	lowerCaseLetters = regexp.MustCompile(`[a-z]`)
-	upperCaseLetters = regexp.MustCompile(`[A-Z]`)
-	symbols          = regexp.MustCompile(`[%]`)
+	digits           = regexp.MustCompile(`[` + _digits + `]`)
+	lowerCaseLetters = regexp.MustCompile(`[` + _lowerCase + `]`)
+	upperCaseLetters = regexp.MustCompile(`[` + _upperCase + `]`)
+	symbols          = regexp.MustCompile(`[` + _symbols + `]`)
+	patternPassword  = regexp.MustCompile(`[` + _password + `]{8,250}`)
 )
 
 // Password domain value object model
@@ -34,6 +42,12 @@ func NewPassword(text string) (*Password, error) {
 	}
 	if len(text) < minimumPasswordLength {
 		return nil, domain.ErrUserPasswordTooShort
+	}
+	if len(text) > maximumPasswordLength {
+		return nil, domain.ErrUserPasswordTooLong
+	}
+	if !patternPassword.MatchString(text) {
+		return nil, domain.ErrInvalidPassword
 	}
 	return &Password{text: text}, nil
 }
@@ -57,15 +71,15 @@ func (pw Password) calculateStrength() int {
 	total := countDigit + countLetter + countSymbol
 
 	if countDigit > 0 && countLetter > 0 {
-		total += mathutil.MinInt(countDigit, countLetter) * 2
+		total += mathutil.MinInt(2, mathutil.MinInt(countDigit, countLetter)) * 5
 	}
 
 	if countLower > 0 && countUpper > 0 {
-		total += mathutil.MinInt(countLower, countUpper) * 5
+		total += mathutil.MinInt(2, mathutil.MinInt(countLower, countUpper)) * 5
 	}
 
 	if countDigit > 0 && countLetter > 0 && countSymbol > 0 {
-		total += mathutil.MinInt(countDigit, countLetter, countSymbol) * 5
+		total += mathutil.MinInt(2, mathutil.MinInt(countDigit, countLetter, countSymbol)) * 5
 	}
 
 	return total

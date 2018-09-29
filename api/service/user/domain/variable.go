@@ -3,6 +3,9 @@ package domain
 import "github.com/pkg/errors"
 
 var (
+	// ErrInvalidPassword error
+	ErrInvalidPassword = errors.New("invalid password")
+
 	// ErrInvalidUserID error
 	ErrInvalidUserID = errors.New("invalid user id")
 
@@ -20,6 +23,9 @@ var (
 
 	// ErrUserPasswordEmpty error
 	ErrUserPasswordEmpty = errors.New("user password is empty")
+
+	// ErrUserPasswordTooLong error
+	ErrUserPasswordTooLong = errors.New("user password should be equal to or shorter than 250")
 
 	// ErrUserPasswordTooShort error
 	ErrUserPasswordTooShort = errors.New("user password should be equal to or longer than 8")
