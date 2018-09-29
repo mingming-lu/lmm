@@ -5,7 +5,7 @@ import (
 
 	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/stringutil"
+	"lmm/api/util/stringutil"
 )
 
 // ArticleQueryService is a query side application
