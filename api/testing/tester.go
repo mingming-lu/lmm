@@ -93,7 +93,7 @@ func (t *Tester) Are(expected, actual interface{}, msgAndArgs ...interface{}) bo
 	return assert.EqualValues(t, expected, actual, msgAndArgs...)
 }
 
-// NoPanics asserts given function would not panics
-func (t *Tester) NoPanics(f func(), msgAndArgs ...interface{}) {
+// NotPanic asserts given function would not panics
+func (t *Tester) NotPanic(f func(), msgAndArgs ...interface{}) {
 	assert.NotPanics(t, f, msgAndArgs...)
 }
