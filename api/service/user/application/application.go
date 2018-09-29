@@ -9,7 +9,7 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
-	"lmm/api/stringutil"
+	"lmm/api/util/stringutil"
 )
 
 // Service is a application service

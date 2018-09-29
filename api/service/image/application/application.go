@@ -6,7 +6,7 @@ import (
 	"lmm/api/service/image/domain/factory"
 	"lmm/api/service/image/domain/model"
 	"lmm/api/service/image/domain/repository"
-	"lmm/api/stringutil"
+	"lmm/api/util/stringutil"
 )
 
 type AppService struct {

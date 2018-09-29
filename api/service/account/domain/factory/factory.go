@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"lmm/api/service/account/domain/model"
-	"lmm/api/stringutil"
+	"lmm/api/util/stringutil"
 )
 
 var idGenerator = sonyflake.NewSonyflake(sonyflake.Settings{})
