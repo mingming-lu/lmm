@@ -89,6 +89,11 @@ func (t *Tester) JSON(expected interface{}, actual string, msgAndArgs ...interfa
 }
 
 // Are compares two collections' values
-func (t *Tester) Are(expected, actual interface{}, msgAndArgs ...interface{}) {
-	assert.EqualValues(t, expected, actual, msgAndArgs...)
+func (t *Tester) Are(expected, actual interface{}, msgAndArgs ...interface{}) bool {
+	return assert.EqualValues(t, expected, actual, msgAndArgs...)
+}
+
+// NotPanic asserts given function would not panics
+func (t *Tester) NotPanic(f func(), msgAndArgs ...interface{}) {
+	assert.NotPanics(t, f, msgAndArgs...)
 }
