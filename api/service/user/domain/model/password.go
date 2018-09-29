@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"regexp"
 
 	"lmm/api/domain/model"
@@ -21,11 +22,11 @@ const (
 )
 
 var (
-	digits           = regexp.MustCompile(`[` + _digits + `]`)
-	lowerCaseLetters = regexp.MustCompile(`[` + _lowerCase + `]`)
-	upperCaseLetters = regexp.MustCompile(`[` + _upperCase + `]`)
-	symbols          = regexp.MustCompile(`[` + _symbols + `]`)
-	patternPassword  = regexp.MustCompile(`[` + _password + `]{8,250}`)
+	digits           = regexp.MustCompile(fmt.Sprintf(`[%s]`, _digits))
+	lowerCaseLetters = regexp.MustCompile(fmt.Sprintf(`[%s]`, _lowerCase))
+	upperCaseLetters = regexp.MustCompile(fmt.Sprintf(`[%s]`, _upperCase))
+	symbols          = regexp.MustCompile(fmt.Sprintf(`[%s]`, _symbols))
+	patternPassword  = regexp.MustCompile(fmt.Sprintf(`[%s]{%d,%d}`, _password, minimumPasswordLength, maximumPasswordLength))
 )
 
 // Password domain value object model
