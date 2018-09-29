@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"os"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -49,7 +50,7 @@ func TestRegisterNewUser(tt *testing.T) {
 	c := context.Background()
 
 	t.Run("Success", func(_ *testing.T) {
-		username, password := "username", "Password1234"
+		username, password := "username", "~!@#$%^&*()-_=+{[}]|\\:;\"'<,>.?/"
 		nameGot, err := testAppService.RegisterNewUser(c, username, password)
 		t.NoError(err)
 		t.Is(username, nameGot)
@@ -61,7 +62,7 @@ func TestRegisterNewUser(tt *testing.T) {
 			[]byte(user.Password()),
 			[]byte(password),
 		))
-		t.NoPanics(func() {
+		t.NotPanic(func() {
 			uuid.Must(uuid.Parse(user.Token()))
 		})
 	})
@@ -73,19 +74,25 @@ func TestRegisterNewUser(tt *testing.T) {
 			Err      error
 		}{
 			"UserNameTooShort": {
-				"ur", "Password1234", domain.ErrInvalidUserName,
+				"ur", "password1234", domain.ErrInvalidUserName,
 			},
 			"UserNameStartsWithoutLetter": {
-				"1username", "Password1234", domain.ErrInvalidUserName,
+				"1username", "password1234", domain.ErrInvalidUserName,
+			},
+			"EmptyPassword": {
+				"username", "", domain.ErrUserPasswordEmpty,
 			},
 			"PasswordIsTooShort": {
 				"username", "passwor", domain.ErrUserPasswordTooShort,
 			},
 			"PasswordIsTooWeak": {
-				"username", "password1234", domain.ErrUserPasswordTooWeak,
+				"username", "password", domain.ErrUserPasswordTooWeak,
+			},
+			"PasswordIsTooLong": {
+				"username", strings.Repeat("s", 251), domain.ErrUserPasswordTooLong,
 			},
 			"DuplicateUserName": {
-				"username", "Password1234", domain.ErrUserNameAlreadyUsed,
+				"username", "password1234", domain.ErrUserNameAlreadyUsed,
 			},
 		}
 
@@ -95,8 +102,8 @@ func TestRegisterNewUser(tt *testing.T) {
 					testCase.UserName,
 					testCase.Password,
 				)
-				t.IsError(testCase.Err, errors.Cause(err))
-				t.Is("", nameGot)
+				t.IsError(testCase.Err, errors.Cause(err), testName)
+				t.Is("", nameGot, testName)
 			})
 		}
 	})
