@@ -4,9 +4,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/pkg/errors"
+
+	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
 	"lmm/api/storage/db"
+	"lmm/api/util/mysqlutil"
 )
 
 // UserStorage implements user/domain/repository.UserRepository
@@ -29,7 +33,10 @@ func (s *UserStorage) Save(c context.Context, user *model.User) error {
 	now := time.Now()
 
 	_, err := stmt.Exec(c, user.Name(), user.Password(), user.Token(), now)
-	// TODO check user name conflict
+
+	if key, _, ok := mysqlutil.CheckDuplicateKeyError(err); ok && key == "name" {
+		return errors.Wrap(domain.ErrUserNameAlreadyUsed, err.Error())
+	}
 
 	return err
 }
