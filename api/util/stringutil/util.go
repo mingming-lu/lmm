@@ -35,3 +35,8 @@ func ReplaceAll(s, old, new string) string {
 func Uint64ToStr(i uint64) string {
 	return strconv.FormatUint(i, 10)
 }
+
+// Int64ToStr is a shortcur of strconv.FormatInt(i, 10)
+func Int64ToStr(i int64) string {
+	return strconv.FormatInt(i, 10)
+}
