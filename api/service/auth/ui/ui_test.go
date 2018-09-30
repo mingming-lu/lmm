@@ -30,6 +30,9 @@ func TestMain(m *testing.M) {
 
 	router = http.NewRouter()
 	router.POST("/v1/auth/login", ui.Login)
+	router.GET("/v1/dummy", ui.BearerAuth(func(c http.Context) {
+		c.String(http.StatusOK, http.StatusText(http.StatusOK))
+	}))
 
 	code := m.Run()
 	os.Exit(code)

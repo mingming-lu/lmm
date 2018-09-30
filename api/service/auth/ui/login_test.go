@@ -38,11 +38,37 @@ func TestLogin(tt *testing.T) {
 
 		res := login(headers)
 		t.Is(http.StatusOK, res.StatusCode())
+
+		t.Run("BearerAuthOK", func(_ *testing.T) {
+			accessToken, err := testingutil.ExtractAccessToken(res.Body())
+			t.NoError(err)
+			t.Not("", accessToken)
+
+			headers := make(map[string]string)
+			headers["Authorization"] = "Bearer " + accessToken
+
+			res := dummy(headers)
+			t.Is(http.StatusOK, res.StatusCode())
+			t.Is("OK", res.Body())
+		})
 	})
 }
 
 func login(headers map[string]string) *testing.Response {
 	request := testing.POST("/v1/auth/login", nil)
+
+	for k, v := range headers {
+		request.Header.Add(k, v)
+	}
+
+	res := testing.NewResponse()
+	router.ServeHTTP(res, request)
+
+	return res
+}
+
+func dummy(headers map[string]string) *testing.Response {
+	request := testing.GET("/v1/dummy")
 
 	for k, v := range headers {
 		request.Header.Add(k, v)

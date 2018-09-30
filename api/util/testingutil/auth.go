@@ -2,6 +2,8 @@ package testingutil
 
 import (
 	"context"
+	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,4 +38,20 @@ func NewAuthUser(db db.DB) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+// ExtractAccessToken tries to extract access token from given string
+func ExtractAccessToken(s string) (string, error) {
+	// avoid cycle import, see lmm/api/service/auth/ui/adapter.go
+	type loginResponse struct {
+		AccessToken string `json:"accessToken"`
+	}
+
+	schema := loginResponse{}
+
+	if err := json.NewDecoder(strings.NewReader(s)).Decode(&schema); err != nil {
+		return "", err
+	}
+
+	return schema.AccessToken, nil
 }
