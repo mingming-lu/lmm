@@ -1,16 +1,21 @@
 version: "3"
 services:
   api:
-    image: golang:1.11
+    image: lmm/api
+    build:
+      context: ../api
+      dockerfile: ../docker/api/Dockerfile
     volumes:
       - ../api:/go/src/lmm/api
       - ../static:/static
-    command: go run /go/src/lmm/api/cmd/api/main.go
+    working_dir: /go/src/lmm/api
+    command: go run cmd/api/main.go
     env_file:
       - ./api/.env
     environment:
       TZ: Asia/Tokyo
       DATABASE_NAME: lmm
+      GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
     depends_on:
       - mysql
