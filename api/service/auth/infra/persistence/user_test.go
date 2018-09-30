@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"lmm/api/util/testingutil"
 
 	"github.com/pkg/errors"
 
@@ -14,7 +15,11 @@ func TestUserStorage(tt *testing.T) {
 	t := testing.NewTester(tt)
 	c := context.Background()
 
-	user := newUser()
+	user, err := testingutil.NewAuthUser(dbEngine)
+	if !t.NoError(err) {
+		t.FailNow()
+	}
+
 	token, err := service.NewTokenService().Encode(user.RawToken())
 	if !t.NoError(err) {
 		t.FailNow()
