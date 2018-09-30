@@ -3,12 +3,12 @@ package model
 import (
 	"regexp"
 
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 
 	"lmm/api/domain/model"
 	"lmm/api/service/user/domain"
+	"lmm/api/util/uuidutil"
 )
 
 var (
@@ -82,7 +82,7 @@ func (user *User) Token() string {
 }
 
 func (user *User) setToken(token string) error {
-	uuid, err := uuid.Parse(token)
+	uuid, err := uuidutil.ParseString(token)
 	if err != nil {
 		return errors.Wrap(domain.ErrInvalidUserToken, err.Error())
 	}

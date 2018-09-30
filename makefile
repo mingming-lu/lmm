@@ -15,7 +15,7 @@ install-app:
 	cd docker && docker-compose run --rm app bash -c "rm -rf app/node_modules && npm --prefix /app install"
 
 install-api:
-	cd docker && docker-compose run --rm api bash -c "go get -u -v github.com/golang/dep/cmd/dep && cd /go/src/lmm/api && rm -rf vendor && dep ensure -v"
+	cd docker && docker-compose build api
 
 install-manager:
 	cd docker && docker-compose run --rm manager bash -c "rm -rf manager/node_modules && npm --prefix /manager install"

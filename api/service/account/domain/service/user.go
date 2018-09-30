@@ -1,12 +1,12 @@
 package service
 
 import (
+	"errors"
+
 	"lmm/api/service/account/domain/factory"
 	"lmm/api/service/account/domain/model"
 	"lmm/api/service/account/domain/repository"
 	"lmm/api/storage"
-
-	"github.com/akinaru-lu/errors"
 )
 
 var (

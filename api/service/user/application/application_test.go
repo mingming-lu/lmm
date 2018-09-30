@@ -12,6 +12,7 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/testing"
+	"lmm/api/util/uuidutil"
 )
 
 var (
@@ -63,7 +64,7 @@ func TestRegisterNewUser(tt *testing.T) {
 			[]byte(password),
 		))
 		t.NotPanic(func() {
-			uuid.Must(uuid.Parse(user.Token()))
+			uuid.Must(uuidutil.ParseString(user.Token()))
 		})
 	})
 
