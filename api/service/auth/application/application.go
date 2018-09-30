@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"regexp"
 
 	"github.com/pkg/errors"
 
@@ -22,11 +23,10 @@ type Service struct {
 
 // NewService creates a new Service pointer
 func NewService(
-	tokenService service.TokenService,
 	userRepository repository.UserRepository,
 ) *Service {
 	return &Service{
-		tokenService:   tokenService,
+		tokenService:   service.NewTokenService(),
 		userRepository: userRepository,
 	}
 }
@@ -60,11 +60,20 @@ func (s *Service) BasicAuth(c context.Context, authorization string) (*model.Tok
 	return s.tokenService.Encode(user.RawToken())
 }
 
+var (
+	patternBearerAuthorization = regexp.MustCompile(`^Bearer (.+)$`)
+)
+
 // BearerAuth authorized given authorization
 func (s *Service) BearerAuth(c context.Context, authorization string) (*model.User, error) {
-	token, err := s.tokenService.Decode(authorization)
-	if err != nil {
+	matched := patternBearerAuthorization.FindStringSubmatch(authorization)
+	if len(matched) != 2 {
 		return nil, domain.ErrInvalidBearerAuthFormat
+	}
+
+	token, err := s.tokenService.Decode(matched[1])
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrInvalidBearerAuthFormat, err.Error())
 	}
 
 	return s.userRepository.FindByToken(c, token)

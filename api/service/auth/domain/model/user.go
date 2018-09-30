@@ -14,6 +14,11 @@ type User struct {
 	rawToken string
 }
 
+// NewUser creates a new user
+func NewUser(name, password, rawToken string) *User {
+	return &User{name: name, password: password, rawToken: rawToken}
+}
+
 // Name gets user name
 func (user *User) Name() string {
 	return user.name
