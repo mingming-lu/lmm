@@ -1,9 +1,10 @@
 package application
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
-	"strings"
 
 	"github.com/pkg/errors"
 
@@ -37,9 +38,13 @@ type basicAuth struct {
 
 // BasicAuth authorizes given authorization
 func (s *Service) BasicAuth(c context.Context, authorization string) (*model.Token, error) {
-	auth := basicAuth{}
+	b, err := base64.URLEncoding.DecodeString(authorization)
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrInvalidBasicAuthFormat, err.Error())
+	}
 
-	if err := json.NewDecoder(strings.NewReader(authorization)).Decode(&auth); err != nil {
+	auth := basicAuth{}
+	if err := json.NewDecoder(bytes.NewReader(b)).Decode(&auth); err != nil {
 		return nil, domain.ErrInvalidBasicAuthFormat
 	}
 
