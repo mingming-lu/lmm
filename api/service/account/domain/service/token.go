@@ -77,7 +77,6 @@ func DecodeToken(targetToken string) (string, error) {
 	decodedToken := make([]byte, len(encodedToken))
 
 	stream := cipher.NewCFBDecrypter(block, iv)
-
 	stream.XORKeyStream(decodedToken, encodedToken)
 
 	params := strings.Split(string(decodedToken), ":")
