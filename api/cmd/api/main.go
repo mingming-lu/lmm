@@ -84,7 +84,8 @@ func main() {
 	router.GET("/v1/images", imageUI.LoadImagesByPage)
 	router.PUT("/v1/images/:image", accountUI.BearerAuth(imageUI.MarkImage))
 
-	http.Serve(":8002", router)
+	server := http.NewServer(":8002", router)
+	server.Run()
 }
 
 func globalRecorder() *zap.Logger {
