@@ -5,12 +5,9 @@ import (
 	"time"
 )
 
-// TokenKey is used to identify token
-type TokenKey = string
-
 // Token domain model
 type Token struct {
-	model.Entity
+	model.ValueObject
 	raw    string
 	expire time.Time
 }
