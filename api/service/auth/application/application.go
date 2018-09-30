@@ -36,9 +36,19 @@ type basicAuth struct {
 	Password string `json:"password"`
 }
 
+var (
+	patternBasicAuthorization  = regexp.MustCompile(`^Basic (.+)$`)
+	patternBearerAuthorization = regexp.MustCompile(`^Bearer (.+)$`)
+)
+
 // BasicAuth authorizes given authorization
 func (s *Service) BasicAuth(c context.Context, authorization string) (*model.Token, error) {
-	b, err := base64.URLEncoding.DecodeString(authorization)
+	matched := patternBasicAuthorization.FindStringSubmatch(authorization)
+	if len(matched) != 2 {
+		return nil, domain.ErrInvalidBasicAuthFormat
+	}
+
+	b, err := base64.URLEncoding.DecodeString(matched[1])
 	if err != nil {
 		return nil, errors.Wrap(domain.ErrInvalidBasicAuthFormat, err.Error())
 	}
@@ -59,10 +69,6 @@ func (s *Service) BasicAuth(c context.Context, authorization string) (*model.Tok
 
 	return s.tokenService.Encode(user.RawToken())
 }
-
-var (
-	patternBearerAuthorization = regexp.MustCompile(`^Bearer (.+)$`)
-)
 
 // BearerAuth authorized given authorization
 func (s *Service) BearerAuth(c context.Context, authorization string) (*model.User, error) {

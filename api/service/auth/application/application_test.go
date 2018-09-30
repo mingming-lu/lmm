@@ -68,9 +68,16 @@ func TestBasicAuth(tt *testing.T) {
 			t.FailNow()
 		}
 
-		token, err := appService.BasicAuth(c, base64.URLEncoding.EncodeToString(b))
+		token, err := appService.BasicAuth(c, "Basic "+base64.URLEncoding.EncodeToString(b))
 		t.NoError(err)
+		t.NotNil(token)
 		t.Is(token.Raw(), registeredUserToken)
+	})
+
+	t.Run("InvalidBasicAuthFormat", func(_ *testing.T) {
+		token, err := appService.BasicAuth(c, "whatever")
+		t.IsError(domain.ErrInvalidBasicAuthFormat, errors.Cause(err))
+		t.Nil(token)
 	})
 
 	t.Run("Fail", func(_ *testing.T) {
@@ -93,7 +100,7 @@ func TestBasicAuth(tt *testing.T) {
 				if !t.NoError(err) {
 					t.FailNow()
 				}
-				token, err := appService.BasicAuth(c, base64.URLEncoding.EncodeToString(b))
+				token, err := appService.BasicAuth(c, "Basic "+base64.URLEncoding.EncodeToString(b))
 				t.IsError(testCase.Err, errors.Cause(err), testName)
 				t.Nil(token, testName)
 			})
