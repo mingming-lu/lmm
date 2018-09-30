@@ -9,24 +9,42 @@ import (
 	router "lmm/api/http"
 )
 
-func NewRequest(method, path string, body io.Reader) *http.Request {
-	return httptest.NewRequest(method, path, body)
+type RequestOptions struct {
+	Headers map[string]string
 }
 
-func GET(path string) *http.Request {
-	return NewRequest(http.MethodGet, path, nil)
+func NewRequest(method, path string, body io.Reader, opts *RequestOptions) *http.Request {
+	req := httptest.NewRequest(method, path, body)
+	if opts != nil {
+		for k, v := range opts.Headers {
+			req.Header.Add(k, v)
+		}
+	}
+
+	return req
 }
 
-func POST(path string, body io.Reader) *http.Request {
-	return NewRequest(http.MethodPost, path, body)
+func Do(req *http.Request, handler http.Handler) *Response {
+	res := NewResponse()
+	handler.ServeHTTP(res, req)
+
+	return res
 }
 
-func PUT(path string, body io.Reader) *http.Request {
-	return NewRequest(http.MethodPut, path, body)
+func GET(path string, opts *RequestOptions) *http.Request {
+	return NewRequest(http.MethodGet, path, nil, opts)
 }
 
-func DELETE(path string) *http.Request {
-	return NewRequest(http.MethodDelete, path, nil)
+func POST(path string, body io.Reader, opts *RequestOptions) *http.Request {
+	return NewRequest(http.MethodPost, path, body, opts)
+}
+
+func PUT(path string, body io.Reader, opts *RequestOptions) *http.Request {
+	return NewRequest(http.MethodPut, path, body, opts)
+}
+
+func DELETE(path string, opts *RequestOptions) *http.Request {
+	return NewRequest(http.MethodDelete, path, nil, opts)
 }
 
 type Response struct {

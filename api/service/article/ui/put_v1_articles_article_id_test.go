@@ -242,15 +242,9 @@ func TestPutArticles_204_EmptyTags(tt *testing.T) {
 }
 
 func putArticles(articleID string, headers map[string]string, requestBody io.ReadCloser) *testing.Response {
-	request := testing.PUT("/v1/articles/"+articleID, requestBody)
-	if headers != nil {
-		for k, v := range headers {
-			request.Header.Add(k, v)
-		}
-	}
+	request := testing.PUT("/v1/articles/"+articleID, requestBody, &testing.RequestOptions{
+		Headers: headers,
+	})
 
-	res := testing.NewResponse()
-	router.ServeHTTP(res, request)
-
-	return res
+	return testing.Do(request, router)
 }

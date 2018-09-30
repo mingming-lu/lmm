@@ -55,27 +55,16 @@ func TestLogin(tt *testing.T) {
 }
 
 func login(headers map[string]string) *testing.Response {
-	request := testing.POST("/v1/auth/login", nil)
-
-	for k, v := range headers {
-		request.Header.Add(k, v)
-	}
-
-	res := testing.NewResponse()
-	router.ServeHTTP(res, request)
-
-	return res
+	request := testing.POST("/v1/auth/login", nil, &testing.RequestOptions{
+		Headers: headers,
+	})
+	return testing.Do(request, router)
 }
 
 func dummy(headers map[string]string) *testing.Response {
-	request := testing.GET("/v1/dummy")
+	request := testing.GET("/v1/dummy", &testing.RequestOptions{
+		Headers: headers,
+	})
 
-	for k, v := range headers {
-		request.Header.Add(k, v)
-	}
-
-	res := testing.NewResponse()
-	router.ServeHTTP(res, request)
-
-	return res
+	return testing.Do(request, router)
 }

@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"io"
 	"strings"
 
@@ -167,17 +166,9 @@ func TestPostArticles_201_EmptyTags(tt *testing.T) {
 }
 
 func postArticles(headers map[string]string, requestBody io.ReadCloser) *testing.Response {
-	uri := fmt.Sprint("/v1/articles")
+	request := testing.POST("/v1/articles", requestBody, &testing.RequestOptions{
+		Headers: headers,
+	})
 
-	request := testing.POST(uri, requestBody)
-	if headers != nil {
-		for k, v := range headers {
-			request.Header.Add(k, v)
-		}
-	}
-
-	res := testing.NewResponse()
-	router.ServeHTTP(res, request)
-
-	return res
+	return testing.Do(request, router)
 }

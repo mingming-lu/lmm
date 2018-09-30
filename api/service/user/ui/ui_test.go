@@ -102,10 +102,7 @@ func TestPostUser(tt *testing.T) {
 }
 
 func postUser(requestBody io.ReadCloser) *testing.Response {
-	request := testing.POST("/v1/users", requestBody)
+	request := testing.POST("/v1/users", requestBody, nil)
 
-	res := testing.NewResponse()
-	router.ServeHTTP(res, request)
-
-	return res
+	return testing.Do(request, router)
 }
