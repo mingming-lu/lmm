@@ -19,14 +19,12 @@ type Server struct {
 
 // NewServer creates a new Server
 func NewServer(addr string, router *Router) *Server {
-	shutDownSignal := make(chan os.Signal, 1)
-	signal.Notify(shutDownSignal, syscall.SIGINT, syscall.SIGTERM)
 	return &Server{
 		srv: &http.Server{
 			Addr:    addr,
 			Handler: router,
 		},
-		shutDownSignal: shutDownSignal,
+		shutDownSignal: make(chan os.Signal, 1),
 		isShutDown:     false,
 	}
 }
@@ -39,19 +37,22 @@ func (s *Server) Run() {
 
 	zap.L().Info("start serving at " + s.srv.Addr)
 	go func() {
+		signal.Notify(s.shutDownSignal, syscall.SIGINT, syscall.SIGTERM)
+
 		if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			zap.L().Fatal(err.Error())
 		}
 	}()
 
 	<-s.shutDownSignal
-	close(s.shutDownSignal)
-
 	s.ShutDown()
 }
 
 // ShutDown stops this server gracefully
 func (s *Server) ShutDown() {
+	signal.Stop(s.shutDownSignal)
+	close(s.shutDownSignal)
+
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
