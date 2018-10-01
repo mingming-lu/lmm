@@ -38,6 +38,16 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
+	findUserID, err := tx.Prepare(c, `
+		select id from user where name = ?
+	`)
+	if err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+		return err
+	}
+
 	saveArticle, err := tx.Prepare(c, `
 		insert into article (uid, user, title, body, created_at, updated_at)
 		values (?, ?, ?, ?, ?, ?)
@@ -72,13 +82,18 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 
 	now := time.Now()
 
-	if err != nil {
-		return nil
+	var userID int
+
+	if err := findUserID.QueryRow(c, article.Author().Name()).Scan(&userID); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+		return err
 	}
 
 	res, err := saveArticle.Exec(c,
 		article.ID().String(),
-		article.Author().ID(),
+		userID,
 		article.Content().Text().Title(),
 		article.Content().Text().Body(),
 		now,
@@ -162,7 +177,7 @@ func (s *ArticleStorage) userModelFromRow(c context.Context, row *sql.Row) (*mod
 	var (
 		id           int
 		rawArticleID string
-		userID       uint64
+		userID       int
 		title        string
 		body         string
 	)
@@ -172,7 +187,15 @@ func (s *ArticleStorage) userModelFromRow(c context.Context, row *sql.Row) (*mod
 		}
 		return nil, err
 	}
-	author, err := s.authorService.AuthorFromUserID(c, userID)
+	findUserName := s.db.Prepare(c, `select name from user where id = ?`)
+	defer findUserName.Close()
+
+	var userName string
+	if err := findUserName.QueryRow(c, userID).Scan(&userName); err != nil {
+		return nil, err
+	}
+
+	author, err := s.authorService.AuthorFromUserName(c, userName)
 	if err != nil {
 		return nil, err
 	}

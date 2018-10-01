@@ -8,5 +8,5 @@ import (
 
 // AuthorService is a user adapter interface
 type AuthorService interface {
-	AuthorFromUserID(c context.Context, userID uint64) (*model.Author, error)
+	AuthorFromUserName(c context.Context, userName string) (*model.Author, error)
 }

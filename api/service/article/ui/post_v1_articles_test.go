@@ -2,167 +2,136 @@ package ui
 
 import (
 	"io"
+	"math/rand"
 	"strings"
+
+	"github.com/google/uuid"
 
 	"lmm/api/http"
 	"lmm/api/service/article/domain"
 	"lmm/api/testing"
+	"lmm/api/util/stringutil"
+	"lmm/api/util/testutil"
 )
 
-func TestPostArticles_201(tt *testing.T) {
+func TestPostArticles(tt *testing.T) {
 	t := testing.NewTester(tt)
+	user := testutil.NewUser(mysql)
 
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + user.Token()
-
-	title := strings.Repeat("t", 140)
-	body := "test body"
-	res := postArticles(headers, testing.StructToRequestBody(postArticleAdapter{
-		Title: &title,
-		Body:  &body,
-		Tags:  []string{"test", "testing"},
-	}))
-
-	t.Is(http.StatusCreated, res.StatusCode())
-	t.Is("Success", res.Body())
-	t.Regexp(`^\/v1\/articles\/\w+$`, res.Header().Get("Location"))
-}
-
-func TestPostArticles_401(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	res := postArticles(nil, testing.StructToRequestBody(struct{}{}))
-
-	t.Is(http.StatusUnauthorized, res.StatusCode())
-}
-
-func TestPostArticles_400_TitleRequired(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + user.Token()
-
-	dummy := ""
-	res := postArticles(headers, testing.StructToRequestBody(struct {
-		Body *string
-		Tags []string
+	cases := map[string]struct {
+		ReqTitle      *string
+		ReqBody       *string
+		ReqTags       []string
+		ReqHeaders    map[string]string
+		ResStatusCode int
+		ResBody       string
+		ResHeaders    map[string]string
 	}{
-		Body: &dummy,
-		Tags: make([]string, 0),
-	}))
+		"Created": {
+			ReqTitle: stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:  stringutil.Pointer(uuid.New().String()),
+			ReqTags: func() []string {
+				s := make([]string, 0)
+				for i := 0; i < rand.Intn(10); i++ {
+					s = append(s, uuid.New().String()[:8])
+				}
+				return s
+			}(),
+			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ResStatusCode: http.StatusCreated,
+			ResBody:       "Success",
+			ResHeaders:    map[string]string{"Location": `^\/v1\/articles\/\w+$`},
+		},
+		"NoTags": {
+			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ResStatusCode: http.StatusCreated,
+			ResBody:       "Success",
+			ResHeaders:    map[string]string{"Location": `^\/v1\/articles\/\w+$`},
+		},
+		"Unauthorized": {
+			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    nil,
+			ResStatusCode: http.StatusUnauthorized,
+			ResBody:       http.StatusText(http.StatusUnauthorized),
+			ResHeaders:    nil,
+		},
+		"TitleRequired": {
+			ReqTitle:      nil,
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       errTitleRequired.Error(),
+			ResHeaders:    nil,
+		},
+		"BodyRequired": {
+			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:       nil,
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       errBodyRequired.Error(),
+			ResHeaders:    nil,
+		},
+		"TagsRequired": {
+			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       nil,
+			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       errTagsRequired.Error(),
+			ResHeaders:    nil,
+		},
+		"EmptyTitle": {
+			ReqTitle:      stringutil.Pointer(""),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       domain.ErrEmptyArticleTitle.Error(),
+			ResHeaders:    nil,
+		},
+		"InvalidTitle": {
+			ReqTitle:      stringutil.Pointer("!@#$"),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       domain.ErrInvalidArticleTitle.Error(),
+			ResHeaders:    nil,
+		},
+		"LongTitle": {
+			ReqTitle:      stringutil.Pointer(strings.Repeat("t", 141)),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       domain.ErrArticleTitleTooLong.Error(),
+			ResHeaders:    nil,
+		},
+	}
 
-	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(errTitleRequired.Error(), res.Body())
-}
-
-func TestPostArticles_400_EmptyTitle(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + user.Token()
-
-	title := ""
-	body := "test body"
-	res := postArticles(headers, testing.StructToRequestBody(postArticleAdapter{
-		Title: &title,
-		Body:  &body,
-		Tags:  []string{"test", "testing"},
-	}))
-
-	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(domain.ErrEmptyArticleTitle.Error(), res.Body())
-}
-
-func TestPostArticles_400_InvalidTitle(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + user.Token()
-
-	title := "$&%"
-	body := "test body"
-	res := postArticles(headers, testing.StructToRequestBody(postArticleAdapter{
-		Title: &title,
-		Body:  &body,
-		Tags:  []string{"test"},
-	}))
-
-	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(domain.ErrInvalidArticleTitle.Error(), res.Body())
-}
-
-func TestPostArticles_400_TitleTooLong(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + user.Token()
-
-	title := strings.Repeat("t", 141)
-	body := "test body"
-	res := postArticles(headers, testing.StructToRequestBody(postArticleAdapter{
-		Title: &title,
-		Body:  &body,
-		Tags:  []string{"test"},
-	}))
-
-	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(domain.ErrArticleTitleTooLong.Error(), res.Body())
-}
-
-func TestPostArticles_400_BodyRequired(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + user.Token()
-
-	dummy := ""
-	res := postArticles(headers, testing.StructToRequestBody(struct {
-		Title *string
-		Tags  []string
-	}{
-		Title: &dummy,
-		Tags:  []string{"test"},
-	}))
-
-	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(errBodyRequired.Error(), res.Body())
-}
-
-func TestPostArticles_400_TagsRequired(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + user.Token()
-
-	dummy := ""
-	res := postArticles(headers, testing.StructToRequestBody(struct {
-		Title *string
-		Body  *string
-	}{
-		Title: &dummy,
-		Body:  &dummy,
-	}))
-
-	t.Is(http.StatusBadRequest, res.StatusCode())
-	t.Is(errTagsRequired.Error(), res.Body())
-}
-
-func TestPostArticles_201_EmptyTags(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	headers := make(map[string]string)
-	headers["Authorization"] = "Bearer " + user.Token()
-
-	title := "awesome"
-	body := ""
-	res := postArticles(headers, testing.StructToRequestBody(postArticleAdapter{
-		Title: &title,
-		Body:  &body,
-		Tags:  []string{},
-	}))
-
-	t.Is(http.StatusCreated, res.StatusCode())
-	t.Is("Success", res.Body())
+	for testName, testCase := range cases {
+		t.Run(testName, func(_ *testing.T) {
+			res := postArticles(testCase.ReqHeaders, testing.StructToRequestBody(
+				postArticleAdapter{
+					Title: testCase.ReqTitle,
+					Body:  testCase.ReqBody,
+					Tags:  testCase.ReqTags,
+				},
+			))
+			t.Is(testCase.ResStatusCode, res.StatusCode())
+			t.Is(testCase.ResBody, res.Body())
+			for k, v := range testCase.ResHeaders {
+				t.Regexp(v, res.Header().Get(k))
+			}
+		})
+	}
 }
 
 func postArticles(headers map[string]string, requestBody io.ReadCloser) *testing.Response {

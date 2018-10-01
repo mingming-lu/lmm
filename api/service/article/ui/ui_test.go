@@ -5,20 +5,14 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/google/uuid"
 
-	accountFactory "lmm/api/service/account/domain/factory"
-	auth "lmm/api/service/account/domain/model"
-	authRepo "lmm/api/service/account/domain/repository"
-	authService "lmm/api/service/account/domain/service"
-	authInfra "lmm/api/service/account/infra"
-	authUI "lmm/api/service/account/ui"
-	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/infra/fetcher"
 	"lmm/api/service/article/infra/persistence"
 	"lmm/api/service/article/infra/service"
-	"lmm/api/storage"
-	featureDB "lmm/api/storage/db"
+	authApp "lmm/api/service/auth/application"
+	authStorage "lmm/api/service/auth/infra/persistence"
+	authUI "lmm/api/service/auth/ui"
+	"lmm/api/storage/db"
 	"lmm/api/testing"
 )
 
@@ -29,28 +23,16 @@ var (
 )
 
 var (
-	articleRepository repository.ArticleRepository
-	router            *testing.Router
-	ui                *UI
-	user              *auth.User
-	userRepo          authRepo.UserRepository
+	mysql  db.DB
+	router *testing.Router
 )
 
 func TestMain(m *testing.M) {
-	db := storage.NewDB()
-	defer db.Close()
-	userRepo = authInfra.NewUserStorage(db)
-	auth := authUI.New(userRepo)
-	user = NewUser()
-
-	mysql := featureDB.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	mysql = db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
 	defer mysql.Close()
 
-	authorService := service.NewAuthorAdapter(mysql)
-	articleFinder := fetcher.NewArticleFetcher(mysql)
-	articleRepository = persistence.NewArticleStorage(mysql, authorService)
-
-	ui = NewUI(articleFinder, articleRepository, authorService)
+	auth := auth(mysql)
+	ui := articleUI(mysql)
 
 	router = testing.NewRouter()
 	router.POST("/v1/articles", auth.BearerAuth(ui.PostArticle))
@@ -60,22 +42,15 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func NewUser() *auth.User {
-	name, password := uuid.New().String()[:5], uuid.New().String()
-	user, err := accountFactory.NewUser(name, password)
-	if err != nil {
-		panic(err)
-	}
+func articleUI(db db.DB) *UI {
+	authorService := service.NewAuthorAdapter(db)
+	articleFinder := fetcher.NewArticleFetcher(db)
+	articleRepository := persistence.NewArticleStorage(db, authorService)
+	return NewUI(articleFinder, articleRepository, authorService)
+}
 
-	if err := userRepo.Add(user); err != nil {
-		panic(err)
-	}
-
-	return auth.NewUser(
-		user.ID(),
-		user.Name(),
-		user.Password(),
-		authService.EncodeToken(user.Token()),
-		user.CreatedAt(),
-	)
+func auth(db db.DB) *authUI.UI {
+	repo := authStorage.NewUserStorage(db)
+	app := authApp.NewService(repo)
+	return authUI.NewUI(app)
 }

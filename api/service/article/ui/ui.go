@@ -4,13 +4,13 @@ import (
 	"errors"
 
 	"lmm/api/http"
-	account "lmm/api/service/account/domain/model"
 	"lmm/api/service/article/application"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/domain/service"
+	userModel "lmm/api/service/auth/domain/model"
 )
 
 var (
@@ -37,9 +37,9 @@ func NewUI(
 	return &UI{appService: appService}
 }
 
-// PostArticle handles POST /1/articles
-func (ui *UI) PostArticle(c http.Context) {
-	user, ok := c.Value(http.StrCtxKey("user")).(*account.User)
+// PostNewArticle handles POST /1/articles
+func (ui *UI) PostNewArticle(c http.Context) {
+	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
@@ -57,7 +57,7 @@ func (ui *UI) PostArticle(c http.Context) {
 	}
 
 	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(c,
-		user.ID(),
+		user.Name(),
 		*article.Title,
 		*article.Body,
 		article.Tags,
@@ -77,9 +77,9 @@ func (ui *UI) PostArticle(c http.Context) {
 	}
 }
 
-// EditArticleText handles PUT /1/article/:articleID
-func (ui *UI) EditArticleText(c http.Context) {
-	user, ok := c.Value(http.StrCtxKey("user")).(*account.User)
+// EditArticle handles PUT /1/article/:articleID
+func (ui *UI) EditArticle(c http.Context) {
+	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
 	if !ok {
 		http.Unauthorized(c)
 		return
@@ -97,7 +97,7 @@ func (ui *UI) EditArticleText(c http.Context) {
 	}
 
 	err := ui.appService.ArticleCommandService().EditArticle(c,
-		user.ID(),
+		user.Name(),
 		c.Request().PathParam("articleID"),
 		*article.Title,
 		*article.Body,

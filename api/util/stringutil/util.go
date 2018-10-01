@@ -26,6 +26,11 @@ func ParseUint64(s string) (uint64, error) {
 	return strconv.ParseUint(s, 10, 64)
 }
 
+// Pointer returns a pointer to given string
+func Pointer(s string) *string {
+	return &s
+}
+
 // ReplaceAll is a shortcut of strings.Replace(s, old, new, -1)
 func ReplaceAll(s, old, new string) string {
 	return strings.Replace(s, old, new, -1)
