@@ -16,7 +16,6 @@ import (
 
 func TestPostArticles(tt *testing.T) {
 	t := testing.NewTester(tt)
-
 	user := testutil.NewUser(mysql)
 
 	cases := map[string]struct {
