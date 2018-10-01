@@ -2,99 +2,127 @@ package persistence
 
 import (
 	"context"
+	"math/rand"
+	"time"
 
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/testing"
+	"lmm/api/util/testutil"
+
+	"github.com/google/uuid"
 )
 
 func TestSaveArticle(tt *testing.T) {
 	t := testing.NewTester(tt)
 	c := context.Background()
 
-	author, err := authorService.AuthorFromUserID(c, user.ID())
+	username, password := "U"+uuid.New().String()[:8], uuid.New().String()
+	user := testutil.NewUserUser(mysql, username, password)
+
+	author, err := authorService.AuthorFromUserName(c, user.Name())
 	t.NoError(err)
 
-	tagNames := make([]string, 3)
-	tagNames[0], tagNames[1], tagNames[2] = "1", "2", "3"
-	article, err := articleService.NewArticleToPost(c, author, "title", "body", tagNames)
-	t.NoError(err)
+	t.Run("Success", func(_ *testing.T) {
+		cases := map[string]struct {
+			Title string
+			Body  string
+			Tags  []string
+		}{
+			"SaveFirstArticle": {
+				Title: uuid.New().String()[:8],
+				Body:  uuid.New().String(),
+				Tags:  randomStringSlice(),
+			},
+			"SaveSecondArticle": {
+				Title: uuid.New().String()[:8],
+				Body:  uuid.New().String(),
+				Tags:  randomStringSlice(),
+			},
+		}
 
-	article2, err := articleService.NewArticleToPost(c, author, "title", "body", tagNames)
-	t.NoError(err)
+		for testName, testCase := range cases {
+			t.Run(testName, func(_ *testing.T) {
+				article, err := articleService.NewArticleToPost(c, author,
+					testCase.Title,
+					testCase.Body,
+					testCase.Tags,
+				)
+				t.NoError(err)
+				t.NoError(articleRepository.Save(c, article))
 
-	// save new article
-	t.NoError(articleRepository.Save(c, article))
-	t.NoError(articleRepository.Save(c, article2))
+				id, title, body, err := selectArticleWhereUIDIs(article.ID().String())
+				t.NoError(err)
+				t.Is(testCase.Title, title)
+				t.Is(testCase.Body, body)
 
-	articleID, title, body, err := selectArticleWhereUIDIs(article.ID().String())
-	t.NoError(err)
+				tags, err := selectTagsWhereArticleIDIs(id)
+				t.NoError(err)
+				t.Are(testCase.Tags, tags)
 
-	t.Is("title", title)
-	t.Is("body", body)
+				t.Run("EditArticle", func(_ *testing.T) {
+					text, err := model.NewText(uuid.New().String()[:8], uuid.New().String())
+					t.NoError(err)
+					tags := func() []*model.Tag {
+						tags := make([]*model.Tag, 0)
+						for i, tagName := range randomStringSlice() {
+							tag, err := model.NewTag(article.ID(), uint(i+1), tagName)
+							t.NoError(err)
+							tags = append(tags, tag)
+						}
+						return tags
+					}()
+					content, err := model.NewContent(text, tags)
+					t.NoError(err)
 
-	tagNamesGot, err := selectTagsWhereArticleIDIs(articleID)
-	t.NoError(err)
-	t.Are(tagNames, tagNamesGot)
+					article.EditContent(content)
+					t.NoError(articleRepository.Save(c, article))
 
-	// edit content
-	text, err := model.NewText("new title", "new body")
-	t.NoError(err)
-	tags := make([]*model.Tag, 0)
-	tag1, err := model.NewTag(article.ID(), 1, "111")
-	t.NoError(err)
-	tag2, err := model.NewTag(article.ID(), 2, "222")
-	t.NoError(err)
-	tag3, err := model.NewTag(article.ID(), 3, "333")
-	t.NoError(err)
-	tags = append(tags, tag1, tag2, tag3)
-	content, err := model.NewContent(text, tags)
-	t.NoError(err)
-	article.EditContent(content)
-
-	// save updated article
-	t.NoError(articleRepository.Save(c, article))
-
-	_, title, body, err = selectArticleWhereUIDIs(article.ID().String())
-	t.NoError(err)
-	t.Is("new title", title)
-	t.Is("new body", body)
-
-	tagNamesGot, err = selectTagsWhereArticleIDIs(articleID)
-	t.NoError(err)
-	t.Is("111", tagNamesGot[0])
-	t.Is("222", tagNamesGot[1])
-	t.Is("333", tagNamesGot[2])
+					id, title, body, err := selectArticleWhereUIDIs(article.ID().String())
+					t.NoError(err)
+					t.Is(text.Title(), title)
+					t.Is(text.Body(), body)
+					tagsGot, err := selectTagsWhereArticleIDIs(id)
+					t.NoError(err)
+					t.Are(func() []string {
+						names := make([]string, 0)
+						for _, tag := range tags {
+							names = append(names, tag.Name())
+						}
+						return names
+					}(), tagsGot)
+				})
+			})
+		}
+	})
 }
 
 func TestFindArticleByID(tt *testing.T) {
 	t := testing.NewTester(tt)
 	c := context.Background()
 
-	author, err := authorService.AuthorFromUserID(c, user.ID())
+	username, password := "U"+uuid.New().String()[:8], uuid.New().String()
+	user := testutil.NewUserUser(mysql, username, password)
+
+	author, err := authorService.AuthorFromUserName(c, user.Name())
 	t.NoError(err)
 
-	tagNames := make([]string, 3)
-	tagNames[0], tagNames[1], tagNames[2] = "awesome2", "awesome3", "awesome1"
-	article, err := articleService.NewArticleToPost(c, author, "awesome title", "awesome body", tagNames)
+	article, err := articleService.NewArticleToPost(c, author, "awesome title", "awesome body", nil)
 	t.NoError(err)
+
+	t.Run("NotFound", func(_ *testing.T) {
+		articleGot, err := articleRepository.FindByID(c, article.ID())
+		t.IsError(domain.ErrNoSuchArticle, err)
+		t.Nil(articleGot)
+	})
 
 	t.NoError(articleRepository.Save(c, article))
 
-	articleGot, err := articleRepository.FindByID(c, article.ID())
-	t.NoError(err)
-	t.Is(article, articleGot)
-}
-
-func TestFindArticleByID_NotFound(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	articleID, err := model.NewArticleID("notexist")
-	t.NoError(err)
-
-	article, err := articleRepository.FindByID(context.Background(), articleID)
-	t.IsError(domain.ErrNoSuchArticle, err)
-	t.Nil(article)
+	t.Run("Found", func(_ *testing.T) {
+		articleGot, err := articleRepository.FindByID(c, article.ID())
+		t.NoError(err)
+		t.Is(article, articleGot)
+	})
 }
 
 func selectArticleWhereUIDIs(uid string) (int, string, string, error) {
@@ -134,4 +162,15 @@ func selectTagsWhereArticleIDIs(id int) ([]string, error) {
 	}
 
 	return tagNames, nil
+}
+
+func randomStringSlice() []string {
+	rand.Seed(time.Now().UnixNano())
+	s := make([]string, 0)
+
+	for i := 0; i < rand.Intn(10); i++ {
+		s = append(s, uuid.New().String()[:8])
+	}
+
+	return s
 }

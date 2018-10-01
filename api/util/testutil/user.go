@@ -1,4 +1,4 @@
-package testingutil
+package testutil
 
 import (
 	"context"
@@ -12,10 +12,10 @@ import (
 )
 
 // NewUserUser create new user from user service
-func NewUserUser(db db.DB, username, rawPassword string) (*model.User, error) {
+func NewUserUser(db db.DB, username, rawPassword string) *model.User {
 	password, err := model.NewPassword(rawPassword)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	user, err := model.NewUser(
@@ -24,7 +24,7 @@ func NewUserUser(db db.DB, username, rawPassword string) (*model.User, error) {
 		stringutil.ReplaceAll(uuid.New().String(), "-", ""),
 	)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	now := time.Now()
@@ -32,8 +32,8 @@ func NewUserUser(db db.DB, username, rawPassword string) (*model.User, error) {
 	if _, err := db.Exec(context.Background(), `
 		insert into user (name, password, token, created_at) values (?, ?, ?, ?)
 	`, user.Name(), user.Password(), user.Token(), now); err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return user, nil
+	return user
 }

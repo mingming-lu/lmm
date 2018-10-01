@@ -1,4 +1,4 @@
-package testingutil
+package testutil
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 )
 
 // NewAuthUser creates new user from auth service
-func NewAuthUser(db db.DB) (*model.User, error) {
+func NewAuthUser(db db.DB) *model.User {
 	rawPassword := uuid.New().String()
 	b, err := bcrypt.GenerateFromPassword([]byte(rawPassword), bcrypt.DefaultCost)
 	if err != nil {
@@ -37,11 +37,11 @@ func NewAuthUser(db db.DB) (*model.User, error) {
 		panic(err)
 	}
 
-	return user, nil
+	return user
 }
 
 // ExtractAccessToken tries to extract access token from given string
-func ExtractAccessToken(s string) (string, error) {
+func ExtractAccessToken(s string) string {
 	// avoid cycle import, see lmm/api/service/auth/ui/adapter.go
 	type loginResponse struct {
 		AccessToken string `json:"accessToken"`
@@ -50,8 +50,8 @@ func ExtractAccessToken(s string) (string, error) {
 	schema := loginResponse{}
 
 	if err := json.NewDecoder(strings.NewReader(s)).Decode(&schema); err != nil {
-		return "", err
+		panic(err)
 	}
 
-	return schema.AccessToken, nil
+	return schema.AccessToken
 }

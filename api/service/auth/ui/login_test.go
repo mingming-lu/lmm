@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"lmm/api/http"
 	"lmm/api/testing"
-	"lmm/api/util/testingutil"
+	"lmm/api/util/testutil"
 
 	"github.com/google/uuid"
 )
@@ -20,10 +20,7 @@ func TestLogin(tt *testing.T) {
 
 	username := "U" + uuid.New().String()[:8]
 	password := "password123!"
-	_, err := testingutil.NewUserUser(dbEngine, username, password)
-	if !t.NoError(err) {
-		t.FailNow()
-	}
+	testutil.NewUserUser(dbEngine, username, password)
 
 	t.Run("Success", func(_ *testing.T) {
 		auth := basicAuth{UserName: username, Password: password}
@@ -40,7 +37,7 @@ func TestLogin(tt *testing.T) {
 		t.Is(http.StatusOK, res.StatusCode())
 
 		t.Run("BearerAuthOK", func(_ *testing.T) {
-			accessToken, err := testingutil.ExtractAccessToken(res.Body())
+			accessToken := testutil.ExtractAccessToken(res.Body())
 			t.NoError(err)
 			t.Not("", accessToken)
 

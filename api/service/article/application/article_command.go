@@ -26,8 +26,8 @@ func NewArticleCommandService(articleRepository repository.ArticleRepository, au
 }
 
 // PostNewArticle is used for posting a new article
-func (app *ArticleCommandService) PostNewArticle(c context.Context, userID uint64, title string, body string, tagNames []string) (*model.ArticleID, error) {
-	author, err := app.authorService.AuthorFromUserID(c, userID)
+func (app *ArticleCommandService) PostNewArticle(c context.Context, userName, title string, body string, tagNames []string) (*model.ArticleID, error) {
+	author, err := app.authorService.AuthorFromUserName(c, userName)
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +45,8 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, userID uint6
 }
 
 // EditArticle is used for edit the article content
-func (app *ArticleCommandService) EditArticle(c context.Context, userID uint64, rawArticleID, title, body string, tagNames []string) error {
-	author, err := app.authorService.AuthorFromUserID(c, userID)
+func (app *ArticleCommandService) EditArticle(c context.Context, userName, rawArticleID, title, body string, tagNames []string) error {
+	author, err := app.authorService.AuthorFromUserName(c, userName)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (app *ArticleCommandService) EditArticle(c context.Context, userID uint64, 
 		return err
 	}
 
-	if article.Author().ID() != author.ID() {
+	if article.Author().Name() != author.Name() {
 		return domain.ErrNotArticleAuthor
 	}
 
