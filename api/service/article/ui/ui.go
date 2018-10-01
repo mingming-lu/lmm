@@ -10,7 +10,7 @@ import (
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/domain/service"
-	userModel "lmm/api/service/user/domain/model"
+	userModel "lmm/api/service/auth/domain/model"
 )
 
 var (

@@ -6,13 +6,12 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	authApp "lmm/api/service/auth/application"
-	authStorage "lmm/api/service/auth/infra/persistence"
-	authUI "lmm/api/service/auth/ui"
-
 	"lmm/api/service/article/infra/fetcher"
 	"lmm/api/service/article/infra/persistence"
 	"lmm/api/service/article/infra/service"
+	authApp "lmm/api/service/auth/application"
+	authStorage "lmm/api/service/auth/infra/persistence"
+	authUI "lmm/api/service/auth/ui"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
 )
@@ -23,10 +22,13 @@ var (
 	connParams = "parseTime=true"
 )
 
-var router *testing.Router
+var (
+	mysql  db.DB
+	router *testing.Router
+)
 
 func TestMain(m *testing.M) {
-	mysql := db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	mysql = db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
 	defer mysql.Close()
 
 	auth := auth(mysql)

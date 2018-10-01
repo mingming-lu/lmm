@@ -10,6 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"lmm/api/service/auth/domain/model"
+	"lmm/api/service/auth/domain/service"
 	"lmm/api/storage/db"
 	"lmm/api/util/stringutil"
 )
@@ -38,6 +39,15 @@ func NewAuthUser(db db.DB) *model.User {
 	}
 
 	return user
+}
+
+// EncodeToken calls lmm/api/service/auth/domain/service.TokenService.Encode
+func EncodeToken(rawToken string) *model.Token {
+	token, err := service.NewTokenService().Encode(rawToken)
+	if err != nil {
+		panic(err)
+	}
+	return token
 }
 
 // ExtractAccessToken tries to extract access token from given string
