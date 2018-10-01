@@ -32,42 +32,6 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
 	INDEX `tag_name` (`article`, `sort`, `name`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
-CREATE TABLE IF NOT EXISTS `blog` (
-	`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`user` BIGINT UNSIGNED NOT NULL,
-	`title` VARCHAR(63) NOT NULL,
-	`text` TEXT NOT NULL,
-	`created_at` DATETIME NOT NULL,
-	`updated_at` DATETIME NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE `title` (`title`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-
-CREATE TABLE IF NOT EXISTS `category` (
-	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`name` VARCHAR(31) NOT NULL,
-	PRIMARY KEY (`id`),
-	UNIQUE `name` (`name`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-
-CREATE TABLE IF NOT EXISTS `blog_category` (
-	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`blog` INT UNSIGNED NOT NULL,
-	`category` INT UNSIGNED NOT NULL,
-	PRIMARY KEY (`id`),
-	UNIQUE `blog` (`blog`),
-	INDEX `category` (`category`, `blog`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-
-CREATE TABLE IF NOT EXISTS `tag` (
-	`id` BIGINT unsigned NOT NULL AUTO_INCREMENT,
-	`blog` INT unsigned NOT NULL,
-	`name` VARCHAR(31) NOT NULL,
-	PRIMARY KEY (id),
-	UNIQUE `blog_tag` (`blog`, `name`),
-	INDEX `tag` (`name`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-
 CREATE TABLE IF NOT EXISTS `image` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`uid` VARCHAR(255) NOT NULL,
