@@ -7,7 +7,6 @@ import (
 
 	"lmm/api/http"
 	"lmm/api/service/auth/application"
-	"lmm/api/service/auth/domain/repository"
 )
 
 // UI is the auth UI
@@ -16,9 +15,9 @@ type UI struct {
 }
 
 // NewUI returns a new ui pointer
-func NewUI(userRepoository repository.UserRepository) *UI {
+func NewUI(service *application.Service) *UI {
 	return &UI{
-		appService: application.NewService(userRepoository),
+		appService: service,
 	}
 }
 
