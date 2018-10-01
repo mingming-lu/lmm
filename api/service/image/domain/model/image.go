@@ -1,43 +1,33 @@
 package model
 
-import "time"
+import (
+	"lmm/api/domain/model"
+)
 
+// Image domain entity
 type Image struct {
-	Entity
-	id        string
-	userID    uint64
-	createdAt time.Time
+	model.Entity
+	name     string
+	uploader *Uploader
+	data     Data
 }
 
-func NewImage(id string, userID uint64, createdAt time.Time) *Image {
-	return &Image{
-		id:        id,
-		userID:    userID,
-		createdAt: createdAt,
-	}
+// NewImage creates new image entity
+func NewImage(name string, uploader *Uploader, data []byte) *Image {
+	return &Image{name: name, uploader: uploader, data: data}
 }
 
-func (i *Image) ID() string {
-	return i.id
+// Name gets image's name
+func (i *Image) Name() string {
+	return i.name
 }
 
-func (i *Image) UserID() uint64 {
-	return i.userID
+// Uploader gets image's uploader
+func (i *Image) Uploader() *Uploader {
+	return i.uploader
 }
 
-func (i *Image) CreatedAt() time.Time {
-	return i.createdAt
-}
-
-func (i *Image) WrapData(data []byte) *ImageWithData {
-	return &ImageWithData{Image: *i, data: data}
-}
-
-type ImageWithData struct {
-	Image
-	data []byte
-}
-
-func (i *ImageWithData) Data() []byte {
+// Data gets image's data
+func (i *Image) Data() []byte {
 	return i.data
 }

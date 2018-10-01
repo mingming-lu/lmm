@@ -1,15 +1,13 @@
 package repository
 
 import (
-	"lmm/api/service/image/domain"
+	"context"
+
 	"lmm/api/service/image/domain/model"
 )
 
+// ImageRepository provides a interface to deal with persistence of image
 type ImageRepository interface {
-	Add(*model.ImageWithData) error
-	Remove(*model.Image) error
-	FindByID(id string) (*model.Image, error)
-	FindByType(domain.ImageType, int, int) ([]*model.Image, bool, error)
-	Find(count, page int) ([]*model.Image, bool, error)
-	MarkAs(*model.Image, domain.ImageType) error
+	Save(c context.Context, image *model.Image) error
+	Remove(c context.Context, image *model.Image) error
 }

@@ -1,73 +1,47 @@
 package application
 
 import (
-	account "lmm/api/service/account/domain/model"
-	"lmm/api/service/image/domain"
-	"lmm/api/service/image/domain/factory"
+	"context"
+	"encoding/base64"
+
 	"lmm/api/service/image/domain/model"
 	"lmm/api/service/image/domain/repository"
-	"lmm/api/util/stringutil"
+	"lmm/api/service/image/domain/service"
+
+	"github.com/google/uuid"
 )
 
-type AppService struct {
-	imageRepo repository.ImageRepository
+// Service struct
+type Service struct {
+	uploaderService service.UploaderService
+	imageRepository repository.ImageRepository
 }
 
-func NewAppService(imageRepo repository.ImageRepository) *AppService {
-	return &AppService{
-		imageRepo: imageRepo,
+// NewService creates a new image application service
+func NewService(
+	imageRepository repository.ImageRepository,
+	uploaderService service.UploaderService,
+) *Service {
+	return &Service{
+		imageRepository: imageRepository,
+		uploaderService: uploaderService,
 	}
 }
 
-func (app *AppService) UploadImage(user *account.User, data []byte) error {
-	image := factory.NewImage(user.ID())
-	return app.imageRepo.Add(image.WrapData(data))
-}
-
-func (app *AppService) FetchImagesByType(imageType, countStr, pageStr string) ([]*model.Image, bool, error) {
-	if countStr == "" {
-		countStr = "100"
-	}
-	if pageStr == "" {
-		pageStr = "1"
-	}
-	count, err := stringutil.ParseInt(countStr)
+// UploadImage uploads image
+func (app *Service) UploadImage(c context.Context, username string, data []byte) (string, error) {
+	uploader, err := app.uploaderService.FromUserName(c, username)
 	if err != nil {
-		return nil, false, domain.ErrInvalidCount
+		return "", err
 	}
-	if count < 0 {
-		return nil, false, domain.ErrInvalidCount
-	}
-	page, err := stringutil.ParseInt(pageStr)
-	if err != nil {
-		return nil, false, domain.ErrInvalidPage
-	}
-	if page < 1 {
-		return nil, false, domain.ErrInvalidPage
-	}
-	switch imageType {
-	case "":
-		return app.imageRepo.Find(count, page)
-	case "normal":
-		return app.imageRepo.FindByType(domain.ImageTypeNormal, count, page)
-	case "photo":
-		return app.imageRepo.FindByType(domain.ImageTypePhoto, count, page)
-	}
-	return nil, false, domain.ErrNoSuchImageType
-}
 
-func (app *AppService) MarkImageAs(imageID, imageType string) error {
-	model, err := app.imageRepo.FindByID(imageID)
-	if err != nil {
-		return err
+	name := base64.URLEncoding.EncodeToString([]byte(uuid.NewMD5(uuid.New(), data).String()))
+
+	image := model.NewImage(name, uploader, model.Data(data))
+
+	if err := app.imageRepository.Save(c, image); err != nil {
+		return "", err
 	}
-	switch imageType {
-	case "":
-		return domain.ErrEmptyImageType
-	case "normal":
-		return app.imageRepo.MarkAs(model, domain.ImageTypeNormal)
-	case "photo":
-		return app.imageRepo.MarkAs(model, domain.ImageTypePhoto)
-	}
-	return domain.ErrNoSuchImageType
+
+	return image.Name(), nil
 }
