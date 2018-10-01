@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"lmm/api/storage/uploader"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -27,6 +28,11 @@ import (
 	articleStorage "lmm/api/service/article/infra/persistence"
 	authorService "lmm/api/service/article/infra/service"
 	articleUI "lmm/api/service/article/ui"
+
+	// image
+	imageStorage "lmm/api/service/image/infra/persistence"
+	imageService "lmm/api/service/image/infra/service"
+	image "lmm/api/service/image/ui"
 )
 
 var (
@@ -78,6 +84,11 @@ func main() {
 	router.GET("/v1/articles", articleUI.ListArticles)
 	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
+
+	// image
+	imageRepo := imageStorage.NewImageStorage(mysql, uploader.NewLocalImageUploader())
+	image := image.New(imageRepo, imageService.NewUserAdapter(mysql))
+	router.POST("/v1/images", authUI.BearerAuth(image.Upload))
 
 	server := http.NewServer(":8002", router)
 	server.Run()
