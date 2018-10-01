@@ -21,6 +21,12 @@ import (
 	authApp "lmm/api/service/auth/application"
 	authStorage "lmm/api/service/auth/infra/persistence"
 	authUI "lmm/api/service/auth/ui"
+
+	// article
+	articleFetcher "lmm/api/service/article/infra/fetcher"
+	articleStorage "lmm/api/service/article/infra/persistence"
+	authorService "lmm/api/service/article/infra/service"
+	articleUI "lmm/api/service/article/ui"
 )
 
 var (
@@ -61,6 +67,17 @@ func main() {
 	authAppService := authApp.NewService(authRepo)
 	authUI := authUI.NewUI(authAppService)
 	router.POST("/v1/auth/login", authUI.Login)
+
+	// article
+	authorAdapter := authorService.NewAuthorAdapter(mysql)
+	articleRepo := articleStorage.NewArticleStorage(mysql, authorAdapter)
+	articleFinder := articleFetcher.NewArticleFetcher(mysql)
+	articleUI := articleUI.NewUI(articleFinder, articleRepo, authorAdapter)
+	router.POST("/v1/articles", articleUI.PostNewArticle)
+	router.PUT("/v1/articles", articleUI.EditArticle)
+	router.GET("/v1/articles", articleUI.ListArticles)
+	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
+	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
 
 	server := http.NewServer(":8002", router)
 	server.Run()

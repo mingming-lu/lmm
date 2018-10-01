@@ -37,8 +37,8 @@ func NewUI(
 	return &UI{appService: appService}
 }
 
-// PostArticle handles POST /1/articles
-func (ui *UI) PostArticle(c http.Context) {
+// PostNewArticle handles POST /1/articles
+func (ui *UI) PostNewArticle(c http.Context) {
 	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
 	if !ok {
 		http.Unauthorized(c)
@@ -77,8 +77,8 @@ func (ui *UI) PostArticle(c http.Context) {
 	}
 }
 
-// EditArticleText handles PUT /1/article/:articleID
-func (ui *UI) EditArticleText(c http.Context) {
+// EditArticle handles PUT /1/article/:articleID
+func (ui *UI) EditArticle(c http.Context) {
 	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
 	if !ok {
 		http.Unauthorized(c)
