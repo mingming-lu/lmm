@@ -38,8 +38,7 @@ func TestMain(m *testing.M) {
 func TestAuthorFromUserID_OK(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	name, password := "U"+uuid.New().String()[:5], uuid.New().String()
-	user := testutil.NewUserUser(mysql, name, password)
+	user := testutil.NewUser(mysql)
 
 	author, err := authorAdapter.AuthorFromUserName(context.Background(), user.Name())
 	t.NoError(err)

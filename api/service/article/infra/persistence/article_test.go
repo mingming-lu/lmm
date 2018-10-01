@@ -5,20 +5,19 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/google/uuid"
+
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/testing"
 	"lmm/api/util/testutil"
-
-	"github.com/google/uuid"
 )
 
 func TestSaveArticle(tt *testing.T) {
 	t := testing.NewTester(tt)
 	c := context.Background()
 
-	username, password := "U"+uuid.New().String()[:8], uuid.New().String()
-	user := testutil.NewUserUser(mysql, username, password)
+	user := testutil.NewUser(mysql)
 
 	author, err := authorService.AuthorFromUserName(c, user.Name())
 	t.NoError(err)
@@ -101,8 +100,7 @@ func TestFindArticleByID(tt *testing.T) {
 	t := testing.NewTester(tt)
 	c := context.Background()
 
-	username, password := "U"+uuid.New().String()[:8], uuid.New().String()
-	user := testutil.NewUserUser(mysql, username, password)
+	user := testutil.NewUser(mysql)
 
 	author, err := authorService.AuthorFromUserName(c, user.Name())
 	t.NoError(err)

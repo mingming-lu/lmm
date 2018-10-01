@@ -6,8 +6,6 @@ import (
 	"lmm/api/http"
 	"lmm/api/testing"
 	"lmm/api/util/testutil"
-
-	"github.com/google/uuid"
 )
 
 func TestLogin(tt *testing.T) {
@@ -18,12 +16,10 @@ func TestLogin(tt *testing.T) {
 		Password string `json:"password"`
 	}
 
-	username := "U" + uuid.New().String()[:8]
-	password := "password123!"
-	testutil.NewUserUser(dbEngine, username, password)
+	user := testutil.NewUser(dbEngine)
 
 	t.Run("Success", func(_ *testing.T) {
-		auth := basicAuth{UserName: username, Password: password}
+		auth := basicAuth{UserName: user.Name(), Password: user.RawPassword()}
 		b, err := json.Marshal(auth)
 		if !t.NoError(err) {
 			t.FailNow()
