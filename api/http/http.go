@@ -33,6 +33,10 @@ func HandleStatus(c Context, code int) {
 	c.String(code, StatusText(code))
 }
 
+func Created(c Context) {
+	HandleStatus(c, http.StatusCreated)
+}
+
 func NoContent(c Context) {
 	HandleStatus(c, http.StatusNoContent)
 }
