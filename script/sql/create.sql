@@ -34,11 +34,10 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
 
 CREATE TABLE IF NOT EXISTS `image` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`uid` VARCHAR(255) NOT NULL,
-	`user` BIGINT UNSIGNED NOT NULL,
-	`type` TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	`created_at` TIMESTAMP NOT NULL,
+	`name` VARCHAR(255) NOT NULL,
+	`user` INT UNSIGNED NOT NULL, -- user.id
+	`created_at` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
-	UNIQUE `uid` (`uid`),
-	INDEX `created_at` (`type`, `created_at`)
+	UNIQUE `name` (`name`),
+	INDEX `created_at` (`created_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
