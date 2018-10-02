@@ -29,10 +29,10 @@ import (
 	authorService "lmm/api/service/article/infra/service"
 	articleUI "lmm/api/service/article/ui"
 
-	// image
-	imageStorage "lmm/api/service/image/infra/persistence"
-	imageService "lmm/api/service/image/infra/service"
-	image "lmm/api/service/image/ui"
+	// asset
+	assetStorage "lmm/api/service/asset/infra/persistence"
+	assetService "lmm/api/service/asset/infra/service"
+	asset "lmm/api/service/asset/ui"
 )
 
 var (
@@ -86,9 +86,9 @@ func main() {
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
 
 	// image
-	imageRepo := imageStorage.NewImageStorage(mysql, uploader.NewLocalImageUploader())
-	image := image.New(imageRepo, imageService.NewUserAdapter(mysql))
-	router.POST("/v1/images", authUI.BearerAuth(image.Upload))
+	assetRepo := assetStorage.NewAssetStorage(mysql, uploader.NewLocalImageUploader())
+	asset := asset.New(assetRepo, assetService.NewUserAdapter(mysql))
+	router.POST("/v1/assets/images", authUI.BearerAuth(asset.Upload))
 
 	server := http.NewServer(":8002", router)
 	server.Run()

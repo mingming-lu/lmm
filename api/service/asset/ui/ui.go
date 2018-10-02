@@ -8,10 +8,10 @@ import (
 	"go.uber.org/zap"
 
 	"lmm/api/http"
+	"lmm/api/service/asset/application"
+	"lmm/api/service/asset/domain/repository"
+	"lmm/api/service/asset/domain/service"
 	userModel "lmm/api/service/auth/domain/model"
-	"lmm/api/service/image/application"
-	"lmm/api/service/image/domain/repository"
-	"lmm/api/service/image/domain/service"
 )
 
 const (
@@ -32,7 +32,7 @@ type UI struct {
 }
 
 // New creates a new UI pointer
-func New(imageRepository repository.ImageRepository, userAdapter service.UploaderService) *UI {
+func New(imageRepository repository.AssetRepository, userAdapter service.UploaderService) *UI {
 	appService := application.NewService(imageRepository, userAdapter)
 	return &UI{appService: appService}
 }
@@ -58,6 +58,37 @@ func (ui *UI) Upload(c http.Context) {
 	}
 
 	c.String(http.StatusCreated, "upload")
+}
+
+// UploadPhoto handles POST /v1/assets/photos
+func (ui *UI) UploadPhoto(c http.Context) {
+	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	data, ext, err := formImageData(c, "photo")
+	if err != nil {
+		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+		c.String(http.StatusBadRequest, errors.Cause(err).Error())
+		return
+	}
+
+	// upload
+	if err := ui.appService.UploadPhoto(c, user.Name(), data, ext); err != nil {
+		panic(err)
+	}
+
+	c.String(http.StatusCreated, "upload")
+}
+
+// ListImages handles GET /v1/assets/images
+func (ui *UI) ListImages() {
+}
+
+// ListPhotos handles GET /v1/assets/photos
+func (ui *UI) ListPhotos(c http.Context) {
 }
 
 func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
@@ -107,16 +138,4 @@ func openImage(fh *multipart.FileHeader) ([]byte, string, error) {
 		panic(err)
 	}
 	return data, ext, nil
-}
-
-// ListImages handles GET /v1/assets/images
-func (ui *UI) ListImages() {
-}
-
-// UploadPhoto handles POST /v1/assets/photos
-func (ui *UI) UploadPhoto(c http.Context) {
-}
-
-// ListPhotos handles GET /v1/assets/photos
-func (ui *UI) ListPhotos(c http.Context) {
 }

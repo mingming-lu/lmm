@@ -4,40 +4,53 @@ import (
 	"context"
 	"encoding/base64"
 
-	"lmm/api/service/image/domain/model"
-	"lmm/api/service/image/domain/repository"
-	"lmm/api/service/image/domain/service"
-
 	"github.com/google/uuid"
+
+	"lmm/api/service/asset/domain/model"
+	"lmm/api/service/asset/domain/repository"
+	"lmm/api/service/asset/domain/service"
 )
 
 // Service struct
 type Service struct {
 	uploaderService service.UploaderService
-	imageRepository repository.ImageRepository
+	assetRepository repository.AssetRepository
 }
 
 // NewService creates a new image application service
 func NewService(
-	imageRepository repository.ImageRepository,
+	assetRepository repository.AssetRepository,
 	uploaderService service.UploaderService,
 ) *Service {
 	return &Service{
-		imageRepository: imageRepository,
+		assetRepository: assetRepository,
 		uploaderService: uploaderService,
 	}
 }
 
 // UploadImage uploads image
 func (app *Service) UploadImage(c context.Context, username string, data []byte, extention string) error {
+	return app.uploadAsset(c, username, data, extention, model.Image)
+}
+
+// UploadPhoto uploads photo
+func (app *Service) UploadPhoto(c context.Context, username string, data []byte, extention string) error {
+	return app.uploadAsset(c, username, data, extention, model.Photo)
+}
+
+func (app *Service) uploadAsset(c context.Context,
+	username string,
+	data []byte,
+	extention string,
+	assetType model.AssetType,
+) error {
 	uploader, err := app.uploaderService.FromUserName(c, username)
 	if err != nil {
 		return err
 	}
 
 	name := base64.URLEncoding.EncodeToString([]byte(uuid.NewMD5(uuid.New(), data).String()))
+	asset := model.NewAsset(assetType, name+"."+extention, uploader, model.Data(data))
 
-	image := model.NewImage(name+"."+extention, uploader, model.Data(data))
-
-	return app.imageRepository.Save(c, image)
+	return app.assetRepository.Save(c, asset)
 }

@@ -7,7 +7,7 @@ services:
       dockerfile: ../docker/api/Dockerfile
     volumes:
       - ../api:/go/src/lmm/api
-      - ../static:/static
+      - ../asset:/asset
     working_dir: /go/src/lmm/api
     command: go run cmd/api/main.go
     env_file:
@@ -49,11 +49,11 @@ services:
       - ../docs/api:/usr/share/nginx/html/api
     environment:
       API_URL: api/index.yml
-  static:
+  asset:
     image: golang:1.11
     volumes:
-      - ../static/src:/go/src/lmm/static
-    command: go run /go/src/lmm/static/main.go
+      - ../asset/src:/go/src/lmm/asset
+    command: go run /go/src/lmm/asset/main.go
     environment:
       TZ: Asia/Tokyo
   manager:
@@ -86,7 +86,8 @@ services:
       - ./nginx/log:/var/log/nginx
       - ./nginx/conf:/etc/nginx/conf
       - ./nginx/modules/:/etc/nginx/modules
-      - ../static/images:/static/images
+      - ../asset/images:/asset/images
+      - ../asset/photos:/asset/photos
     environment:
       TZ: Asia/Tokyo
     ports:
@@ -96,10 +97,10 @@ services:
       - app
       - docs
       - manager
-      - static
+      - asset
     links:
       - api:lmm-api
       - app:lmm-app
       - docs:lmm-docs
       - manager:lmm-manager
-      - static:lmm-static
+      - asset:lmm-asset

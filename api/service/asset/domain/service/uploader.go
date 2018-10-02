@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"lmm/api/service/image/domain/model"
+	"lmm/api/service/asset/domain/model"
 )
 
 // UploaderService provides interface to convert user to uploader

@@ -5,9 +5,9 @@ import (
 
 	"github.com/pkg/errors"
 
-	"lmm/api/service/image/domain"
-	"lmm/api/service/image/domain/model"
-	"lmm/api/service/image/domain/service"
+	"lmm/api/service/asset/domain"
+	"lmm/api/service/asset/domain/model"
+	"lmm/api/service/asset/domain/service"
 	"lmm/api/storage/db"
 )
 

@@ -10,7 +10,7 @@ services:
     command: bash
   app:
     command: echo "not implemented"
-  static:
+  asset:
     command: echo "not implemented"
   manager:
     command: echo "not implemented"
