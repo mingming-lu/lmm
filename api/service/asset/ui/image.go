@@ -45,7 +45,7 @@ func (ui *UI) Upload(c http.Context) {
 		return
 	}
 
-	data, err := formImageData(c, "image")
+	data, ext, err := formImageData(c, "image")
 	if err != nil {
 		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
 		c.String(http.StatusBadRequest, errors.Cause(err).Error())
@@ -53,41 +53,45 @@ func (ui *UI) Upload(c http.Context) {
 	}
 
 	// upload
-	name, err := ui.appService.UploadImage(c, user.Name(), data)
-	if err != nil {
+	if err := ui.appService.UploadImage(c, user.Name(), data, ext); err != nil {
 		panic(err)
 	}
 
-	c.Header("Location", "/v1/images/"+name)
-	http.Created(c)
+	c.String(http.StatusCreated, "upload")
 }
 
-func formImageData(c http.Context, imageKey string) ([]byte, error) {
+func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
 	if err := c.Request().ParseMultipartForm(maxFormDataSize); err != nil {
 		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
-		return nil, errors.Wrap(errImageMaxSizeExceeded, err.Error())
+		return nil, "", errors.Wrap(errImageMaxSizeExceeded, err.Error())
 	}
 	assets := c.Request().MultipartForm.File[imageKey]
 
 	if len(assets) == 0 {
-		return nil, errNoImageToUpload
+		return nil, "", errNoImageToUpload
 	}
 
 	if len(assets) > 1 {
 		zap.L().Warn("attend to upload multiple images", zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
-		return nil, errMaxUploadExcceed
+		return nil, "", errMaxUploadExcceed
 	}
 
 	return openImage(assets[0])
 }
 
-func openImage(fh *multipart.FileHeader) ([]byte, error) {
+func openImage(fh *multipart.FileHeader) ([]byte, string, error) {
 	// check type
+	ext := ""
 	contentType := fh.Header.Get("Content-Type")
 	switch contentType {
-	case "image/gif", "image/jpeg", "image/png":
+	case "image/gif":
+		ext = "gif"
+	case "image/jpeg":
+		ext = "jpeg"
+	case "image/png":
+		ext = "png"
 	default:
-		return nil, errNotAllowedImageType
+		return nil, "", errNotAllowedImageType
 	}
 
 	f, err := fh.Open()
@@ -102,5 +106,17 @@ func openImage(fh *multipart.FileHeader) ([]byte, error) {
 		// if it can't read all, just go die
 		panic(err)
 	}
-	return data, nil
+	return data, ext, nil
+}
+
+// ListImages handles GET /v1/assets/images
+func (ui *UI) ListImages() {
+}
+
+// UploadPhoto handles POST /v1/assets/photos
+func (ui *UI) UploadPhoto(c http.Context) {
+}
+
+// ListPhotos handles GET /v1/assets/photos
+func (ui *UI) ListPhotos(c http.Context) {
 }

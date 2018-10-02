@@ -29,19 +29,15 @@ func NewService(
 }
 
 // UploadImage uploads image
-func (app *Service) UploadImage(c context.Context, username string, data []byte) (string, error) {
+func (app *Service) UploadImage(c context.Context, username string, data []byte, extention string) error {
 	uploader, err := app.uploaderService.FromUserName(c, username)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	name := base64.URLEncoding.EncodeToString([]byte(uuid.NewMD5(uuid.New(), data).String()))
 
-	image := model.NewImage(name, uploader, model.Data(data))
+	image := model.NewImage(name+"."+extention, uploader, model.Data(data))
 
-	if err := app.imageRepository.Save(c, image); err != nil {
-		return "", err
-	}
-
-	return image.Name(), nil
+	return app.imageRepository.Save(c, image)
 }
