@@ -31,12 +31,11 @@ func (r *accessLogRecorder) accessLog(next http.Handler) http.Handler {
 		fields := []zap.Field{
 			zap.Int("status", status),
 			zap.String("request_id", req.Header.Get("X-Request-ID")),
-			zap.String("method", req.Method),
-			zap.String("proto", req.Proto),
-			zap.String("host", req.Host),
-			zap.String("uri", req.RequestURI),
 			zap.String("remote_addr", req.RemoteAddr),
 			zap.String("ua", req.Header.Get("User-Agent")),
+			zap.String("method", req.Method),
+			zap.String("host", req.Host),
+			zap.String("uri", req.RequestURI),
 			zap.String("latency", time.Since(start).String()),
 		}
 
