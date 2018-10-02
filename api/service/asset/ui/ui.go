@@ -37,50 +37,14 @@ func New(imageRepository repository.AssetRepository, userAdapter service.Uploade
 	return &UI{appService: appService}
 }
 
-// Upload handles POST /v1/images
-func (ui *UI) Upload(c http.Context) {
-	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
-	if !ok {
-		http.Unauthorized(c)
-		return
-	}
-
-	data, ext, err := formImageData(c, "image")
-	if err != nil {
-		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
-		c.String(http.StatusBadRequest, errors.Cause(err).Error())
-		return
-	}
-
-	// upload
-	if err := ui.appService.UploadImage(c, user.Name(), data, ext); err != nil {
-		panic(err)
-	}
-
-	c.String(http.StatusCreated, "upload")
+// UploadImage handles POST /v1/assets/images
+func (ui *UI) UploadImage(c http.Context) {
+	ui.upload(c, "image")
 }
 
 // UploadPhoto handles POST /v1/assets/photos
 func (ui *UI) UploadPhoto(c http.Context) {
-	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
-	if !ok {
-		http.Unauthorized(c)
-		return
-	}
-
-	data, ext, err := formImageData(c, "photo")
-	if err != nil {
-		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
-		c.String(http.StatusBadRequest, errors.Cause(err).Error())
-		return
-	}
-
-	// upload
-	if err := ui.appService.UploadPhoto(c, user.Name(), data, ext); err != nil {
-		panic(err)
-	}
-
-	c.String(http.StatusCreated, "upload")
+	ui.upload(c, "photo")
 }
 
 // ListImages handles GET /v1/assets/images
@@ -89,6 +53,37 @@ func (ui *UI) ListImages() {
 
 // ListPhotos handles GET /v1/assets/photos
 func (ui *UI) ListPhotos(c http.Context) {
+}
+
+func (ui *UI) upload(c http.Context, keyName string) {
+	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
+	if !ok {
+		http.Unauthorized(c)
+		return
+	}
+
+	data, ext, err := formImageData(c, keyName)
+	if err != nil {
+		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+		c.String(http.StatusBadRequest, errors.Cause(err).Error())
+		return
+	}
+
+	// upload
+	switch keyName {
+	case "image":
+		if err := ui.appService.UploadImage(c, user.Name(), data, ext); err != nil {
+			panic(err)
+		}
+	case "photo":
+		if err := ui.appService.UploadPhoto(c, user.Name(), data, ext); err != nil {
+			panic(err)
+		}
+	default:
+		panic("unknown key name: '" + keyName + "'")
+	}
+
+	c.String(http.StatusCreated, "uploaded")
 }
 
 func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
