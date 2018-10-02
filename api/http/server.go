@@ -32,7 +32,7 @@ func NewServer(addr string, router *Router) *Server {
 // Run starts listening to this server and blocks goroutine
 func (s *Server) Run() {
 	if s.isShutDown {
-		zap.L().Fatal("cannot run server since it is stopped")
+		zap.L().Panic("cannot run server since it is stopped")
 	}
 
 	zap.L().Info("start serving at " + s.srv.Addr)
@@ -40,7 +40,7 @@ func (s *Server) Run() {
 		signal.Notify(s.shutDownSignal, syscall.SIGINT, syscall.SIGTERM)
 
 		if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			zap.L().Fatal(err.Error())
+			zap.L().Panic(err.Error())
 		}
 	}()
 
@@ -57,7 +57,7 @@ func (s *Server) ShutDown() {
 	defer cancel()
 
 	if err := s.srv.Shutdown(ctx); err != nil {
-		zap.L().Fatal(err.Error())
+		zap.L().Panic(err.Error())
 	}
 
 	s.isShutDown = true

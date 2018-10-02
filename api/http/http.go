@@ -25,7 +25,7 @@ type Middleware = func(Handler) Handler
 func Serve(addr string, r *Router) {
 	zap.L().Info("Serving at:" + addr)
 	if err := http.ListenAndServe(addr, r); err != nil {
-		zap.L().Fatal(err.Error())
+		zap.L().Panic(err.Error())
 	}
 }
 
