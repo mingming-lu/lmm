@@ -22,16 +22,19 @@ export default {
   },
   methods: {
     signin () {
-      axios.post(process.env.API_URL_BASE + '/v1/signin', {
-        name: this.username,
-        password: this.password
+      axios.post(process.env.API_URL_BASE + '/v1/auth/login', null, {
+        headers: {
+          Authorization: 'Basic ' + btoa(JSON.stringify({
+            username: this.username,
+            password: this.password
+          }))
+        }
       }).then(res => {
         if (res.status !== 200) {
           alert('signin failed')
           return
         }
-        localStorage.setItem('username', res.data.name)
-        localStorage.setItem('token', res.data.token)
+        localStorage.setItem('token', res.data.accessToken)
         this.$router.push('/')
         location.reload()
       }).catch(e => {
