@@ -3,6 +3,7 @@ package model
 import (
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	"lmm/api/domain/model"
 	"lmm/api/service/article/domain"
@@ -56,7 +57,7 @@ func (t *Text) SetTitle(title string) error {
 	if newTitle == "" {
 		return domain.ErrEmptyArticleTitle
 	}
-	if len(newTitle) > articleTitleMaxLength {
+	if utf8.RuneCountInString(newTitle) > articleTitleMaxLength {
 		return domain.ErrArticleTitleTooLong
 	}
 	if !patternArticleTitle.MatchString(newTitle) {
