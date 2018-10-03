@@ -18,7 +18,6 @@ type Request struct {
 func NewRequest(r *http.Request, params httprouter.Params) *Request {
 	return &Request{pathParams: params, queryParams: nil, Request: r}
 }
-
 func (r *Request) Bind(schema interface{}) error {
 	return json.NewDecoder(r.Request.Body).Decode(schema)
 }
@@ -32,4 +31,8 @@ func (r *Request) QueryParam(name string) string {
 		r.queryParams = r.Request.URL.Query()
 	}
 	return r.queryParams.Get(name)
+}
+
+func (r *Request) RequestID() string {
+	return r.Header.Get("X-Request-ID")
 }

@@ -1,3 +1,7 @@
+CREATE DATABASE IF NOT EXISTS `lmm`;
+
+USE `lmm`;
+
 CREATE TABLE IF NOT EXISTS `user` (
 	`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(255) NOT NULL,
@@ -32,13 +36,13 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
 	INDEX `tag_name` (`article`, `sort`, `name`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
-CREATE TABLE IF NOT EXISTS `image` (
+CREATE TABLE IF NOT EXISTS `asset` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-	`uid` VARCHAR(255) NOT NULL,
-	`user` BIGINT UNSIGNED NOT NULL,
-	`type` TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	`created_at` TIMESTAMP NOT NULL,
+	`name` VARCHAR(255) NOT NULL,
+	`type` TINYINT UNSIGNED NOT NULL, -- image:0 photo:1
+	`user` INT UNSIGNED NOT NULL, -- user.id
+	`created_at` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
-	UNIQUE `uid` (`uid`),
-	INDEX `created_at` (`type`, `created_at`)
+	UNIQUE `name` (`name`),
+	INDEX `created_at` (`created_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;

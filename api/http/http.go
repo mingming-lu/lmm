@@ -25,12 +25,16 @@ type Middleware = func(Handler) Handler
 func Serve(addr string, r *Router) {
 	zap.L().Info("Serving at:" + addr)
 	if err := http.ListenAndServe(addr, r); err != nil {
-		zap.L().Fatal(err.Error())
+		zap.L().Panic(err.Error())
 	}
 }
 
 func HandleStatus(c Context, code int) {
 	c.String(code, StatusText(code))
+}
+
+func Created(c Context) {
+	HandleStatus(c, http.StatusCreated)
 }
 
 func NoContent(c Context) {

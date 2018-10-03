@@ -43,9 +43,9 @@ export default {
       this.onSaving = true
       let formData = new FormData()
       this.files.forEach(file => {
-        formData.append('src', file)
+        formData.append('image', file)
       })
-      axios.post(process.env.API_URL_BASE + '/v1/images', formData, {
+      axios.post(process.env.API_URL_BASE + '/v1/assets/images', formData, {
         headers: {
           Authorization: 'Bearer ' + localStorage.getItem('token')
         }

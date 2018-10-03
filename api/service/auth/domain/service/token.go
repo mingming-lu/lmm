@@ -26,7 +26,7 @@ var (
 
 func init() {
 	if len(tokenSecretKey) == 0 {
-		zap.L().Fatal("token key not set")
+		zap.L().Panic("token key not set")
 	}
 }
 

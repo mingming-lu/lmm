@@ -8,6 +8,7 @@ import (
 	"lmm/api/log"
 	"lmm/api/middleware"
 	"lmm/api/storage/db"
+	"lmm/api/storage/uploader"
 
 	// user
 	userApp "lmm/api/service/user/application"
@@ -24,6 +25,11 @@ import (
 	articleStorage "lmm/api/service/article/infra/persistence"
 	authorService "lmm/api/service/article/infra/service"
 	articleUI "lmm/api/service/article/ui"
+
+	// asset
+	assetStorage "lmm/api/service/asset/infra/persistence"
+	assetService "lmm/api/service/asset/infra/service"
+	asset "lmm/api/service/asset/ui"
 )
 
 func main() {
@@ -69,6 +75,15 @@ func main() {
 	router.GET("/v1/articles", articleUI.ListArticles)
 	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
+
+	// asset
+	assetFinder := assetService.NewAssetFetcher(mysql)
+	assetRepo := assetStorage.NewAssetStorage(mysql, uploader.NewLocalImageUploader())
+	asset := asset.New(assetFinder, assetRepo, assetService.NewUserAdapter(mysql))
+	router.POST("/v1/assets/images", authUI.BearerAuth(asset.UploadImage))
+	router.GET("/v1/assets/images", asset.ListImages)
+	router.POST("/v1/assets/photos", authUI.BearerAuth(asset.UploadPhoto))
+	router.GET("/v1/assets/photos", asset.ListPhotos)
 
 	server := http.NewServer(":8002", router)
 	server.Run()
