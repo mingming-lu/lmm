@@ -67,6 +67,25 @@ func (app *Service) uploadAsset(c context.Context,
 
 // ListImages lists images by given limit and cursor
 func (app *Service) ListImages(c context.Context, limitStr, nextCursorStr string) (*model.ImageCollection, error) {
+	limit, nextCursor, err := app.parseLimitAndCursorOrDefault(limitStr, nextCursorStr)
+	if err != nil {
+		return nil, err
+	}
+
+	return app.assetFinder.FindAllImages(c, limit, nextCursor)
+}
+
+// ListPhotos lists images by given limit and cursor
+func (app *Service) ListPhotos(c context.Context, limitStr, nextCursorStr string) (*model.PhotoCollection, error) {
+	limit, nextCursor, err := app.parseLimitAndCursorOrDefault(limitStr, nextCursorStr)
+	if err != nil {
+		return nil, err
+	}
+
+	return app.assetFinder.FindAllPhotos(c, limit, nextCursor)
+}
+
+func (app *Service) parseLimitAndCursorOrDefault(limitStr, nextCursorStr string) (uint, uint, error) {
 	if limitStr == "" {
 		limitStr = "30"
 	}
@@ -77,18 +96,13 @@ func (app *Service) ListImages(c context.Context, limitStr, nextCursorStr string
 
 	limit, err := stringutil.ParseUint(limitStr)
 	if err != nil {
-		return nil, errors.Wrap(ErrInvalidLimit, err.Error())
+		return 0, 0, errors.Wrap(ErrInvalidLimit, err.Error())
 	}
 
 	nextCursor, err := stringutil.ParseUint(nextCursorStr)
 	if err != nil {
-		return nil, errors.Wrap(ErrInvalidCursor, err.Error())
+		return 0, 0, errors.Wrap(ErrInvalidCursor, err.Error())
 	}
 
-	return app.assetFinder.FindAllImages(c, limit, nextCursor)
-}
-
-// ListPhotos lists images by given limit and cursor
-func (app *Service) ListPhotos() (*model.PhotoCollection, error) {
-	panic("not implemented")
+	return limit, nextCursor, nil
 }

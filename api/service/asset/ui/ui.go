@@ -75,6 +75,24 @@ func (ui *UI) ListImages(c http.Context) {
 
 // ListPhotos handles GET /v1/assets/photos
 func (ui *UI) ListPhotos(c http.Context) {
+	collection, err := ui.appService.ListPhotos(c,
+		c.Request().QueryParam("limit"),
+		c.Request().QueryParam("nextCursor"),
+	)
+	if err == nil {
+		c.JSON(http.StatusOK, photoCollectionToJSON(collection))
+		return
+	}
+
+	zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+
+	err = errors.Cause(err)
+	switch err {
+	case application.ErrInvalidCursor, application.ErrInvalidLimit:
+		c.String(http.StatusBadRequest, err.Error())
+	default:
+		panic(err)
+	}
 }
 
 func (ui *UI) upload(c http.Context, keyName string) {
