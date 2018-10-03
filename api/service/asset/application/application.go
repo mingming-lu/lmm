@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	ErrInvalidLimit  = errors.New("invalid limit")
-	ErrInvalidCursor = errors.New("invalid cursor")
+	ErrInvalidPage    = errors.New("invalid page")
+	ErrInvalidPerPage = errors.New("invalid perPage")
 )
 
 // Service struct
@@ -65,44 +65,47 @@ func (app *Service) uploadAsset(c context.Context,
 	return app.assetRepository.Save(c, asset)
 }
 
-// ListImages lists images by given limit and cursor
-func (app *Service) ListImages(c context.Context, limitStr, nextCursorStr string) (*model.ImageCollection, error) {
-	limit, nextCursor, err := app.parseLimitAndCursorOrDefault(limitStr, nextCursorStr)
+// ListImages lists images by given page and perPage
+func (app *Service) ListImages(c context.Context, pageStr, perPageStr string) (*model.ImageCollection, error) {
+	page, perPage, err := app.parseLimitAndCursorOrDefault(pageStr, perPageStr)
 	if err != nil {
 		return nil, err
 	}
 
-	return app.assetFinder.FindAllImages(c, limit, nextCursor)
+	return app.assetFinder.FindAllImages(c, page, perPage)
 }
 
-// ListPhotos lists images by given limit and cursor
-func (app *Service) ListPhotos(c context.Context, limitStr, nextCursorStr string) (*model.PhotoCollection, error) {
-	limit, nextCursor, err := app.parseLimitAndCursorOrDefault(limitStr, nextCursorStr)
+// ListPhotos lists images by given page and perPage
+func (app *Service) ListPhotos(c context.Context, pageStr, perPageStr string) (*model.PhotoCollection, error) {
+	page, perPage, err := app.parseLimitAndCursorOrDefault(pageStr, perPageStr)
 	if err != nil {
 		return nil, err
 	}
 
-	return app.assetFinder.FindAllPhotos(c, limit, nextCursor)
+	return app.assetFinder.FindAllPhotos(c, page, perPage)
 }
 
-func (app *Service) parseLimitAndCursorOrDefault(limitStr, nextCursorStr string) (uint, uint, error) {
-	if limitStr == "" {
-		limitStr = "30"
+func (app *Service) parseLimitAndCursorOrDefault(pageStr, perPageStr string) (uint, uint, error) {
+	if pageStr == "" {
+		pageStr = "1"
 	}
 
-	if nextCursorStr == "" {
-		nextCursorStr = "0"
+	if perPageStr == "" {
+		perPageStr = "30"
 	}
 
-	limit, err := stringutil.ParseUint(limitStr)
+	page, err := stringutil.ParseUint(pageStr)
 	if err != nil {
-		return 0, 0, errors.Wrap(ErrInvalidLimit, err.Error())
+		return 0, 0, errors.Wrap(ErrInvalidPage, err.Error())
+	}
+	if page < 1 {
+		return 0, 0, errors.Wrap(ErrInvalidPage, "page can not be less than 1")
 	}
 
-	nextCursor, err := stringutil.ParseUint(nextCursorStr)
+	perPage, err := stringutil.ParseUint(perPageStr)
 	if err != nil {
-		return 0, 0, errors.Wrap(ErrInvalidCursor, err.Error())
+		return 0, 0, errors.Wrap(ErrInvalidPerPage, err.Error())
 	}
 
-	return limit, nextCursor, nil
+	return page, perPage, nil
 }

@@ -21,16 +21,16 @@ func (d *PhotoDescriptor) ID() uint {
 
 // PhotoCollection saves photos
 type PhotoCollection struct {
-	photos []*PhotoDescriptor
-	nextID *uint
+	photos      []*PhotoDescriptor
+	hasNextPage bool
 }
 
 // NewPhotoCollection creates a new image collection
-func NewPhotoCollection(photos []*PhotoDescriptor, nextID *uint) *PhotoCollection {
+func NewPhotoCollection(photos []*PhotoDescriptor, hasNextPage bool) *PhotoCollection {
 	if len(photos) == 0 {
 		photos = make([]*PhotoDescriptor, 0)
 	}
-	return &PhotoCollection{photos: photos, nextID: nextID}
+	return &PhotoCollection{photos: photos, hasNextPage: hasNextPage}
 }
 
 // List lists all photos from collection
@@ -38,8 +38,8 @@ func (c *PhotoCollection) List() []*PhotoDescriptor {
 	return c.photos
 }
 
-// NextID returns next id when to find more images
+// HasNextPage returns next id when to find more images
 // if no more images, returns nil
-func (c *PhotoCollection) NextID() *uint {
-	return c.nextID
+func (c *PhotoCollection) HasNextPage() bool {
+	return c.hasNextPage
 }

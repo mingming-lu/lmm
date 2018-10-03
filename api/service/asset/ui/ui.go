@@ -54,20 +54,20 @@ func (ui *UI) UploadPhoto(c http.Context) {
 // ListImages handles GET /v1/assets/images
 func (ui *UI) ListImages(c http.Context) {
 	collection, err := ui.appService.ListImages(c,
-		c.Request().QueryParam("limit"),
-		c.Request().QueryParam("nextCursor"),
+		c.Request().QueryParam("page"),
+		c.Request().QueryParam("perPage"),
 	)
 	if err == nil {
 		c.JSON(http.StatusOK, imageCollectionToJSON(collection))
 		return
 	}
 
-	zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+	zap.L().Warn(err.Error(), zap.String("request_id", c.Request().RequestID()))
 
 	err = errors.Cause(err)
 	switch err {
-	case application.ErrInvalidCursor, application.ErrInvalidLimit:
-		c.String(http.StatusBadRequest, err.Error())
+	case application.ErrInvalidPage, application.ErrInvalidPerPage:
+		http.NotFound(c)
 	default:
 		panic(err)
 	}
@@ -76,20 +76,20 @@ func (ui *UI) ListImages(c http.Context) {
 // ListPhotos handles GET /v1/assets/photos
 func (ui *UI) ListPhotos(c http.Context) {
 	collection, err := ui.appService.ListPhotos(c,
-		c.Request().QueryParam("limit"),
-		c.Request().QueryParam("nextCursor"),
+		c.Request().QueryParam("page"),
+		c.Request().QueryParam("perPage"),
 	)
 	if err == nil {
 		c.JSON(http.StatusOK, photoCollectionToJSON(collection))
 		return
 	}
 
-	zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+	zap.L().Warn(err.Error(), zap.String("request_id", c.Request().RequestID()))
 
 	err = errors.Cause(err)
 	switch err {
-	case application.ErrInvalidCursor, application.ErrInvalidLimit:
-		c.String(http.StatusBadRequest, err.Error())
+	case application.ErrInvalidPage, application.ErrInvalidPerPage:
+		http.NotFound(c)
 	default:
 		panic(err)
 	}
@@ -104,7 +104,7 @@ func (ui *UI) upload(c http.Context, keyName string) {
 
 	data, ext, err := formImageData(c, keyName)
 	if err != nil {
-		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().RequestID()))
 		c.String(http.StatusBadRequest, errors.Cause(err).Error())
 		return
 	}
@@ -128,7 +128,7 @@ func (ui *UI) upload(c http.Context, keyName string) {
 
 func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
 	if err := c.Request().ParseMultipartForm(maxFormDataSize); err != nil {
-		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().RequestID()))
 		return nil, "", errors.Wrap(errImageMaxSizeExceeded, err.Error())
 	}
 	assets := c.Request().MultipartForm.File[imageKey]
@@ -138,7 +138,7 @@ func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
 	}
 
 	if len(assets) > 1 {
-		zap.L().Warn("attend to upload multiple images", zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+		zap.L().Warn("attend to upload multiple images", zap.String("request_id", c.Request().RequestID()))
 		return nil, "", errMaxUploadExcceed
 	}
 

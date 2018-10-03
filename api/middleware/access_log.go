@@ -26,13 +26,12 @@ func (r *accessLogRecorder) accessLog(next http.Handler) http.Handler {
 
 		req := c.Request()
 		res := c.Response()
-
 		status := res.StatusCode()
 		fields := []zap.Field{
 			zap.Int("status", status),
-			zap.String("request_id", req.Header.Get("X-Request-ID")),
+			zap.String("request_id", req.RequestID()),
 			zap.String("remote_addr", req.RemoteAddr),
-			zap.String("ua", req.Header.Get("User-Agent")),
+			zap.String("ua", req.UserAgent()),
 			zap.String("method", req.Method),
 			zap.String("host", req.Host),
 			zap.String("uri", req.RequestURI),

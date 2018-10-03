@@ -21,7 +21,7 @@ func (r *recoveryRecoder) Recovery(next http.Handler) http.Handler {
 		defer func() {
 			if recovered := recover(); recovered != nil {
 				fields := []zap.Field{
-					zap.String("request_id", c.Request().Header.Get("X-Request-ID")),
+					zap.String("request_id", c.Request().RequestID()),
 					zap.Reflect("what", recovered),
 				}
 				r.logger.DPanic("unexpected error", fields...)

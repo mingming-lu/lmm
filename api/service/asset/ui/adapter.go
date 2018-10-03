@@ -7,8 +7,8 @@ type imageListItem struct {
 }
 
 type imageListJSON struct {
-	Images     []imageListItem `json:"images"`
-	NextCursor *uint           `json:"nextCursor"`
+	Images      []imageListItem `json:"images"`
+	HasNextPage bool            `json:"hasNextPage"`
 }
 
 func imageCollectionToJSON(collection *model.ImageCollection) *imageListJSON {
@@ -17,8 +17,8 @@ func imageCollectionToJSON(collection *model.ImageCollection) *imageListJSON {
 		images[i].Name = image.Name()
 	}
 	return &imageListJSON{
-		Images:     images,
-		NextCursor: collection.NextID(),
+		Images:      images,
+		HasNextPage: collection.HasNextPage(),
 	}
 }
 
@@ -27,8 +27,8 @@ type photoListItem struct {
 }
 
 type photoListJSON struct {
-	Photos     []photoListItem `json:"photos"`
-	NextCursor *uint           `json:"nextCursor"`
+	Photos      []photoListItem `json:"photos"`
+	HasNextPage bool            `json:"hasNextPage"`
 }
 
 func photoCollectionToJSON(collection *model.PhotoCollection) *photoListJSON {
@@ -37,7 +37,7 @@ func photoCollectionToJSON(collection *model.PhotoCollection) *photoListJSON {
 		photos[i].Name = photo.Name()
 	}
 	return &photoListJSON{
-		Photos:     photos,
-		NextCursor: collection.NextID(),
+		Photos:      photos,
+		HasNextPage: collection.HasNextPage(),
 	}
 }

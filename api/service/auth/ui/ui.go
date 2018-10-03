@@ -31,7 +31,7 @@ func (ui *UI) Login(c http.Context) {
 		})
 	default:
 		zap.L().Warn(err.Error(),
-			zap.String("request_id", c.Request().Header.Get("X-Request-ID")),
+			zap.String("request_id", c.Request().RequestID()),
 		)
 		http.Unauthorized(c)
 	}
@@ -43,7 +43,7 @@ func (ui *UI) BearerAuth(next http.Handler) http.Handler {
 		user, err := ui.appService.BearerAuth(c, c.Request().Header.Get("Authorization"))
 		if err != nil {
 			zap.L().Warn(err.Error(),
-				zap.String("request_id", c.Request().Header.Get("X-Request-ID")),
+				zap.String("request_id", c.Request().RequestID()),
 			)
 			http.Unauthorized(c)
 			return

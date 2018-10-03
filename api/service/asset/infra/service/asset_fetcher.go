@@ -18,23 +18,14 @@ func NewAssetFetcher(db db.DB) service.AssetFinder {
 	return &assetFetcher{db: db}
 }
 
-func (f *assetFetcher) FindAllImages(c context.Context, limit, nextCursor uint) (*model.ImageCollection, error) {
-	var query string
-	var args []interface{}
-	if nextCursor == 0 {
-		query = `select id, name from asset where type = 0 order by created_at desc limit ?`
-		args = []interface{}{limit + 1}
-	} else {
-		query = `select id, name from asset where id <= ? and type = 0 order by created_at desc limit ?`
-		args = []interface{}{nextCursor, limit + 1}
-	}
-	stmt := f.db.Prepare(c, query)
+func (f *assetFetcher) FindAllImages(c context.Context, page, perPage uint) (*model.ImageCollection, error) {
+	stmt := f.db.Prepare(c, `select id, name from asset where type = 0 order by created_at desc limit ? offset ?`)
 	defer stmt.Close()
 
-	rows, err := stmt.Query(c, args...)
+	rows, err := stmt.Query(c, perPage+1, (page-1)*perPage)
 	if err != nil {
 		if err == db.ErrNoRows {
-			return model.NewImageCollection(nil, nil), nil
+			return model.NewImageCollection(nil, false), nil
 		}
 		return nil, err
 	}
@@ -52,34 +43,23 @@ func (f *assetFetcher) FindAllImages(c context.Context, limit, nextCursor uint) 
 		images = append(images, model.NewImageDescriptor(id, name))
 	}
 
-	var nextID *uint
-	if uint(len(images)) > limit {
-		leading, trailing := images[:limit], images[limit:]
-		id := trailing[0].ID()
-		nextID = &id
-		images = leading
+	hasNextPage := false
+	if uint(len(images)) > perPage {
+		images = images[:perPage]
+		hasNextPage = true
 	}
 
-	return model.NewImageCollection(images, nextID), nil
+	return model.NewImageCollection(images, hasNextPage), nil
 }
 
-func (f *assetFetcher) FindAllPhotos(c context.Context, limit, nextCursor uint) (*model.PhotoCollection, error) {
-	var query string
-	var args []interface{}
-	if nextCursor == 0 {
-		query = `select id, name from asset where type = 1 order by created_at desc limit ?`
-		args = []interface{}{limit + 1}
-	} else {
-		query = `select id, name from asset where id <= ? and type = 1 order by created_at desc limit ?`
-		args = []interface{}{nextCursor, limit + 1}
-	}
-	stmt := f.db.Prepare(c, query)
+func (f *assetFetcher) FindAllPhotos(c context.Context, page, perPage uint) (*model.PhotoCollection, error) {
+	stmt := f.db.Prepare(c, `select id, name from asset where type = 1 order by created_at desc limit ? offset ?`)
 	defer stmt.Close()
 
-	rows, err := stmt.Query(c, args...)
+	rows, err := stmt.Query(c, perPage+1, (page-1)*perPage)
 	if err != nil {
 		if err == db.ErrNoRows {
-			return model.NewPhotoCollection(nil, nil), nil
+			return model.NewPhotoCollection(nil, false), nil
 		}
 		return nil, err
 	}
@@ -97,13 +77,11 @@ func (f *assetFetcher) FindAllPhotos(c context.Context, limit, nextCursor uint) 
 		photos = append(photos, model.NewPhotoDescriptor(id, name))
 	}
 
-	var nextID *uint
-	if uint(len(photos)) > limit {
-		leading, trailing := photos[:limit], photos[limit:]
-		id := trailing[0].ID()
-		nextID = &id
-		photos = leading
+	hasNextPage := false
+	if uint(len(photos)) > perPage {
+		photos = photos[:perPage]
+		hasNextPage = true
 	}
 
-	return model.NewPhotoCollection(photos, nextID), nil
+	return model.NewPhotoCollection(photos, hasNextPage), nil
 }
