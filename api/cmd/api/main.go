@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	_ "github.com/go-sql-driver/mysql"
 	"go.uber.org/zap"
 
@@ -29,12 +26,6 @@ import (
 	articleUI "lmm/api/service/article/ui"
 )
 
-var (
-	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
-	dbName     = os.Getenv("DATABASE_NAME")
-	connParams = "parseTime=true"
-)
-
 func main() {
 	logger := globalRecorder()
 	defer logger.Sync()
@@ -42,7 +33,7 @@ func main() {
 	undo := zap.ReplaceGlobals(logger)
 	defer undo()
 
-	mysql := db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	mysql := db.DefaultMySQL()
 	defer mysql.Close()
 
 	router := http.NewRouter()

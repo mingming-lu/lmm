@@ -3,6 +3,11 @@ services:
   api:
     env_file:
       - ./api/.dev.env
+    environment:
+      DB_HOST: lmm-mysql
+      DB_PORT: 3306
+      DB_NAME: lmm
+      DB_USER: root
   nginx:
     volumes:
       - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
