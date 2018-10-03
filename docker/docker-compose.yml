@@ -14,7 +14,6 @@ services:
       - ./api/.env
     environment:
       TZ: Asia/Tokyo
-      DATABASE_NAME: lmm
       GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
     depends_on:
