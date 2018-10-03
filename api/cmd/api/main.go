@@ -86,9 +86,11 @@ func main() {
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
 
 	// image
+	assetFinder := assetService.NewAssetFetcher(mysql)
 	assetRepo := assetStorage.NewAssetStorage(mysql, uploader.NewLocalImageUploader())
-	asset := asset.New(assetRepo, assetService.NewUserAdapter(mysql))
-	router.POST("/v1/assets/images", authUI.BearerAuth(asset.Upload))
+	asset := asset.New(assetFinder, assetRepo, assetService.NewUserAdapter(mysql))
+	router.POST("/v1/assets/images", authUI.BearerAuth(asset.UploadImage))
+	router.GET("/v1/assets/images", asset.ListImages)
 
 	server := http.NewServer(":8002", router)
 	server.Run()

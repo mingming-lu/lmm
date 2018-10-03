@@ -32,8 +32,12 @@ type UI struct {
 }
 
 // New creates a new UI pointer
-func New(imageRepository repository.AssetRepository, userAdapter service.UploaderService) *UI {
-	appService := application.NewService(imageRepository, userAdapter)
+func New(
+	assetFinder service.AssetFinder,
+	assetRepository repository.AssetRepository,
+	userAdapter service.UploaderService,
+) *UI {
+	appService := application.NewService(assetFinder, assetRepository, userAdapter)
 	return &UI{appService: appService}
 }
 
@@ -48,7 +52,25 @@ func (ui *UI) UploadPhoto(c http.Context) {
 }
 
 // ListImages handles GET /v1/assets/images
-func (ui *UI) ListImages() {
+func (ui *UI) ListImages(c http.Context) {
+	collection, err := ui.appService.ListImages(c,
+		c.Request().QueryParam("limit"),
+		c.Request().QueryParam("nextCursor"),
+	)
+	if err == nil {
+		c.JSON(http.StatusOK, imageCollectionToJSON(collection))
+		return
+	}
+
+	zap.L().Warn(err.Error(), zap.String("request_id", c.Request().Header.Get("X-Request-ID")))
+
+	err = errors.Cause(err)
+	switch err {
+	case application.ErrInvalidCursor, application.ErrInvalidLimit:
+		c.String(http.StatusBadRequest, err.Error())
+	default:
+		panic(err)
+	}
 }
 
 // ListPhotos handles GET /v1/assets/photos
