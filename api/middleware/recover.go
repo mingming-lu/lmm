@@ -24,7 +24,7 @@ func (r *recoveryRecoder) Recovery(next http.Handler) http.Handler {
 					zap.String("request_id", c.Request().RequestID()),
 					zap.Reflect("what", recovered),
 				}
-				r.logger.DPanic("unexpected error", fields...)
+				r.logger.Error("unexpected error", fields...)
 				http.InternalServerError(c)
 			}
 		}()
