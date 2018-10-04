@@ -82,5 +82,9 @@ func (s *Service) BearerAuth(c context.Context, authorization string) (*model.Us
 		return nil, errors.Wrap(domain.ErrInvalidBearerAuthFormat, err.Error())
 	}
 
+	if token.IsExpired() {
+		return nil, domain.ErrTokenExpired
+	}
+
 	return s.userRepository.FindByToken(c, token)
 }

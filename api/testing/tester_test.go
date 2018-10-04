@@ -3,7 +3,7 @@ package testing
 import (
 	"testing"
 
-	"github.com/akinaru-lu/errors"
+	"github.com/pkg/errors"
 )
 
 func TestIs(t *testing.T) {
