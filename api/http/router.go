@@ -48,7 +48,7 @@ func (r *Router) Handle(method string, path string, handler Handler) {
 	}
 
 	r.router.Handle(method, path, func(res http.ResponseWriter, req *http.Request, params httprouter.Params) {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		ctx, cancel := context.WithTimeout(req.Context(), timeout)
 		defer cancel()
 
 		c := &contextImpl{

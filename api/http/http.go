@@ -14,6 +14,7 @@ const (
 	StatusUnauthorized        = http.StatusUnauthorized
 	StatusForbidden           = http.StatusForbidden
 	StatusNotFound            = http.StatusNotFound
+	StatusRequestTimeout      = http.StatusRequestTimeout
 	StatusConflict            = http.StatusConflict
 	StatusInternalServerError = http.StatusInternalServerError
 )
@@ -51,6 +52,10 @@ func Unauthorized(c Context) {
 
 func NotFound(c Context) {
 	HandleStatus(c, StatusNotFound)
+}
+
+func RequestTimeout(c Context) {
+	HandleStatus(c, StatusRequestTimeout)
 }
 
 func InternalServerError(c Context) {
