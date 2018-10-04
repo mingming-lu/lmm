@@ -9,4 +9,5 @@ var (
 	ErrInvalidTokenLength      = errors.New("invalid token length")
 	ErrNoSuchUser              = errors.New("no such user")
 	ErrPasswordNotMatched      = errors.New("wrong password")
+	ErrTokenExpired            = errors.New("token expired")
 )
