@@ -4,7 +4,10 @@ services:
     env_file:
       - ./api/.test.env
     environment:
-      DATABASE_NAME: lmm_test
+      DB_HOST: lmm-mysql
+      DB_PORT: 3306
+      DB_NAME: lmm_test
+      DB_USER: root
       HTTP_TIMEOUT_SECOND: 1
     working_dir: /go/src/lmm/api
     command: bash
