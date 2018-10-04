@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -19,17 +18,13 @@ import (
 )
 
 var (
-	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
-	dbName     = os.Getenv("DATABASE_NAME")
-	connParams = "parseTime=true"
-)
-
-var (
 	router *http.Router
 )
 
 func TestMain(m *testing.M) {
-	dbEngine := db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	dbEngine := db.DefaultMySQL()
+	defer dbEngine.Close()
+
 	userRepo := persistence.NewUserStorage(dbEngine)
 	appService := application.NewService(userRepo)
 	ui := NewUI(appService)

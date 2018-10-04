@@ -35,7 +35,7 @@ func (s *Server) Run() {
 		zap.L().Panic("cannot run server since it is stopped")
 	}
 
-	zap.L().Info("start serving at " + s.srv.Addr)
+	zap.L().Info("start serving at "+s.srv.Addr, zap.Int("pid", os.Getpid()))
 	go func() {
 		signal.Notify(s.shutDownSignal, syscall.SIGINT, syscall.SIGTERM)
 

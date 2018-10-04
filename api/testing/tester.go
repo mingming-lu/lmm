@@ -1,9 +1,11 @@
 package testing
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -94,6 +96,20 @@ func (t *Tester) Are(expected, actual interface{}, msgAndArgs ...interface{}) bo
 }
 
 // NotPanic asserts given function would not panics
-func (t *Tester) NotPanic(f func(), msgAndArgs ...interface{}) {
-	assert.NotPanics(t, f, msgAndArgs...)
+func (t *Tester) NotPanic(f func(), msgAndArgs ...interface{}) bool {
+	return assert.NotPanics(t, f, msgAndArgs...)
+}
+
+func (t *Tester) Timeout(f func(), timeout time.Duration) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	go func() {
+		f()
+		cancel()
+	}()
+
+	<-ctx.Done()
+
+	return assert.Equal(t, context.DeadlineExceeded, ctx.Err())
 }

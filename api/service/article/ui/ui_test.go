@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -17,26 +16,20 @@ import (
 )
 
 var (
-	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
-	dbName     = os.Getenv("DATABASE_NAME")
-	connParams = "parseTime=true"
-)
-
-var (
 	mysql  db.DB
 	router *testing.Router
 )
 
 func TestMain(m *testing.M) {
-	mysql = db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	mysql = db.DefaultMySQL()
 	defer mysql.Close()
 
 	auth := auth(mysql)
 	ui := articleUI(mysql)
 
 	router = testing.NewRouter()
-	router.POST("/v1/articles", auth.BearerAuth(ui.PostArticle))
-	router.PUT("/v1/articles/:articleID", auth.BearerAuth(ui.EditArticleText))
+	router.POST("/v1/articles", auth.BearerAuth(ui.PostNewArticle))
+	router.PUT("/v1/articles/:articleID", auth.BearerAuth(ui.EditArticle))
 
 	code := m.Run()
 	os.Exit(code)
