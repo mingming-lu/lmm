@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -14,18 +13,14 @@ import (
 )
 
 var (
-	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
-	dbName     = os.Getenv("DATABASE_NAME")
-	connParams = "parseTime=true"
-)
-
-var (
 	dbEngine db.DB
 	router   *http.Router
 )
 
 func TestMain(m *testing.M) {
-	dbEngine = db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	dbEngine = db.DefaultMySQL()
+	defer dbEngine.Close()
+
 	repo := persistence.NewUserStorage(dbEngine)
 	app := application.NewService(repo)
 	ui := NewUI(app)

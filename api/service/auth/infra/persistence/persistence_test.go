@@ -1,7 +1,6 @@
 package persistence
 
 import (
-	"fmt"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -12,18 +11,14 @@ import (
 )
 
 var (
-	dbSrcName  = "root:@tcp(lmm-mysql:3306)/"
-	dbName     = os.Getenv("DATABASE_NAME")
-	connParams = "parseTime=true"
-)
-
-var (
 	dbEngine db.DB
 	userRepo repository.UserRepository
 )
 
 func TestMain(m *testing.M) {
-	dbEngine = db.NewMySQL(fmt.Sprintf("%s%s?%s", dbSrcName, dbName, connParams))
+	dbEngine = db.DefaultMySQL()
+	defer dbEngine.Close()
+
 	userRepo = NewUserStorage(dbEngine)
 
 	code := m.Run()
