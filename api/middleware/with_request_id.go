@@ -6,7 +6,7 @@ import (
 	"lmm/api/http"
 )
 
-// WithRequestID adds request id value to  context
+// WithRequestID adds request id value to context
 func WithRequestID(next http.Handler) http.Handler {
 	return func(c http.Context) {
 		requestIDKey := http.StrCtxKey("request_id")
