@@ -5,7 +5,6 @@ import (
 	"mime/multipart"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"lmm/api/http"
 	"lmm/api/service/asset/application"
@@ -62,14 +61,12 @@ func (ui *UI) ListImages(c http.Context) {
 		return
 	}
 
-	zap.L().Warn(err.Error(), zap.String("request_id", c.Request().RequestID()))
-
-	err = errors.Cause(err)
-	switch err {
+	switch errors.Cause(err) {
 	case application.ErrInvalidPage, application.ErrInvalidPerPage:
 		http.NotFound(c)
 	default:
-		panic(err)
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
 	}
 }
 
@@ -84,14 +81,12 @@ func (ui *UI) ListPhotos(c http.Context) {
 		return
 	}
 
-	zap.L().Warn(err.Error(), zap.String("request_id", c.Request().RequestID()))
-
-	err = errors.Cause(err)
-	switch err {
+	switch errors.Cause(err) {
 	case application.ErrInvalidPage, application.ErrInvalidPerPage:
 		http.NotFound(c)
 	default:
-		panic(err)
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
 	}
 }
 
@@ -104,7 +99,7 @@ func (ui *UI) upload(c http.Context, keyName string) {
 
 	data, ext, err := formImageData(c, keyName)
 	if err != nil {
-		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().RequestID()))
+		http.Error(c, err.Error())
 		c.String(http.StatusBadRequest, errors.Cause(err).Error())
 		return
 	}
@@ -128,7 +123,7 @@ func (ui *UI) upload(c http.Context, keyName string) {
 
 func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
 	if err := c.Request().ParseMultipartForm(maxFormDataSize); err != nil {
-		zap.L().Warn(err.Error(), zap.String("request_id", c.Request().RequestID()))
+		http.Error(c, err.Error())
 		return nil, "", errors.Wrap(errImageMaxSizeExceeded, err.Error())
 	}
 	assets := c.Request().MultipartForm.File[imageKey]
@@ -138,7 +133,7 @@ func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
 	}
 
 	if len(assets) > 1 {
-		zap.L().Warn("attend to upload multiple images", zap.String("request_id", c.Request().RequestID()))
+		http.Warn(c, "attend to upload multiple images")
 		return nil, "", errMaxUploadExcceed
 	}
 

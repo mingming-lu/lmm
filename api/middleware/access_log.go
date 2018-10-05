@@ -8,17 +8,8 @@ import (
 	"lmm/api/http"
 )
 
-// NewAccessLog returns a middleware to record access log
-func NewAccessLog(logger *zap.Logger) http.Middleware {
-	r := accessLogRecorder{logger: logger}
-	return r.accessLog
-}
-
-type accessLogRecorder struct {
-	logger *zap.Logger
-}
-
-func (r *accessLogRecorder) accessLog(next http.Handler) http.Handler {
+// AccessLog records access log
+func AccessLog(next http.Handler) http.Handler {
 	return func(c http.Context) {
 		start := time.Now()
 
@@ -39,11 +30,11 @@ func (r *accessLogRecorder) accessLog(next http.Handler) http.Handler {
 		}
 
 		if status >= 500 {
-			r.logger.Error(http.StatusText(status), fields...)
+			zap.L().Error(http.StatusText(status), fields...)
 		} else if status >= 400 {
-			r.logger.Warn(http.StatusText(status), fields...)
+			zap.L().Warn(http.StatusText(status), fields...)
 		} else {
-			r.logger.Info(http.StatusText(status), fields...)
+			zap.L().Info(http.StatusText(status), fields...)
 		}
 	}
 }

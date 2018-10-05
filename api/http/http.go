@@ -17,6 +17,7 @@ const (
 	StatusRequestTimeout      = http.StatusRequestTimeout
 	StatusConflict            = http.StatusConflict
 	StatusInternalServerError = http.StatusInternalServerError
+	StatusServiceUnavailable  = http.StatusServiceUnavailable
 )
 
 type Handler = func(Context)
@@ -60,6 +61,10 @@ func RequestTimeout(c Context) {
 
 func InternalServerError(c Context) {
 	HandleStatus(c, StatusInternalServerError)
+}
+
+func ServiceUnavailable(c Context) {
+	HandleStatus(c, StatusServiceUnavailable)
 }
 
 func StatusText(code int) string {

@@ -5,7 +5,6 @@ import (
 	"go.uber.org/zap"
 
 	"lmm/api/http"
-	"lmm/api/log"
 	"lmm/api/middleware"
 	"lmm/api/storage/db"
 	"lmm/api/storage/uploader"
@@ -45,13 +44,9 @@ func main() {
 	router := http.NewRouter()
 
 	// middleware
-	accessRecorder := accessLogRecorder()
-	defer accessRecorder.Sync()
-	router.Use(middleware.NewAccessLog(accessRecorder))
-
-	recvRecoder := recoveryRecorder()
-	defer recvRecoder.Sync()
-	router.Use(middleware.NewRecovery(recvRecoder))
+	router.Use(middleware.AccessLog)
+	router.Use(middleware.Recovery)
+	router.Use(middleware.WithRequestID)
 
 	// user
 	userRepo := userStorage.NewUserStorage(mysql)
@@ -70,8 +65,8 @@ func main() {
 	articleRepo := articleStorage.NewArticleStorage(mysql, authorAdapter)
 	articleFinder := articleFetcher.NewArticleFetcher(mysql)
 	articleUI := articleUI.NewUI(articleFinder, articleRepo, authorAdapter)
-	router.POST("/v1/articles", articleUI.PostNewArticle)
-	router.PUT("/v1/articles", articleUI.EditArticle)
+	router.POST("/v1/articles", authUI.BearerAuth(articleUI.PostNewArticle))
+	router.PUT("/v1/articles", authUI.BearerAuth(articleUI.EditArticle))
 	router.GET("/v1/articles", articleUI.ListArticles)
 	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
@@ -90,7 +85,7 @@ func main() {
 }
 
 func globalRecorder() *zap.Logger {
-	cfg := log.DefaultZapConfig()
+	cfg := http.DefaultZapConfig()
 
 	logger, err := cfg.Build()
 	if err != nil {
@@ -98,30 +93,4 @@ func globalRecorder() *zap.Logger {
 	}
 
 	return logger.Named("global")
-}
-
-func recoveryRecorder() *zap.Logger {
-	cfg := log.DefaultZapConfig()
-	cfg.DisableCaller = true
-	cfg.DisableStacktrace = false
-	cfg.EncoderConfig.StacktraceKey = "stacktrace"
-
-	logger, err := cfg.Build()
-	if err != nil {
-		panic(err)
-	}
-
-	return logger.Named("recovery")
-}
-
-func accessLogRecorder() *zap.Logger {
-	cfg := log.DefaultZapConfig()
-	cfg.DisableCaller = true
-
-	logger, err := cfg.Build()
-	if err != nil {
-		panic(err)
-	}
-
-	return logger.Named("access_log")
 }

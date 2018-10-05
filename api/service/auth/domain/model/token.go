@@ -1,8 +1,9 @@
 package model
 
 import (
-	"lmm/api/domain/model"
 	"time"
+
+	"lmm/api/domain/model"
 )
 
 // Token domain model

@@ -3,8 +3,6 @@ package ui
 import (
 	"context"
 
-	"go.uber.org/zap"
-
 	"lmm/api/http"
 	"lmm/api/service/auth/application"
 )
@@ -30,9 +28,7 @@ func (ui *UI) Login(c http.Context) {
 			AccessToken: token.Hashed(),
 		})
 	default:
-		zap.L().Warn(err.Error(),
-			zap.String("request_id", c.Request().RequestID()),
-		)
+		http.Warn(c, err.Error())
 		http.Unauthorized(c)
 	}
 }
@@ -42,9 +38,7 @@ func (ui *UI) BearerAuth(next http.Handler) http.Handler {
 	return func(c http.Context) {
 		user, err := ui.appService.BearerAuth(c, c.Request().Header.Get("Authorization"))
 		if err != nil {
-			zap.L().Warn(err.Error(),
-				zap.String("request_id", c.Request().RequestID()),
-			)
+			http.Warn(c, err.Error())
 			http.Unauthorized(c)
 			return
 		}

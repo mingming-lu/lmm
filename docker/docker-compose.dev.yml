@@ -8,6 +8,7 @@ services:
       DB_PORT: 3306
       DB_NAME: lmm
       DB_USER: root
+      HTTP_TIMEOUT_SECOND: 3
   nginx:
     volumes:
       - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf

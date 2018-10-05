@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 
 	"lmm/api/http"
 	"lmm/api/service/article/application"
@@ -62,7 +62,7 @@ func (ui *UI) PostNewArticle(c http.Context) {
 		*article.Body,
 		article.Tags,
 	)
-	switch err {
+	switch errors.Cause(err) {
 	case nil:
 		c.Header("Location", "/v1/articles/"+articleID.String())
 		c.String(http.StatusCreated, "Success")
@@ -73,7 +73,8 @@ func (ui *UI) PostNewArticle(c http.Context) {
 	case domain.ErrNoSuchUser:
 		http.Unauthorized(c)
 	default:
-		panic(err)
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
 	}
 }
 
@@ -103,7 +104,7 @@ func (ui *UI) EditArticle(c http.Context) {
 		*article.Body,
 		article.Tags,
 	)
-	switch err {
+	switch errors.Cause(err) {
 	case nil:
 		http.NoContent(c)
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
@@ -119,7 +120,8 @@ func (ui *UI) EditArticle(c http.Context) {
 	case domain.ErrNotArticleAuthor:
 		c.String(http.StatusForbidden, err.Error())
 	default:
-		panic(err)
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
 	}
 }
 
@@ -142,13 +144,14 @@ func (ui *UI) ListArticles(c http.Context) {
 		c.Request().QueryParam("count"),
 		c.Request().QueryParam("page"),
 	)
-	switch err {
+	switch errors.Cause(err) {
 	case nil:
 		c.JSON(http.StatusOK, ui.articleListViewToJSON(view))
 	case application.ErrInvalidCount, application.ErrInvalidPage:
 		c.JSON(http.StatusBadRequest, err.Error())
 	default:
-		panic(err)
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
 	}
 }
 
@@ -170,13 +173,14 @@ func (ui *UI) GetArticle(c http.Context) {
 	view, err := ui.appService.ArticleQueryService().ArticleByID(c,
 		c.Request().PathParam("articleID"),
 	)
-	switch err {
+	switch errors.Cause(err) {
 	case nil:
 		c.JSON(http.StatusOK, ui.articleViewToJSON(view))
 	case domain.ErrInvalidArticleID, domain.ErrNoSuchArticle:
 		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 	default:
-		panic(err)
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
 	}
 }
 
@@ -199,11 +203,12 @@ func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
 func (ui *UI) GetAllArticleTags(c http.Context) {
 	view, err := ui.appService.ArticleQueryService().AllArticleTags(c)
 
-	switch err {
+	switch errors.Cause(err) {
 	case nil:
 		c.JSON(http.StatusOK, ui.tagListViewToJSON(view))
 	default:
-		panic(err)
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
 	}
 }
 
