@@ -28,8 +28,7 @@ func (ui *UI) SignUp(c http.Context) {
 		reqBody.Password,
 	)
 
-	caused := errors.Cause(err)
-	switch caused {
+	switch errors.Cause(err) {
 	case nil:
 		c.String(http.StatusCreated, "success")
 	case domain.ErrInvalidUserName:
@@ -47,6 +46,7 @@ func (ui *UI) SignUp(c http.Context) {
 	case domain.ErrUserPasswordTooWeak:
 		c.String(http.StatusBadRequest, domain.ErrUserPasswordTooWeak.Error())
 	default:
-		panic(err)
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
 	}
 }
