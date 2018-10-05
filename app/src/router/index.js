@@ -3,8 +3,8 @@ import Router from 'vue-router'
 
 const Home = () => import('@/components/Home')
 const Index = () => import('@/components/Index')
-const Blog = () => import('@/components/blog/Blog')
-const BlogList = () => import('@/components/blog/List')
+const Article = () => import('@/components/article/Article')
+const Articles = () => import('@/components/article/Articles')
 const Photos = () => import('@/components/Photos')
 const Projects = () => import('@/components/Project')
 const Reviews = () => import('@/components/Reviews')
@@ -31,16 +31,16 @@ export default new Router({
       component: Home
     },
     {
-      path: '/blog',
+      path: '/articles',
       component: Index,
       children: [
         {
           path: '',
-          component: BlogList
+          component: Articles
         },
         {
           path: ':id',
-          component: Blog
+          component: Article
         }
       ]
     },

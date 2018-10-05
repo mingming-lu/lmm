@@ -62,8 +62,8 @@ export default {
       moderateWideMode: false,
       items: [
         {
-          link: '/blog',
-          name: 'Blog',
+          link: '/articles',
+          name: 'Articles',
           icon: 'fa-pencil'
         },
         {

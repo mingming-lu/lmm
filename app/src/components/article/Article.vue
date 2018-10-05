@@ -1,20 +1,18 @@
 <template>
   <div class="container">
-    <!-- Blog text -->
-    <div class="blog" :class="{ 'left': !isMobile, 'mobile': isMobile }">
+    <!-- Article text -->
+    <div class="article" :class="{ 'left': !isMobile, 'mobile': isMobile }">
       <div :class="{container: !isMobile}">
         <p class="title">{{ title }}</p>
         <div class="info">
-          <span><i class="fa fa-fw fa-folder-open-o"></i>{{ category.name }}</span>
-          <span style="white-space: pre;">  |  </span>
-          <span><i class="fa fa-fw fa-calendar-o"></i><span>{{ createdAt }}</span></span>
+          <span><i class="fa fa-fw fa-calendar-o"></i><span>{{ postAt }}</span></span>
         </div>
-        <div ref="text" class="marked text" v-html="text" v-hljs></div>
-        <p v-if="createdAt !== updatedAt" class="info text-right">Updated at {{ updatedAt }}</p>
+        <div ref="body" class="marked text" v-html="body" v-hljs></div>
+        <p v-if="postAt !== lastEditedAt" class="info text-right">Edited at {{ lastEditedAt }}</p>
       </div>
     </div>
 
-    <!-- Blog tags -->
+    <!-- Article tags -->
     <div v-if="!isMobile" class="tags">
       <div :class="{container: !isMobile}">
         <h3><i class="fa fa-fw fa-tags"></i>Tags</h3>
@@ -26,7 +24,7 @@
       </div>
     </div>
 
-    <!-- Blog chapters -->
+    <!-- Article chapters -->
     <div v-if="!isMobile" class="chapters">
       <div :class="{container: !isMobile}">
         <h3><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h3>
@@ -50,27 +48,24 @@ export default {
       isMobile: false,
       title: '',
       subtitles: [],
-      text: '',
-      createdAt: '',
-      updatedAt: '',
-      category: {},
-      tags: []
+      body: '',
+      tags: [],
+      postAt: '',
+      lastEditedAt: ''
     }
   },
   created () {
-    const pattern = /^\/blog\/(\d+)$/g
+    const pattern = /^\/articles\/(\w+)$/g
     const match = pattern.exec(this.$route.path)
     const id = match[1]
-    this.blogID = id
-    this.fetchBlog()
-    this.fetchCategory()
-    this.fetchTags()
+    this.articleID = id
+    this.fetchArticle()
     this.calcIsMobile()
     window.addEventListener('resize', this.calcIsMobile)
     window.addEventListener('scroll', this.calcProgress)
   },
   watch: {
-    text: function () {
+    body: function () {
       this.$nextTick(() => {
         this.calcProgress()
       })
@@ -81,45 +76,24 @@ export default {
     window.removeEventListener('scroll', this.calcProgress)
   },
   methods: {
-    fetchBlog: function () {
+    fetchArticle: function () {
       const md = new Markdownit({
         html: true,
         typographer: true
       })
-      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID).then(res => {
-        const blog = res.data
+      axios.get(process.env.API_URL_BASE + '/v1/articles/' + this.articleID).then(res => {
+        const article = res.data
 
-        this.title = blog.title
-        this.createdAt = blog.created_at
-        this.updatedAt = blog.updated_at
+        this.title = article.title
+        this.tags = article.tags
+        this.postAt = article.post_at
+        this.lastEditedAt = article.last_edited_at
 
         // prepare subtitles and their links
-        const text = md.render(blog.text)
-        const results = this.extractSubtitles(text, this.$route.path)
-        this.text = results[0]
+        const body = md.render(article.body)
+        const results = this.extractSubtitles(body, this.$route.path)
+        this.body = results[0]
         this.subtitles = results[1]
-      }).catch(e => {
-        if (e.response) {
-          console.log(e.response.data)
-        } else {
-          console.log(e)
-        }
-      })
-    },
-    fetchCategory: function () {
-      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/category').then(res => {
-        this.category = res.data
-      }).catch(e => {
-        if (e.response) {
-          console.log(e.response.data)
-        } else {
-          console.log(e)
-        }
-      })
-    },
-    fetchTags: function () {
-      axios.get(process.env.API_URL_BASE + '/v1/blog/' + this.blogID + '/tags').then(res => {
-        this.tags = res.data.tags
       }).catch(e => {
         if (e.response) {
           console.log(e.response.data)
@@ -165,7 +139,7 @@ export default {
       return [lines.join('\n'), subtitles]
     },
     calcProgress () {
-      let el = this.$refs.text
+      let el = this.$refs.body
       let progress = ((window.scrollY + window.innerHeight) - el.offsetTop) / (el.offsetHeight)
       progress = progress > 1 ? 100 : progress * 100
       this.$refs.progress.style.width = progress + '%'
@@ -189,7 +163,7 @@ i {
   @media screen and (max-width: $max_width_device) {
     padding: 0 16px;
   }
-  .blog {
+  .article {
     float: left;
     width: 66.666%;
     .title {
