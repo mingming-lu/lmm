@@ -1,7 +1,7 @@
 all: dev
 
 docker-compose: docker
-	cd docker && docker-compose -f docker-compose.yml $(args) $(cmd)
+	docker-compose -f docker/docker-compose.yml $(args) $(cmd)
 
 build:
 	make docker-compose cmd=build
@@ -21,13 +21,13 @@ install-manager:
 	cd docker && docker-compose run --rm manager bash -c "rm -rf manager/node_modules && npm --prefix /manager install"
 
 prod:
-	make docker-compose cmd=up
+	make docker-compose cmd="up -d"
 
 dev:
-	make prod args="-f docker-compose.dev.yml"
+	make prod args="-f docker/docker-compose.dev.yml"
 
 test:
-	make docker-compose args="-f docker-compose.test.yml" cmd="run $(target)"
+	make docker-compose args="-f docker/docker-compose.test.yml" cmd="run $(target)"
 
 test-api:
 	make test target=api
@@ -41,3 +41,6 @@ restart:
 
 stop:
 	make docker-compose cmd=down
+
+logs:
+	make docker-compose cmd="logs -f"
