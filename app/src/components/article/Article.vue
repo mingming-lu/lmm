@@ -42,6 +42,7 @@
 <script>
 import axios from 'axios'
 import Markdownit from 'markdown-it'
+import { formattedUTCString } from '@/utils'
 export default {
   data () {
     return {
@@ -86,8 +87,8 @@ export default {
 
         this.title = article.title
         this.tags = article.tags
-        this.postAt = article.post_at
-        this.lastEditedAt = article.last_edited_at
+        this.postAt = formattedUTCString(article.post_at)
+        this.lastEditedAt = formattedUTCString(article.last_edited_at)
 
         // prepare subtitles and their links
         const body = md.render(article.body)

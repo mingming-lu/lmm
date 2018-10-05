@@ -12,7 +12,7 @@
               <p class="post-title">
                 <router-link :to="'/articles/' + article.id" class="link">{{ article.title }}</router-link>
               </p>
-              <p class="post-info"><i class="fa fa-fw fa-calendar-o"></i>{{ article.post_at }}</p>
+              <p class="post-info"><i class="fa fa-fw fa-calendar-o"></i>{{ formatted(article.post_at) }}</p>
             </td>
           </tr>
         </table>
@@ -39,6 +39,7 @@
 <script>
 import axios from 'axios'
 import LdsEllipsis from '@/components/loadings/LdsEllipsis'
+import { formattedUTCString } from '@/utils'
 export default {
   components: {
     LdsEllipsis
@@ -48,11 +49,12 @@ export default {
       isMobile: false,
       isArticleListLoaded: false,
       articleList: [],
+      formatted: formattedUTCString,
       tags: []
     }
   },
   created () {
-    this.fetchArticle()
+    this.fetchArticles()
     this.fetchTags()
     this.calcIsMobile()
     window.addEventListener('resize', this.calcIsMobile)
@@ -61,7 +63,7 @@ export default {
     window.removeEventListener('resize', this.calcIsMobile)
   },
   methods: {
-    fetchArticle () {
+    fetchArticles () {
       axios.get(process.env.API_URL_BASE + '/v1/articles?count=10').then(res => {
         this.articleList = res.data.articles
         this.isArticleListLoaded = true
