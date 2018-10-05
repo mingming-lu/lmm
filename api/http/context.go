@@ -53,6 +53,7 @@ func (c *contextImpl) Value(key interface{}) interface{} {
 func (c *contextImpl) Header(key, value string) {
 	if c.res.Header().Get(key) != "" {
 		zap.L().Warn("unexpected to set same header more than once",
+			zap.String("request_id", c.Request().RequestID()),
 			zap.String("header", key),
 			zap.String("value", value),
 		)
@@ -65,7 +66,7 @@ func (c *contextImpl) JSON(statusCode int, data interface{}) {
 	c.writeContentType("application/json")
 	c.res.WriteHeader(statusCode)
 	if err := json.NewEncoder(c.res).Encode(data); err != nil {
-		zap.L().Error(err.Error())
+		Error(c, err.Error())
 	}
 }
 
@@ -81,7 +82,7 @@ func (c *contextImpl) String(statusCode int, s string) {
 	c.writeContentType("text/plain")
 	c.res.WriteHeader(statusCode)
 	if _, err := fmt.Fprint(c.res, s); err != nil {
-		zap.L().Error(err.Error())
+		Error(c, err.Error())
 	}
 }
 
