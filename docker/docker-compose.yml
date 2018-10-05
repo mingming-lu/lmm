@@ -9,7 +9,8 @@ services:
       - ../api:/go/src/lmm/api
       - ../asset:/asset
     working_dir: /go/src/lmm/api
-    command: go run cmd/api/main.go
+    restart: always
+    command: api
     env_file:
       - ./api/.env
     environment:

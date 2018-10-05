@@ -15,10 +15,13 @@ install-app:
 	cd docker && docker-compose run --rm app bash -c "rm -rf app/node_modules && npm --prefix /app install"
 
 install-api:
-	cd docker && docker-compose build api
+	make build-api
 
 install-manager:
 	cd docker && docker-compose run --rm manager bash -c "rm -rf manager/node_modules && npm --prefix /manager install"
+
+build-api:
+	cd docker && docker-compose build api
 
 prod:
 	make docker-compose cmd=up
