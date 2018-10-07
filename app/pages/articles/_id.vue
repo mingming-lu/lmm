@@ -17,9 +17,9 @@
       <div :class="{container: !isMobile}">
         <h3><i class="fa fa-fw fa-tags"></i>Tags</h3>
         <p>
-          <router-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
+          <nuxt-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
             {{ tag.name }}
-          </router-link>
+          </nuxt-link>
         </p>
       </div>
     </div>
@@ -30,9 +30,9 @@
         <h3><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h3>
         <div ref="progress" class="progress-bar"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
-          <router-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
+          <nuxt-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
             <div v-html="subtitle.name"></div>
-          </router-link>
+          </nuxt-link>
         </p>
       </div>
     </div>
