@@ -12,7 +12,7 @@
     </a>
     <p>&copy; 2018
       <nuxt-link
-        to="/home#author"
+        to="/#author"
         class="link">
         <u>Lu Mingming</u>
       </nuxt-link>
