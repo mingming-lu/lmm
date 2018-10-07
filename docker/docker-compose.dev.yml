@@ -9,6 +9,8 @@ services:
       DB_NAME: lmm
       DB_USER: root
       HTTP_TIMEOUT_SECOND: 3
+  app:
+    command: npm --prefix /app run dev
   nginx:
     volumes:
       - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf

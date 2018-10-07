@@ -25,7 +25,7 @@ services:
     image: node:9.9
     volumes:
       - ../app:/app
-    command: npm --prefix /app start
+    command: npm --prefix /app run build && npm --prefix /app start
     environment:
       TZ: Asia/Tokyo
   cli:
