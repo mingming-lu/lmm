@@ -11,11 +11,11 @@
       <i class="fa fa-linkedin link"/>
     </a>
     <p>&copy; 2018
-      <router-link
+      <nuxt-link
         to="/home#author"
         class="link">
         <u>Lu Mingming</u>
-      </router-link>
+      </nuxt-link>
     </p>
   </footer>
 </template>
