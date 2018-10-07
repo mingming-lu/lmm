@@ -63,16 +63,16 @@ export default {
     fetchPhotos () {
       this.page += 1
       this.isPageLoaded = false
-      axios.get(process.env.API_URL_BASE + '/v1/images?type=photo&count=10&page=' + this.page).then((res) => {
-        this.photos.push(...res.data.images)
-        res.data.images.forEach((photo, index) => {
+      axios.get(process.env.API_URL_BASE + '/v1/assets/photos?perPage=10&page=' + this.page).then((res) => {
+        this.photos.push(...res.data.photos)
+        res.data.photos.forEach((photo, index) => {
           if (index % 2 === 0) {
             this.left.push(photo)
           } else {
             this.right.push(photo)
           }
         })
-        this.hasNext = res.data.has_next_page
+        this.hasNext = res.data.hasNextPage
         this.isPageLoaded = true
       }).catch((e) => {
         console.log(e)

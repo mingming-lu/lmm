@@ -1,21 +1,29 @@
-export { formattedTime }
-
-var months = {
-  0: 'January',
-  1: 'February',
-  2: 'March',
-  3: 'April',
-  4: 'May',
-  5: 'June',
-  6: 'July',
-  7: 'August',
-  8: 'September',
-  9: 'October',
-  10: 'November',
-  11: 'December'
+export {
+  formattedDate,
+  formattedTimeStamp,
+  formattedUTCString
 }
 
-function formattedTime (timestamp) {
+function formattedTimeStamp (timestamp) {
   let date = new Date(timestamp * 1e3)
-  return months[date.getUTCMonth()] + ' ' + date.getUTCDate() + ', ' + date.getUTCFullYear()
+  return formattedDate(date)
+}
+
+function formattedUTCString (s) {
+  let date = new Date(s)
+  console.log(date)
+  return formattedDate(date)
+}
+
+function formattedDate (date) {
+  let d = {
+    y: date.getFullYear(),
+    m: date.getMonth(),
+    d: date.getDate()
+  }
+  let s = ''
+  s += d.y + '-'
+  s += (d.m + 1) + '-'
+  s += (d.d < 10 ? '0' + d.d : d.d)
+  return s
 }

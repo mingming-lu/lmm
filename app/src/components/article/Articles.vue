@@ -3,16 +3,16 @@
     <!-- Posts -->
     <div class="posts" :class="{ 'mobile-left': isMobile }">
       <div :class="{container: !isMobile}">
-        <div v-if="!isBlogListLoaded" class="center">
+        <div v-if="!isArticleListLoaded" class="center">
           <LdsEllipsis class="fade-in" />
         </div>
         <table v-else>
-          <tr v-for="blog in blogList" :key="blog.id">
+          <tr v-for="article in articleList" :key="article.id">
             <td>
               <p class="post-title">
-                <router-link :to="'/blog/' + blog.id" class="link">{{ blog.title }}</router-link>
+                <router-link :to="'/articles/' + article.id" class="link">{{ article.title }}</router-link>
               </p>
-              <p class="post-info"><i class="fa fa-fw fa-calendar-o"></i>{{ blog.created_at }}</p>
+              <p class="post-info"><i class="fa fa-fw fa-calendar-o"></i>{{ formatted(article.post_at) }}</p>
             </td>
           </tr>
         </table>
@@ -20,14 +20,6 @@
     </div>
 
     <div v-if="!isMobile" class="nav">
-      <!-- Categories -->
-      <div class="categories container">
-        <h3><i class="fa fa-fw fa-folder"></i>Categories</h3>
-        <router-link to="" v-for="category in categories" :key="category.id" class="link">
-          <p class="category">{{ category.name }}</p>
-        </router-link>
-      </div>
-
       <!-- Tags -->
       <div class="tags container">
         <h3><i class="fa fa-fw fa-tags"></i>Tags</h3>
@@ -47,6 +39,7 @@
 <script>
 import axios from 'axios'
 import LdsEllipsis from '@/components/loadings/LdsEllipsis'
+import { formattedUTCString } from '@/utils'
 export default {
   components: {
     LdsEllipsis
@@ -54,15 +47,14 @@ export default {
   data () {
     return {
       isMobile: false,
-      isBlogListLoaded: false,
-      blogList: [],
-      categories: [],
+      isArticleListLoaded: false,
+      articleList: [],
+      formatted: formattedUTCString,
       tags: []
     }
   },
   created () {
-    this.fetchBlog()
-    this.fetchCategories()
+    this.fetchArticles()
     this.fetchTags()
     this.calcIsMobile()
     window.addEventListener('resize', this.calcIsMobile)
@@ -71,24 +63,17 @@ export default {
     window.removeEventListener('resize', this.calcIsMobile)
   },
   methods: {
-    fetchBlog () {
-      axios.get(process.env.API_URL_BASE + '/v1/blog').then(res => {
-        this.blogList = res.data.blog
-        this.isBlogListLoaded = true
-      }).catch(e => {
-        console.log(e.response.data)
-      })
-    },
-    fetchCategories () {
-      axios.get(process.env.API_URL_BASE + '/v1/categories').then(res => {
-        this.categories = res.data.categories
+    fetchArticles () {
+      axios.get(process.env.API_URL_BASE + '/v1/articles?count=10').then(res => {
+        this.articleList = res.data.articles
+        this.isArticleListLoaded = true
       }).catch(e => {
         console.log(e.response.data)
       })
     },
     fetchTags () {
-      axios.get(process.env.API_URL_BASE + '/v1/tags').then(res => {
-        this.tags = res.data.tags
+      axios.get(process.env.API_URL_BASE + '/v1/articleTags').then(res => {
+        this.tags = res.data
       }).catch(e => {
         console.log(e.response.data)
       })
