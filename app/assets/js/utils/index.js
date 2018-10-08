@@ -7,7 +7,6 @@ function formattedTimeStamp(timestamp) {
 
 function formattedUTCString(s) {
   let date = new Date(s)
-  console.log(date)
   return formattedDate(date)
 }
 
