@@ -5,28 +5,30 @@
       :class="{ 'mobile-left': isMobile }"
       class="posts">
       <div :class="{container: !isMobile}">
-        <div
-          v-if="!isArticleListLoaded"
-          class="center">
-          <LdsEllipsis class="fade-in" />
-        </div>
-        <table v-else>
-          <tr
-            v-for="article in articleList"
-            :key="article.id">
-            <td>
-              <p class="post-title">
-                <nuxt-link
-                  :to="'/articles/' + article.id"
-                  class="link">{{ article.title }}</nuxt-link>
-              </p>
-              <p class="post-info">
-                <i class="fa fa-fw fa-calendar-o"/>
-                {{ formatted(article.post_at) }}
-              </p>
-            </td>
-          </tr>
-        </table>
+        <no-ssr>
+          <table v-if="isArticleListLoaded">
+            <tr
+              v-for="article in articles"
+              :key="article.id">
+              <td>
+                <p class="post-title">
+                  <nuxt-link
+                    :to="'/articles/' + article.id"
+                    class="link">{{ article.title }}</nuxt-link>
+                </p>
+                <p class="post-info">
+                  <i class="fa fa-fw fa-calendar-o"/>
+                  {{ formatted(article.post_at) }}
+                </p>
+              </td>
+            </tr>
+          </table>
+          <div
+            v-else
+            class="center">
+            <LdsEllipsis class="fade-in" />
+          </div>
+        </no-ssr>
       </div>
     </div>
 
@@ -47,9 +49,6 @@
         </p>
       </div>
     </div>
-
-    <router-view/>
-
   </div>
 </template>
 
@@ -61,45 +60,68 @@ export default {
   components: {
     LdsEllipsis
   },
-  data() {
-    return {
-      isMobile: false,
-      isArticleListLoaded: false,
-      articleList: [],
-      formatted: formattedUTCString,
-      tags: []
-    }
+  asyncData({$axios}) {
+    return axios.all([
+      $axios.get(`/v1/articles`),
+      $axios.get(`/v1/articleTags`)
+    ]).then(([articlesRes, tagsRes]) => {
+      return {
+        isArticleListLoaded: true,
+        isMobile: false,
+        articles: articlesRes.data.articles,
+        tags:     tagsRes.data
+      }
+    })
+    // => {
+    //   return {
+    //     isArticleListLoaded: true,
+    //     articleList:         res.data.articles,
+    //     tags:                [],
+    //   }
+    // })
   },
-  created() {
-    this.fetchArticles()
-    this.fetchTags()
-    this.calcIsMobile()
-    if (process.browser) {
-      window.addEventListener('resize', this.calcIsMobile)
-    }
-  },
-  beforeDestroy() {
-    if (process.browser) {
-      window.removeEventListener('resize', this.calcIsMobile)
-    }
-  },
+  // data() {
+  //   return {
+  //     isMobile: false,
+  //     isArticleListLoaded: false,
+  //     articleList: [],
+  //     formatted: formattedUTCString,
+  //     tags: []
+  //   }
+  // },
+  // mounted() {
+  //   this.calcIsMobile()
+  //   if (process.browser) {
+  //     window.addEventListener('resize', this.calcIsMobile)
+  //   }
+  //     // this.fetchArticles()
+  //     // this.fetchTags()
+  // },
+  // beforeDestroy() {
+  //   if (process.browser) {
+  //     window.removeEventListener('resize', this.calcIsMobile)
+  //   }
+  // },
   methods: {
-    fetchArticles() {
-      axios.get(process.env.API_URL_BASE + '/v1/articles?count=10').then(res => {
-        this.articleList = res.data.articles
-        this.isArticleListLoaded = true
-      })
-      .catch(e => {
-        console.log(e.response.data)
-      })
+    formatted(dtString) {
+      return formattedUTCString(dtString)
     },
-    fetchTags() {
-      axios.get(process.env.API_URL_BASE + '/v1/articleTags').then(res => {
-        this.tags = res.data
-      }).catch(e => {
-        console.log(e.response.data)
-      })
-    },
+    // fetchArticles() {
+    //   axios.get(process.env.API_URL_BASE + '/v1/articles?count=10').then(res => {
+    //     this.articleList = res.data.articles
+    //     this.isArticleListLoaded = true
+    //   })
+    //   .catch(e => {
+    //     console.log(e.response.data)
+    //   })
+    // },
+    // fetchTags() {
+    //   axios.get(process.env.API_URL_BASE + '/v1/articleTags').then(res => {
+    //     this.tags = res.data
+    //   }).catch(e => {
+    //     console.log(e.response.data)
+    //   })
+    // },
     calcIsMobile() {
       if (process.browser) {
         this.isMobile = window.innerWidth <= 768
