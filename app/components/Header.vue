@@ -124,7 +124,9 @@ export default {
   },
   methods: {
     calcDrawerNavBarHeight() {
-      this.drawerNavBarHeight = this.$refs.drawerNavBar.clientHeight
+      if (this.$refs.drawerNavBar) {
+        this.drawerNavBarHeight = this.$refs.drawerNavBar.clientHeight
+      }
     },
     calcIsWideMode() {
       this.wideMode = window.innerWidth >= 680 // $max_width_device + 1
