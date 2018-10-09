@@ -62,6 +62,18 @@ export default {
       miniVariant: true,
       title: 'Manager'
     }
+  },
+  mounted () {
+    window.addEventListener('resize', this.onResize, {passive: true})
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.onResize, {passive: true})
+  },
+  methods: {
+    onResize() {
+      // see https://vuetifyjs.com/en/layout/breakpoints
+      this.miniVariant = window.innerWidth > 600
+    }
   }
 }
 </script>
