@@ -72,56 +72,24 @@ export default {
         tags:     tagsRes.data
       }
     })
-    // => {
-    //   return {
-    //     isArticleListLoaded: true,
-    //     articleList:         res.data.articles,
-    //     tags:                [],
-    //   }
-    // })
   },
-  // data() {
-  //   return {
-  //     isMobile: false,
-  //     isArticleListLoaded: false,
-  //     articleList: [],
-  //     formatted: formattedUTCString,
-  //     tags: []
-  //   }
-  // },
-  // mounted() {
-  //   this.calcIsMobile()
-  //   if (process.browser) {
-  //     window.addEventListener('resize', this.calcIsMobile)
-  //   }
-  //     // this.fetchArticles()
-  //     // this.fetchTags()
-  // },
-  // beforeDestroy() {
-  //   if (process.browser) {
-  //     window.removeEventListener('resize', this.calcIsMobile)
-  //   }
-  // },
+  created() {
+    if (process.browser) {
+      window.addEventListener('resize', this.calcIsMobile)
+    }
+  },
+  mounted() {
+    this.calcIsMobile()
+  },
+  beforeDestroy() {
+    if (process.browser) {
+      window.removeEventListener('resize', this.calcIsMobile)
+    }
+  },
   methods: {
     formatted(dtString) {
       return formattedUTCString(dtString)
     },
-    // fetchArticles() {
-    //   axios.get(process.env.API_URL_BASE + '/v1/articles?count=10').then(res => {
-    //     this.articleList = res.data.articles
-    //     this.isArticleListLoaded = true
-    //   })
-    //   .catch(e => {
-    //     console.log(e.response.data)
-    //   })
-    // },
-    // fetchTags() {
-    //   axios.get(process.env.API_URL_BASE + '/v1/articleTags').then(res => {
-    //     this.tags = res.data
-    //   }).catch(e => {
-    //     console.log(e.response.data)
-    //   })
-    // },
     calcIsMobile() {
       if (process.browser) {
         this.isMobile = window.innerWidth <= 768
