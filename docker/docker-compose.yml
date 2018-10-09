@@ -28,6 +28,8 @@ services:
     command: npm --prefix /app run build && npm --prefix /app start
     environment:
       TZ: Asia/Tokyo
+    links:
+      - api:lmm-api
   cli:
     image: lmm/cli
     build:
