@@ -11,6 +11,8 @@ services:
       HTTP_TIMEOUT_SECOND: 3
   app:
     command: npm --prefix /app run dev
+    links:
+      - api:lmm-api
   nginx:
     volumes:
       - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
