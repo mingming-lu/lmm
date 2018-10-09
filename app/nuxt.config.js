@@ -83,5 +83,9 @@ module.exports = {
   server: {
     port: 8001,
     host: '0.0.0.0'
+  },
+
+  env: {
+    ASSET_URL: 'http://asset.lmm.local'
   }
 }

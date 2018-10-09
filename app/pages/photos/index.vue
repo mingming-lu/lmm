@@ -35,7 +35,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
 export default {
   components: {
@@ -70,7 +69,7 @@ export default {
     fetchPhotos () {
       this.page += 1
       this.isPageLoaded = false
-      axios.get(process.env.API_URL_BASE + '/v1/assets/photos?perPage=10&page=' + this.page).then((res) => {
+      this.$axios.get(`/v1/assets/photos?perPage=10&page=${this.page}`).then((res) => {
         this.photos.push(...res.data.photos)
         res.data.photos.forEach((photo, index) => {
           if (index % 2 === 0) {
@@ -86,7 +85,8 @@ export default {
       })
     },
     url: (name) => {
-      return process.env.IMAGE_URL_BASE + '/' + name
+      // TODO, create a plugin to convert name to imageURL
+      return `${process.env.ASSET_URL}/photos/${name}`
     },
     calcIsWideMode () {
       if (process.browser) {
