@@ -50,6 +50,8 @@ module.exports = {
   */
   axios: {
     // See https://github.com/nuxt-community/axios-module#options
+    baseURL: 'http://lmm-api:8002',
+    browserBaseURL: 'http://api.lmm.local'
   },
 
   /*
