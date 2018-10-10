@@ -1,7 +1,17 @@
 <template>
   <v-layout column>
-    <v-list>
-      <template v-for="(article, index) in articles">
+    <v-list class="list">
+      <v-btn
+        absolute
+        bottom
+        color="accent"
+        dark
+        fab
+        right
+      >
+        <v-icon>create</v-icon>
+      </v-btn>
+      <template v-for="article in articles">
         <v-list-tile
           :to="`/articles/${article.id}`"
           :key="article.id"
@@ -13,7 +23,6 @@
             <v-list-tile-sub-title v-text="new Date(article.post_at).toLocaleString()" />
           </v-list-tile-content>
         </v-list-tile>
-        <v-divider v-if="index + 1 < articles.length" :key="`divider-${index}`"></v-divider>
       </template>
     </v-list>
   </v-layout>
@@ -21,6 +30,11 @@
 
 <script>
 export default {
+  head () {
+    return {
+      title: 'Articles'
+    }
+  },
   asyncData({$axios}) {
     return $axios.get('/v1/articles')
     .then(res => {
@@ -33,3 +47,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.list {
+  position: relative;
+}
+</style>

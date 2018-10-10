@@ -1,8 +1,7 @@
 <template>
   <v-layout column>
     <v-list>
-      <v-subheader class="headline">Index</v-subheader>
-      <template v-for="(item, index) in indices">
+      <template v-for="item in indices">
         <v-list-tile
           :to="item.to"
           :key="item.to"
@@ -14,7 +13,6 @@
             <v-list-tile-sub-title v-text="item.description" />
           </v-list-tile-content>
         </v-list-tile>
-        <v-divider v-if="index + 1 < indices.length" :key="`divider-${index}`"></v-divider>
       </template>
     </v-list>
   </v-layout>
@@ -22,6 +20,11 @@
 
 <script>
 export default {
+  head () {
+    return {
+      title: 'Index'
+    }
+  },
   data () {
     return {
       indices: [
