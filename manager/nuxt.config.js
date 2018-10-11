@@ -1,4 +1,5 @@
 const pkg = require('./package')
+import colors from 'vuetify/es5/util/colors'
 
 module.exports = {
   mode: 'spa',
@@ -22,7 +23,7 @@ module.exports = {
   /*
   ** Customize the progress-bar color
   */
-  loading: { color: '#fff' },
+  loading: { color: colors.default.blue.darken3 },
 
   /*
   ** Global CSS
