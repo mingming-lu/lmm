@@ -1,16 +1,6 @@
 <template>
   <v-layout column>
-    <v-list class="list">
-      <v-btn
-        absolute
-        bottom
-        color="accent"
-        dark
-        fab
-        right
-      >
-        <v-icon>create</v-icon>
-      </v-btn>
+    <v-list>
       <template v-for="article in articles">
         <v-list-tile
           :to="`/articles/${article.id}`"
@@ -25,6 +15,16 @@
         </v-list-tile>
       </template>
     </v-list>
+    <v-btn
+      absolute
+      color="accent"
+      dark
+      fab
+      right
+      top
+    >
+      <v-icon>create</v-icon>
+    </v-btn>
   </v-layout>
 </template>
 
@@ -47,9 +47,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.list {
-  position: relative;
-}
-</style>
