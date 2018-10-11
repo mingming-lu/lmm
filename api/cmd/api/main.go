@@ -66,7 +66,7 @@ func main() {
 	articleFinder := articleFetcher.NewArticleFetcher(mysql)
 	articleUI := articleUI.NewUI(articleFinder, articleRepo, authorAdapter)
 	router.POST("/v1/articles", authUI.BearerAuth(articleUI.PostNewArticle))
-	router.PUT("/v1/articles", authUI.BearerAuth(articleUI.EditArticle))
+	router.PUT("/v1/articles/:articleID", authUI.BearerAuth(articleUI.EditArticle))
 	router.GET("/v1/articles", articleUI.ListArticles)
 	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)

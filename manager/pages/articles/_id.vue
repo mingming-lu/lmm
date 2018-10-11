@@ -20,11 +20,11 @@
             </v-chip>
           </template>
         </v-combobox>
-        <v-textarea label="body" required v-model="articleBody"/>
+        <v-textarea label="body" auto-grow required v-model="articleBody"/>
       </v-flex>
       <v-flex xs6>
         <v-subheader>Article Body Preview</v-subheader>
-        <v-textarea class="mx-3" v-html="marked(articleBody)"/>
+        <div class="mx-3 preview" v-hljs v-html="marked(articleBody)"></div>
       </v-flex>
     </v-layout>
     <v-btn
@@ -34,31 +34,57 @@
       fab
       right
       top
+      @click="updateArticle"
     >
       <v-icon>autorenew</v-icon>
     </v-btn>
+    <v-snackbar
+      v-model="updatedSnackbar"
+      bottom
+      color="success"
+      :timeout="3000"
+    >
+      Updated
+    </v-snackbar>
   </v-container>
 </template>
 
 <script>
 import Markdownit from 'markdown-it'
+
+const fetcher = axiosClient => {
+  return {
+    fetch: articleID => {
+      return Promise.all([
+        axiosClient.get(`/v1/articles/${articleID}`),
+        axiosClient.get(`/v1/articleTags`)
+      ])
+      .then(([article, tags]) => {
+        return {
+          articleID:       article.data.id,
+          articleTitle:    article.data.title,
+          articleBody:     article.data.body,
+          articleTags:     article.data.tags.map(tag => { return tag.name }),
+          tags:            tags.data.map(tag => { return tag.name }),
+          row:             false,
+          updatedSnackbar: false,
+        }
+      })
+    }
+  }
+}
+
+const marker = new Markdownit({
+  html:        true,
+  typographer: true
+})
+
 export default {
   validate({params}) {
     return /^[\d\w]{8}$/.test(params.id)
   },
   asyncData({$axios, params}) {
-    return Promise.all([
-      $axios.get(`/v1/articles/${params.id}`),
-      $axios.get(`/v1/articleTags`)
-    ]).then(([article, tags]) => {
-      return {
-        articleTitle: article.data.title,
-        articleBody:  article.data.body,
-        articleTags:  article.data.tags.map(tag => { return tag.name }),
-        row:          false,
-        tags:         tags.data.map(tag => { return tag.name })
-      }
-    })
+    return fetcher($axios).fetch(params.id)
   },
   mounted() {
     this.onResize()
@@ -69,14 +95,37 @@ export default {
   },
   methods: {
     marked(text) {
-      return new Markdownit({
-        html: true,
-        typographer: true
-      }).render(text)
+      console.log(this.$refs.dummy)
+      return marker.render(text)
     },
     removeTag(item) {
       this.articleTags.splice(this.articleTags.indexOf(item), 1)
       this.articleTags = [...this.articleTags]
+    },
+    updateArticle() {
+      this.$axios
+        .put(`/v1/articles/${this.articleID}`, {
+          title: this.articleTitle,
+          body:  this.articleBody,
+          tags:  this.articleTags,
+        }, {
+          headers: {
+            Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`,
+          },
+        })
+        .then(res => {
+          this.updatedSnackbar = true
+          fetcher(this.$axios).fetch(this.articleID).then(data => {
+            this.articleID    = data.articleID
+            this.articleTitle = data.articleTitle
+            this.articleBody  = data.articleBody
+            this.articleTags  = data.articleTags
+            this.tags         = data.tags
+          })
+        })
+        .catch(e => {
+          alert(e)
+        })
     },
     onResize() {
       this.row = window.innerWidth > 960
@@ -84,3 +133,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.preview {
+  font-size: 16px; /* adjust to v-textarea */
+}
+.preview /deep/ code {
+  font-family: Monaco, "Courier", monospace;
+  width: 100%;
+}
+</style>
