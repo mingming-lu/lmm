@@ -39,6 +39,13 @@ module.exports = {
   ],
 
   /*
+  ** Router config
+  */
+  router: {
+    middleware: 'authenticate'
+  },
+
+  /*
   ** Nuxt.js modules
   */
   modules: [
