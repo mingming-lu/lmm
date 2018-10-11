@@ -42,7 +42,7 @@ module.exports = {
   ** Router config
   */
   router: {
-    middleware: 'authenticate'
+    middleware: 'authenticated'
   },
 
   /*
