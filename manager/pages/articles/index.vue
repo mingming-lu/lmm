@@ -38,7 +38,6 @@ export default {
   asyncData({$axios}) {
     return $axios.get('/v1/articles')
     .then(res => {
-      console.log(res)
       return {
         articles:      res.data.articles,
         has_next_page: res.data.has_next_page
