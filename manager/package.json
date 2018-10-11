@@ -19,13 +19,14 @@
     "@nuxtjs/axios": "^5.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0",
     "babel-eslint": "^8.2.1",
     "eslint": "^5.0.1",
-    "eslint-loader": "^2.0.0",
-    "eslint-plugin-vue": "^4.0.0",
     "eslint-config-prettier": "^3.1.0",
+    "eslint-loader": "^2.0.0",
     "eslint-plugin-prettier": "2.6.2",
+    "eslint-plugin-vue": "^4.0.0",
+    "markdown-it": "^8.4.2",
+    "nodemon": "^1.11.0",
     "prettier": "1.14.3",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2"

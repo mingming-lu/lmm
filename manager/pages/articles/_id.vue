@@ -23,8 +23,8 @@
         <v-textarea label="body" required v-model="articleBody"/>
       </v-flex>
       <v-flex xs6>
-        <v-text-field readonly outline label="title preview" v-model="articleTitle"/>
-        <v-textarea   readonly outline label="body preview"  v-model="articleBody"/>
+        <v-subheader>Article Body Preview</v-subheader>
+        <v-textarea class="mx-3" v-html="marked(articleBody)"/>
       </v-flex>
     </v-layout>
     <v-btn
@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import Markdownit from 'markdown-it'
 export default {
   validate({params}) {
     return /^[\d\w]{8}$/.test(params.id)
@@ -67,6 +68,12 @@ export default {
     window.removeEventListener('resize', this.onResize, { passive: true })
   },
   methods: {
+    marked(text) {
+      return new Markdownit({
+        html: true,
+        typographer: true
+      }).render(text)
+    },
     removeTag(item) {
       this.articleTags.splice(this.articleTags.indexOf(item), 1)
       this.articleTags = [...this.articleTags]
