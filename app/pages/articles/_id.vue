@@ -264,6 +264,11 @@ i {
   background-color: #f1f1f1 !important;
   font-family: Monaco, "Courier", monospace;
 }
+.marked /deep/ pre {
+  code {
+    padding: 4px 12px;
+  }
+}
 .marked /deep/ s {
   opacity: 0.5;
 }
