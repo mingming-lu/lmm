@@ -13,6 +13,8 @@ services:
     command: npm --prefix /app run dev
     links:
       - api:lmm-api
+  manager:
+    command: npm --prefix /manager run dev
   nginx:
     volumes:
       - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
