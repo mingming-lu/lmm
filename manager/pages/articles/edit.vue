@@ -80,11 +80,11 @@ const marker = new Markdownit({
 })
 
 export default {
-  validate({params}) {
-    return /^[\d\w]{8}$/.test(params.id)
+  validate({query}) {
+    return /^[\d\w]{8}$/.test(query.articleID)
   },
-  asyncData({$axios, params}) {
-    return fetcher($axios).fetch(params.id)
+  asyncData({$axios, query}) {
+    return fetcher($axios).fetch(query.articleID)
   },
   mounted() {
     this.onResize()
@@ -93,6 +93,7 @@ export default {
   beforeDestroy() {
     window.removeEventListener('resize', this.onResize, { passive: true })
   },
+  watchQuery: ['articleID'],
   methods: {
     marked(text) {
       console.log(this.$refs.dummy)

@@ -3,7 +3,7 @@
     <v-list>
       <template v-for="article in articles">
         <v-list-tile
-          :to="`/articles/${article.id}`"
+          :to="`/articles/edit?articleID=${article.id}`"
           :key="article.id"
           nuxt
           exact
