@@ -24,7 +24,7 @@
       </v-flex>
       <v-flex xs6>
         <v-subheader>Article Body Preview</v-subheader>
-        <div class="mx-3 preview" v-html="marked(articleBody)"></div>
+        <div class="mx-3 preview" v-hljs v-html="marked(articleBody)"></div>
       </v-flex>
     </v-layout>
     <v-btn
@@ -143,8 +143,7 @@ export default {
 .preview {
   font-size: 16px; /* adjust to v-textarea */
 }
-.preview /deep/ code {
+.preview /deep/ pre code {
   font-family: Monaco, "Courier", monospace;
-  width: 100%;
 }
 </style>
