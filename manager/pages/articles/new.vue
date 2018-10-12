@@ -34,45 +34,15 @@
       fab
       right
       top
-      @click="updateArticle"
+      @click="postArticle"
     >
-      <v-icon>autorenew</v-icon>
+      <v-icon>save</v-icon>
     </v-btn>
-    <v-snackbar
-      v-model="updatedSnackbar"
-      bottom
-      color="success"
-      :timeout="3000"
-    >
-      Updated
-    </v-snackbar>
   </v-container>
 </template>
 
 <script>
 import Markdownit from 'markdown-it'
-
-const fetcher = axiosClient => {
-  return {
-    fetch: articleID => {
-      return Promise.all([
-        axiosClient.get(`/v1/articles/${articleID}`),
-        axiosClient.get(`/v1/articleTags`)
-      ])
-      .then(([article, tags]) => {
-        return {
-          articleID:       article.data.id,
-          articleTitle:    article.data.title,
-          articleBody:     article.data.body,
-          articleTags:     article.data.tags.map(tag => { return tag.name }),
-          tags:            tags.data.map(tag => { return tag.name }),
-          row:             false,
-          updatedSnackbar: false,
-        }
-      })
-    }
-  }
-}
 
 const marker = new Markdownit({
   html:        true,
@@ -82,14 +52,21 @@ const marker = new Markdownit({
 export default {
   head() {
     return {
-      title: 'Edit an article',
+      title: 'Post an article',
     }
   },
-  validate({query}) {
-    return /^[\d\w]{8}$/.test(query.articleID)
-  },
-  asyncData({$axios, query}) {
-    return fetcher($axios).fetch(query.articleID)
+  asyncData({ $axios }) {
+    return $axios
+      .get('/v1/articleTags')
+      .then(res => {
+        return {
+          articleTitle:   '',
+          articleBody:    '',
+          articleTags:    [],
+          tags:           res.data.map(tag => tag.name),
+          row:            false,
+        }
+      })
   },
   mounted() {
     this.onResize()
@@ -98,7 +75,6 @@ export default {
   beforeDestroy() {
     window.removeEventListener('resize', this.onResize, { passive: true })
   },
-  watchQuery: ['articleID'],
   methods: {
     marked(text) {
       return marker.render(text)
@@ -107,34 +83,25 @@ export default {
       this.articleTags.splice(this.articleTags.indexOf(item), 1)
       this.articleTags = [...this.articleTags]
     },
-    updateArticle() {
+    onResize() {
+      this.row = window.innerWidth > 960
+    },
+    postArticle() {
       this.$axios
-        .put(`/v1/articles/${this.articleID}`, {
+        .post('/v1/articles', {
           title: this.articleTitle,
           body:  this.articleBody,
           tags:  this.articleTags,
         }, {
           headers: {
             Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`,
-          },
+          }
         })
         .then(res => {
-          this.updatedSnackbar = true
-          fetcher(this.$axios).fetch(this.articleID).then(data => {
-            this.articleID    = data.articleID
-            this.articleTitle = data.articleTitle
-            this.articleBody  = data.articleBody
-            this.articleTags  = data.articleTags
-            this.tags         = data.tags
-          })
-        })
-        .catch(e => {
-          alert(e)
+          alert(`Article posted\nmessage: ${JSON.stringify(res.data)}`)
+          this.$router.push('/articles')
         })
     },
-    onResize() {
-      this.row = window.innerWidth > 960
-    }
   }
 }
 </script>
