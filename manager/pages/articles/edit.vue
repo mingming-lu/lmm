@@ -80,6 +80,11 @@ const marker = new Markdownit({
 })
 
 export default {
+  head() {
+    return {
+      title: 'Edit an article',
+    }
+  },
   validate({query}) {
     return /^[\d\w]{8}$/.test(query.articleID)
   },

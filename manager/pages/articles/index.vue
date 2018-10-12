@@ -20,7 +20,9 @@
       color="accent"
       dark
       fab
+      nuxt
       right
+      to="/articles/new"
       top
     >
       <v-icon>create</v-icon>
@@ -32,7 +34,7 @@
 export default {
   head () {
     return {
-      title: 'Articles'
+      title: 'Articles list'
     }
   },
   asyncData({$axios}) {
