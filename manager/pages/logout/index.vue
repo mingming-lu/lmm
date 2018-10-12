@@ -1,23 +1,16 @@
 <template>
-  <nuxt-link to="/login">{{ `Redirect to login page in ${countDown}s` }}</nuxt-link>
+  <p class="text-xs-center"><nuxt-link to="/">Go to home page</nuxt-link></p>
 </template>
 
 <script>
 export default {
-  data() {
-    return {
-      countDown: 3,
+  created() {
+    if (confirm('Are you really going to logout ?')) {
+      window.localStorage.removeItem('accessToken')
+      this.$router.push('/')
+    } else {
+      this.$router.back()
     }
   },
-  mounted() {
-    window.localStorage.removeItem('accessToken')
-    const i = setInterval(() => {
-      this.countDown--;
-      if (this.countDown === 0) {
-        clearInterval(i)
-        this.$router.push('/login')
-      }
-    }, 1000);
-  }
 }
 </script>
