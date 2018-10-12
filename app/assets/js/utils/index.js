@@ -1,4 +1,4 @@
-export {formattedDate,formattedTimeStamp,formattedUTCString}
+export { formattedDate, formattedTimeStamp, formattedUTCString }
 
 function formattedTimeStamp(timestamp) {
   let date = new Date(timestamp * 1e3)
@@ -11,14 +11,9 @@ function formattedUTCString(s) {
 }
 
 function formattedDate(date) {
-  let d = {
-    y: date.getFullYear(),
-    m: date.getMonth(),
-    d: date.getDate()
-  }
-  let s = ''
-  s += d.y + '-'
-  s += (d.m + 1) + '-'
-  s += (d.d < 10 ? '0' + d.d : d.d)
-  return s
+  const y = date.getFullYear()
+  const m = date.getMonth() + 1
+  const d = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
+
+  return `${y}-${m}-${d} ${date.toTimeString().substr(0, 8)}`
 }

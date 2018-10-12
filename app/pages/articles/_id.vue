@@ -56,8 +56,8 @@ export default {
         subtitles:    [],
         body:         res.data.body,
         tags:         res.data.tags,
-        postAt:       res.data.post_at,
-        lastEditedAt: res.data.last_edited_at
+        postAt:       formattedUTCString(res.data.post_at),
+        lastEditedAt: formattedUTCString(res.data.last_edited_at),
       }
     })
   },
