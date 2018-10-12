@@ -133,19 +133,17 @@ export default {
       }
     },
     jumpToHash: (hash) => {
-      if (process.broswer) {
-        location.href = hash
-        window.scrollTo(0, document.getElementById(hash.slice(1)).offsetTop - 64)
+      location.href = hash
+      window.scrollTo(0, document.getElementById(hash.slice(1)).offsetTop - 64)
 
-        // change background color of subtitle for 0.5s
-        const match = /^#(.+)$/g.exec(hash)
-        if (match !== null && match.length >= 2) {
-          const id = match[1]
-          document.getElementById(id).className = 'highlighted'
-          setTimeout(() => {
-            document.getElementById(id).className = 'highlight-dispear-trans'
-          }, 500)
-        }
+      // change background color of subtitle for 0.5s
+      const match = /^#(.+)$/g.exec(hash)
+      if (match !== null && match.length >= 2) {
+        const id = match[1]
+        document.getElementById(id).className = 'highlighted'
+        setTimeout(() => {
+          document.getElementById(id).className = 'highlight-dispear-trans'
+        }, 500)
       }
     }
   }
@@ -153,7 +151,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/styles.scss';
+@import '~/assets/scss/styles.scss';
 i {
   margin-right: 8px;
 }
