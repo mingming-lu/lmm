@@ -47,24 +47,35 @@ export default {
   validate ({ params }) {
     return /^[\d\w]{8}$/.test(params.id)
   },
-  data () {
+  head () {
     return {
-      isMobile: false,
-      title: '',
-      subtitles: [],
-      body: '',
-      tags: [],
-      postAt: '',
-      lastEditedAt: ''
+      title: this.title
     }
   },
+  asyncData({$axios, params}) {
+    return $axios.get(`v1/articles/${params.id}`)
+    .then(res => {
+      return {
+        isMobile:     true,
+        title:        res.data.title,
+        subtitles:    [],
+        body:         res.data.body,
+        tags:         res.data.tags,
+        postAt:       formattedUTCString(res.data.post_at),
+        lastEditedAt: formattedUTCString(res.data.last_edited_at),
+      }
+    })
+  },
   created () {
-    this.fetchArticle()
-    this.calcIsMobile()
     if (process.browser) {
       window.addEventListener('resize', this.calcIsMobile)
       window.addEventListener('scroll', this.calcProgress)
     }
+  },
+  mounted () {
+    this.markBodyAndExtractSubtitles()
+    this.calcIsMobile()
+    this.calcProgress()
   },
   watch: {
     body: function () {
@@ -80,49 +91,18 @@ export default {
     }
   },
   methods: {
-    fetchArticle: function () {
+    markBodyAndExtractSubtitles() {
       const md = new Markdownit({
         html: true,
         typographer: true
       })
-      axios.get(process.env.API_URL_BASE + '/v1/articles/' + this.$route.params.id).then(res => {
-        const article = res.data
 
-        this.title = article.title
-        this.tags = article.tags
-        this.postAt = formattedUTCString(article.post_at)
-        this.lastEditedAt = formattedUTCString(article.last_edited_at)
-
-        // prepare subtitles and their links
-        const body = md.render(article.body)
-        const results = this.extractSubtitles(body, this.$route.path)
-        this.body = results[0]
-        this.subtitles = results[1]
-      }).catch(e => {
-        if (e.response) {
-          console.log(e.response.data)
-        } else {
-          console.log(e)
-        }
-      })
+      const body     = md.render(this.body)
+      const results  = this.extractSubtitles(body, this.$route.path)
+      this.body      = results[0]
+      this.subtitles = results[1]
     },
-    jumpToHash: (hash) => {
-      if (process.broswer) {
-        location.href = hash
-        window.scrollTo(0, document.getElementById(hash.slice(1)).offsetTop - 64)
-
-        // change background color of subtitle for 0.5s
-        const match = /^#(.+)$/g.exec(hash)
-        if (match !== null && match.length >= 2) {
-          const id = match[1]
-          document.getElementById(id).className = 'highlighted'
-          setTimeout(() => {
-            document.getElementById(id).className = 'highlight-dispear-trans'
-          }, 500)
-        }
-      }
-    },
-    extractSubtitles: (text, url) => {
+    extractSubtitles: (text) => {
       let lines = text.split('\n')
       let subtitles = []
 
@@ -145,7 +125,7 @@ export default {
       return [lines.join('\n'), subtitles]
     },
     calcProgress () {
-      if (process.browser) {
+      if (process.browser && this.$refs.progress) {
         let el = this.$refs.body
         let progress = ((window.scrollY + window.innerHeight) - el.offsetTop) / (el.offsetHeight)
         progress = progress > 1 ? 100 : progress * 100
@@ -156,13 +136,27 @@ export default {
       if (process.browser) {
         this.isMobile = window.innerWidth <= 768
       }
+    },
+    jumpToHash: (hash) => {
+      location.href = hash
+      window.scrollTo(0, document.getElementById(hash.slice(1)).offsetTop - 64)
+
+      // change background color of subtitle for 0.5s
+      const match = /^#(.+)$/g.exec(hash)
+      if (match !== null && match.length >= 2) {
+        const id = match[1]
+        document.getElementById(id).className = 'highlighted'
+        setTimeout(() => {
+          document.getElementById(id).className = 'highlight-dispear-trans'
+        }, 500)
+      }
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/scss/styles.scss';
+@import '~/assets/scss/styles.scss';
 i {
   margin-right: 8px;
 }
@@ -274,6 +268,11 @@ i {
 .marked /deep/ code {
   background-color: #f1f1f1 !important;
   font-family: Monaco, "Courier", monospace;
+}
+.marked /deep/ pre {
+  code {
+    padding: 4px 12px;
+  }
 }
 .marked /deep/ s {
   opacity: 0.5;

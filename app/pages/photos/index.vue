@@ -35,13 +35,17 @@
 </template>
 
 <script>
-import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
 export default {
   components: {
     LdsEllipsis
   },
-  data () {
+  head() {
+    return {
+      title: 'Photos'
+    }
+  },
+  data() {
     return {
       isPageLoaded: false,
       wideMode: false,
@@ -52,25 +56,25 @@ export default {
       photos: []
     }
   },
-  created () {
+  created() {
     if (process.browser) {
       window.addEventListener('resize', this.calcIsWideMode)
     }
   },
-  mounted () {
+  mounted() {
     this.calcIsWideMode()
     this.fetchPhotos()
   },
-  beforeDestroy () {
+  beforeDestroy() {
     if (process.browser) {
       window.removeEventListener('resize', this.calcIsWideMode)
     }
   },
   methods: {
-    fetchPhotos () {
+    fetchPhotos() {
       this.page += 1
       this.isPageLoaded = false
-      axios.get(process.env.API_URL_BASE + '/v1/assets/photos?perPage=10&page=' + this.page).then((res) => {
+      this.$axios.get(`/v1/assets/photos?perPage=10&page=${this.page}`).then((res) => {
         this.photos.push(...res.data.photos)
         res.data.photos.forEach((photo, index) => {
           if (index % 2 === 0) {
@@ -85,10 +89,11 @@ export default {
         console.log(e)
       })
     },
-    url: (name) => {
-      return process.env.IMAGE_URL_BASE + '/' + name
+    url: name => {
+      // TODO, create a plugin to convert name to imageURL
+      return `${process.env.ASSET_URL}/photos/${name}`
     },
-    calcIsWideMode () {
+    calcIsWideMode() {
       if (process.browser) {
         this.wideMode = window.innerWidth >= 800
       }

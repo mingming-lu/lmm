@@ -4,5 +4,6 @@ import 'highlight.js/styles/github-gist.css'
 
 Vue.directive('hljs', el => {
   let codeBlocks = el.querySelectorAll('pre code')
+  console.log(codeBlocks)
   Array.prototype.forEach.call(codeBlocks, hljs.highlightBlock)
 })

@@ -5,28 +5,38 @@
       :class="{ 'mobile-left': isMobile }"
       class="posts">
       <div :class="{container: !isMobile}">
-        <div
-          v-if="!isArticleListLoaded"
-          class="center">
-          <LdsEllipsis class="fade-in" />
-        </div>
-        <table v-else>
-          <tr
-            v-for="article in articleList"
-            :key="article.id">
-            <td>
-              <p class="post-title">
-                <nuxt-link
-                  :to="'/articles/' + article.id"
-                  class="link">{{ article.title }}</nuxt-link>
-              </p>
-              <p class="post-info">
-                <i class="fa fa-fw fa-calendar-o"/>
-                {{ formatted(article.post_at) }}
-              </p>
-            </td>
-          </tr>
-        </table>
+        <no-ssr>
+          <table v-if="isPageLoaded">
+            <tr
+              v-for="article in articles"
+              :key="article.id">
+              <td>
+                <p class="post-title">
+                  <nuxt-link
+                    :to="'/articles/' + article.id"
+                    class="link">{{ article.title }}</nuxt-link>
+                </p>
+                <p class="post-info">
+                  <i class="fa fa-fw fa-calendar-o"/>
+                  {{ formatted(article.post_at) }}
+                </p>
+              </td>
+            </tr>
+          </table>
+          <div
+            v-else
+            class="center">
+            <LdsEllipsis class="fade-in" />
+          </div>
+        </no-ssr>
+      </div>
+      <!-- button to load more page -->
+      <div v-if="hasNextPage && isPageLoaded" class="center">
+        <br>
+        <button class="more" @click.prevent="loadMoreArticles()">See more&hellip;</button>
+      </div>
+      <div v-if="!hasNextPage && isPageLoaded" class="center">
+        <p class="hint">No more articles.</p>
       </div>
     </div>
 
@@ -48,7 +58,7 @@
       </div>
     </div>
 
-    <router-view/>
+
 
   </div>
 </template>
@@ -57,26 +67,46 @@
 import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
 import { formattedUTCString } from '~/assets/js/utils'
+
+const articleFetcher = axiosClient => {
+  return {
+    fetch: page => {
+      return axiosClient.get(`v1/articles?page=${page}`)
+    },
+  }
+}
+
 export default {
   components: {
     LdsEllipsis
   },
-  data() {
+  head () {
     return {
-      isMobile: false,
-      isArticleListLoaded: false,
-      articleList: [],
-      formatted: formattedUTCString,
-      tags: []
+      title: 'Articles'
     }
   },
+  asyncData({$axios}) {
+    return axios.all([
+      $axios.get(`/v1/articles`),
+      $axios.get(`/v1/articleTags`)
+    ]).then(([articlesRes, tagsRes]) => {
+      return {
+        isMobile:     false,
+        articles:     articlesRes.data.articles,
+        tags:         tagsRes.data,
+        page:         1,
+        hasNextPage:  articlesRes.data.has_next_page,
+        isPageLoaded: true,
+      }
+    })
+  },
   created() {
-    this.fetchArticles()
-    this.fetchTags()
-    this.calcIsMobile()
     if (process.browser) {
       window.addEventListener('resize', this.calcIsMobile)
     }
+  },
+  mounted() {
+    this.calcIsMobile()
   },
   beforeDestroy() {
     if (process.browser) {
@@ -84,26 +114,20 @@ export default {
     }
   },
   methods: {
-    fetchArticles() {
-      axios.get(process.env.API_URL_BASE + '/v1/articles?count=10').then(res => {
-        this.articleList = res.data.articles
-        this.isArticleListLoaded = true
-      })
-      .catch(e => {
-        console.log(e.response.data)
-      })
-    },
-    fetchTags() {
-      axios.get(process.env.API_URL_BASE + '/v1/articleTags').then(res => {
-        this.tags = res.data
-      }).catch(e => {
-        console.log(e.response.data)
-      })
+    formatted(dtString) {
+      return formattedUTCString(dtString)
     },
     calcIsMobile() {
       if (process.browser) {
         this.isMobile = window.innerWidth <= 768
       }
+    },
+    loadMoreArticles() {
+      articleFetcher(this.$axios).fetch(++this.page)
+        .then(res => {
+          this.articles.push(...res.data.articles)
+          this.hasNextPage = res.data.has_next_page
+        })
     }
   }
 }
@@ -182,5 +206,24 @@ export default {
 }
 i {
   margin-right: 8px;
+}
+.more {
+  border: 1px solid rgba(1, 1, 1, 0.1);
+  border-radius: 2px;
+  padding: 8px 32px;
+  color: $color_text;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 1.12em;
+  &:hover {
+    background: transparent;
+    border: 1px solid rgba(30, 144, 255, 0.1);
+    color: $color_accent;
+    outline: none;
+  }
+}
+.hint {
+  color: rgba(1, 1, 1, 0.1);
+  font-size: 1.12em;
 }
 </style>
