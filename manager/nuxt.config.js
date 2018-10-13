@@ -59,8 +59,8 @@ module.exports = {
   */
   axios: {
     // See https://github.com/nuxt-community/axios-module#options
-    baseURL: 'http://lmm-api:8002',
-    browserBaseURL: 'http://api.lmm.local'
+    baseURL: process.env.API_URL,
+    browserBaseURL: process.env.API_URL_BROWSER
   },
 
   /*
@@ -87,10 +87,17 @@ module.exports = {
   },
 
   /*
-  ** Server confiuration
+  ** Server configuration
   */
   server: {
-    host: '0.0.0.0',
-    port: 8004
+    host: process.env.SERVER_HOST,
+    port: process.env.SERVER_PORT
+  },
+
+  /*
+  ** Environment configuration
+  */
+  env: {
+    ASSET_URL: process.env.ASSET_URL
   }
 }

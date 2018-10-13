@@ -7,7 +7,7 @@ module.exports = {
   ** Headers of the page
   */
   head: {
-    title: 'LMM\'s Blog',
+    title: `LMM's Blog`,
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -50,8 +50,8 @@ module.exports = {
   */
   axios: {
     // See https://github.com/nuxt-community/axios-module#options
-    baseURL: 'http://lmm-api:8002',
-    browserBaseURL: 'http://api.lmm.local'
+    baseURL: process.env.API_URL,
+    browserBaseURL: process.env.API_URL_BROWSER
   },
 
   /*
@@ -69,8 +69,8 @@ module.exports = {
           test: /\.(js|vue)$/,
           loader: 'eslint-loader',
           exclude: /(node_modules)/,
-          options : {
-            fix : true
+          options: {
+            fix: true
           }
         })
       }
@@ -81,11 +81,14 @@ module.exports = {
   ** Server confiuration
   */
   server: {
-    port: 8001,
-    host: '0.0.0.0'
+    host: process.env.SERVER_HOST,
+    port: process.env.SERVER_PORT
   },
 
+  /*
+  ** Environment configuration
+  */
   env: {
-    ASSET_URL: 'http://asset.lmm.local'
+    ASSET_URL: process.env.ASSET_URL
   }
 }
