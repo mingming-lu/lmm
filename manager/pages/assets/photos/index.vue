@@ -123,6 +123,11 @@ export default {
         })
         .then(res => {
           alert(`Uploaded\nmessage: ${res.data}`)
+          fetcher(this.$axios).fetch(1)
+            .then(res => {
+              this.photos      = res.data.photos
+              this.hasNextPage = res.data.hasNextPage
+            })
         })
     }
   }
