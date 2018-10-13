@@ -47,6 +47,11 @@ export default {
   validate ({ params }) {
     return /^[\d\w]{8}$/.test(params.id)
   },
+  head () {
+    return {
+      title: this.title
+    }
+  },
   asyncData({$axios, params}) {
     return $axios.get(`v1/articles/${params.id}`)
     .then(res => {

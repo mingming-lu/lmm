@@ -80,6 +80,11 @@ export default {
   components: {
     LdsEllipsis
   },
+  head () {
+    return {
+      title: 'Articles'
+    }
+  },
   asyncData({$axios}) {
     return axios.all([
       $axios.get(`/v1/articles`),
