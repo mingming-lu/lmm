@@ -13,8 +13,20 @@ services:
     command: npm --prefix /app run dev
     links:
       - api:lmm-api
+    environment:
+      SERVER_HOST: '0.0.0.0'
+      SERVER_PORT: 8001
+      API_URL: 'http://lmm-api:8002'
+      API_URL_BROWSER: 'http://api.lmm.local'
+      ASSET_URL: 'http://asset.lmm.local'
   manager:
     command: npm --prefix /manager run dev
+    environment:
+      SERVER_HOST: '0.0.0.0'
+      SERVER_PORT: 8004
+      API_URL: 'http://lmm-api:8002'
+      API_URL_BROWSER: 'http://api.lmm.local'
+      ASSET_URL: 'http://asset.lmm.local'
   nginx:
     volumes:
       - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
