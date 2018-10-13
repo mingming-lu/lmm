@@ -6,7 +6,7 @@
       class="posts">
       <div :class="{container: !isMobile}">
         <no-ssr>
-          <table v-if="isArticleListLoaded">
+          <table v-if="isPageLoaded">
             <tr
               v-for="article in articles"
               :key="article.id">
@@ -30,6 +30,14 @@
           </div>
         </no-ssr>
       </div>
+      <!-- button to load more page -->
+      <div v-if="hasNextPage && isPageLoaded" class="center">
+        <br>
+        <button class="more" @click.prevent="loadMoreArticles()">See more&hellip;</button>
+      </div>
+      <div v-if="!hasNextPage && isPageLoaded" class="center">
+        <p class="hint">No more articles.</p>
+      </div>
     </div>
 
     <div
@@ -49,6 +57,9 @@
         </p>
       </div>
     </div>
+
+
+
   </div>
 </template>
 
@@ -56,6 +67,15 @@
 import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
 import { formattedUTCString } from '~/assets/js/utils'
+
+const articleFetcher = axiosClient => {
+  return {
+    fetch: page => {
+      return axiosClient.get(`v1/articles?page=${page}`)
+    },
+  }
+}
+
 export default {
   components: {
     LdsEllipsis
@@ -66,10 +86,12 @@ export default {
       $axios.get(`/v1/articleTags`)
     ]).then(([articlesRes, tagsRes]) => {
       return {
-        isArticleListLoaded: true,
-        isMobile: false,
-        articles: articlesRes.data.articles,
-        tags:     tagsRes.data
+        isMobile:     false,
+        articles:     articlesRes.data.articles,
+        tags:         tagsRes.data,
+        page:         1,
+        hasNextPage:  articlesRes.data.has_next_page,
+        isPageLoaded: true,
       }
     })
   },
@@ -94,6 +116,13 @@ export default {
       if (process.browser) {
         this.isMobile = window.innerWidth <= 768
       }
+    },
+    loadMoreArticles() {
+      articleFetcher(this.$axios).fetch(++this.page)
+        .then(res => {
+          this.articles.push(...res.data.articles)
+          this.hasNextPage = res.data.has_next_page
+        })
     }
   }
 }
@@ -172,5 +201,24 @@ export default {
 }
 i {
   margin-right: 8px;
+}
+.more {
+  border: 1px solid rgba(1, 1, 1, 0.1);
+  border-radius: 2px;
+  padding: 8px 32px;
+  color: $color_text;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 1.12em;
+  &:hover {
+    background: transparent;
+    border: 1px solid rgba(30, 144, 255, 0.1);
+    color: $color_accent;
+    outline: none;
+  }
+}
+.hint {
+  color: rgba(1, 1, 1, 0.1);
+  font-size: 1.12em;
 }
 </style>
