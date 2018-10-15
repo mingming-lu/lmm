@@ -1,0 +1,32 @@
+version: "3"
+services:
+  api:
+    env_file:
+      - ./api/.dev.env
+    environment:
+      DB_HOST: lmm-mysql
+      DB_PORT: 3306
+      DB_NAME: lmm
+      DB_USER: root
+      HTTP_TIMEOUT_SECOND: 3
+  app:
+    command: npm --prefix /app run dev
+    links:
+      - api:lmm-api
+    environment:
+      SERVER_HOST: '0.0.0.0'
+      SERVER_PORT: 8001
+      API_URL: 'http://lmm-api:8002'
+      API_URL_BROWSER: 'http://api.lmm.local'
+      ASSET_URL: 'http://asset.lmm.local'
+  manager:
+    command: npm --prefix /manager run dev
+    environment:
+      SERVER_HOST: '0.0.0.0'
+      SERVER_PORT: 8004
+      API_URL: 'http://lmm-api:8002'
+      API_URL_BROWSER: 'http://api.lmm.local'
+      ASSET_URL: 'http://asset.lmm.local'
+  nginx:
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
