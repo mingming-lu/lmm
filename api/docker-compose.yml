@@ -5,8 +5,7 @@ services:
     build:
       context: .
     volumes:
-      - ../go:/go
-      - ../asset:/asset
+      - ./go:/go
     working_dir: /go/src/lmm/api
     command: go run cmd/api/main.go
     environment:
