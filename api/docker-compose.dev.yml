@@ -1,0 +1,14 @@
+version: "3"
+services:
+  api:
+    env_file:
+      - ./.env/dev.env
+    environment:
+      DB_HOST: api-mysql
+      DB_PORT: 3306
+      DB_NAME: lmm
+      DB_USER: root
+      HTTP_TIMEOUT_SECOND: 3
+  mysql:
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1

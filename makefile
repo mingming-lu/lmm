@@ -1,46 +1,24 @@
 all: dev
 
-docker-compose: docker
-	docker-compose -f docker/docker-compose.yml $(args) $(cmd)
-
-build:
-	make docker-compose cmd=build
-
-install:
-	make install-app
-	make install-api
-	make install-manager
-
-install-app:
-	cd docker && docker-compose run --rm app bash -c "rm -rf app/node_modules && npm --prefix /app install"
-
-install-api:
-	cd docker && docker-compose build api
-
-install-manager:
-	cd docker && docker-compose run --rm manager bash -c "rm -rf manager/node_modules && npm --prefix /manager install"
-
-prod:
-	make docker-compose cmd="up -d"
-
 dev:
-	make prod args="-f docker/docker-compose.dev.yml"
+	make start
 
-test:
-	make docker-compose args="-f docker/docker-compose.test.yml" cmd="run $(target)"
+start:
+	cd api && make
+	cd app && make
+	cd asset && make
+	cd manager && make
+	cd docs && make
+	cd gateway && make
 
-test-api:
-	make test target=api
-
-cli: script
-	make docker-compose cmd="run cli python $(target)"
+stop:
+	cd api && make stop
+	cd app && make stop
+	cd asset && make stop
+	cd manager && make stop
+	cd docs && make stop
+	cd gateway && make stop
 
 restart:
 	make stop
-	make
-
-stop:
-	make docker-compose cmd=down
-
-logs:
-	make docker-compose cmd="logs -f"
+	make start

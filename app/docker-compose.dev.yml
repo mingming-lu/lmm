@@ -1,0 +1,12 @@
+version: "3"
+services:
+  app:
+    command: npm --prefix /app run dev
+    environment:
+      SERVER_HOST: '0.0.0.0'
+      SERVER_PORT: 8001
+      API_URL: http://host.docker.internal:8002
+      API_URL_BROWSER: http://api.lmm.local
+      ASSET_URL: http://asset.lmm.local
+
+# ref: https://docs.docker.com/docker-for-mac/networking/#per-container-ip-addressing-is-not-possible
