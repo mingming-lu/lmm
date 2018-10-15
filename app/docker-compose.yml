@@ -1,0 +1,12 @@
+version: "3"
+services:
+  app:
+    image: node:9.9
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: npm --prefix /app run build && npm --prefix /app start
+    environment:
+      TZ: Asia/Tokyo
+    ports:
+      - 8001:8001
