@@ -11,4 +11,5 @@ stop:
 	docker-compose down
 
 logs:
-	docker-compose logs -f
+	docker-compose logs # no follow and display nginx access log
+	docker-compose run --rm nginx bash -c "tail -f /var/log/nginx/access.log"
