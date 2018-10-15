@@ -1,3 +1,2 @@
-*
-!.gitignore
-!my.cnf
+lib
+log
