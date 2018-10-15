@@ -1,1 +1,0 @@
-ALTER TABLE `tag` MODIFY `blog` BIGINT NOT NULL;
