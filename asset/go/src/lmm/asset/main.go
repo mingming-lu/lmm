@@ -5,12 +5,8 @@ import (
 	"net/http"
 )
 
-func index(w http.ResponseWriter, r *http.Request) {
-	http.NotFound(w, r)
-}
-
 func main() {
-	http.DefaultServeMux.HandleFunc("/", index)
+	http.Handle("/", http.FileServer(http.Dir("/static")))
 
 	log.Println("listening and serving at :8003")
 	if err := http.ListenAndServe(":8003", nil); err != nil {
