@@ -1,0 +1,11 @@
+version: "3"
+services:
+  manager:
+    image: node:9.9
+    volumes:
+      - .:/manager
+    command: npm --prefix /manager run build && npm --prefix /manager start
+    environment:
+      TZ: Asia/Tokyo
+    ports:
+      - 8004:8004
