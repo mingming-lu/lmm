@@ -1,0 +1,14 @@
+version: "3"
+services:
+  nginx:
+    image: nginx:1.14
+    restart: always
+    volumes:
+      - ./nginx/log:/var/log/nginx
+      - ./nginx/conf:/etc/nginx/conf
+      - ./nginx/modules/:/etc/nginx/modules
+    environment:
+      TZ: Asia/Tokyo
+    ports:
+      - 80:80
+      - 443:443
