@@ -2,9 +2,7 @@ version: "3"
 services:
   api:
     container_name: api
-    image: lmm/api
-    build:
-      context: .
+    image: golang:1.11
     volumes:
       - ./go:/go
     working_dir: /go/src/lmm/api
