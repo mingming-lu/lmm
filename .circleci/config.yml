@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  build:
+    machine:
+      image: circleci/classic:edge
+    steps:
+      - checkout
+      - run:
+          name: Test API
+          command: |
+            cd api
+            mkdir -p .env
+            chmod -R 777 mysql
+            echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/dev.env
+            echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
+            pip install --upgrade pip
+            pip install docker-compose
+            make install
+            make test
