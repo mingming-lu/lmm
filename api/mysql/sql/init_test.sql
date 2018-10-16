@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS `lmm_test`;
 CREATE DATABASE IF NOT EXISTS `lmm_test`;
 
 USE `lmm_test`;

@@ -10,4 +10,8 @@ services:
       DB_USER: root
       HTTP_TIMEOUT_SECOND: 1
     working_dir: /go/src/lmm/api
-    command: bash
+    command: bash -c "go test ./... -count 1 -cover -v"
+  mysql:
+    volumes:
+      - ./mysql/sql/init_test.sql:/mysql/sql/init_test.sql
+    command: --init-file /mysql/sql/init_test.sql
