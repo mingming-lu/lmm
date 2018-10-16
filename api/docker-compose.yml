@@ -1,6 +1,7 @@
 version: "3"
 services:
   api:
+    container_name: api
     image: lmm/api
     build:
       context: .
@@ -18,6 +19,7 @@ services:
       - mysql:api-mysql
       - redis:api-redis
   mysql:
+    container_name: api-mysql
     image: mysql:5.7
     volumes:
       - ./mysql/lib:/var/lib/mysql
@@ -27,4 +29,5 @@ services:
     environment:
       TZ: Asia/Tokyo
   redis:
+    container_name: api-redis
     image: redis:5.0-rc
