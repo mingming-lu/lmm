@@ -5,7 +5,6 @@ import (
 
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/storage"
 	"lmm/api/storage/db"
 )
 
@@ -26,7 +25,7 @@ func (a *AuthorAdapter) AuthorFromUserName(c context.Context, userName string) (
 
 	var authorName string
 	if err := stmt.QueryRow(c, userName).Scan(&authorName); err != nil {
-		if err == storage.ErrNoRows {
+		if err == db.ErrNoRows {
 			return nil, domain.ErrNoSuchUser
 		}
 		return nil, err
