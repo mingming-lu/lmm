@@ -1,7 +1,7 @@
 all: start
 
-build:
-	docker-compose run --rm manager bash -c "rm -rf manager/node_modules && npm --prefix /manager install"
+install:
+	docker-compose run --rm --no-deps manager bash -c "rm -rf manager/node_modules && npm --prefix /manager install"
 
 start:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
