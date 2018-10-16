@@ -10,7 +10,7 @@ jobs:
           command: |
             cd api
             mkdir -p .env
-            chmod 777 mysql
+            chmod -R 777 mysql
             echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/dev.env
             echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
             pip install --upgrade pip
