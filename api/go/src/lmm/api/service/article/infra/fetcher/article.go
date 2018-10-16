@@ -6,7 +6,6 @@ import (
 
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/storage"
 	"lmm/api/storage/db"
 )
 
@@ -29,7 +28,7 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model
 
 	rows, err := stmt.Query(c, count+1, (page-1)*count)
 	if err != nil {
-		if err == storage.ErrNoRows {
+		if err == db.ErrNoRows {
 			return model.NewArticleListView(nil, false), nil
 		}
 		return nil, err
@@ -85,7 +84,7 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 
 	err := selectArticle.QueryRow(c, id.String()).Scan(&linkedID, &rawArticleID, &articleTitle, &articleBody, &articlePostAt, &articleEditedAt)
 	if err != nil {
-		if err == storage.ErrNoRows {
+		if err == db.ErrNoRows {
 			return nil, domain.ErrNoSuchArticle
 		}
 		return nil, err
@@ -106,7 +105,7 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 	)
 
 	rows, err := selectTags.Query(c, linkedID)
-	if err != nil && err != storage.ErrNoRows {
+	if err != nil && err != db.ErrNoRows {
 		return nil, err
 	}
 	defer rows.Close()
@@ -140,7 +139,7 @@ func (f *ArticleFetcher) ListAllTags(c context.Context) (model.TagListView, erro
 
 	rows, err := stmt.Query(c)
 	if err != nil {
-		if err == storage.ErrNoRows {
+		if err == db.ErrNoRows {
 			return nil, nil
 		}
 		return nil, err
