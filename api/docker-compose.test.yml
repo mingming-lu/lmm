@@ -3,8 +3,6 @@ services:
   api:
     env_file:
       - ./.env/test.env
-    volumes:
-      - ./sql/init_test.sql:/docker-entrypoint-initdb.d/init_test.sql
     environment:
       DB_HOST: api-mysql
       DB_PORT: 3306
