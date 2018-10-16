@@ -7,6 +7,17 @@ import (
 	"time"
 )
 
+// Config defines config of database
+type Config struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Database string
+	// Retry defines retry time if connection fails, 0 for no retry, < 0 for infinite retries
+	Retry int
+}
+
 // DB is a database abstraction
 type DB interface {
 	Begin(c context.Context, opts *sql.TxOptions) (Tx, error)

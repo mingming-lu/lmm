@@ -4,7 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"fmt"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 var (
@@ -17,17 +20,72 @@ type base struct {
 	src *sql.DB
 }
 
-func newBase(driver, dsn string) DB {
+func newBase(driver string, config Config) DB {
+	if config.User == "" {
+		config.User = "root"
+	}
+	if config.Host == "" {
+		config.Host = "127.0.0.1"
+	}
+	if config.Port == "" {
+		config.Port = "3306"
+	}
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		config.User,
+		config.Password,
+		config.Host,
+		config.Port,
+		config.Database,
+	)
+
+	var (
+		db    DB
+		err   error
+		retry = config.Retry
+	)
+
+	for {
+		db, err = tryToOpenDB(driver, dsn)
+		if err == nil {
+			break
+		}
+
+		if retry == 0 {
+			break
+		} else {
+			zap.L().Warn("retry connecting to db...",
+				zap.String("host", config.Host),
+				zap.String("port", config.Port),
+				zap.String("db", config.Database),
+			)
+			<-time.After(5 * time.Second)
+		}
+		if retry > 0 {
+			retry--
+		}
+	}
+	if err != nil {
+		zap.L().Panic(err.Error())
+	}
+	return db
+}
+
+func tryToOpenDB(driver, dsn string) (DB, error) {
 	db, err := sql.Open(driver, dsn)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	if err := db.PingContext(ctx); err != nil {
-		panic(err)
+		db.Close()
+		return nil, err
 	}
-	return &base{src: db}
+
+	return &base{src: db}, nil
 }
 
 func (db *base) Begin(c context.Context, opts *sql.TxOptions) (Tx, error) {
