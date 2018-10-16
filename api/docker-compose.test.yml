@@ -3,8 +3,6 @@ services:
   api:
     env_file:
       - ./.env/test.env
-    volumes:
-      - ./sql/init_test.sql:/docker-entrypoint-initdb.d/init_test.sql
     environment:
       DB_HOST: api-mysql
       DB_PORT: 3306
@@ -12,4 +10,8 @@ services:
       DB_USER: root
       HTTP_TIMEOUT_SECOND: 1
     working_dir: /go/src/lmm/api
-    command: bash
+    command: bash -c "go test ./... -count 1 -cover -v"
+  mysql:
+    volumes:
+      - ./mysql/sql/init_test.sql:/mysql/sql/init_test.sql
+    command: --init-file /mysql/sql/init_test.sql

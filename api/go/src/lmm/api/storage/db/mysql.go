@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -12,17 +11,18 @@ type MySQL struct {
 
 // DefaultMySQL returns a new DB with default dsn
 func DefaultMySQL() DB {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASS"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_NAME"),
-	)
-	return NewMySQL(dsn)
+	config := Config{
+		User:     os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASS"),
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		Database: os.Getenv("DB_NAME"),
+		Retry:    -1,
+	}
+	return NewMySQL(config)
 }
 
 // NewMySQL returns a MySQL DB implementation
-func NewMySQL(dsn string) DB {
-	return newBase("mysql", dsn)
+func NewMySQL(config Config) DB {
+	return newBase("mysql", config)
 }
