@@ -22,3 +22,8 @@ stop:
 restart:
 	make stop
 	make start
+
+install:
+	cd api && make install
+	cd app && make install
+	cd manager && make install

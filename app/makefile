@@ -1,7 +1,7 @@
 all: start
 
-build:
-	docker-compose run --rm app bash -c "rm -rf app/node_modules && npm --prefix /app install"
+install:
+	docker-compose run --rm --no-deps app bash -c "rm -rf app/node_modules && npm --prefix /app install"
 
 start:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d

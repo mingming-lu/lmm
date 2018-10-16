@@ -1,6 +1,6 @@
 <template>
   <v-layout column>
-    <v-list>
+    <v-list v-if="articles.length">
       <template v-for="article in articles">
         <v-list-tile
           :to="`/articles/edit?articleID=${article.id}`"
