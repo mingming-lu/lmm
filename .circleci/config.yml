@@ -10,6 +10,7 @@ jobs:
           command: |
             cd api
             mkdir -p .env
+            echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/dev.env
             echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
             pip install --upgrade pip
             pip install docker-compose
