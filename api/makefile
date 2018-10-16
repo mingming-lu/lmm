@@ -1,5 +1,8 @@
 all: start
 
+install:
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml run --rm --no-deps api go mod download
+
 start:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
