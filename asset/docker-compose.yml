@@ -1,12 +1,15 @@
 version: "3"
 services:
   asset:
+    container_name: asset
     image: golang:1.11
+    working_dir: /go/src/lmm/asset
     volumes:
       - ./go:/go
       - ./static:/static
-    command: go run /go/src/lmm/asset/main.go
+    command: go run main.go
     environment:
       TZ: Asia/Tokyo
+      GO111MODULE: 'on'
     ports:
       - 8003:8003
