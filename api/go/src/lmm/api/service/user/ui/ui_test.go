@@ -20,17 +20,16 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	var dbEngine db.DB
+	mysql := db.DefaultMySQL()
 
 	testing.NewTestRunner(m).Setup(func() {
-		dbEngine := db.DefaultMySQL()
-		userRepo := persistence.NewUserStorage(dbEngine)
+		userRepo := persistence.NewUserStorage(mysql)
 		appService := application.NewService(userRepo)
 		ui := NewUI(appService)
 		router = http.NewRouter()
 		router.POST("/v1/users", ui.SignUp)
 	}).Teardown(func() {
-		dbEngine.Close()
+		mysql.Close()
 	}).Run()
 }
 
