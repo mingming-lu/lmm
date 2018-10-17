@@ -2,16 +2,14 @@ package service
 
 import (
 	"context"
-	"os"
-
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/google/uuid"
-
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/service"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
 	"lmm/api/util/testutil"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 )
 
 var (
@@ -20,12 +18,12 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	mysql = db.DefaultMySQL()
-	defer mysql.Close()
-
-	authorAdapter = NewAuthorAdapter(mysql)
-	code := m.Run()
-	os.Exit(code)
+	testing.NewTestRunner(m).Setup(func() {
+		mysql = db.DefaultMySQL()
+		authorAdapter = NewAuthorAdapter(mysql)
+	}).Teardown(func() {
+		mysql.Close()
+	}).Run()
 }
 
 func TestAuthorFromUserID_OK(tt *testing.T) {
