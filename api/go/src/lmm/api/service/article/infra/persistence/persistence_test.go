@@ -1,15 +1,13 @@
 package persistence
 
 import (
-	"os"
-
-	_ "github.com/go-sql-driver/mysql"
-
 	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/domain/service"
 	infraService "lmm/api/service/article/infra/service"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -20,13 +18,12 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	mysql = db.DefaultMySQL()
-	defer mysql.Close()
-
-	authorService = infraService.NewAuthorAdapter(mysql)
-	articleRepository = NewArticleStorage(mysql, authorService)
-	articleService = service.NewArticleService(articleRepository)
-
-	code := m.Run()
-	os.Exit(code)
+	testing.NewTestRunner(m).Setup(func() {
+		mysql = db.DefaultMySQL()
+		authorService = infraService.NewAuthorAdapter(mysql)
+		articleRepository = NewArticleStorage(mysql, authorService)
+		articleService = service.NewArticleService(articleRepository)
+	}).Teardown(func() {
+		mysql.Close()
+	}).Run()
 }

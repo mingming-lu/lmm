@@ -2,12 +2,6 @@ package ui
 
 import (
 	"io"
-	"os"
-	"strings"
-
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/google/uuid"
-
 	"lmm/api/http"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
@@ -15,6 +9,10 @@ import (
 	"lmm/api/storage/db"
 	"lmm/api/testing"
 	"lmm/api/util/stringutil"
+	"strings"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 )
 
 var (
@@ -22,18 +20,17 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	dbEngine := db.DefaultMySQL()
-	defer dbEngine.Close()
+	mysql := db.DefaultMySQL()
 
-	userRepo := persistence.NewUserStorage(dbEngine)
-	appService := application.NewService(userRepo)
-	ui := NewUI(appService)
-
-	router = http.NewRouter()
-	router.POST("/v1/users", ui.SignUp)
-
-	code := m.Run()
-	os.Exit(code)
+	testing.NewTestRunner(m).Setup(func() {
+		userRepo := persistence.NewUserStorage(mysql)
+		appService := application.NewService(userRepo)
+		ui := NewUI(appService)
+		router = http.NewRouter()
+		router.POST("/v1/users", ui.SignUp)
+	}).Teardown(func() {
+		mysql.Close()
+	}).Run()
 }
 
 func TestPostUser(tt *testing.T) {
