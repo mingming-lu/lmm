@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   asset:
     container_name: asset
@@ -11,5 +11,11 @@ services:
     environment:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
+    networks:
+      - asset
     ports:
       - 8003:8003
+
+networks:
+  asset:
+    name: asset

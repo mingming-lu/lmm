@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   manager:
     image: node:9.9
@@ -7,5 +7,11 @@ services:
     command: npm --prefix /manager run build && npm --prefix /manager start
     environment:
       TZ: Asia/Tokyo
+    networks:
+      - manager
     ports:
       - 8004:8004
+
+networks:
+  manager:
+    name: manager

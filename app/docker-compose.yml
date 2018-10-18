@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   app:
     image: node:9.9
@@ -8,5 +8,11 @@ services:
     command: npm --prefix /app run build && npm --prefix /app start
     environment:
       TZ: Asia/Tokyo
+    networks:
+      - app
     ports:
       - 8001:8001
+
+networks:
+  app:
+    name: app
