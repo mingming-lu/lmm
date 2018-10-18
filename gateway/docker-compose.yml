@@ -7,6 +7,7 @@ services:
     volumes:
       - ./nginx/log:/var/log/nginx
       - ./nginx/conf:/etc/nginx/conf
+      - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/modules/:/etc/nginx/modules
     environment:
       TZ: Asia/Tokyo
