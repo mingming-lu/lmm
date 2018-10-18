@@ -19,7 +19,7 @@ services:
       - mysql:api-mysql
       - redis:api-redis
   mysql:
-    container_name: api-mysql
+    container_name: api_mysql
     image: mysql:5.7
     volumes:
       - ./mysql/lib:/var/lib/mysql
@@ -31,7 +31,7 @@ services:
     networks:
       - api
   redis:
-    container_name: api-redis
+    container_name: api_redis
     image: redis:5.0-rc
     networks:
       - api
