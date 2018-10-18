@@ -6,5 +6,5 @@ services:
       SERVER_HOST: '0.0.0.0'
       SERVER_PORT: 8004
       API_URL: 'http://host.docker.internal:8002'
-      API_URL_BROWSER: 'http://api.lmm.local'
-      ASSET_URL: 'http://asset.lmm.local'
+      API_URL_BROWSER: 'https://api.lmm.local'
+      ASSET_URL: 'https://asset.lmm.local'
