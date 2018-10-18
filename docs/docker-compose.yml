@@ -1,6 +1,7 @@
 version: "3.7"
 services:
   docs:
+    container_name: docs_swagger
     image: swaggerapi/swagger-ui:v3.14.2
     volumes:
       - ./api:/usr/share/nginx/html/api

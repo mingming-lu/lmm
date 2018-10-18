@@ -1,6 +1,7 @@
 version: "3.7"
 services:
   app:
+    container_name: app
     image: node:9.9
     volumes:
       - .:/app
