@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   docs:
     image: swaggerapi/swagger-ui:v3.14.2
@@ -6,5 +6,11 @@ services:
       - ./api:/usr/share/nginx/html/api
     environment:
       API_URL: api/index.yml
+    networks:
+      - doc
     ports:
       - 8005:8080
+
+networks:
+  doc:
+    name: doc
