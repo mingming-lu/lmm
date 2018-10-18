@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   nginx:
     image: nginx:1.14
@@ -9,6 +9,12 @@ services:
       - ./nginx/modules/:/etc/nginx/modules
     environment:
       TZ: Asia/Tokyo
+    networks:
+      - gateway
     ports:
       - 80:80
       - 443:443
+
+networks:
+  gateway:
+    name: gateway
