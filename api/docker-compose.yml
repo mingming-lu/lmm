@@ -1,4 +1,4 @@
-version: "3"
+version: "3.7"
 services:
   api:
     container_name: api
@@ -11,6 +11,8 @@ services:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
+    networks:
+      - api
     ports:
       - 8002:8002
     links:
@@ -26,6 +28,14 @@ services:
       - ./mysql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       TZ: Asia/Tokyo
+    networks:
+      - api
   redis:
     container_name: api-redis
     image: redis:5.0-rc
+    networks:
+      - api
+
+networks:
+  api:
+    name: api
