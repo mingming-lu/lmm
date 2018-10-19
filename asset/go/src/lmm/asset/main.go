@@ -26,7 +26,10 @@ func accessLog(next echo.HandlerFunc) echo.HandlerFunc {
 
 		req := c.Request()
 		res := c.Response()
-		status := res.Status
+		status := res.Status // why always 200 ?
+		if e, ok := err.(*echo.HTTPError); ok {
+			status = e.Code
+		}
 
 		fields := []zap.Field{
 			zap.Int("status", status),
