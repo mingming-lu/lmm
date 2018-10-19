@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"os"
+
 	"lmm/api/service/user/domain/repository"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
@@ -14,10 +16,14 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	testing.NewTestRunner(m).Setup(func() {
-		dbEngine = db.DefaultMySQL()
-		userRepo = NewUserStorage(dbEngine)
-	}).Teardown(func() {
-		dbEngine.Close()
-	}).Run()
+	dbEngine = db.DefaultMySQL()
+	userRepo = NewUserStorage(dbEngine)
+
+	code := m.Run()
+
+	if err := dbEngine.Close(); err != nil {
+		panic(err)
+	}
+
+	os.Exit(code)
 }

@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"os"
+
 	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/domain/service"
 	infraService "lmm/api/service/article/infra/service"
@@ -18,12 +20,16 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	testing.NewTestRunner(m).Setup(func() {
-		mysql = db.DefaultMySQL()
-		authorService = infraService.NewAuthorAdapter(mysql)
-		articleRepository = NewArticleStorage(mysql, authorService)
-		articleService = service.NewArticleService(articleRepository)
-	}).Teardown(func() {
-		mysql.Close()
-	}).Run()
+	mysql = db.DefaultMySQL()
+	authorService = infraService.NewAuthorAdapter(mysql)
+	articleRepository = NewArticleStorage(mysql, authorService)
+	articleService = service.NewArticleService(articleRepository)
+
+	code := m.Run()
+
+	if err := mysql.Close(); err != nil {
+		panic(err)
+	}
+
+	os.Exit(code)
 }

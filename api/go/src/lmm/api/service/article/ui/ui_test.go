@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"os"
+
 	"lmm/api/service/article/infra/fetcher"
 	"lmm/api/service/article/infra/persistence"
 	"lmm/api/service/article/infra/service"
@@ -19,16 +21,20 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	testing.NewTestRunner(m).Setup(func() {
-		mysql = db.DefaultMySQL()
-		auth := auth(mysql)
-		ui := articleUI(mysql)
-		router = testing.NewRouter()
-		router.POST("/v1/articles", auth.BearerAuth(ui.PostNewArticle))
-		router.PUT("/v1/articles/:articleID", auth.BearerAuth(ui.EditArticle))
-	}).Teardown(func() {
-		mysql.Close()
-	}).Run()
+	mysql = db.DefaultMySQL()
+	auth := auth(mysql)
+	ui := articleUI(mysql)
+	router = testing.NewRouter()
+	router.POST("/v1/articles", auth.BearerAuth(ui.PostNewArticle))
+	router.PUT("/v1/articles/:articleID", auth.BearerAuth(ui.EditArticle))
+
+	code := m.Run()
+
+	if err := mysql.Close(); err != nil {
+		panic(err)
+	}
+
+	os.Exit(code)
 }
 
 func articleUI(db db.DB) *UI {
