@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   manager:
-    container_name: manager
+    container_name: lmm_manager
     image: node:9.9
     volumes:
       - .:/manager
