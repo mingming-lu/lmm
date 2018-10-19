@@ -4,8 +4,8 @@ services:
     container_name: lmm_messaging_rabbitmq
     image: rabbitmq:3.7-management
     volumes:
-      - ./lib:/var/lib/rabbitmq
-      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./rabbitmq/lib:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
       - lmm_messaging
     ports:
