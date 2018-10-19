@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   api:
-    container_name: api
+    container_name: lmm_api
     image: golang:1.11
     volumes:
       - ./go:/go
@@ -19,7 +19,7 @@ services:
       - mysql:api-mysql
       - redis:api-redis
   mysql:
-    container_name: api_mysql
+    container_name: lmm_api_mysql
     image: mysql:5.7
     volumes:
       - ./mysql/lib:/var/lib/mysql
@@ -31,7 +31,7 @@ services:
     networks:
       - api
   redis:
-    container_name: api_redis
+    container_name: lmm_api_redis
     image: redis:5.0-rc
     networks:
       - api

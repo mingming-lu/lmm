@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   asset:
-    container_name: asset
+    container_name: lmm_asset
     image: golang:1.11
     working_dir: /go/src/lmm/asset
     volumes:
