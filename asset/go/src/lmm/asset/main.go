@@ -59,7 +59,7 @@ func main() {
 	e.Use(accessLog)
 
 	e.Static("/images", "/static/images")
-	e.Static("/photos", "/static/images")
+	e.Static("/photos", "/static/photos")
 
 	e.Logger.Fatal(e.Start(":8003"))
 }
