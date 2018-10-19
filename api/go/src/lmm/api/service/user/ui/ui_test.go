@@ -2,6 +2,8 @@ package ui
 
 import (
 	"io"
+	"os"
+
 	"lmm/api/http"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
@@ -21,16 +23,19 @@ var (
 
 func TestMain(m *testing.M) {
 	mysql := db.DefaultMySQL()
+	userRepo := persistence.NewUserStorage(mysql)
+	appService := application.NewService(userRepo)
+	ui := NewUI(appService)
+	router = http.NewRouter()
+	router.POST("/v1/users", ui.SignUp)
 
-	testing.NewTestRunner(m).Setup(func() {
-		userRepo := persistence.NewUserStorage(mysql)
-		appService := application.NewService(userRepo)
-		ui := NewUI(appService)
-		router = http.NewRouter()
-		router.POST("/v1/users", ui.SignUp)
-	}).Teardown(func() {
-		mysql.Close()
-	}).Run()
+	code := m.Run()
+
+	if err := mysql.Close(); err != nil {
+		panic(err)
+	}
+
+	os.Exit(code)
 }
 
 func TestPostUser(tt *testing.T) {

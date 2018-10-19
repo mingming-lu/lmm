@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"os"
+
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/service"
 	"lmm/api/storage/db"
@@ -18,12 +20,16 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	testing.NewTestRunner(m).Setup(func() {
-		mysql = db.DefaultMySQL()
-		authorAdapter = NewAuthorAdapter(mysql)
-	}).Teardown(func() {
-		mysql.Close()
-	}).Run()
+	mysql = db.DefaultMySQL()
+	authorAdapter = NewAuthorAdapter(mysql)
+
+	code := m.Run()
+
+	if err := mysql.Close();err != nil {
+		panic(err)
+	}
+
+	os.Exit(code)
 }
 
 func TestAuthorFromUserID_OK(tt *testing.T) {
