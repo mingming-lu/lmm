@@ -7,12 +7,13 @@ services:
       - ./rabbitmq/lib:/var/lib/rabbitmq
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
-      - lmm_messaging
+      - lmm
     ports:
       - 5672:5672
       - 15672:15672
     command: sh -c "rabbitmq-plugins enable rabbitmq_management; rabbitmq-server"
 
 networks:
-  lmm_messaging:
-    name: lmm_messaging
+  lmm:
+    external:
+      name: lmm
