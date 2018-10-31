@@ -8,10 +8,11 @@ services:
     environment:
       API_URL: api/index.yml
     networks:
-      - doc
+      - lmm
     ports:
       - 8005:8080
 
 networks:
-  doc:
-    name: doc
+  lmm:
+    external:
+      name: lmm

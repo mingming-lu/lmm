@@ -12,10 +12,11 @@ services:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
     networks:
-      - asset
+      - lmm
     ports:
       - 8003:8003
 
 networks:
-  asset:
-    name: asset
+  lmm:
+    external:
+      name: lmm
