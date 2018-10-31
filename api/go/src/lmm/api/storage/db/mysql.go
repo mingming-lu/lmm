@@ -12,11 +12,11 @@ type MySQL struct {
 // DefaultMySQL returns a new DB with default dsn
 func DefaultMySQL() DB {
 	config := Config{
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASS"),
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		Database: os.Getenv("DB_NAME"),
+		User:     os.Getenv("MYSQL_USER"),
+		Password: os.Getenv("MYSQL_PASS"),
+		Host:     os.Getenv("MYSQL_HOST"),
+		Port:     os.Getenv("MYSQL_PORT"),
+		Database: os.Getenv("MYSQL_NAME"),
 		Retry:    -1,
 	}
 	return NewMySQL(config)
