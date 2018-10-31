@@ -5,6 +5,7 @@ dev:
 
 start:
 	cd gateway && make
+	cd messaging && make
 	cd api && make
 	cd app && make
 	cd asset && make
@@ -17,6 +18,7 @@ stop:
 	cd asset && make stop
 	cd manager && make stop
 	cd docs && make stop
+	cd messaging && make stop
 	cd gateway && make stop
 
 restart:
