@@ -43,7 +43,7 @@ func main() {
 	defer mysql.Close()
 
 	// localUploader := uploader.NewLocalImageUploader()
-	rabbitMQClient := rabbitmq.NewClient()
+	rabbitMQClient := rabbitmq.DefaultClient()
 	rabbitMQUploader := uploader.NewRabbitMQAssetUploader(rabbitMQClient)
 	defer rabbitMQUploader.Close() // would close rabbitMQClient too
 

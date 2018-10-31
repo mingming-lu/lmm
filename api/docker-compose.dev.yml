@@ -8,6 +8,10 @@ services:
       MYSQL_PORT: 3306
       MYSQL_NAME: lmm
       MYSQL_USER: root
+      RABBIT_HOST: host.docker.internal
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASS: guest
       HTTP_TIMEOUT_SECOND: 3
     networks:
       - lmm
