@@ -50,7 +50,7 @@ func (uploader *RabbitMQAssetUploader) Upload(c context.Context, name string, da
 	return uploader.client.Publish(c, rabbitmq.NewEvent(
 		&amqp.Publishing{
 			MessageId: name,
-			Type:      fmt.Sprintf("lmm_%s_uploaded", config.Type),
+			Type:      fmt.Sprintf("asset.%s.uploaded", config.Type),
 			Timestamp: time.Now(),
 			Body:      data,
 		},

@@ -24,12 +24,12 @@ func main() {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"lmm_photo_uploaded", // name
-		false,                // durable
-		false,                // delete when unused
-		false,                // exclusive
-		false,                // no-wait
-		nil,                  // arguments
+		"asset.photo.uploaded", // name
+		false,                  // durable
+		false,                  // delete when unused
+		false,                  // exclusive
+		false,                  // no-wait
+		nil,                    // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
