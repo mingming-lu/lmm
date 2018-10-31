@@ -9,6 +9,13 @@ services:
       DB_NAME: lmm
       DB_USER: root
       HTTP_TIMEOUT_SECOND: 3
+    networks:
+      - lmm
   mysql:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
+
+networks:
+  lmm:
+    external:
+      name: lmm

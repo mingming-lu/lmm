@@ -12,7 +12,7 @@ services:
       GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
     networks:
-      - api
+      - lmm_api
     ports:
       - 8002:8002
     links:
@@ -29,13 +29,13 @@ services:
     environment:
       TZ: Asia/Tokyo
     networks:
-      - api
+      - lmm_api
   redis:
     container_name: lmm_api_redis
     image: redis:5.0-rc
     networks:
-      - api
+      - lmm_api
 
 networks:
-  api:
-    name: api
+  lmm_api:
+    name: lmm_api

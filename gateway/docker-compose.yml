@@ -12,11 +12,11 @@ services:
     environment:
       TZ: Asia/Tokyo
     networks:
-      - gateway
+      - lmm
     ports:
       - 80:80
       - 443:443
 
 networks:
-  gateway:
-    name: gateway
+  lmm:
+    name: lmm

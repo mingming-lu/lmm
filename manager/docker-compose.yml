@@ -9,10 +9,11 @@ services:
     environment:
       TZ: Asia/Tokyo
     networks:
-      - manager
+      - lmm
     ports:
       - 8004:8004
 
 networks:
-  manager:
-    name: manager
+  lmm:
+    external:
+      name: lmm

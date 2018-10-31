@@ -10,10 +10,11 @@ services:
     environment:
       TZ: Asia/Tokyo
     networks:
-      - app
+      - lmm
     ports:
       - 8001:8001
 
 networks:
-  app:
-    name: app
+  lmm:
+    external:
+      name: lmm
