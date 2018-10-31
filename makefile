@@ -4,12 +4,12 @@ dev:
 	make start
 
 start:
+	cd gateway && make
 	cd api && make
 	cd app && make
 	cd asset && make
 	cd manager && make
 	cd docs && make
-	cd gateway && make
 
 stop:
 	cd api && make stop
