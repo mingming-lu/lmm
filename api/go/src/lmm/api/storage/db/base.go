@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+
+	"lmm/api/util"
 )
 
 var (
@@ -42,18 +44,11 @@ func newBase(driver string, config Config) DB {
 	var (
 		db    DB
 		err   error
-		retry = config.Retry
 	)
 
-	for {
+	err = util.Retry(config.Retry, func() error {
 		db, err = tryToOpenDB(driver, dsn)
-		if err == nil {
-			break
-		}
-
-		if retry == 0 {
-			break
-		} else {
+		if err != nil {
 			zap.L().Warn("retry connecting to db...",
 				zap.String("host", config.Host),
 				zap.String("port", config.Port),
@@ -61,13 +56,13 @@ func newBase(driver string, config Config) DB {
 			)
 			<-time.After(5 * time.Second)
 		}
-		if retry > 0 {
-			retry--
-		}
-	}
+		return err
+	})
+
 	if err != nil {
 		zap.L().Panic(err.Error())
 	}
+
 	return db
 }
 
