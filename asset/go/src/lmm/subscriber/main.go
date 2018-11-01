@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/streadway/amqp"
 )
@@ -14,9 +16,48 @@ func failOnError(err error, msg string) {
 	}
 }
 
+func connect() *amqp.Connection {
+	user := os.Getenv("RABBIT_USER")
+	if user == "" {
+		user = "guest"
+	}
+
+	pass := os.Getenv("RABBIT_PASS")
+	if pass == "" {
+		pass = "guest"
+	}
+
+	host := os.Getenv("RABBIT_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+
+	port := os.Getenv("RABBIT_PORT")
+	if port == "" {
+		port = "5672"
+	}
+
+	url := fmt.Sprintf("amqp://%s:%s@%s:%s", user, pass, host, port)
+
+	var (
+		conn *amqp.Connection
+		err  error
+	)
+
+	for {
+		conn, err = amqp.Dial(url)
+		if err == nil {
+			break
+		}
+		log.Println(err.Error())
+		<-time.After(5 * time.Second)
+	}
+
+	return conn
+}
+
 func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@host.docker.internal:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
+	conn := connect()
 	defer conn.Close()
 
 	ch, err := conn.Channel()
