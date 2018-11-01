@@ -56,53 +56,89 @@ func connect() *amqp.Connection {
 	return conn
 }
 
-func main() {
+// Subscriber subscribes topics
+type Subscriber struct {
+	conn    *amqp.Connection
+	channel *amqp.Channel
+}
+
+// NewSubscriber (re)tries to connect to rabbitmq until success
+func NewSubscriber() (*Subscriber, error) {
 	conn := connect()
-	defer conn.Close()
-
 	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
+	if err != nil {
+		return nil, err
+	}
+	return &Subscriber{conn: conn, channel: ch}, nil
+}
 
-	q, err := ch.QueueDeclare(
-		"asset.photo.uploaded", // name
-		false,                  // durable
-		false,                  // delete when unused
-		false,                  // exclusive
-		false,                  // no-wait
-		nil,                    // arguments
-	)
-	failOnError(err, "Failed to declare a queue")
+// Close closes subscriber's connection
+func (s *Subscriber) Close() error {
+	if err := s.channel.Close(); err != nil {
+		return err
+	}
 
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	failOnError(err, "Failed to register a consumer")
+	if err := s.conn.Close(); err != nil {
+		return err
+	}
 
-	forever := make(chan bool)
+	return nil
+}
 
-	go func() {
-		for msg := range msgs {
-			log.Printf("Received a message: %s", msg.MessageId)
-			err := upload(msg.MessageId, msg.Body)
-			if err != nil {
+// Event is an alias of amqp.Delivery
+type Event = amqp.Delivery
+
+// Subscribe subscribes topics
+func (s *Subscriber) Subscribe(topic string, handler func(event Event) error) {
+	q, err := s.channel.QueueDeclare(topic, true, false, false, false, nil)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	msgs, err := s.channel.Consume(q.Name, "", false, false, false, false, nil)
+
+	for msg := range msgs {
+		err := handler(msg)
+		if err != nil {
+			log.Println(err.Error())
+		} else {
+			if err := msg.Ack(false); err != nil {
 				log.Println(err.Error())
 			}
 		}
-	}()
-
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
+	}
 }
 
-func upload(name string, data []byte) error {
-	file, err := os.OpenFile("/static/photos/"+name, os.O_RDWR|os.O_CREATE|os.O_EXCL, os.ModePerm)
+func main() {
+	subscriber, err := NewSubscriber()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer subscriber.Close()
+
+	term := make(chan bool)
+
+	go subscriber.Subscribe("asset.photo.uploaded", func(event Event) error {
+		return uploadPhoto(event.MessageId, event.Body)
+	})
+
+	go subscriber.Subscribe("asset.image.uploaded", func(event Event) error {
+		return uploadImage(event.MessageId, event.Body)
+	})
+
+	<-term
+}
+
+func uploadImage(name string, data []byte) error {
+	return upload("images", name, data)
+}
+
+func uploadPhoto(name string, data []byte) error {
+	return upload("photos", name, data)
+}
+
+func upload(assetType, name string, data []byte) error {
+	file, err := os.OpenFile("/static/"+assetType+"/"+name, os.O_RDWR|os.O_CREATE|os.O_EXCL, os.ModePerm)
 	if err != nil {
 		return err
 	}
