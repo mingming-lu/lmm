@@ -8,12 +8,20 @@ import (
 	"time"
 
 	"github.com/streadway/amqp"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-func failOnError(err error, msg string) {
+func init() {
+	cfg := zap.NewProductionConfig()
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	logger, err := cfg.Build()
+
 	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
+		log.Fatal(err.Error())
 	}
+
+	zap.ReplaceGlobals(logger)
 }
 
 func connect() *amqp.Connection {
@@ -49,10 +57,20 @@ func connect() *amqp.Connection {
 		if err == nil {
 			break
 		}
-		log.Println(err.Error())
+		zap.L().Warn("retry connecting to rabbitmq...",
+			zap.String("error", err.Error()),
+			zap.String("host", host),
+			zap.String("port", port),
+			zap.String("user", user),
+		)
 		<-time.After(5 * time.Second)
 	}
 
+	zap.L().Info("rabbitmq connected",
+		zap.String("host", host),
+		zap.String("port", port),
+		zap.String("user", user),
+	)
 	return conn
 }
 
@@ -92,7 +110,7 @@ type Event = amqp.Delivery
 func (s *Subscriber) Subscribe(topic string, handler func(event Event) error) {
 	q, err := s.channel.QueueDeclare(topic, true, false, false, false, nil)
 	if err != nil {
-		log.Fatal(err.Error())
+		zap.L().Fatal(err.Error())
 	}
 
 	msgs, err := s.channel.Consume(q.Name, "", false, false, false, false, nil)
@@ -100,10 +118,10 @@ func (s *Subscriber) Subscribe(topic string, handler func(event Event) error) {
 	for msg := range msgs {
 		err := handler(msg)
 		if err != nil {
-			log.Println(err.Error())
+			zap.L().Error(err.Error())
 		} else {
 			if err := msg.Ack(false); err != nil {
-				log.Println(err.Error())
+				zap.L().Error(err.Error())
 			}
 		}
 	}
@@ -112,7 +130,7 @@ func (s *Subscriber) Subscribe(topic string, handler func(event Event) error) {
 func main() {
 	subscriber, err := NewSubscriber()
 	if err != nil {
-		log.Fatal(err.Error())
+		zap.L().Error(err.Error())
 	}
 	defer subscriber.Close()
 
