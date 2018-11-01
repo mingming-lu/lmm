@@ -37,6 +37,7 @@ func DefaultClient() *Client {
 		client, err = NewClient(url)
 		if err != nil {
 			zap.L().Warn("retry connecting to rabbitmq...",
+				zap.String("error", err.Error()),
 				zap.String("url", url),
 			)
 			<-time.After(5 * time.Second)
