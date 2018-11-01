@@ -4,10 +4,14 @@ services:
     env_file:
       - ./.env/dev.env
     environment:
-      DB_HOST: api-mysql
-      DB_PORT: 3306
-      DB_NAME: lmm
-      DB_USER: root
+      MYSQL_HOST: api-mysql
+      MYSQL_PORT: 3306
+      MYSQL_NAME: lmm
+      MYSQL_USER: root
+      RABBIT_HOST: host.docker.internal
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASS: guest
       HTTP_TIMEOUT_SECOND: 3
     networks:
       - lmm

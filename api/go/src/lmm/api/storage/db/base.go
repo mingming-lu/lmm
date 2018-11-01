@@ -42,14 +42,15 @@ func newBase(driver string, config Config) DB {
 	)
 
 	var (
-		db    DB
-		err   error
+		db  DB
+		err error
 	)
 
 	err = util.Retry(config.Retry, func() error {
 		db, err = tryToOpenDB(driver, dsn)
 		if err != nil {
-			zap.L().Warn("retry connecting to db...",
+			zap.L().Warn("retry connecting to mysql...",
+				zap.String("error", err.Error()),
 				zap.String("host", config.Host),
 				zap.String("port", config.Port),
 				zap.String("db", config.Database),

@@ -1,3 +1,4 @@
 .env
 
+go/bin
 go/pkg

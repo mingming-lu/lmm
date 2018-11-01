@@ -14,6 +14,8 @@ var (
 
 	// ErrInvalidImageUploadType error
 	ErrInvalidImageUploadType = errors.New("asset type expects to be 'image' or 'photo'")
+
+	ErrInvalidAssetName = errors.New("invalid asset name")
 )
 
 // ImageUploaderConfig pass config parameters to uploader
@@ -64,4 +66,8 @@ func (up *localImageUploader) Upload(c context.Context, name string, data []byte
 
 func (up *localImageUploader) Delete(c context.Context, name string, args ...interface{}) error {
 	return errors.New("not implemented")
+}
+
+func (up *localImageUploader) Close() error {
+	return nil
 }

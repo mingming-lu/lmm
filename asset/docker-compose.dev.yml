@@ -1,0 +1,8 @@
+version: '3.7'
+services:
+  subscriber:
+    environment:
+      RABBIT_HOST: host.docker.internal
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASS: guest

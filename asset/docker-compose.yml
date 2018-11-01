@@ -5,18 +5,38 @@ services:
     image: golang:1.11
     working_dir: /go/src/lmm/asset
     volumes:
-      - ./go:/go
-      - ./static:/static
+      - ./go/pkg:/go/pkg
+      - ./go/src/lmm/asset:/go/src/lmm/asset
+      - ./static/images:/static/images
+      - ./static/photos:/static/photos
     command: go run main.go
     environment:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
     networks:
       - lmm
+      - lmm_asset
     ports:
       - 8003:8003
+  subscriber:
+    container_name: lmm_asset_subscriber
+    image: golang:1.11
+    working_dir: /go/src/lmm/subscriber
+    volumes:
+      - ./go/pkg:/go/pkg
+      - ./go/src/lmm/subscriber:/go/src/lmm/subscriber
+      - ./static/images:/static/images
+      - ./static/photos:/static/photos
+    command: go run main.go
+    environment:
+      TZ: Asia/Tokyo
+      GO111MODULE: 'on'
+    networks:
+      - lmm_asset
 
 networks:
+  lmm_asset:
+    name: lmm_asset
   lmm:
     external:
       name: lmm

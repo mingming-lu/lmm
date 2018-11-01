@@ -1,0 +1,19 @@
+version: '3.7'
+services:
+  rabbitmq:
+    container_name: lmm_messaging_rabbitmq
+    image: rabbitmq:3.7-management
+    volumes:
+      - ./rabbitmq/lib:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    networks:
+      - lmm
+    ports:
+      - 5672:5672
+      - 15672:15672
+    command: sh -c "rabbitmq-plugins enable rabbitmq_management; rabbitmq-server"
+
+networks:
+  lmm:
+    external:
+      name: lmm
