@@ -7,7 +7,8 @@ services:
     volumes:
       - ./go/pkg:/go/pkg
       - ./go/src/lmm/asset:/go/src/lmm/asset
-      - ./static:/static
+      - ./static/images:/static/images
+      - ./static/photos:/static/photos
     command: go run main.go
     environment:
       TZ: Asia/Tokyo
@@ -24,7 +25,8 @@ services:
     volumes:
       - ./go/pkg:/go/pkg
       - ./go/src/lmm/subscriber:/go/src/lmm/subscriber
-      - ./static:/static
+      - ./static/images:/static/images
+      - ./static/photos:/static/photos
     command: go run main.go
     environment:
       TZ: Asia/Tokyo
