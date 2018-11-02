@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   rabbitmq:
-    container_name: lmm_messaging_rabbitmq
+    container_name: lmm-messaging-rabbitmq
     image: rabbitmq:3.7-management
     volumes:
       - ./rabbitmq/lib:/var/lib/rabbitmq

@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   api:
-    container_name: lmm_api
+    container_name: lmm-api
     image: golang:1.11
     volumes:
       - ./go:/go
@@ -12,14 +12,14 @@ services:
       GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
     networks:
-      - lmm_api
+      - lmm-api
     ports:
       - 8002:8002
     links:
       - mysql:api-mysql
       - redis:api-redis
   mysql:
-    container_name: lmm_api_mysql
+    container_name: lmm-api-mysql
     image: mysql:5.7
     volumes:
       - ./mysql/lib:/var/lib/mysql
@@ -29,13 +29,13 @@ services:
     environment:
       TZ: Asia/Tokyo
     networks:
-      - lmm_api
+      - lmm-api
   redis:
-    container_name: lmm_api_redis
+    container_name: lmm-api-redis
     image: redis:5.0-rc
     networks:
-      - lmm_api
+      - lmm-api
 
 networks:
-  lmm_api:
-    name: lmm_api
+  lmm-api:
+    name: lmm-api

@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   app:
-    container_name: lmm_app
+    container_name: lmm-app
     image: node:9.9
     volumes:
       - .:/app

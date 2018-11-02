@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   asset:
-    container_name: lmm_asset
+    container_name: lmm-asset
     image: golang:1.11
     working_dir: /go/src/lmm/asset
     volumes:
@@ -15,11 +15,11 @@ services:
       GO111MODULE: 'on'
     networks:
       - lmm
-      - lmm_asset
+      - lmm-asset
     ports:
       - 8003:8003
   subscriber:
-    container_name: lmm_asset_subscriber
+    container_name: lmm-asset-subscriber
     image: golang:1.11
     working_dir: /go/src/lmm/subscriber
     volumes:
@@ -32,11 +32,11 @@ services:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
     networks:
-      - lmm_asset
+      - lmm-asset
 
 networks:
-  lmm_asset:
-    name: lmm_asset
+  lmm-asset:
+    name: lmm-asset
   lmm:
     external:
       name: lmm
