@@ -21,12 +21,27 @@ type Client struct {
 
 // DefaultClient tries to connect to rabbitmq
 func DefaultClient() *Client {
-	url := fmt.Sprintf("amqp://%s:%s@%s:%s",
-		os.Getenv("RABBIT_USER"),
-		os.Getenv("RABBIT_PASS"),
-		os.Getenv("RABBIT_HOST"),
-		os.Getenv("RABBIT_PORT"),
-	)
+	user := os.Getenv("RABBIT_USER")
+	if user == "" {
+		user = "guest"
+	}
+
+	pass := os.Getenv("RABBIT_PASS")
+	if pass == "" {
+		pass = "guest"
+	}
+
+	host := os.Getenv("RABBIT_HOST")
+	if host == "" {
+		host = "127.0.0.1"
+	}
+
+	port := os.Getenv("RABBIT_PORT")
+	if port == "" {
+		port = "5672"
+	}
+
+	url := fmt.Sprintf("amqp://%s:%s@%s:%s", user, pass, host, port)
 
 	var (
 		client *Client
@@ -38,6 +53,9 @@ func DefaultClient() *Client {
 		if err != nil {
 			zap.L().Warn("retry connecting to rabbitmq...",
 				zap.String("error", err.Error()),
+				zap.String("host", host),
+				zap.String("port", port),
+				zap.String("user", user),
 			)
 			<-time.After(5 * time.Second)
 		}
