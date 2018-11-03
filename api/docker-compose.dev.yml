@@ -13,13 +13,20 @@ services:
       RABBIT_USER: guest
       RABBIT_PASS: guest
       HTTP_TIMEOUT_SECOND: 3
+    links:
+      - mysql:api-mysql
     networks:
       - lmm
+      - lmm-api
   mysql:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    networks:
+      - lmm-api
 
 networks:
+  lmm-api:
+    name: lmm-api
   lmm:
     external:
       name: lmm
