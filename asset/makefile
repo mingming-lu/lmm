@@ -12,3 +12,6 @@ stop:
 
 logs:
 	docker-compose logs -f
+
+prod:
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d

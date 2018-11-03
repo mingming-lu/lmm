@@ -1,8 +1,20 @@
 version: '3.7'
 services:
+  asset:
+    networks:
+      - lmm
+    ports:
+      - 8003:8003
   subscriber:
     environment:
       RABBIT_HOST: host.docker.internal
       RABBIT_PORT: 5672
       RABBIT_USER: guest
       RABBIT_PASS: guest
+    networks:
+      - lmm
+
+networks:
+  lmm:
+    external:
+      name: lmm

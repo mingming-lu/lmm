@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  asset:
+    network_mode: host
+  subscriber:
+    environment:
+      RABBIT_HOST: 0.0.0.0
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASS: guest
+    network_mode: host
