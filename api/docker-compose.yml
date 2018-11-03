@@ -17,7 +17,6 @@ services:
       - 8002:8002
     links:
       - mysql:api-mysql
-      - redis:api-redis
   mysql:
     container_name: lmm-api-mysql
     image: mysql:5.7
@@ -28,11 +27,6 @@ services:
       - ./mysql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       TZ: Asia/Tokyo
-    networks:
-      - lmm-api
-  redis:
-    container_name: lmm-api-redis
-    image: redis:5.0-rc
     networks:
       - lmm-api
 
