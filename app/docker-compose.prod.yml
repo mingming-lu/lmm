@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  app:
+    command: bash -c "npm --prefix /app run build && npm --prefix /app start"
+    environment:
+      TZ: Asia/Tokyo
+      SERVER_HOST: '0.0.0.0'
+      SERVER_PORT: 8001
+      API_URL: http://api.lumingming.net
+      API_URL_BROWSER: http://api.lumingming.net
+      ASSET_URL: http://asset.lumingming.net     
+    network_mode: host

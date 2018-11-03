@@ -13,3 +13,6 @@ stop:
 logs:
 	docker-compose logs # no follow and display nginx access log
 	docker-compose run --rm nginx bash -c "tail -f /var/log/nginx/access.log"
+
+prod:
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d

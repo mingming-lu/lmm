@@ -13,11 +13,6 @@ services:
     environment:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
-    networks:
-      - lmm
-      - lmm-asset
-    ports:
-      - 8003:8003
   subscriber:
     container_name: lmm-asset-subscriber
     image: golang:1.11
@@ -31,12 +26,3 @@ services:
     environment:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
-    networks:
-      - lmm-asset
-
-networks:
-  lmm-asset:
-    name: lmm-asset
-  lmm:
-    external:
-      name: lmm

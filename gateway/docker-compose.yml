@@ -3,20 +3,11 @@ services:
   nginx:
     container_name: lmm-gateway-nginx
     image: nginx:1.14
-    restart: always
     volumes:
       - ./nginx/log:/var/log/nginx
       - ./nginx/conf:/etc/nginx/conf
-      - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/modules/:/etc/nginx/modules
+      - ./nginx/allowedips/:/etc/nginx/allowedips
     environment:
       TZ: Asia/Tokyo
-    networks:
-      - lmm
-    ports:
-      - 80:80
-      - 443:443
-
-networks:
-  lmm:
-    name: lmm
+    network_mode: host
