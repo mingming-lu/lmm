@@ -8,5 +8,14 @@ services:
       API_URL: http://host.docker.internal:8002
       API_URL_BROWSER: https://api.lmm.local
       ASSET_URL: https://asset.lmm.local
+    ports:
+      - 8001:8001
+    networks:
+      - lmm
+
+networks:
+  lmm:
+    external:
+      name: lmm
 
 # ref: https://docs.docker.com/docker-for-mac/networking/#per-container-ip-addressing-is-not-possible
