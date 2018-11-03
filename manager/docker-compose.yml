@@ -5,15 +5,5 @@ services:
     image: node:9.9
     volumes:
       - .:/manager
-    command: npm --prefix /manager run build && npm --prefix /manager start
     environment:
       TZ: Asia/Tokyo
-    networks:
-      - lmm
-    ports:
-      - 8004:8004
-
-networks:
-  lmm:
-    external:
-      name: lmm

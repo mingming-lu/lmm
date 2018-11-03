@@ -8,3 +8,12 @@ services:
       API_URL: 'http://host.docker.internal:8002'
       API_URL_BROWSER: 'https://api.lmm.local'
       ASSET_URL: 'https://asset.lmm.local'
+    networks:
+      - lmm
+    ports:
+      - 8004:8004
+
+networks:
+  lmm:
+    external:
+      name: lmm
