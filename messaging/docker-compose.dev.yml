@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  rabbitmq:
+    networks:
+      - lmm
+
+networks:
+  lmm:
+    external:
+      name: lmm
