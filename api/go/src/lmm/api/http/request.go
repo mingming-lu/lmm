@@ -36,3 +36,30 @@ func (r *Request) QueryParam(name string) string {
 func (r *Request) RequestID() string {
 	return r.Header.Get("X-Request-ID")
 }
+
+// RemoteAddr returns remote addr by cheking the following order:
+// X-Real-IP header
+// X-Forwarded-For header
+// RemoteAddr property
+func (r *Request) RemoteAddr() string {
+	if remoteAddr := r.Header.Get("X-Real-IP"); remoteAddr != "" {
+		return remoteAddr
+	}
+
+	if remoteAddr := r.Header.Get("X-Forwarded-For"); remoteAddr != "" {
+		return remoteAddr
+	}
+
+	return r.Request.RemoteAddr
+}
+
+// Host returns host name by cheking the following order:
+// Host header
+// Host property
+func (r *Request) Host() string {
+	if host := r.Header.Get("Host"); host != "" {
+		return host
+	}
+
+	return r.Request.Host
+}

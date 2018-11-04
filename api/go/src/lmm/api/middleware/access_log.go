@@ -4,12 +4,22 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"lmm/api/http"
 )
 
 // AccessLog records access log
 func AccessLog(next http.Handler) http.Handler {
+	cfg := zap.NewProductionConfig()
+	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	logger, err := cfg.Build()
+	if err != nil {
+		panic(err)
+	}
+	logger = logger.Named("access_log")
+
 	return func(c http.Context) {
 		start := time.Now()
 
@@ -21,20 +31,20 @@ func AccessLog(next http.Handler) http.Handler {
 		fields := []zap.Field{
 			zap.Int("status", status),
 			zap.String("request_id", req.RequestID()),
-			zap.String("remote_addr", req.RemoteAddr),
+			zap.String("remote_addr", req.RemoteAddr()),
 			zap.String("ua", req.UserAgent()),
 			zap.String("method", req.Method),
-			zap.String("host", req.Host),
+			zap.String("host", req.Host()),
 			zap.String("uri", req.RequestURI),
 			zap.String("latency", time.Since(start).String()),
 		}
 
 		if status >= 500 {
-			zap.L().Error(http.StatusText(status), fields...)
+			logger.Error(http.StatusText(status), fields...)
 		} else if status >= 400 {
-			zap.L().Warn(http.StatusText(status), fields...)
+			logger.Warn(http.StatusText(status), fields...)
 		} else {
-			zap.L().Info(http.StatusText(status), fields...)
+			logger.Info(http.StatusText(status), fields...)
 		}
 	}
 }
