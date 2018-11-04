@@ -7,7 +7,7 @@ services:
       - ./nginx/log:/var/log/nginx
       - ./nginx/conf:/etc/nginx/conf
       - ./nginx/modules/:/etc/nginx/modules
+      - ./nginx/ssl/:/etc/nginx/ssl
       - ./nginx/allowedips/:/etc/nginx/allowedips
     environment:
       TZ: Asia/Tokyo
-    network_mode: host
