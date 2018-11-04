@@ -45,17 +45,10 @@
         class="drawer">
         <div class="container">
           <nuxt-link
-            to="/home"
-            class="link"
-            active-class="drawer-item-active"
-            @click.native="navigate('Home')">
-            <p><i class="fa fa-fw fa-home"/>Home</p>
-          </nuxt-link>
-          <nuxt-link
             v-for="item in items"
             :key="item.name"
             :to="item.link"
-            active-class="drawer-item-active"
+            :class="{'drawer-item-active': currentRouterName === item.name}"
             class="link"
             @click.native="navigate(item.name)">
             <p><i
@@ -80,6 +73,11 @@ export default {
       wideMode: false,
       moderateWideMode: false,
       items: [
+        {
+          link: '/',
+          name: 'Home',
+          icon: 'fa-home',
+        },
         {
           link: '/articles',
           name: 'Articles',
@@ -140,7 +138,7 @@ export default {
     determineCurrentRouterName() {
       this.currentRouterName = ''
       const path = window.location.pathname
-      if (path === '/' || path === '/home') {
+      if (path === '/') {
         this.currentRouterName = 'Home'
         return
       }
