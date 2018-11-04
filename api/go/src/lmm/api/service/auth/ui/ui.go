@@ -5,6 +5,11 @@ import (
 
 	"lmm/api/http"
 	"lmm/api/service/auth/application"
+	"lmm/api/service/auth/application/command"
+)
+
+const (
+	errGrantTypeRequired = "grant type required"
 )
 
 // UI is the auth UI
@@ -21,7 +26,19 @@ func NewUI(service *application.Service) *UI {
 
 // Login handles POST /v1/auth/login
 func (ui *UI) Login(c http.Context) {
-	token, err := ui.appService.BasicAuth(c, c.Request().Header.Get("Authorization"))
+	auth := c.Request().Header.Get("Authorization")
+	var body loginRequestBody
+	if err := c.Request().Bind(&body); err != nil {
+		http.Warn(c, err.Error())
+		c.String(http.StatusBadRequest, errGrantTypeRequired)
+		return
+	}
+
+	token, err := ui.appService.Login(c, command.LoginCommand{
+		AccessToken: auth,
+		BasicAuth:   auth,
+		GrantType:   body.GrantType,
+	})
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, loginResponse{

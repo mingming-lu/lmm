@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"lmm/api/service/auth/domain/model"
@@ -12,7 +13,7 @@ import (
 func EncodeToken(rawToken string) *model.Token {
 	token, err := service.NewTokenService().Encode(rawToken)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("error: %s, input token: '%s'", err.Error(), rawToken))
 	}
 	return token
 }
@@ -27,7 +28,7 @@ func ExtractAccessToken(s string) string {
 	schema := loginResponse{}
 
 	if err := json.NewDecoder(strings.NewReader(s)).Decode(&schema); err != nil {
-		panic(err)
+		panic(fmt.Sprintf("error: %s, input string: '%s'", err.Error(), s))
 	}
 
 	return schema.AccessToken

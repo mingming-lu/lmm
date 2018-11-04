@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"lmm/api/service/auth/application/command"
 	"lmm/api/service/auth/domain"
 	"lmm/api/service/auth/domain/model"
 	"lmm/api/service/auth/domain/repository"
@@ -40,6 +41,18 @@ var (
 	patternBasicAuthorization  = regexp.MustCompile(`^Basic (.+)$`)
 	patternBearerAuthorization = regexp.MustCompile(`^Bearer (.+)$`)
 )
+
+// Login try to login with basic auth or access token and returns a new access token
+func (s *Service) Login(c context.Context, cmd command.LoginCommand) (*model.Token, error) {
+	switch cmd.GrantType {
+	case domain.GrantTypeBasicAuth:
+		return s.BasicAuth(c, cmd.BasicAuth)
+	case domain.GrantTypeRefreshToken:
+		return s.RefreshToken(c, cmd.AccessToken)
+	default:
+		return nil, errors.Wrap(domain.ErrInvalidGrantType, cmd.GrantType)
+	}
+}
 
 // BasicAuth authorizes given authorization
 func (s *Service) BasicAuth(c context.Context, authorization string) (*model.Token, error) {
@@ -87,4 +100,14 @@ func (s *Service) BearerAuth(c context.Context, authorization string) (*model.Us
 	}
 
 	return s.userRepository.FindByToken(c, token)
+}
+
+// RefreshToken refreshes access token in bearer auth format
+func (s *Service) RefreshToken(c context.Context, auth string) (*model.Token, error) {
+	user, err := s.BearerAuth(c, auth)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.tokenService.Encode(user.RawToken())
 }
