@@ -7,6 +7,7 @@ export default {
   created() {
     if (confirm('Are you really going to logout ?')) {
       window.localStorage.removeItem('accessToken')
+      this.$store.commit('setAccessToken', undefined)
       this.$router.push('/')
     } else {
       this.$router.back()

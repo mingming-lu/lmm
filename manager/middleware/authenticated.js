@@ -1,14 +1,39 @@
-export default function({ isServer, route, req, redirect }) {
+export default function({ $axios, isServer, route, req, redirect, store }) {
   if (isServer && !req) {
     return
   }
   if (route.path === '/login') {
     return
   }
-  if (!window.localStorage.getItem('accessToken')) {
-    if (route.path === '/logout') {
+
+  let accessToken = window.localStorage.getItem('accessToken')
+
+  if (accessToken && !store.state.accessToken) {
+    console.log('ha?')
+    $axios.post('/v1/auth/login', {
+          grantType: 'refreshToken',
+        }, {
+          headers: {
+            Authorization: 'Bearer ' + accessToken,
+          },
+        })
+        .then(res => {
+          window.localStorage.setItem('accessToken', res.data.accessToken)
+          store.commit('setAccessToken', window.localStorage.getItem('accessToken'))
+        })
+        .catch(e => {
+          console.log(e)
+          redirectToLogin(redirect, route.path)
+        })
+  }
+  if (!accessToken && !store.state.accessToken) {
+    redirectToLogin(redirect, route.path)
+  }
+}
+
+const redirectToLogin = (redirect, path) => {
+    if (path === '/logout') {
       redirect('/login')
     }
-    redirect(`/login?redirect=${route.path}`)
-  }
+    redirect(`/login?redirect=${path}`)
 }
