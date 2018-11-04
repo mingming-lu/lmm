@@ -6,7 +6,6 @@
         :rules="[rules.username.required, rules.username.min, rules.username.max]"
         label="User Name"
         counter
-        @click:append="show1 = !show1"
       />
 
       <v-text-field
@@ -29,6 +28,7 @@ export default {
     return {
       callback: () => {
         const location = query.redirect ? query.redirect : '/'
+        console.log(location)
         redirect(location)
       },
       username: '',
@@ -52,7 +52,9 @@ export default {
   methods: {
     login() {
       this.$axios
-        .post('/v1/auth/login', {}, {
+        .post('/v1/auth/login', {
+          grantType: 'basicAuth',
+        }, {
           headers: {
             Authorization: 'Basic ' + btoa(JSON.stringify({
               username: this.username,
@@ -62,6 +64,7 @@ export default {
         })
         .then(res => {
           window.localStorage.setItem('accessToken', res.data.accessToken)
+          this.$store.commit('setAccessToken', window.localStorage.getItem('accessToken'))
           this.callback()
         })
         .catch(e => {
