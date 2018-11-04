@@ -21,10 +21,10 @@ func AccessLog(next http.Handler) http.Handler {
 		fields := []zap.Field{
 			zap.Int("status", status),
 			zap.String("request_id", req.RequestID()),
-			zap.String("remote_addr", req.RemoteAddr),
+			zap.String("remote_addr", req.RemoteAddr()),
 			zap.String("ua", req.UserAgent()),
 			zap.String("method", req.Method),
-			zap.String("host", req.Host),
+			zap.String("host", req.Host()),
 			zap.String("uri", req.RequestURI),
 			zap.String("latency", time.Since(start).String()),
 		}
