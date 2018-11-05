@@ -15,6 +15,7 @@
       <div :class="{narrowTopNav: moderateWideMode}">
         <nuxt-link
           v-for="item in items"
+          v-if="item.wideMode"
           :key="item.name"
           :to="item.link"
           class="nav-item">
@@ -77,26 +78,31 @@ export default {
           link: '/',
           name: 'Home',
           icon: 'fa-home',
+          wideMode: false,
         },
         {
           link: '/articles',
           name: 'Articles',
-          icon: 'fa-pencil'
+          icon: 'fa-pencil',
+          wideMode: true,
         },
         {
           link: '/photos',
           name: 'Photos',
-          icon: 'fa-camera-retro'
+          icon: 'fa-camera-retro',
+          wideMode: true,
         },
         {
           link: '/projects',
           name: 'Projects',
-          icon: 'fa-archive'
+          icon: 'fa-archive',
+          wideMode: true,
         },
         {
           link: '/reviews',
           name: 'Reviews',
-          icon: 'fa-star-half-o'
+          icon: 'fa-star-half-o',
+          wideMode: true,
         }
       ]
     }
