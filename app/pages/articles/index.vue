@@ -30,14 +30,6 @@
           </div>
         </no-ssr>
       </div>
-      <!-- button to load more page -->
-      <div v-if="hasNextPage && isPageLoaded" class="center">
-        <br>
-        <button class="more" @click.prevent="loadMoreArticles()">See more&hellip;</button>
-      </div>
-      <div v-if="!hasNextPage && isPageLoaded" class="center">
-        <p class="hint">No more articles.</p>
-      </div>
     </div>
 
     <div
@@ -122,13 +114,6 @@ export default {
         this.isMobile = window.innerWidth <= 768
       }
     },
-    loadMoreArticles() {
-      articleFetcher(this.$axios).fetch(++this.page)
-        .then(res => {
-          this.articles.push(...res.data.articles)
-          this.hasNextPage = res.data.has_next_page
-        })
-    }
   }
 }
 </script>
