@@ -118,27 +118,19 @@ export default {
     })
   },
   watchQuery: ['page', 'perPage'],
-  created() {
-    if (process.browser) {
-      window.addEventListener('resize', this.calcIsMobile)
-    }
-  },
   mounted() {
+    window.addEventListener('resize', this.calcIsMobile)
     this.calcIsMobile()
   },
   beforeDestroy() {
-    if (process.browser) {
-      window.removeEventListener('resize', this.calcIsMobile)
-    }
+    window.removeEventListener('resize', this.calcIsMobile)
   },
   methods: {
     formatted(dtString) {
       return formattedUTCString(dtString)
     },
     calcIsMobile() {
-      if (process.browser) {
-        this.isMobile = window.innerWidth <= 768
-      }
+      this.isMobile = window.innerWidth <= 768
     },
   }
 }

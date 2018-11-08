@@ -66,13 +66,9 @@ export default {
       }
     })
   },
-  created () {
-    if (process.browser) {
-      window.addEventListener('resize', this.calcIsMobile)
-      window.addEventListener('scroll', this.calcProgress)
-    }
-  },
   mounted () {
+    window.addEventListener('resize', this.calcIsMobile)
+    window.addEventListener('scroll', this.calcProgress)
     this.markBodyAndExtractSubtitles()
     this.calcIsMobile()
     this.calcProgress()
@@ -85,10 +81,8 @@ export default {
     }
   },
   beforeDestroy () {
-    if (process.browser) {
-      window.removeEventListener('resize', this.calcIsMobile)
-      window.removeEventListener('scroll', this.calcProgress)
-    }
+    window.removeEventListener('resize', this.calcIsMobile)
+    window.removeEventListener('scroll', this.calcProgress)
   },
   methods: {
     markBodyAndExtractSubtitles() {
@@ -125,7 +119,7 @@ export default {
       return [lines.join('\n'), subtitles]
     },
     calcProgress () {
-      if (process.browser && this.$refs.progress) {
+      if (this.$refs.progress) {
         let el = this.$refs.body
         let progress = ((window.scrollY + window.innerHeight) - el.offsetTop) / (el.offsetHeight)
         progress = progress > 1 ? 100 : progress * 100
@@ -133,9 +127,7 @@ export default {
       }
     },
     calcIsMobile () {
-      if (process.browser) {
-        this.isMobile = window.innerWidth <= 768
-      }
+      this.isMobile = window.innerWidth <= 768
     },
     jumpToHash: (hash) => {
       location.href = hash
