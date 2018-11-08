@@ -1,6 +1,9 @@
 package ui
 
 import (
+	"fmt"
+	"math"
+
 	"github.com/pkg/errors"
 
 	"lmm/api/http"
@@ -11,6 +14,7 @@ import (
 	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/domain/service"
 	userModel "lmm/api/service/auth/domain/model"
+	"lmm/api/util/stringutil"
 )
 
 var (
@@ -155,6 +159,21 @@ func (ui *UI) ListArticles(c http.Context) {
 	}
 }
 
+// ListArticlesByPagination handles GET /v2/articles
+func (ui *UI) ListArticlesByPagination(c http.Context) {
+	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(c,
+		c.Request().QueryParam("perPage"),
+		c.Request().QueryParam("page"),
+	)
+	switch err {
+	case nil:
+		c.JSON(http.StatusOK, ui.articleListViewToJSONV2(c, v))
+	default:
+		http.Error(c, err.Error())
+		http.ServiceUnavailable(c)
+	}
+}
+
 func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAdapter {
 	items := make([]articleListItem, len(view.Items()), len(view.Items()))
 	for i, item := range view.Items() {
@@ -166,6 +185,39 @@ func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAda
 		Articles:    items,
 		HasNextPage: view.HasNextPage(),
 	}
+}
+
+func (ui *UI) articleListViewToJSONV2(c http.Context, view *model.ArticleListView) *articleListAdapterV2 {
+	adapter := ui.articleListViewToJSON(view)
+	adapterV2 := &articleListAdapterV2{
+		Articles: adapter.Articles,
+		Page:     view.Page(),
+		PerPage:  view.PerPage(),
+		Total:    view.Total(),
+	}
+
+	last := uint(math.Ceil(
+		float64(adapterV2.Total) / float64(adapterV2.PerPage),
+	))
+
+	if adapterV2.Page > 1 && adapterV2.Page <= last+1 {
+		adapterV2.PrevPage = buildURI(c.Request().Path(), adapterV2.Page-1, adapterV2.PerPage)
+	}
+
+	if view.HasNextPage() {
+		adapterV2.NextPage = buildURI(c.Request().Path(), adapterV2.Page+1, adapterV2.PerPage)
+	}
+
+	if adapterV2.Total > 0 {
+		adapterV2.FirstPage = buildURI(c.Request().Path(), 1, adapterV2.PerPage)
+		adapterV2.LastPage = buildURI(c.Request().Path(), last, adapterV2.PerPage)
+	}
+
+	return adapterV2
+}
+
+func buildURI(base string, page, perPage uint) *string {
+	return stringutil.Pointer(fmt.Sprintf("%s?page=%d&perPage=%d", base, page, perPage))
 }
 
 // GetArticle handles GET /v1/articles/:articleID

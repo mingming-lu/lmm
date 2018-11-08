@@ -11,6 +11,17 @@ type articleListAdapter struct {
 	HasNextPage bool              `json:"has_next_page"`
 }
 
+type articleListAdapterV2 struct {
+	Articles  []articleListItem `json:"articles"`
+	Page      uint              `json:"page"`
+	PerPage   uint              `json:"perPage"`
+	Total     uint              `json"total"`
+	PrevPage  *string           `json:"prevPage"`
+	NextPage  *string           `json:"nextPage"`
+	FirstPage *string           `json:"firstPage"`
+	LastPage  *string           `json:"lastPage"`
+}
+
 type articleListItem struct {
 	ID     string `json:"id"`
 	Title  string `json:"title"`
