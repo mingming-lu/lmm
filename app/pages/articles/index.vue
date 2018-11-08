@@ -50,20 +50,20 @@
       </div>
     </div>
 
-
-
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
-import { formattedUTCString } from '~/assets/js/utils'
+import { buildURLEncodedString, formattedUTCString } from '~/assets/js/utils'
+
+const apiPath = '/v2/articles'
 
 const articleFetcher = axiosClient => {
   return {
     fetch: page => {
-      return axiosClient.get(`v1/articles?page=${page}`)
+      return axiosClient.get(`${path}?page=${page}`)
     },
   }
 }
@@ -77,21 +77,27 @@ export default {
       title: 'Articles'
     }
   },
-  asyncData({$axios}) {
+  asyncData({$axios, query, route}) {
+    const q = buildURLEncodedString({
+      page:    query.page,
+      perPage: query.perPage,
+    })
     return axios.all([
-      $axios.get(`/v1/articles`),
+      $axios.get(`${apiPath}${q !== '' ? '?'+q : ''}`),
       $axios.get(`/v1/articleTags`)
     ]).then(([articlesRes, tagsRes]) => {
       return {
         isMobile:     false,
         articles:     articlesRes.data.articles,
         tags:         tagsRes.data,
-        page:         1,
-        hasNextPage:  articlesRes.data.has_next_page,
+        page:         articlesRes.data.page,
+        perPage:      articlesRes.data.perPage,
+        total:        articlesRes.data.total,
         isPageLoaded: true,
       }
     })
   },
+  watchQuery: ['page', 'perPage'],
   created() {
     if (process.browser) {
       window.addEventListener('resize', this.calcIsMobile)

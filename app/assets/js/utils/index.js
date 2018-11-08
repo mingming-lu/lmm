@@ -1,4 +1,4 @@
-export { formattedDate, formattedTimeStamp, formattedUTCString }
+export { buildURLEncodedString, formattedDate, formattedTimeStamp, formattedUTCString }
 
 function formattedTimeStamp(timestamp) {
   let date = new Date(timestamp * 1e3)
@@ -16,4 +16,12 @@ function formattedDate(date) {
   const d = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
 
   return `${y}-${m}-${d} ${date.toTimeString().substr(0, 8)}`
+}
+
+const buildURLEncodedString = obj => {
+  return Object.entries(obj).filter(kv => {
+    return kv[1]
+  }).map(kv => {
+    return `${kv[0]}=${kv[1]}`
+  }).join('&')
 }
