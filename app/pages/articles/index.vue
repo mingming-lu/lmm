@@ -68,13 +68,29 @@ const articleFetcher = axiosClient => {
   }
 }
 
+const buildLinks = (obj, path) => {
+  let links = []
+  if (obj.prev && typeof obj.prev === typeof '') {
+    links.push({
+      rel: 'prev', href: obj.prev.replace(apiPath, path),
+    })
+  }
+  if (obj.next && typeof obj.next === typeof '') {
+    links.push({
+      rel: 'next', href: obj.next.replace(apiPath, path),
+    })
+  }
+  return links
+}
+
 export default {
   components: {
     LdsEllipsis
   },
   head () {
     return {
-      title: 'Articles'
+      title: 'Articles',
+      link:  this.links,
     }
   },
   asyncData({$axios, query, route}) {
@@ -94,6 +110,10 @@ export default {
         perPage:      articlesRes.data.perPage,
         total:        articlesRes.data.total,
         isPageLoaded: true,
+        links:        buildLinks({
+          prev: articlesRes.data.prevPage,
+          next: articlesRes.data.nextPage,
+        }, route.path),
       }
     })
   },
