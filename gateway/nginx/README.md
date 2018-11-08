@@ -16,3 +16,32 @@ openssl req \
 -sha256 \
 -days 3650
 ```
+
+### Example upstream conf:
+
+#### For MacOS
+```conf
+upstream app {
+    server host.docker.internal:8001;
+}
+
+upstream api {
+    server host.docker.internal:8002;
+}
+
+upstream asset {
+    server host.docker.internal:8003;
+}
+
+upstream manager {
+    server host.docker.internal:8004;
+}
+
+upstream docs {
+    server host.docker.internal:8005;
+}
+
+upstream rabbitmq {
+    server host.docker.internal:15672;
+}
+```
