@@ -5,8 +5,8 @@
       :class="{ 'mobile-left': isMobile }"
       class="posts">
       <div :class="{container: !isMobile}">
-        <no-ssr>
-          <table v-if="isPageLoaded">
+        <table v-if="isPageLoaded">
+          <tbody>
             <tr
               v-for="article in articles"
               :key="article.id">
@@ -22,13 +22,13 @@
                 </p>
               </td>
             </tr>
-          </table>
-          <div
-            v-else
-            class="center">
-            <LdsEllipsis class="fade-in" />
-          </div>
-        </no-ssr>
+          </tbody>
+        </table>
+        <div
+          v-else
+          class="center">
+          <LdsEllipsis class="fade-in" />
+        </div>
       </div>
       <div class="container pagination">
         <button
