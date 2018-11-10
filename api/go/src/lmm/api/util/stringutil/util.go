@@ -3,6 +3,12 @@ package stringutil
 import (
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+)
+
+var (
+	errOutOfRange = errors.New("out of range")
 )
 
 // ParseInt is a shortcut of strconv.Atoi(s)
@@ -44,4 +50,44 @@ func Uint64ToStr(i uint64) string {
 // Int64ToStr is a shortcur of strconv.FormatInt(i, 10)
 func Int64ToStr(i int64) string {
 	return strconv.FormatInt(i, 10)
+}
+
+// ValidateInt converts s into integer type
+// and validates it if s is inside given close interval,
+// returns default value and no error if s is empty
+func ValidateInt(s string, defaultValue, minValue, maxValue int) (int, error) {
+	if s == "" {
+		return defaultValue, nil
+	}
+
+	i, err := ParseInt(s)
+	if err != nil {
+		return i, err
+	}
+
+	if i < minValue || i > maxValue {
+		return i, errOutOfRange
+	}
+
+	return i, nil
+}
+
+// ValidateUint converts s into integer type
+// and validates it if s is inside given close interval
+// returns default value and no error if s is empty
+func ValidateUint(s string, defaultValue, minValue, maxValue uint) (uint, error) {
+	if s == "" {
+		return defaultValue, nil
+	}
+
+	i, err := ParseUint(s)
+	if err != nil {
+		return i, err
+	}
+
+	if i < minValue || i > maxValue {
+		return i, errOutOfRange
+	}
+
+	return i, nil
 }

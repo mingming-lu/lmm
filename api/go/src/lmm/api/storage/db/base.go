@@ -143,3 +143,29 @@ func (db *base) SetMaxOpenConns(n int) {
 func (db *base) Stats() sql.DBStats {
 	return db.src.Stats()
 }
+
+// SQLOptions has sql options
+type SQLOptions struct {
+	Where   string
+	OrderBy string
+	Limit   string
+}
+
+// Count counts the number of columns from table
+func Count(c context.Context, db DB, table, column string, opts SQLOptions) (uint, error) {
+	var count uint
+	sql := "SELECT COUNT(" + column + ") FROM " + table
+	if opts.Where != "" {
+		sql += " " + opts.Where
+	}
+
+	stmt := db.Prepare(c, sql)
+	defer stmt.Close()
+
+	row := stmt.QueryRow(c)
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}

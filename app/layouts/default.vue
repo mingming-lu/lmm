@@ -20,18 +20,12 @@ export default {
       footerHeight: 0
     }
   },
-  created() {
-    if (process.browser) {
-      window.addEventListener('resize', this.calcFooterHeight)
-    }
-  },
-  beforeDestroy() {
-    if (process.browser) {
-      window.removeEventListener('resize', this.calcFooterHeight)
-    }
-  },
   mounted() {
     this.calcFooterHeight()
+    window.addEventListener('resize', this.calcFooterHeight)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.calcFooterHeight)
   },
   methods: {
     calcFooterHeight() {

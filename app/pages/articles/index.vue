@@ -5,8 +5,8 @@
       :class="{ 'mobile-left': isMobile }"
       class="posts">
       <div :class="{container: !isMobile}">
-        <no-ssr>
-          <table v-if="isPageLoaded">
+        <table v-if="isPageLoaded">
+          <tbody>
             <tr
               v-for="article in articles"
               :key="article.id">
@@ -22,21 +22,29 @@
                 </p>
               </td>
             </tr>
-          </table>
-          <div
-            v-else
-            class="center">
-            <LdsEllipsis class="fade-in" />
-          </div>
-        </no-ssr>
+          </tbody>
+        </table>
+        <div
+          v-else
+          class="center">
+          <LdsEllipsis class="fade-in" />
+        </div>
       </div>
-      <!-- button to load more page -->
-      <div v-if="hasNextPage && isPageLoaded" class="center">
-        <br>
-        <button class="more" @click.prevent="loadMoreArticles()">See more&hellip;</button>
-      </div>
-      <div v-if="!hasNextPage && isPageLoaded" class="center">
-        <p class="hint">No more articles.</p>
+      <div class="container pagination">
+        <button
+          v-on:click="fethcArticles(prevPage)"
+          :class="{enable: Boolean(prevPage)}"
+          class="button prev">
+          &lt;
+        </button>
+        <span class="page">{{ page }}</span>
+        <button
+          v-on:click="fethcArticles(nextPage)"
+          :class="{enable: Boolean(nextPage)}"
+          class="button next"
+          >
+          &gt;
+        </button>
       </div>
     </div>
 
@@ -58,22 +66,37 @@
       </div>
     </div>
 
-
-
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
-import { formattedUTCString } from '~/assets/js/utils'
+import { buildURLEncodedString, formattedUTCString } from '~/assets/js/utils'
+
+const apiPath = '/v2/articles'
 
 const articleFetcher = axiosClient => {
   return {
-    fetch: page => {
-      return axiosClient.get(`v1/articles?page=${page}`)
+    fetch: uri => {
+      return axiosClient.get(uri)
     },
   }
+}
+
+const buildLinks = (obj, path) => {
+  let links = []
+  if (obj.prev && typeof obj.prev === typeof '') {
+    links.push({
+      rel: 'prev', href: obj.prev.replace(apiPath, path),
+    })
+  }
+  if (obj.next && typeof obj.next === typeof '') {
+    links.push({
+      rel: 'next', href: obj.next.replace(apiPath, path),
+    })
+  }
+  return links
 }
 
 export default {
@@ -82,51 +105,71 @@ export default {
   },
   head () {
     return {
-      title: 'Articles'
+      title: 'Articles',
+      link:  this.links,
     }
   },
-  asyncData({$axios}) {
+  asyncData({$axios, query, route}) {
+    const q = buildURLEncodedString({
+      page:    Boolean(query.page)    ? query.page    : 1,
+      perPage: Boolean(query.perPage) ? query.perPage : 5,
+    })
+    const uri = `${apiPath}?${q}`
     return axios.all([
-      $axios.get(`/v1/articles`),
+      $axios.get(uri),
       $axios.get(`/v1/articleTags`)
     ]).then(([articlesRes, tagsRes]) => {
       return {
         isMobile:     false,
+        isPageLoaded: true,
+        currentURI:   uri,
         articles:     articlesRes.data.articles,
         tags:         tagsRes.data,
-        page:         1,
-        hasNextPage:  articlesRes.data.has_next_page,
-        isPageLoaded: true,
+        page:         articlesRes.data.page,
+        perPage:      articlesRes.data.perPage,
+        total:        articlesRes.data.total,
+        prevPage:     articlesRes.data.prevPage,
+        nextPage:     articlesRes.data.nextPage,
+        links:        buildLinks({
+          prev: articlesRes.data.prevPage,
+          next: articlesRes.data.nextPage,
+        }, route.path),
       }
     })
   },
-  created() {
-    if (process.browser) {
-      window.addEventListener('resize', this.calcIsMobile)
-    }
-  },
+  watchQuery: ['page', 'perPage'],
   mounted() {
+    window.addEventListener('resize', this.calcIsMobile)
     this.calcIsMobile()
   },
   beforeDestroy() {
-    if (process.browser) {
-      window.removeEventListener('resize', this.calcIsMobile)
-    }
+    window.removeEventListener('resize', this.calcIsMobile)
   },
   methods: {
     formatted(dtString) {
       return formattedUTCString(dtString)
     },
     calcIsMobile() {
-      if (process.browser) {
-        this.isMobile = window.innerWidth <= 768
-      }
+      this.isMobile = window.innerWidth <= 768
     },
-    loadMoreArticles() {
-      articleFetcher(this.$axios).fetch(++this.page)
+    fethcArticles(uri) {
+      if (!uri || uri === this.currentURI) {
+        return
+      }
+      this.isPageLoaded = false
+      articleFetcher(this.$axios)
+        .fetch(uri)
         .then(res => {
-          this.articles.push(...res.data.articles)
-          this.hasNextPage = res.data.has_next_page
+          this.currentURI = uri
+          this.articles   = res.data.articles
+          this.page       = res.data.page
+          this.prevPage   = res.data.prevPage
+          this.nextPage   = res.data.nextPage
+          this.links      = buildLinks({
+            prev: res.data.prevPage,
+            next: res.data.nextPage,
+          }, this.$route.path)
+          this.isPageLoaded = true
         })
     }
   }
@@ -161,6 +204,46 @@ export default {
     }
     .post-info {
       color: #777;
+    }
+    .pagination {
+      align-items: center;
+      display: flex;
+      font-size: 1.1em;
+      justify-content: center;
+      text-align: center;
+      .page {
+        color: $color_text;
+        cursor: default;
+        height: 2em;
+        line-height: 2em;
+        width: 2em;
+      }
+      .button {
+        background-color: transparent;
+        border: none;
+        border-radius: 50%;
+        display:inline-block;
+        font-size: 1.1em;
+        opacity: 0.2;
+        margin: 8px;
+        &.prev {
+          margin-right: 32px;
+        }
+        &.next {
+          margin-left: 32px;
+        }
+        &.enable {
+          opacity: 1;
+          &:hover {
+            color: $color_accent;
+            cursor: pointer;
+          }
+        }
+        &:focus {
+          outline: 0;
+          box-shadow: none;
+        }
+      }
     }
   }
   .nav {

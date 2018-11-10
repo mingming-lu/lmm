@@ -56,19 +56,13 @@ export default {
       photos: []
     }
   },
-  created() {
-    if (process.browser) {
-      window.addEventListener('resize', this.calcIsWideMode)
-    }
-  },
   mounted() {
+    window.addEventListener('resize', this.calcIsWideMode)
     this.calcIsWideMode()
     this.fetchPhotos()
   },
   beforeDestroy() {
-    if (process.browser) {
-      window.removeEventListener('resize', this.calcIsWideMode)
-    }
+    window.removeEventListener('resize', this.calcIsWideMode)
   },
   methods: {
     fetchPhotos() {
@@ -94,9 +88,7 @@ export default {
       return `${process.env.ASSET_URL}/photos/${name}`
     },
     calcIsWideMode() {
-      if (process.browser) {
-        this.wideMode = window.innerWidth >= 800
-      }
+      this.wideMode = window.innerWidth >= 800
     }
   }
 }

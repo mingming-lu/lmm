@@ -29,11 +29,16 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model
 	rows, err := stmt.Query(c, count+1, (page-1)*count)
 	if err != nil {
 		if err == db.ErrNoRows {
-			return model.NewArticleListView(nil, false), nil
+			return model.NewArticleListView(nil, 0, 0, 0, false), nil
 		}
 		return nil, err
 	}
 	defer rows.Close()
+
+	total, err := db.Count(c, f.db, "article", "id", db.SQLOptions{})
+	if err != nil {
+		return nil, err
+	}
 
 	var (
 		rawArticleID  string
@@ -58,7 +63,7 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model
 		articles = articles[0:count]
 	}
 
-	return model.NewArticleListView(articles, hasNextPage), nil
+	return model.NewArticleListView(articles, page, count, total, hasNextPage), nil
 }
 
 // FindByID implementation
