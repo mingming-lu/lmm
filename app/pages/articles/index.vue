@@ -30,6 +30,22 @@
           </div>
         </no-ssr>
       </div>
+      <div class="container pagination">
+        <button
+          v-on:click="fethcArticles(prevPage)"
+          :class="{enable: Boolean(prevPage)}"
+          class="button prev">
+          &lt;
+        </button>
+        <span class="page">{{ page }}</span>
+        <button
+          v-on:click="fethcArticles(nextPage)"
+          :class="{enable: Boolean(nextPage)}"
+          class="button next"
+          >
+          &gt;
+        </button>
+      </div>
     </div>
 
     <div
@@ -62,8 +78,8 @@ const apiPath = '/v2/articles'
 
 const articleFetcher = axiosClient => {
   return {
-    fetch: page => {
-      return axiosClient.get(`${path}?page=${page}`)
+    fetch: uri => {
+      return axiosClient.get(uri)
     },
   }
 }
@@ -95,21 +111,25 @@ export default {
   },
   asyncData({$axios, query, route}) {
     const q = buildURLEncodedString({
-      page:    query.page,
-      perPage: query.perPage,
+      page:    Boolean(query.page)    ? query.page    : 1,
+      perPage: Boolean(query.perPage) ? query.perPage : 5,
     })
+    const uri = `${apiPath}?${q}`
     return axios.all([
-      $axios.get(`${apiPath}${q !== '' ? '?'+q : ''}`),
+      $axios.get(uri),
       $axios.get(`/v1/articleTags`)
     ]).then(([articlesRes, tagsRes]) => {
       return {
         isMobile:     false,
+        isPageLoaded: true,
+        currentURI:   uri,
         articles:     articlesRes.data.articles,
         tags:         tagsRes.data,
         page:         articlesRes.data.page,
         perPage:      articlesRes.data.perPage,
         total:        articlesRes.data.total,
-        isPageLoaded: true,
+        prevPage:     articlesRes.data.prevPage,
+        nextPage:     articlesRes.data.nextPage,
         links:        buildLinks({
           prev: articlesRes.data.prevPage,
           next: articlesRes.data.nextPage,
@@ -132,6 +152,26 @@ export default {
     calcIsMobile() {
       this.isMobile = window.innerWidth <= 768
     },
+    fethcArticles(uri) {
+      if (!uri || uri === this.currentURI) {
+        return
+      }
+      this.isPageLoaded = false
+      articleFetcher(this.$axios)
+        .fetch(uri)
+        .then(res => {
+          this.currentURI = uri
+          this.articles   = res.data.articles
+          this.page       = res.data.page
+          this.prevPage   = res.data.prevPage
+          this.nextPage   = res.data.nextPage
+          this.links      = buildLinks({
+            prev: res.data.prevPage,
+            next: res.data.nextPage,
+          }, this.$route.path)
+          this.isPageLoaded = true
+        })
+    }
   }
 }
 </script>
@@ -164,6 +204,46 @@ export default {
     }
     .post-info {
       color: #777;
+    }
+    .pagination {
+      align-items: center;
+      display: flex;
+      font-size: 1.1em;
+      justify-content: center;
+      text-align: center;
+      .page {
+        color: $color_text;
+        cursor: default;
+        height: 2em;
+        line-height: 2em;
+        width: 2em;
+      }
+      .button {
+        background-color: transparent;
+        border: none;
+        border-radius: 50%;
+        display:inline-block;
+        font-size: 1.1em;
+        opacity: 0.2;
+        margin: 8px;
+        &.prev {
+          margin-right: 32px;
+        }
+        &.next {
+          margin-left: 32px;
+        }
+        &.enable {
+          opacity: 1;
+          &:hover {
+            color: $color_accent;
+            cursor: pointer;
+          }
+        }
+        &:focus {
+          outline: 0;
+          box-shadow: none;
+        }
+      }
     }
   }
   .nav {
