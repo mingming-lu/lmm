@@ -2,21 +2,21 @@
   <div class="container">
     <!-- Articles -->
     <div
-      :class="{ 'mobile-left': isMobile }"
+      :class="{ 'desktop': !isMobile, 'mobile': isMobile }"
       class="posts">
-      <div :class="{container: !isMobile}">
+      <div :class="{ 'container': !isMobile }">
         <table v-if="isPageLoaded">
           <tbody>
             <tr
               v-for="article in articles"
               :key="article.id">
               <td>
-                <p class="post-title">
+                <p class="title">
                   <nuxt-link
                     :to="'/articles/' + article.id"
                     class="link">{{ article.title }}</nuxt-link>
                 </p>
-                <p class="post-info">
+                <p class="post-at">
                   <i class="fa fa-fw fa-calendar-o"/>
                   {{ formatted(article.post_at) }}
                 </p>
@@ -30,7 +30,10 @@
           <LdsEllipsis class="fade-in" />
         </div>
       </div>
-      <div class="container pagination">
+      <div
+        v-if="articles.length !== 0"
+        class="container pagination"
+        >
         <button
           v-on:click="fethcArticles(prevPage)"
           :class="{enable: Boolean(prevPage)}"
@@ -40,11 +43,26 @@
         <span class="page">{{ page }}</span>
         <button
           v-on:click="fethcArticles(nextPage)"
-          :class="{enable: Boolean(nextPage)}"
+          :class="{ 'enable': Boolean(nextPage) }"
           class="button next"
           >
           &gt;
         </button>
+      </div>
+      <div
+        v-else
+        class="center"
+        >
+        <div class="center">
+          <p class="hint">No more artiles.</p>
+        </div>
+        <nuxt-link
+          v-if="page > 1"
+          class="link hint"
+          to="/articles"
+          >
+          Go to first page
+        </nuxt-link>
       </div>
     </div>
 
@@ -187,14 +205,13 @@ export default {
   }
   .posts {
     float: left;
-    width: 66.6666%;
     table {
       width: 100%;
       td {
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       }
     }
-    .post-title {
+    .title {
       @media screen and (min-width: $max_width_device + 1) {
         font-size: 1.8em;
       }
@@ -202,7 +219,7 @@ export default {
         font-size: 1.5em;
       }
     }
-    .post-info {
+    .post-at {
       color: #777;
     }
     .pagination {
@@ -255,14 +272,6 @@ export default {
     position: sticky !important;
     top: 44px !important; /* height of header */
     width: 33.3333%;
-    .categories {
-      .category {
-        font-size: 1.1em;
-        i {
-          opacity: 0;
-        }
-      }
-    }
     .tags {
       .tag {
         display: inline-block;
@@ -281,32 +290,20 @@ export default {
     }
   }
 }
+.hint {
+  color: rgba(1, 1, 1, 0.1);
+  font-size: 1.1em;
+}
 .fade-in {
   @include fade_in($opacity: 0.2, $duration: 2s);
 }
-.mobile-left {
-  width: 100% !important;
+.desktop {
+  width: 66.6666%;
+}
+.mobile {
+  width: 100%;
 }
 i {
   margin-right: 8px;
-}
-.more {
-  border: 1px solid rgba(1, 1, 1, 0.1);
-  border-radius: 2px;
-  padding: 8px 32px;
-  color: $color_text;
-  background-color: transparent;
-  cursor: pointer;
-  font-size: 1.12em;
-  &:hover {
-    background: transparent;
-    border: 1px solid rgba(30, 144, 255, 0.1);
-    color: $color_accent;
-    outline: none;
-  }
-}
-.hint {
-  color: rgba(1, 1, 1, 0.1);
-  font-size: 1.12em;
 }
 </style>
