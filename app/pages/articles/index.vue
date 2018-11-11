@@ -11,12 +11,12 @@
               v-for="article in articles"
               :key="article.id">
               <td>
-                <p class="post-title">
+                <p class="title">
                   <nuxt-link
                     :to="'/articles/' + article.id"
                     class="link">{{ article.title }}</nuxt-link>
                 </p>
-                <p class="post-info">
+                <p class="post-at">
                   <i class="fa fa-fw fa-calendar-o"/>
                   {{ formatted(article.post_at) }}
                 </p>
@@ -193,7 +193,7 @@ export default {
         border-bottom: 1px solid rgba(0, 0, 0, 0.1);
       }
     }
-    .post-title {
+    .title {
       @media screen and (min-width: $max_width_device + 1) {
         font-size: 1.8em;
       }
@@ -201,7 +201,7 @@ export default {
         font-size: 1.5em;
       }
     }
-    .post-info {
+    .post-at {
       color: #777;
     }
     .pagination {
@@ -254,14 +254,6 @@ export default {
     position: sticky !important;
     top: 44px !important; /* height of header */
     width: 33.3333%;
-    .categories {
-      .category {
-        font-size: 1.1em;
-        i {
-          opacity: 0;
-        }
-      }
-    }
     .tags {
       .tag {
         display: inline-block;
@@ -291,24 +283,5 @@ export default {
 }
 i {
   margin-right: 8px;
-}
-.more {
-  border: 1px solid rgba(1, 1, 1, 0.1);
-  border-radius: 2px;
-  padding: 8px 32px;
-  color: $color_text;
-  background-color: transparent;
-  cursor: pointer;
-  font-size: 1.12em;
-  &:hover {
-    background: transparent;
-    border: 1px solid rgba(30, 144, 255, 0.1);
-    color: $color_accent;
-    outline: none;
-  }
-}
-.hint {
-  color: rgba(1, 1, 1, 0.1);
-  font-size: 1.12em;
 }
 </style>
