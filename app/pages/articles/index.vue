@@ -2,9 +2,9 @@
   <div class="container">
     <!-- Articles -->
     <div
-      :class="{ 'mobile-left': isMobile }"
+      :class="{ 'desktop': !isMobile, 'mobile': isMobile }"
       class="posts">
-      <div :class="{container: !isMobile}">
+      <div :class="{ 'container': !isMobile }">
         <table v-if="isPageLoaded">
           <tbody>
             <tr
@@ -40,7 +40,7 @@
         <span class="page">{{ page }}</span>
         <button
           v-on:click="fethcArticles(nextPage)"
-          :class="{enable: Boolean(nextPage)}"
+          :class="{ 'enable': Boolean(nextPage) }"
           class="button next"
           >
           &gt;
@@ -187,7 +187,6 @@ export default {
   }
   .posts {
     float: left;
-    width: 66.6666%;
     table {
       width: 100%;
       td {
@@ -284,8 +283,11 @@ export default {
 .fade-in {
   @include fade_in($opacity: 0.2, $duration: 2s);
 }
-.mobile-left {
-  width: 100% !important;
+.desktop {
+  width: 66.6666%;
+}
+.mobile {
+  width: 100%;
 }
 i {
   margin-right: 8px;
