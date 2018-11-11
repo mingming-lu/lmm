@@ -54,7 +54,7 @@
         class="center"
         >
         <div class="center">
-          <p class="hint">No more artiles.</p>
+          <p class="hint">No more articles.</p>
         </div>
         <nuxt-link
           v-if="page > 1"
