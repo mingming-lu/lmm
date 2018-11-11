@@ -30,7 +30,10 @@
           <LdsEllipsis class="fade-in" />
         </div>
       </div>
-      <div class="container pagination">
+      <div
+        v-if="articles.length !== 0"
+        class="container pagination"
+        >
         <button
           v-on:click="fethcArticles(prevPage)"
           :class="{enable: Boolean(prevPage)}"
@@ -45,6 +48,21 @@
           >
           &gt;
         </button>
+      </div>
+      <div
+        v-else
+        class="center"
+        >
+        <div class="center">
+          <p class="hint">No more artiles.</p>
+        </div>
+        <nuxt-link
+          v-if="page > 1"
+          class="link hint"
+          to="/articles"
+          >
+          Go to first page
+        </nuxt-link>
       </div>
     </div>
 
@@ -271,6 +289,10 @@ export default {
       }
     }
   }
+}
+.hint {
+  color: rgba(1, 1, 1, 0.1);
+  font-size: 1.1em;
 }
 .fade-in {
   @include fade_in($opacity: 0.2, $duration: 2s);
