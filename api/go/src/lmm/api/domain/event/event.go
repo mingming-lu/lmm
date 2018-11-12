@@ -2,7 +2,7 @@ package event
 
 import "time"
 
-type DomainEvent interface {
+type Event interface {
 	Topic() string
 	OccurredAt() time.Time
 }
