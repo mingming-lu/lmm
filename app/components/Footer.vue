@@ -3,12 +3,12 @@
     <a
       href="https://github.com/akinaru-lu"
       target="_blank">
-      <i class="fa fa-github link"/>
+      <i class="fab fa-github link"></i>
     </a>
     <a
       href="https://www.linkedin.com/in/lumingming/"
       target="_blank">
-      <i class="fa fa-linkedin link"/>
+      <i class="fab fa-linkedin-in link"/>
     </a>
     <p>&copy; 2018
       <nuxt-link
