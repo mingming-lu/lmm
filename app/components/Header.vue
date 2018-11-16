@@ -34,10 +34,10 @@
           @click.native="toggleDrawer">
           <i
             v-if="!drawerShown"
-            class="fa fa-fw fa-bars"/>
+            class="fas fa-bars"/>
           <i
             v-else
-            class="fa fa-fw fa-times"/>
+            class="fas fa-times"/>
         </nuxt-link><span v-if="!drawerShown">{{ currentRouterName }}</span>
       </div>
       <div
@@ -52,9 +52,7 @@
             :class="{'drawer-item-active': currentRouterName === item.name}"
             class="link"
             @click.native="navigate(item.name)">
-            <p><i
-              :class="item.icon"
-              class="fa fa-fw"/>
+            <p><i :class="item.icon"></i>
               {{ item.name }}
             </p>
           </nuxt-link>
@@ -77,31 +75,31 @@ export default {
         {
           link: '/',
           name: 'Home',
-          icon: 'fa-home',
+          icon: 'fas fa-home',
           wideMode: false,
         },
         {
           link: '/articles',
           name: 'Articles',
-          icon: 'fa-pencil',
+          icon: 'fas fa-pencil-alt',
           wideMode: true,
         },
         {
           link: '/photos',
           name: 'Photos',
-          icon: 'fa-camera-retro',
+          icon: 'fas fa-camera-retro',
           wideMode: true,
         },
         {
           link: '/projects',
           name: 'Projects',
-          icon: 'fa-archive',
+          icon: 'fas fa-project-diagram',
           wideMode: true,
         },
         {
           link: '/reviews',
           name: 'Reviews',
-          icon: 'fa-star-half-o',
+          icon: 'fas fa-star-half-alt',
           wideMode: true,
         }
       ]

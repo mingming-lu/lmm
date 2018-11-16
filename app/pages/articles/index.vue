@@ -17,7 +17,7 @@
                     class="link">{{ article.title }}</nuxt-link>
                 </p>
                 <p class="post-at">
-                  <i class="fa fa-fw fa-calendar-o"/>
+                  <i class="far fa-clock"></i>
                   {{ formatted(article.post_at) }}
                 </p>
               </td>
@@ -71,7 +71,7 @@
       class="nav">
       <!-- Tags -->
       <div class="tags container">
-        <h3><i class="fa fa-fw fa-tags"/>Tags</h3>
+        <h3><i class="fas fa-hashtag"></i>Tags</h3>
         <p>
           <nuxt-link
             v-for="tag in tags"
