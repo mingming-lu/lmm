@@ -88,17 +88,28 @@ export default {
     }
   },
   methods: {
-    copyURLToClipboard(name) {
-      const textArea = document.createElement("textarea");
+    fallbackCopyURLToClipboard(name) {
       const url = this.wrapAssetURL(name)
+      const textArea = document.createElement("textarea");
       textArea.value = url
       textArea.style = 'display: none'
-      document.body.appendChild(textArea);
+      document.body.appendChild(textArea)
       textArea.select()
       if (document.execCommand('copy') === true) {
         this.copied = true
       }
       document.body.removeChild(textArea);
+    },
+    copyURLToClipboard(name) {
+      if (!navigator.clipboard) {
+        return this.fallbackCopyURLToClipboard(name)
+      }
+      const url = this.wrapAssetURL(name)
+      navigator.clipboard.writeText(url).then(() => {
+        this.copied = true
+      }, err => {
+        console.log(err)
+      })
     },
     pickOnePhoto() {
       this.$refs.imagePicker.click()
