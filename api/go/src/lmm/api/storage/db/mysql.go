@@ -2,6 +2,7 @@ package db
 
 import (
 	"os"
+	"time"
 )
 
 // MySQL is a DB implementation
@@ -19,7 +20,13 @@ func DefaultMySQL() DB {
 		Database: os.Getenv("MYSQL_NAME"),
 		Retry:    -1,
 	}
-	return NewMySQL(config)
+
+	mysql := NewMySQL(config)
+	mysql.SetConnMaxLifetime(time.Hour)
+	mysql.SetMaxIdleConns(10)
+	mysql.SetMaxOpenConns(100)
+
+	return mysql
 }
 
 // NewMySQL returns a MySQL DB implementation
