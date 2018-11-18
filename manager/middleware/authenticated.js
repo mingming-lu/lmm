@@ -9,7 +9,6 @@ export default function({ $axios, isServer, route, req, redirect, store }) {
   let accessToken = window.localStorage.getItem('accessToken')
 
   if (accessToken && !store.state.accessToken) {
-    console.log('ha?')
     $axios.post('/v1/auth/login', {
           grantType: 'refreshToken',
         }, {
