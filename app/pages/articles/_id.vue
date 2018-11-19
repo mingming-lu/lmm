@@ -5,7 +5,7 @@
       <div :class="{container: !isMobile}">
         <p class="title">{{ title }}</p>
         <div class="info">
-          <span><i class="fa fa-fw fa-calendar-o"></i><span>{{ postAt }}</span></span>
+          <span><i class="far fa-clock"></i><span>{{ postAt }}</span></span>
         </div>
         <div ref="body" class="marked text" v-html="body" v-hljs></div>
         <p v-if="postAt !== lastEditedAt" class="info text-right">Edited at {{ lastEditedAt }}</p>
@@ -15,7 +15,7 @@
     <!-- Article tags -->
     <div v-if="!isMobile" class="tags">
       <div :class="{container: !isMobile}">
-        <h3><i class="fa fa-fw fa-tags"></i>Tags</h3>
+        <h3><i class="fas fa-hashtag"></i>Tags</h3>
         <p>
           <nuxt-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
             {{ tag.name }}
@@ -27,7 +27,7 @@
     <!-- Article chapters -->
     <div v-if="!isMobile" class="chapters">
       <div :class="{container: !isMobile}">
-        <h3><i class="fa fa-fw fa-bookmark-o"></i>Chapters</h3>
+        <h3><i class="far fa-bookmark"></i>Chapters</h3>
         <div ref="progress" class="progress-bar"/>
         <p v-for="subtitle in subtitles" :key="subtitle.name">
           <nuxt-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
