@@ -260,6 +260,7 @@ i {
 .marked /deep/ code {
   background-color: #f1f1f1 !important;
   font-family: Monaco, "Courier", monospace;
+  font-size: 0.88em;
 }
 .marked /deep/ pre {
   code {
