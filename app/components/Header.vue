@@ -173,8 +173,8 @@ export default {
   user-select: none;
   color: $color_text;
   padding: 0 16px;
-  vertical-align: middle;
   .icon {
+    vertical-align: middle;
     width: 64px;
     height: 64px;
   }
