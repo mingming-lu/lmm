@@ -213,7 +213,7 @@ export default {
     }
     .title {
       @media screen and (min-width: $max_width_device + 1) {
-        font-size: 1.8em;
+        font-size: 1.66em;
       }
       @media screen and(max-width: $max_width_device) {
         font-size: 1.5em;
