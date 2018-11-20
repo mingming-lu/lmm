@@ -30,44 +30,10 @@
           <LdsEllipsis class="fade-in" />
         </div>
       </div>
-      <Simple
-        v-model="page"
-        class="center"
+      <SimplePagination
+        :page="page"
+        :total="total"
       />
-      <div
-        v-if="articles.length !== 0"
-        class="container pagination"
-        >
-        <button
-          v-on:click="fethcArticles(prevPage)"
-          :class="{enable: Boolean(prevPage)}"
-          class="button prev">
-          &lt;
-        </button>
-        <span class="page">{{ page }}</span>
-        <button
-          v-on:click="fethcArticles(nextPage)"
-          :class="{ 'enable': Boolean(nextPage) }"
-          class="button next"
-          >
-          &gt;
-        </button>
-      </div>
-      <div
-        v-else
-        class="center"
-        >
-        <div class="center">
-          <p class="hint">No more articles.</p>
-        </div>
-        <nuxt-link
-          v-if="page > 1"
-          class="link hint"
-          to="/articles"
-          >
-          Go to first page
-        </nuxt-link>
-      </div>
     </div>
 
     <div
@@ -94,7 +60,7 @@
 <script>
 import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
-import Simple from '~/components/pagination/Simple'
+import SimplePagination from '~/components/pagination/SimplePagination'
 import { buildURLEncodedString, formattedUTCString } from '~/assets/js/utils'
 
 const apiPath = '/v2/articles'
@@ -125,7 +91,7 @@ const buildLinks = (obj, path) => {
 export default {
   components: {
     LdsEllipsis,
-    Simple,
+    SimplePagination,
   },
   head () {
     return {

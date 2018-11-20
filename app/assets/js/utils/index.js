@@ -1,4 +1,10 @@
-export { buildURLEncodedString, formattedDate, formattedTimeStamp, formattedUTCString }
+export {
+  buildURLEncodedString,
+  formattedDate,
+  formattedTimeStamp,
+  formattedUTCString,
+  range
+}
 
 function formattedTimeStamp(timestamp) {
   let date = new Date(timestamp * 1e3)
@@ -19,9 +25,22 @@ function formattedDate(date) {
 }
 
 const buildURLEncodedString = obj => {
-  return Object.entries(obj).filter(kv => {
-    return kv[1]
-  }).map(kv => {
-    return `${kv[0]}=${kv[1]}`
-  }).join('&')
+  return Object.entries(obj)
+    .filter(kv => {
+      return kv[1]
+    })
+    .map(kv => {
+      return `${kv[0]}=${kv[1]}`
+    })
+    .join('&')
+}
+
+const range = (from, to) => {
+  from = from > 0 ? from : 1
+
+  return Array(to - from + 1)
+    .fill(from)
+    .map((v, i) => {
+      return v + i
+    })
 }
