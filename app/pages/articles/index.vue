@@ -30,6 +30,10 @@
           <LdsEllipsis class="fade-in" />
         </div>
       </div>
+      <Simple
+        v-model="page"
+        class="center"
+      />
       <div
         v-if="articles.length !== 0"
         class="container pagination"
@@ -90,6 +94,7 @@
 <script>
 import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
+import Simple from '~/components/pagination/Simple'
 import { buildURLEncodedString, formattedUTCString } from '~/assets/js/utils'
 
 const apiPath = '/v2/articles'
@@ -119,7 +124,8 @@ const buildLinks = (obj, path) => {
 
 export default {
   components: {
-    LdsEllipsis
+    LdsEllipsis,
+    Simple,
   },
   head () {
     return {
