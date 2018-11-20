@@ -198,7 +198,6 @@ i {
   .chapters {
     float: right;
     position: sticky !important;
-    top: 44px;
     width: 33.3333%;
     .chapter-item {
       font-size: 1.1em;

@@ -1,7 +1,10 @@
 <template>
   <div id="app">
-    <Header/>
-    <nuxt id="content" :style="{marginBottom: footerHeight + 'px'}"/>
+    <Header ref="header"/>
+    <nuxt
+      id="content"
+      :style="{top: `${headerHeight}px`, marginBottom: `${footerHeight}px`}"
+    />
     <Footer ref="footer"/>
   </div>
 </template>
@@ -17,18 +20,20 @@ export default {
   },
   data() {
     return {
-      footerHeight: 0
+      headerHeight: 0,
+      footerHeight: 0,
     }
   },
   mounted() {
-    this.calcFooterHeight()
-    window.addEventListener('resize', this.calcFooterHeight)
+    window.addEventListener('resize', this.calcEdge)
+    this.calcEdge()
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.calcFooterHeight)
+    window.removeEventListener('resize', this.calcEdge)
   },
   methods: {
-    calcFooterHeight() {
+    calcEdge() {
+      this.headerHeight = this.$refs.header.$el.clientHeight
       this.footerHeight = this.$refs.footer.$el.clientHeight
     }
   }
@@ -42,16 +47,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   color: $color_text;
   background-color: $color_primary;
-}
-#content {
-  @media screen and (min-width: $max_width_device + 1) {
-    margin-top: 128px;
-  }
-  @media screen and (max-width: 960px) {
-    margin-top: 64px;
-  }
-  @media screen and (max-width: $max_width_device) {
-    margin-top: 0;
-  }
 }
 </style>
