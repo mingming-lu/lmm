@@ -35,9 +35,11 @@
         class="container pagination"
         >
         <nuxt-link
+          v-if="!isMobile"
           :to="prevPage"
           :class="{disabled: !Boolean(prevPage)}"
-          class="navigation link prev">
+          class="navigation link prev"
+          >
           &#10094; Prev
         </nuxt-link>
         <nuxt-link
@@ -50,6 +52,7 @@
           {{ item }}
         </nuxt-link>
         <nuxt-link
+          v-if="!isMobile"
           :to="nextPage"
           :class="{disabled: !Boolean(nextPage) }"
           class="navigation link next"
@@ -246,6 +249,7 @@ export default {
         height: 2em;
         line-height: 2em;
         width: 2em;
+        margin: 4px;
         &.active {
           background-color: white !important;
           color: $color_accent !important;
