@@ -34,20 +34,31 @@
         v-if="articles.length !== 0"
         class="container pagination"
         >
-        <button
-          v-on:click="fethcArticles(prevPage)"
-          :class="{enable: Boolean(prevPage)}"
-          class="button prev">
-          &lt;
-        </button>
-        <span class="page">{{ page }}</span>
-        <button
-          v-on:click="fethcArticles(nextPage)"
-          :class="{ 'enable': Boolean(nextPage) }"
-          class="button next"
+        <nuxt-link
+          v-if="!isMobile"
+          :to="prevPage"
+          :class="{disabled: !Boolean(prevPage)}"
+          class="navigation link prev"
           >
-          &gt;
-        </button>
+          &#10094; Prev
+        </nuxt-link>
+        <nuxt-link
+          v-for="item in pager.items"
+          :key="item"
+          :to="item === page ? $route.fullPath : `${$route.path}?page=${item}&perPage=${perPage}`"
+          :class="{active: item === page }"
+          class="link page"
+          >
+          {{ item }}
+        </nuxt-link>
+        <nuxt-link
+          v-if="!isMobile"
+          :to="nextPage"
+          :class="{disabled: !Boolean(nextPage) }"
+          class="navigation link next"
+          >
+          Next &#10095;
+        </nuxt-link>
       </div>
       <div
         v-else
@@ -90,7 +101,12 @@
 <script>
 import axios from 'axios'
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
-import { buildURLEncodedString, formattedUTCString } from '~/assets/js/utils'
+import {
+  buildPageNumbers,
+  buildURLEncodedString,
+  formattedUTCString,
+  range,
+} from '~/assets/js/utils'
 
 const apiPath = '/v2/articles'
 
@@ -103,18 +119,16 @@ const articleFetcher = axiosClient => {
 }
 
 const buildLinks = (obj, path) => {
-  let links = []
-  if (obj.prev && typeof obj.prev === typeof '') {
-    links.push({
-      rel: 'prev', href: obj.prev.replace(apiPath, path),
+  return Object.entries(obj)
+    .filter(kv => {
+      return Boolean(kv[1])
     })
-  }
-  if (obj.next && typeof obj.next === typeof '') {
-    links.push({
-      rel: 'next', href: obj.next.replace(apiPath, path),
+    .map(kv => {
+      return {
+        rel:  kv[0],
+        href: kv[1].replace(apiPath, path)
+      }
     })
-  }
-  return links
 }
 
 export default {
@@ -137,20 +151,29 @@ export default {
       $axios.get(uri),
       $axios.get(`/v1/articleTags`)
     ]).then(([articlesRes, tagsRes]) => {
+      const articles = articlesRes.data
+      const page = articles.page
+      const perPage = articles.perPage
+      const total = articles.total
       return {
         isMobile:     false,
         isPageLoaded: true,
         currentURI:   uri,
-        articles:     articlesRes.data.articles,
+        articles:     articles.articles,
         tags:         tagsRes.data,
-        page:         articlesRes.data.page,
-        perPage:      articlesRes.data.perPage,
-        total:        articlesRes.data.total,
-        prevPage:     articlesRes.data.prevPage,
-        nextPage:     articlesRes.data.nextPage,
+        page:         page,
+        perPage:      perPage,
+        pager:        {
+          items: buildPageNumbers(page, Math.ceil(total / perPage), 5),
+        },
+        total:        articles.total,
+        prevPage:     articles.prevPage ? articles.prevPage.replace(apiPath, route.path) : '',
+        nextPage:     articles.nextPage ? articles.nextPage.replace(apiPath, route.path) : '',
         links:        buildLinks({
-          prev: articlesRes.data.prevPage,
-          next: articlesRes.data.nextPage,
+          first: articles.firstPage,
+          prev:  articles.prevPage,
+          next:  articles.nextPage,
+          last:  articles.lastPage,
         }, route.path),
       }
     })
@@ -170,26 +193,6 @@ export default {
     calcIsMobile() {
       this.isMobile = window.innerWidth <= 768
     },
-    fethcArticles(uri) {
-      if (!uri || uri === this.currentURI) {
-        return
-      }
-      this.isPageLoaded = false
-      articleFetcher(this.$axios)
-        .fetch(uri)
-        .then(res => {
-          this.currentURI = uri
-          this.articles   = res.data.articles
-          this.page       = res.data.page
-          this.prevPage   = res.data.prevPage
-          this.nextPage   = res.data.nextPage
-          this.links      = buildLinks({
-            prev: res.data.prevPage,
-            next: res.data.nextPage,
-          }, this.$route.path)
-          this.isPageLoaded = true
-        })
-    }
   }
 }
 </script>
@@ -225,40 +228,37 @@ export default {
     .pagination {
       align-items: center;
       display: flex;
-      font-size: 1.1em;
+      font-size: 1.15em;
       justify-content: center;
       text-align: center;
+      padding: 8px;
+      .navigation {
+        &.disabled {
+          opacity: 0.2;
+          pointer-events: none !important;
+        }
+        &.prev {
+          margin-right: 16px;
+        }
+        &.next {
+          margin-left: 16px;
+        }
+      }
       .page {
         color: $color_text;
-        cursor: default;
         height: 2em;
         line-height: 2em;
         width: 2em;
-      }
-      .button {
-        background-color: transparent;
-        border: none;
-        border-radius: 50%;
-        display:inline-block;
-        font-size: 1.1em;
-        opacity: 0.2;
-        margin: 8px;
-        &.prev {
-          margin-right: 32px;
+        margin: 4px;
+        &.active {
+          background-color: white !important;
+          color: $color_accent !important;
+          pointer-events: none !important;
         }
-        &.next {
-          margin-left: 32px;
-        }
-        &.enable {
-          opacity: 1;
-          &:hover {
-            color: $color_accent;
-            cursor: pointer;
-          }
-        }
-        &:focus {
-          outline: 0;
-          box-shadow: none;
+        &:hover {
+          background-color: $color_accent;
+          border-radius: 2px;
+          color: white;
         }
       }
     }
