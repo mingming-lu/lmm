@@ -2,9 +2,11 @@ package fetcher
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"lmm/api/service/article/domain"
+	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/storage/db"
 )
@@ -20,7 +22,14 @@ func NewArticleFetcher(db db.DB) *ArticleFetcher {
 }
 
 // ListByPage implementation
-func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model.ArticleListView, error) {
+func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter *finder.ArticleFilter) (*model.ArticleListView, error) {
+	if len(filter.Tags) == 0 {
+		return f.listByPage(c, count, page)
+	}
+	return f.listByPageWithFitler(c, count, page, filter)
+}
+
+func (f *ArticleFetcher) listByPage(c context.Context, count, page uint) (*model.ArticleListView, error) {
 	stmt := f.db.Prepare(c, `
 		select uid, title, created_at from article order by created_at desc limit ? offset ?
 	`)
@@ -35,6 +44,28 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model
 	}
 	defer rows.Close()
 
+	return f.buildArticlesList(c, rows, count, page)
+}
+
+func (f *ArticleFetcher) listByPageWithFitler(c context.Context, count, page uint, filter *finder.ArticleFilter) (*model.ArticleListView, error) {
+	stmt := f.db.Prepare(c, `
+		select uid, title, created_at from article a inner join article_tag t on a.id = t.article where t.name in (?) order by created_at desc limit ? offset ?
+	`)
+	defer stmt.Close()
+
+	rows, err := stmt.Query(c, strings.Join(filter.Tags, ","), count+1, (page-1)*count)
+	if err != nil {
+		if err == db.ErrNoRows {
+			return model.NewArticleListView(nil, 0, 0, 0, false), nil
+		}
+		return nil, err
+	}
+	defer rows.Close()
+
+	return f.buildArticlesList(c, rows, count, page)
+}
+
+func (f *ArticleFetcher) buildArticlesList(c context.Context, rows *db.Rows, count, page uint) (*model.ArticleListView, error) {
 	total, err := db.Count(c, f.db, "article", "id", db.SQLOptions{})
 	if err != nil {
 		return nil, err

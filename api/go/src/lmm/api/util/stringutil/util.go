@@ -11,6 +11,10 @@ var (
 	errOutOfRange = errors.New("out of range")
 )
 
+func Padding(s, pad string) string {
+	return pad + s + pad
+}
+
 // ParseInt is a shortcut of strconv.Atoi(s)
 func ParseInt(s string) (int, error) {
 	return strconv.Atoi(s)

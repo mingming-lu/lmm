@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+type Rows = sql.Rows
+
 // Config defines config of database
 type Config struct {
 	Host     string

@@ -2,7 +2,9 @@ package ui
 
 import (
 	"fmt"
+	"lmm/api/service/article/application/query"
 	"math"
+	"strings"
 
 	"github.com/pkg/errors"
 
@@ -144,13 +146,14 @@ func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 
 // ListArticles handles GET /v1/articles
 func (ui *UI) ListArticles(c http.Context) {
-	view, err := ui.appService.ArticleQueryService().ListArticlesByPage(c,
-		c.Request().QueryParam("count"),
-		c.Request().QueryParam("page"),
-	)
+	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(c, query.ListArticleQuery{
+		Count: c.Request().QueryParam("page"),
+		Page:  c.Request().QueryParam("perPage"),
+		Tags:  strings.Split(c.Request().QueryParam("tags"), ","),
+	})
 	switch errors.Cause(err) {
 	case nil:
-		c.JSON(http.StatusOK, ui.articleListViewToJSON(view))
+		c.JSON(http.StatusOK, ui.articleListViewToJSON(v))
 	case application.ErrInvalidCount, application.ErrInvalidPage:
 		c.JSON(http.StatusBadRequest, err.Error())
 	default:
@@ -161,10 +164,11 @@ func (ui *UI) ListArticles(c http.Context) {
 
 // ListArticlesByPagination handles GET /v2/articles
 func (ui *UI) ListArticlesByPagination(c http.Context) {
-	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(c,
-		c.Request().QueryParam("perPage"),
-		c.Request().QueryParam("page"),
-	)
+	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(c, query.ListArticleQuery{
+		Count: c.Request().QueryParam("page"),
+		Page:  c.Request().QueryParam("perPage"),
+		Tags:  strings.Split(c.Request().QueryParam("tags"), ","),
+	})
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, ui.articleListViewToJSONV2(c, v))
