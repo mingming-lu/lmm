@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: go-mod-{{ checksum "/go/src/lmm/api/go.mod" }}
+          key: go-mod-{{ checksum "api/go.mod" }}
       - run:
           name: Test API
           command: |
@@ -19,6 +19,6 @@ jobs:
             make install
             make test
       - save_cache:
-          key: go-mod-{{ checksum "/go/src/lmm/api/go.mod" }}
+          key: go-mod-{{ checksum "api/go.mod" }}
           paths:
             - /go/pkg/mod
