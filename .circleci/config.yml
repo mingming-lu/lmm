@@ -6,9 +6,9 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}
+          key: api-go-mod-{{ arch }}-{{ .Branch }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
       - restore_cache:
-          key: api-mysql-{{ checksum "api/mysql/sql/init_test.sql" }}
+          key: api-mysql-{{ arch }}-{{ .Branch }}-{{ checksum "api/mysql/sql/init_test.sql" }}
       - run:
           name: Test API
           command: |
@@ -21,10 +21,10 @@ jobs:
             make install
             make test
       - save_cache:
-          key: api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}
+          key: api-go-mod-{{ arch }}-{{ .Branch }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
           paths:
             - api/go/pkg/mod
       - save_cache:
-          key: api-mysql-{{ checksum "api/mysql/sql/init_test.sql" }}
+          key: api-mysql-{{ arch }}-{{ .Branch }}-{{ checksum "api/mysql/sql/init_test.sql" }}
           paths:
             - api/mysql/lib
