@@ -12,28 +12,30 @@
       </div>
     </div>
 
-    <!-- Article tags -->
-    <div v-if="!isMobile" class="tags">
-      <div :class="{container: !isMobile}">
-        <h3><i class="fas fa-hashtag"></i>Tags</h3>
-        <p>
-          <nuxt-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
-            {{ tag.name }}
-          </nuxt-link>
-        </p>
+    <div class="nav">
+      <!-- Article tags -->
+      <div v-if="!isMobile" class="tags">
+        <div :class="{container: !isMobile}">
+          <h3><i class="fas fa-hashtag"></i>Tags</h3>
+          <p>
+            <nuxt-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
+              {{ tag.name }}
+            </nuxt-link>
+          </p>
+        </div>
       </div>
-    </div>
 
-    <!-- Article chapters -->
-    <div v-if="!isMobile" class="chapters">
-      <div :class="{container: !isMobile}">
-        <h3><i class="far fa-bookmark"></i>Chapters</h3>
-        <div ref="progress" class="progress-bar"/>
-        <p v-for="subtitle in subtitles" :key="subtitle.name">
-          <nuxt-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
-            <div v-html="subtitle.name"></div>
-          </nuxt-link>
-        </p>
+      <!-- Article chapters -->
+      <div v-if="!isMobile" class="chapters">
+        <div :class="{container: !isMobile}">
+          <h3><i class="far fa-bookmark"></i>Chapters</h3>
+          <div ref="progress" class="progress-bar"/>
+          <p v-for="subtitle in subtitles" :key="subtitle.name">
+            <nuxt-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
+              <div v-html="subtitle.name"></div>
+            </nuxt-link>
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -177,42 +179,45 @@ i {
       color: #777 !important;
     }
   }
-  .tags {
-    float: right;
-    width: 33.3333%;
-    .tag {
-      display: inline-block;
-      background-color: #777;
-      padding: 1px 8px;
-      margin: 2px;
-      border-radius: 2px;
-      font-weight: bold;
-      font-size: 0.98em;
-      color: white !important;
-      &:hover {
-        background-color: $color_accent;
-        opacity: 0.8;
+  .nav {
+    position: sticky !important;
+    top: 0px;
+    .tags {
+      float: right;
+      width: 33.3333%;
+      .tag {
+        display: inline-block;
+        background-color: #777;
+        padding: 1px 8px;
+        margin: 2px;
+        border-radius: 2px;
+        font-weight: bold;
+        font-size: 0.98em;
+        color: white !important;
+        &:hover {
+          background-color: $color_accent;
+          opacity: 0.8;
+        }
       }
     }
-  }
-  .chapters {
-    float: right;
-    position: sticky !important;
-    width: 33.3333%;
-    .chapter-item {
-      font-size: 1.1em;
-    }
-    .chapter-item /deep/ .h3 {
-      padding-left: 1em;
-    }
-    .chapter-item /deep/ .h4 {
-      padding-left: 2em;
-    }
-    .chapter-item /deep/ .h5 {
-      padding-left: 3em;
-    }
-    .chapter-item /deep/ .h6 {
-      padding-left: 4em;
+    .chapters {
+      float: right;
+      width: 33.3333%;
+      .chapter-item {
+        font-size: 1.1em;
+      }
+      .chapter-item /deep/ .h3 {
+        padding-left: 1em;
+      }
+      .chapter-item /deep/ .h4 {
+        padding-left: 2em;
+      }
+      .chapter-item /deep/ .h5 {
+        padding-left: 3em;
+      }
+      .chapter-item /deep/ .h6 {
+        padding-left: 4em;
+      }
     }
   }
 }
