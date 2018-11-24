@@ -34,8 +34,7 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
 	`name` VARCHAR(255) NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE `tag_id` (`article`, `sort`),
-	INDEX `name` (`name`),
-	INDEX `article_tag` (`article`, `sort`, `name`)
+	INDEX `tag_name` (`article`, `sort`, `name`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS `asset` (
