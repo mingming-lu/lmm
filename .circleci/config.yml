@@ -3,6 +3,7 @@ jobs:
   build:
     machine:
       image: circleci/classic:edge
+    working_directory: ~/lmm
     steps:
       - checkout
       - restore_cache:
@@ -23,8 +24,8 @@ jobs:
       - save_cache:
           key: api-go-mod-{{ arch }}-{{ .Branch }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
           paths:
-            - api/go/pkg/mod
+            - ~/lmm/api/go/pkg/mod
       - save_cache:
           key: api-mysql-{{ arch }}-{{ .Branch }}-{{ checksum "api/mysql/sql/init_test.sql" }}
           paths:
-            - api/mysql/lib
+            - ~/lmm/api/mysql/lib
