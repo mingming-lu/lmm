@@ -5,6 +5,8 @@ jobs:
       image: circleci/classic:edge
     steps:
       - checkout
+      - restore_cache:
+        key: go-mod-{{ checksum "/go/src/lmm/api/go.mod" }}
       - run:
           name: Test API
           command: |
@@ -16,3 +18,7 @@ jobs:
             pip install docker-compose
             make install
             make test
+      - save_cache:
+        key: go-mod-{{ checksum "/go/src/lmm/api/go.mod" }}
+        paths:
+          - /go/pkg/mod
