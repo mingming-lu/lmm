@@ -53,6 +53,7 @@ func main() {
 	router.Use(middleware.AccessLog)
 	router.Use(middleware.Recovery)
 	router.Use(middleware.WithRequestID)
+	router.Use(middleware.CacheControl)
 
 	// user
 	userRepo := userStorage.NewUserStorage(mysql)
