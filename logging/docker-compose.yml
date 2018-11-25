@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  fluentd:
+    container_name: lmm-logging-fluentd
+    image: fluent/fluentd:v1.3.0
+    ports:
+      - 24224:24224
+      - 24224:24224/udp
+    volumes:
+      - ./fluentd/log:/fluentd/log
+      - ./fluentd/etc:/fluentd/etc
