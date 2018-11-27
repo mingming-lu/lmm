@@ -14,7 +14,7 @@ start:
 	make start-services -j
 
 start-logging:
-	docker-compose -f logging/docker-compose.yml up -d
+	docker-compose -f logging/docker-compose.yml -f logging/docker-compose.dev.yml up -d
 
 start-gateway:
 	cd gateway && make
@@ -73,6 +73,3 @@ stop-logging:
 restart:
 	make stop
 	make start
-
-logs:
-	docker-compose -f logging/docker-compose.yml logs -f
