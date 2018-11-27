@@ -51,8 +51,9 @@ func Init() func() {
 		Named("logger").
 		WithOptions(
 			zap.AddCaller(),
+			zap.AddCallerSkip(1),
 			zap.AddStacktrace(zap.LevelEnablerFunc(func(lv zapcore.Level) bool {
-				return lv >= zap.WarnLevel
+				return lv == zap.PanicLevel
 			})),
 		)
 
