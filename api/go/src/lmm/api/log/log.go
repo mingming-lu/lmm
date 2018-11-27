@@ -24,14 +24,15 @@ func (w *kafkaWriter) Write(b []byte) (int, error) {
 // Expected to be called in main() first
 func Init() func() {
 	encoderConfig := zapcore.EncoderConfig{
-		MessageKey:   "msg",
-		NameKey:      "logger",
-		TimeKey:      "ts",
-		CallerKey:    "caller",
-		EncodeCaller: zapcore.FullCallerEncoder,
-		EncodeLevel:  zapcore.LowercaseLevelEncoder,
-		EncodeTime:   zapcore.ISO8601TimeEncoder,
-		LineEnding:   zapcore.DefaultLineEnding,
+		MessageKey:    "msg",
+		NameKey:       "logger",
+		TimeKey:       "ts",
+		StacktraceKey: "trace",
+		CallerKey:     "caller",
+		EncodeCaller:  zapcore.ShortCallerEncoder,
+		EncodeLevel:   zapcore.LowercaseLevelEncoder,
+		EncodeTime:    zapcore.ISO8601TimeEncoder,
+		LineEnding:    zapcore.DefaultLineEnding,
 	}
 
 	kafkaEncoder := zapcore.NewJSONEncoder(encoderConfig)
@@ -46,7 +47,14 @@ func Init() func() {
 		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stderr), globalEnabler),
 	)
 
-	logger := zap.New(core).Named("logger")
+	logger := zap.New(core).
+		Named("logger").
+		WithOptions(
+			zap.AddCaller(),
+			zap.AddStacktrace(zap.LevelEnablerFunc(func(lv zapcore.Level) bool {
+				return lv >= zap.WarnLevel
+			})),
+		)
 
 	undo := zap.ReplaceGlobals(logger)
 
