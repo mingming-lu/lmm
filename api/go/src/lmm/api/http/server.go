@@ -2,12 +2,11 @@ package http
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"go.uber.org/zap"
 )
 
 // Server is a wrapper of *http.Server and *Router
@@ -32,15 +31,15 @@ func NewServer(addr string, router *Router) *Server {
 // Run starts listening to this server and blocks goroutine
 func (s *Server) Run() {
 	if s.isShutDown {
-		zap.L().Panic("cannot run server since it is stopped")
+		log.Panic("cannot run server since it is stopped")
 	}
 
-	zap.L().Info("start serving at "+s.srv.Addr, zap.Int("pid", os.Getpid()))
+	log.Printf("start serving at %s, pid: %d\n", s.srv.Addr, os.Getpid())
 	go func() {
 		signal.Notify(s.shutDownSignal, syscall.SIGINT, syscall.SIGTERM)
 
 		if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			zap.L().Panic(err.Error())
+			log.Panic(err)
 		}
 	}()
 
@@ -57,9 +56,9 @@ func (s *Server) ShutDown() {
 	defer cancel()
 
 	if err := s.srv.Shutdown(ctx); err != nil {
-		zap.L().Panic(err.Error())
+		log.Panic(err)
 	}
 
 	s.isShutDown = true
-	zap.L().Info("stopped serving at " + s.srv.Addr)
+	log.Printf("stopped serving at %s\n", s.srv.Addr)
 }

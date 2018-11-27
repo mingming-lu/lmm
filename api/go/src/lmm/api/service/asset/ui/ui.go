@@ -65,8 +65,7 @@ func (ui *UI) ListImages(c http.Context) {
 	case application.ErrInvalidPage, application.ErrInvalidPerPage:
 		http.NotFound(c)
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Log().Panic(c, err.Error())
 	}
 }
 
@@ -85,8 +84,7 @@ func (ui *UI) ListPhotos(c http.Context) {
 	case application.ErrInvalidPage, application.ErrInvalidPerPage:
 		http.NotFound(c)
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Log().Panic(c, err.Error())
 	}
 }
 
@@ -99,7 +97,7 @@ func (ui *UI) upload(c http.Context, keyName string) {
 
 	data, ext, err := formImageData(c, keyName)
 	if err != nil {
-		http.Error(c, err.Error())
+		http.Log().Error(c, err.Error())
 		c.String(http.StatusBadRequest, errors.Cause(err).Error())
 		return
 	}
@@ -123,7 +121,7 @@ func (ui *UI) upload(c http.Context, keyName string) {
 
 func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
 	if err := c.Request().ParseMultipartForm(maxFormDataSize); err != nil {
-		http.Error(c, err.Error())
+		http.Log().Error(c, err.Error())
 		return nil, "", errors.Wrap(errImageMaxSizeExceeded, err.Error())
 	}
 	assets := c.Request().MultipartForm.File[imageKey]
@@ -133,7 +131,7 @@ func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
 	}
 
 	if len(assets) > 1 {
-		http.Warn(c, "attend to upload multiple images")
+		http.Log().Error(c, "attend to upload multiple images")
 		return nil, "", errMaxUploadExcceed
 	}
 

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -18,11 +19,7 @@ func newKafkaSyncWriter() zapcore.WriteSyncer {
 }
 
 func (w *kafkaWriter) Write(b []byte) (int, error) {
-	zap.L().Info("TODO: send data to kafka",
-		zap.ByteString("data", b),
-	)
-
-	return 0, nil
+	return fmt.Println("TODO: Send access log data to kafka:", string(b[:]))
 }
 
 var (
@@ -43,6 +40,7 @@ func newAccessLog() *zap.Logger {
 		EncodeLevel:  zapcore.LowercaseLevelEncoder,
 		EncodeTime:   zapcore.ISO8601TimeEncoder,
 		EncodeCaller: zapcore.ShortCallerEncoder,
+		LineEnding:   zapcore.DefaultLineEnding,
 	}
 	kafkaEncoder := zapcore.NewJSONEncoder(encoderConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)

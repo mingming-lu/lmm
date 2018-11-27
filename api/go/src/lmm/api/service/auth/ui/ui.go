@@ -29,7 +29,7 @@ func (ui *UI) Login(c http.Context) {
 	auth := c.Request().Header.Get("Authorization")
 	var body loginRequestBody
 	if err := c.Request().Bind(&body); err != nil {
-		http.Warn(c, err.Error())
+		http.Log().Warn(c, err.Error())
 		c.String(http.StatusBadRequest, errGrantTypeRequired)
 		return
 	}
@@ -45,7 +45,7 @@ func (ui *UI) Login(c http.Context) {
 			AccessToken: token.Hashed(),
 		})
 	default:
-		http.Warn(c, err.Error())
+		http.Log().Warn(c, err.Error())
 		http.Unauthorized(c)
 	}
 }
@@ -55,7 +55,7 @@ func (ui *UI) BearerAuth(next http.Handler) http.Handler {
 	return func(c http.Context) {
 		user, err := ui.appService.BearerAuth(c, c.Request().Header.Get("Authorization"))
 		if err != nil {
-			http.Warn(c, err.Error())
+			http.Log().Warn(c, err.Error())
 			http.Unauthorized(c)
 			return
 		}

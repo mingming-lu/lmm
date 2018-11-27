@@ -17,7 +17,7 @@ func newKafkaSyncWriter() zapcore.WriteSyncer {
 }
 
 func (w *kafkaWriter) Write(b []byte) (int, error) {
-	return fmt.Println("TODO: send logger data to kafka")
+	return fmt.Println("TODO: Send logger data to kafka:", string(b[:]))
 }
 
 // Init initializes logger for std log and zap global logger

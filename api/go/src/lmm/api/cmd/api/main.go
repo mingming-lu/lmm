@@ -2,9 +2,9 @@ package main
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	"go.uber.org/zap"
 
 	"lmm/api/http"
+	"lmm/api/log"
 	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
 	"lmm/api/storage/db"
@@ -33,11 +33,8 @@ import (
 )
 
 func main() {
-	logger := globalRecorder()
-	defer logger.Sync()
-
-	undo := zap.ReplaceGlobals(logger)
-	defer undo()
+	callback := log.Init()
+	defer callback()
 
 	mysql := db.DefaultMySQL()
 	defer mysql.Close()
@@ -90,15 +87,4 @@ func main() {
 
 	server := http.NewServer(":8002", router)
 	server.Run()
-}
-
-func globalRecorder() *zap.Logger {
-	cfg := http.DefaultZapConfig()
-
-	logger, err := cfg.Build()
-	if err != nil {
-		panic(err)
-	}
-
-	return logger.Named("global")
 }
