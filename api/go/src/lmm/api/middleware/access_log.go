@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -9,16 +11,53 @@ import (
 	"lmm/api/http"
 )
 
+type kafkaWriter struct{}
+
+func newKafkaSyncWriter() zapcore.WriteSyncer {
+	w := zapcore.AddSync(new(kafkaWriter))
+	return zapcore.Lock(w)
+}
+
+func (w *kafkaWriter) Write(b []byte) (int, error) {
+	return fmt.Println("TODO: Send access log data to kafka:", string(b[:]))
+}
+
+var (
+	stdoutEnabler = zap.LevelEnablerFunc(func(lv zapcore.Level) bool {
+		return lv == zapcore.InfoLevel
+	})
+	stderrEnabler = zap.LevelEnablerFunc(func(lv zapcore.Level) bool {
+		return lv >= zapcore.WarnLevel
+	})
+)
+
+func newAccessLog() *zap.Logger {
+	encoderConfig := zapcore.EncoderConfig{
+		LevelKey:     "level",
+		MessageKey:   "msg",
+		NameKey:      "logger",
+		TimeKey:      "ts",
+		EncodeLevel:  zapcore.LowercaseLevelEncoder,
+		EncodeTime:   zapcore.ISO8601TimeEncoder,
+		EncodeCaller: zapcore.ShortCallerEncoder,
+		LineEnding:   zapcore.DefaultLineEnding,
+	}
+	kafkaEncoder := zapcore.NewJSONEncoder(encoderConfig)
+	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(kafkaEncoder, newKafkaSyncWriter(), stderrEnabler),
+		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stderr), stderrEnabler),
+		zapcore.NewCore(kafkaEncoder, newKafkaSyncWriter(), stdoutEnabler),
+		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stdout), stdoutEnabler),
+	)
+	return zap.New(core).Named("access_log")
+}
+
 // AccessLog records access log
 func AccessLog(next http.Handler) http.Handler {
-	cfg := zap.NewProductionConfig()
-	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-
-	logger, err := cfg.Build()
-	if err != nil {
-		panic(err)
-	}
-	logger = logger.Named("access_log")
+	logger := newAccessLog()
+	defer logger.Sync()
 
 	return func(c http.Context) {
 		start := time.Now()

@@ -2,12 +2,12 @@ package http
 
 import (
 	"context"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
-	"go.uber.org/zap"
 
 	"lmm/api/util/stringutil"
 )
@@ -21,7 +21,7 @@ func init() {
 		if i, err := stringutil.ParseUint(s); err == nil && i > 0 {
 			timeout = time.Duration(i) * time.Second
 		} else {
-			zap.L().Warn(err.Error())
+			log.Println(err)
 		}
 	}
 }

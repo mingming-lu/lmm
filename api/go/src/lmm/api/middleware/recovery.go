@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"go.uber.org/zap"
-
 	"lmm/api/http"
 )
 
@@ -11,11 +9,6 @@ func Recovery(next http.Handler) http.Handler {
 	return func(c http.Context) {
 		defer func() {
 			if recovered := recover(); recovered != nil {
-				fields := []zap.Field{
-					zap.String("request_id", c.Request().RequestID()),
-					zap.Reflect("what", recovered),
-				}
-				zap.L().Error("unexpected error", fields...)
 				http.InternalServerError(c)
 			}
 		}()
