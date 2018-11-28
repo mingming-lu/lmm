@@ -4,6 +4,7 @@ services:
     env_file:
       - ./.env/dev.env
     environment:
+      APP_HOST: https://www.lmm.local
       MYSQL_HOST: api-mysql
       MYSQL_PORT: 3306
       MYSQL_NAME: lmm
