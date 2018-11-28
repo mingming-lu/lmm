@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -46,6 +47,7 @@ func Init() func() {
 		zapcore.NewCore(kafkaEncoder, newKafkaSyncWriter(), globalEnabler),
 		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stderr), globalEnabler),
 	)
+	core = zapcore.NewSampler(core, time.Second, 100, 100)
 
 	logger := zap.New(core).
 		Named("logger").

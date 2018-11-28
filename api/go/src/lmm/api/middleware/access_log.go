@@ -51,6 +51,8 @@ func newAccessLog() *zap.Logger {
 		zapcore.NewCore(kafkaEncoder, newKafkaSyncWriter(), stdoutEnabler),
 		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stdout), stdoutEnabler),
 	)
+	core = zapcore.NewSampler(core, time.Second, 100, 100)
+
 	return zap.New(core).Named("access_log")
 }
 
