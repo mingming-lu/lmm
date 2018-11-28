@@ -65,6 +65,10 @@ func (r *Request) Host() string {
 	return r.Request.Host
 }
 
+func (r *Request) Origin() string {
+	return r.Header.Get("Origin")
+}
+
 func (r *Request) Path() string {
 	return r.Request.URL.Path
 }
