@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"fmt"
+	"io"
 	"os"
 	"time"
 
@@ -10,17 +10,6 @@ import (
 
 	"lmm/api/http"
 )
-
-type kafkaWriter struct{}
-
-func newKafkaSyncWriter() zapcore.WriteSyncer {
-	w := zapcore.AddSync(new(kafkaWriter))
-	return zapcore.Lock(w)
-}
-
-func (w *kafkaWriter) Write(b []byte) (int, error) {
-	return fmt.Println("TODO: Send access log data to kafka:", string(b[:]))
-}
 
 var (
 	stdoutEnabler = zap.LevelEnablerFunc(func(lv zapcore.Level) bool {
@@ -31,7 +20,14 @@ var (
 	})
 )
 
-func newAccessLog() *zap.Logger {
+// AccessLogger struct
+type AccessLogger struct {
+	logger *zap.Logger
+	writer io.Writer
+}
+
+// NewAccessLog creates a new AccessLog
+func NewAccessLog(logWriter io.Writer) *AccessLogger {
 	encoderConfig := zapcore.EncoderConfig{
 		LevelKey:     "level",
 		MessageKey:   "msg",
@@ -42,25 +38,35 @@ func newAccessLog() *zap.Logger {
 		EncodeCaller: zapcore.ShortCallerEncoder,
 		LineEnding:   zapcore.DefaultLineEnding,
 	}
-	kafkaEncoder := zapcore.NewJSONEncoder(encoderConfig)
+	writerEncoder := zapcore.NewJSONEncoder(encoderConfig)
 	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
 
 	core := zapcore.NewTee(
-		zapcore.NewCore(kafkaEncoder, newKafkaSyncWriter(), stderrEnabler),
+		zapcore.NewCore(writerEncoder, newSyncWriter(logWriter), stderrEnabler),
 		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stderr), stderrEnabler),
-		zapcore.NewCore(kafkaEncoder, newKafkaSyncWriter(), stdoutEnabler),
+		zapcore.NewCore(writerEncoder, newSyncWriter(logWriter), stdoutEnabler),
 		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stdout), stdoutEnabler),
 	)
 	core = zapcore.NewSampler(core, time.Second, 100, 100)
 
-	return zap.New(core).Named("access_log")
+	return &AccessLogger{
+		logger: zap.New(core).Named("access_log"),
+		writer: logWriter,
+	}
+}
+
+// Sync implementation
+func (l *AccessLogger) Sync() error {
+	return l.logger.Sync()
+}
+
+// Write may be not mutex
+func (l *AccessLogger) Write(p []byte) (int, error) {
+	return l.Write(p)
 }
 
 // AccessLog records access log
-func AccessLog(next http.Handler) http.Handler {
-	logger := newAccessLog()
-	defer logger.Sync()
-
+func (l *AccessLogger) AccessLog(next http.Handler) http.Handler {
 	return func(c http.Context) {
 		start := time.Now()
 
@@ -81,11 +87,16 @@ func AccessLog(next http.Handler) http.Handler {
 		}
 
 		if status >= 500 {
-			logger.Error(http.StatusText(status), fields...)
+			l.logger.Error(http.StatusText(status), fields...)
 		} else if status >= 400 {
-			logger.Warn(http.StatusText(status), fields...)
+			l.logger.Warn(http.StatusText(status), fields...)
 		} else {
-			logger.Info(http.StatusText(status), fields...)
+			l.logger.Info(http.StatusText(status), fields...)
 		}
 	}
+}
+
+func newSyncWriter(w io.Writer) zapcore.WriteSyncer {
+	syncWriter := zapcore.AddSync(w)
+	return zapcore.Lock(syncWriter)
 }
