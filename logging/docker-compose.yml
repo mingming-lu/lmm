@@ -1,15 +1,14 @@
 version: "3.7"
 
 services:
-  zookeeper:
-    container_name: lmm-logging-zookeeper
-    image: zookeeper:3.4.13
-  kafka:
-    container_name: lmm-logging-kafka
-    image: wurstmeister/kafka:2.12-2.1.0
-    ports:
-      - 9092:9092
-    links:
-      - zookeeper
+  pubsub:
+    container_name: lmm-logging-pubsub
+    image: golang:1.11
+    volumes:
+      - ./go:/go
+      - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
+    working_dir: /go/src/lmm/logging/pubsub
+    command: go run sub.go
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      TZ: Asia/Tokyo
+      GO111MODULE: 'on'

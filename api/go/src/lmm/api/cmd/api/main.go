@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"fmt"
+
 	_ "github.com/go-sql-driver/mysql"
 
 	"lmm/api/http"
 	"lmm/api/log"
+	"lmm/api/messaging/pubsub"
 	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
 	"lmm/api/storage/db"
@@ -35,6 +39,12 @@ import (
 func main() {
 	callback := log.Init()
 	defer callback()
+
+	c := pubsub.NewClient()
+	if err := c.Publish(context.TODO()); err != nil {
+		fmt.Println(err.Error())
+	}
+	defer c.Close()
 
 	mysql := db.DefaultMySQL()
 	defer mysql.Close()

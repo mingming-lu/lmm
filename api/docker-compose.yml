@@ -5,6 +5,7 @@ services:
     image: golang:1.11
     volumes:
       - ./go:/go
+      - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
     working_dir: /go/src/lmm/api
     command: go run cmd/api/main.go
     environment:
