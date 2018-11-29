@@ -4,6 +4,7 @@ services:
     container_name: lmm-gateway-nginx
     image: nginx:1.14.1-alpine
     volumes:
+      - ./nginx/run:/var/run
       - ./nginx/log:/var/log/nginx
       - ./nginx/conf:/etc/nginx/conf
       - ./nginx/upstream:/etc/nginx/upstream
