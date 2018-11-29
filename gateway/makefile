@@ -16,3 +16,6 @@ logs:
 
 prod:
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+reload-nginx:
+	docker-compose -f docker-compose.yml run nginx sh -c 'nginx -s reload'
