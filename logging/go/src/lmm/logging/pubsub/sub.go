@@ -21,14 +21,12 @@ func main() {
 		panic(err)
 	}
 
-	err = client.Subscription(os.Getenv("GCP_PROJECT_SUBSCRIPTION_ID")).
+	err = client.Subscription(os.Getenv("GCP_PUBSUB_LOGGING_SUBSCRIPTION_ID")).
 		Receive(context.Background(), func(c context.Context, msg *pubsub.Message) {
 			fmt.Print(string(msg.Data[:]))
 			msg.Ack()
 		})
 	if err != nil {
-		log.Println(err.Error())
+		log.Fatal(err.Error())
 	}
-	log.Println("OK")
-	select {}
 }
