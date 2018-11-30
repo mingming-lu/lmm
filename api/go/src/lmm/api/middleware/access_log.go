@@ -38,14 +38,14 @@ func NewAccessLog(logWriter io.Writer) *AccessLogger {
 		EncodeCaller: zapcore.ShortCallerEncoder,
 		LineEnding:   zapcore.DefaultLineEnding,
 	}
-	writerEncoder := zapcore.NewJSONEncoder(encoderConfig)
-	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
+
+	encoder := zapcore.NewJSONEncoder(encoderConfig)
 
 	core := zapcore.NewTee(
-		zapcore.NewCore(writerEncoder, newSyncWriter(logWriter), stderrEnabler),
-		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stderr), stderrEnabler),
-		zapcore.NewCore(writerEncoder, newSyncWriter(logWriter), stdoutEnabler),
-		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stdout), stdoutEnabler),
+		zapcore.NewCore(encoder, newSyncWriter(logWriter), stderrEnabler),
+		zapcore.NewCore(encoder, zapcore.Lock(os.Stderr), stderrEnabler),
+		zapcore.NewCore(encoder, newSyncWriter(logWriter), stdoutEnabler),
+		zapcore.NewCore(encoder, zapcore.Lock(os.Stdout), stdoutEnabler),
 	)
 	core = zapcore.NewSampler(core, time.Second, 100, 100)
 

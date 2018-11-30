@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -20,9 +21,9 @@ func main() {
 		panic(err)
 	}
 
-	err = client.Subscription("GCP_PROJECT_SUBSCRIPTION_ID").
+	err = client.Subscription(os.Getenv("GCP_PROJECT_SUBSCRIPTION_ID")).
 		Receive(context.Background(), func(c context.Context, msg *pubsub.Message) {
-			log.Printf("%+v\n", msg.Data[:])
+			fmt.Print(string(msg.Data[:]))
 			msg.Ack()
 		})
 	if err != nil {

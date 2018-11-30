@@ -1,7 +1,7 @@
 package log
 
 import (
-	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -10,20 +10,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type kafkaWriter struct{}
-
-func newKafkaSyncWriter() zapcore.WriteSyncer {
-	w := zapcore.AddSync(new(kafkaWriter))
-	return zapcore.Lock(w)
-}
-
-func (w *kafkaWriter) Write(b []byte) (int, error) {
-	return fmt.Println("TODO: Send logger data to kafka:", string(b[:]))
-}
-
 // Init initializes logger for std log and zap global logger
 // Expected to be called in main() first
-func Init() func() {
+func Init(logWriter io.Writer) func() {
 	encoderConfig := zapcore.EncoderConfig{
 		MessageKey:    "msg",
 		NameKey:       "logger",
@@ -43,8 +32,10 @@ func Init() func() {
 		return true
 	})
 
+	syncer := zapcore.Lock(zapcore.AddSync(logWriter))
+
 	core := zapcore.NewTee(
-		zapcore.NewCore(kafkaEncoder, newKafkaSyncWriter(), globalEnabler),
+		zapcore.NewCore(kafkaEncoder, syncer, globalEnabler),
 		zapcore.NewCore(consoleEncoder, zapcore.Lock(os.Stderr), globalEnabler),
 	)
 	core = zapcore.NewSampler(core, time.Second, 100, 100)

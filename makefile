@@ -9,12 +9,8 @@ dev:
 	make start
 
 start:
-	make start-logging
 	make start-gateway
 	make start-services -j
-
-start-logging:
-	docker-compose -f logging/docker-compose.yml -f logging/docker-compose.dev.yml up -d
 
 start-gateway:
 	cd gateway && make
@@ -42,7 +38,6 @@ start-messaging:
 stop:
 	make stop-services -j
 	make stop-gateway
-	make stop-logging
 
 stop-services: stop-api stop-app stop-asset stop-manager stop-docs stop-messaging
 
@@ -66,9 +61,6 @@ stop-messaging:
 
 stop-gateway:
 	cd gateway && make stop
-
-stop-logging:
-	docker-compose -f logging/docker-compose.yml down
 
 restart:
 	make stop

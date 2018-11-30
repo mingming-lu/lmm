@@ -37,9 +37,6 @@ import (
 )
 
 func main() {
-	callback := log.Init()
-	defer callback()
-
 	pubsubClient, err := pubsub.NewClient()
 	if err != nil {
 		panic(err)
@@ -47,11 +44,14 @@ func main() {
 	defer pubsubClient.Close()
 
 	pubsubTopicPublisher := pubsub.NewPubSubTopicPublisher(
-		pubsubClient.Topic(os.Getenv("GCP_PROJECT_ID")),
+		pubsubClient.Topic(os.Getenv("GCP_PROJECT_TOPIC_ID")),
 		func() context.Context {
 			return context.Background()
 		},
 	)
+
+	callback := log.Init(pubsubTopicPublisher)
+	defer callback()
 
 	mysql := db.DefaultMySQL()
 	defer mysql.Close()
