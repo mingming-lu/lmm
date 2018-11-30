@@ -2,9 +2,8 @@ version: "3.7"
 services:
   app:
     container_name: lmm-app
-    image: node:9.9
+    image: node:lts-alpine
     volumes:
       - .:/app
-    working_dir: /app
     environment:
       TZ: Asia/Tokyo
