@@ -37,10 +37,6 @@ upstream manager {
     server host.docker.internal:8004;
 }
 
-upstream docs {
-    server host.docker.internal:8005;
-}
-
 upstream rabbitmq {
     server host.docker.internal:15672;
 }

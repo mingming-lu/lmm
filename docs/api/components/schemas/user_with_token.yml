@@ -1,7 +1,0 @@
-allOf:
-  - $ref: './user.yml'
-
-  - type: object
-    properties:
-      token:
-        type: string
