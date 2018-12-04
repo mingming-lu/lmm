@@ -44,7 +44,7 @@ func main() {
 	defer pubsubClient.Close()
 
 	pubsubTopicPublisher := pubsub.NewPubSubTopicPublisher(
-		pubsubClient.Topic(os.Getenv("GCP_PROJECT_TOPIC_ID")),
+		pubsubClient.Topic(os.Getenv("GCP_PUBSUB_LOGGING_TOPIC_ID")),
 		func() context.Context {
 			return context.Background()
 		},
