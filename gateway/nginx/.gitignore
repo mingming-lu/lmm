@@ -1,5 +1,6 @@
 .DS_Store
 
+run
 log
 ssl
 allowedips
