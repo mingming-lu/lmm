@@ -31,7 +31,7 @@ func AccessLog(next http.Handler) http.Handler {
 		fields := []zap.Field{
 			zap.Int("status", status),
 			zap.String("request_id", req.RequestID()),
-			zap.String("remote_addr", req.ClientIP()),
+			zap.String("client_ip", req.ClientIP()),
 			zap.String("forwarded_for", req.Header.Get("X-Forwarded-For")),
 			zap.String("ua", req.UserAgent()),
 			zap.String("method", req.Method),
