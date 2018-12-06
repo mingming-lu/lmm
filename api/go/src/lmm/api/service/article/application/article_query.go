@@ -24,16 +24,17 @@ func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.Li
 	var (
 		count uint = 5
 		page  uint = 1
+		err   error
 	)
 	if q.Count != "" && q.Count != "5" {
-		count, err := stringutil.ParseUint(q.Count)
+		count, err = stringutil.ParseUint(q.Count)
 		if err != nil || count < 1 {
 			return nil, ErrInvalidCount
 		}
 	}
 
 	if q.Page != "" && q.Page != "1" {
-		page, err := stringutil.ParseUint(q.Page)
+		page, err = stringutil.ParseUint(q.Page)
 		if err != nil || page < 1 {
 			return nil, ErrInvalidPage
 		}

@@ -182,8 +182,8 @@ func (ui *UI) buildListArticleQueryFromContext(c http.Context) query.ListArticle
 		tags = strings.Split(tagsParam, ",")
 	}
 	return query.ListArticleQuery{
-		Count: c.Request().QueryParam("page"),
-		Page:  c.Request().QueryParam("perPage"),
+		Page:  c.Request().QueryParam("page"),
+		Count: c.Request().QueryParam("perPage"),
 		Tags:  tags,
 	}
 }
