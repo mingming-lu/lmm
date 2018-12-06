@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"go.uber.org/zap"
 
 	"lmm/api/util"
@@ -17,6 +19,22 @@ var (
 	ErrNoRows   = sql.ErrNoRows
 	ErrTxDonw   = sql.ErrTxDone
 )
+
+type sqlError struct {
+	query string
+	args  []interface{}
+}
+
+func (e *sqlError) Error() string {
+	return e.String()
+}
+
+func (e sqlError) String() string {
+	if len(e.args) == 0 {
+		return fmt.Sprintf("query: " + e.query)
+	}
+	return fmt.Sprintf("query: "+e.query+", args: %#v", e.args)
+}
 
 type base struct {
 	src *sql.DB
@@ -105,7 +123,11 @@ func (db *base) Driver() driver.Driver {
 }
 
 func (db *base) Exec(c context.Context, query string, args ...interface{}) (sql.Result, error) {
-	return db.src.ExecContext(c, query, args...)
+	r, err := db.src.ExecContext(c, query, args...)
+	if err != nil {
+		return r, errors.Wrap(&sqlError{query: query, args: args}, err.Error())
+	}
+	return r, err
 }
 
 func (db *base) Ping(c context.Context) error {
@@ -115,13 +137,17 @@ func (db *base) Ping(c context.Context) error {
 func (db *base) Prepare(c context.Context, query string) Stmt {
 	st, err := db.src.PrepareContext(c, query)
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(&sqlError{query: query}, err.Error()))
 	}
 	return &stmt{Stmt: st}
 }
 
 func (db *base) Query(c context.Context, query string, args ...interface{}) (*sql.Rows, error) {
-	return db.src.QueryContext(c, query, args...)
+	r, err := db.src.QueryContext(c, query, args...)
+	if err != nil {
+		return r, errors.Wrap(&sqlError{query: query, args: args}, err.Error())
+	}
+	return r, err
 }
 
 func (db *base) QueryRow(c context.Context, query string, args ...interface{}) *sql.Row {
@@ -142,30 +168,4 @@ func (db *base) SetMaxOpenConns(n int) {
 
 func (db *base) Stats() sql.DBStats {
 	return db.src.Stats()
-}
-
-// SQLOptions has sql options
-type SQLOptions struct {
-	Where   string
-	OrderBy string
-	Limit   string
-}
-
-// Count counts the number of columns from table
-func Count(c context.Context, db DB, table, column string, opts SQLOptions) (uint, error) {
-	var count uint
-	sql := "SELECT COUNT(" + column + ") FROM " + table
-	if opts.Where != "" {
-		sql += " " + opts.Where
-	}
-
-	stmt := db.Prepare(c, sql)
-	defer stmt.Close()
-
-	row := stmt.QueryRow(c)
-	err := row.Scan(&count)
-	if err != nil {
-		return 0, err
-	}
-	return count, nil
 }

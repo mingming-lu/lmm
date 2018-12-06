@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+type Rows = sql.Rows
+
 // Config defines config of database
 type Config struct {
 	Host     string
@@ -45,4 +47,49 @@ type DB interface {
 	SetMaxOpenConns(n int)
 
 	Stats() sql.DBStats
+}
+
+// SQLOptions has sql options
+type SQLOptions struct {
+	Where   string
+	OrderBy string
+	Limit   string
+}
+
+// Count counts the number of columns from table
+func Count(c context.Context, db DB, table, column string, opts SQLOptions) (uint, error) {
+	var count uint
+	sql := "SELECT COUNT(" + column + ") FROM " + table
+	if opts.Where != "" {
+		sql += " " + opts.Where
+	}
+
+	stmt := db.Prepare(c, sql)
+	defer stmt.Close()
+
+	row := stmt.QueryRow(c)
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// Masks build a string in a (?,?,?) like format
+func Masks(length uint) string {
+	switch length {
+	case 0:
+		return ""
+	case 1:
+		return "(?)"
+	default:
+		var (
+			i uint = 1
+			s      = "(?"
+		)
+		for ; i < length; i++ {
+			s += ",?"
+		}
+		return s + ")"
+	}
 }

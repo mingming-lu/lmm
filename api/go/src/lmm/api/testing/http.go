@@ -59,6 +59,10 @@ func (r *Response) StatusCode() int {
 	return r.Result().StatusCode
 }
 
+func (r *Response) RawBody() io.Reader {
+	return r.ResponseRecorder.Body
+}
+
 func (r *Response) Body() string {
 	b, err := ioutil.ReadAll(r.ResponseRecorder.Body)
 	if err != nil {

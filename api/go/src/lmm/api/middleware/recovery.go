@@ -13,7 +13,7 @@ func Recovery(next http.Handler) http.Handler {
 			if recovered := recover(); recovered != nil {
 				fields := []zap.Field{
 					zap.String("request_id", c.Request().RequestID()),
-					zap.Reflect("what", recovered),
+					zap.Any("what", recovered),
 				}
 				zap.L().Error("unexpected error", fields...)
 				http.InternalServerError(c)

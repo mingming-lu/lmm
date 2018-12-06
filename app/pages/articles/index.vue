@@ -145,6 +145,7 @@ export default {
     const q = buildURLEncodedString({
       page:    Boolean(query.page)    ? query.page    : 1,
       perPage: Boolean(query.perPage) ? query.perPage : 5,
+      tags:    Boolean(query.tags) ? query.tags : undefined,
     })
     const uri = `${apiPath}?${q}`
     return axios.all([
@@ -178,7 +179,7 @@ export default {
       }
     })
   },
-  watchQuery: ['page', 'perPage'],
+  watchQuery: ['page', 'perPage', 'tags'],
   mounted() {
     window.addEventListener('resize', this.calcIsMobile)
     this.calcIsMobile()
