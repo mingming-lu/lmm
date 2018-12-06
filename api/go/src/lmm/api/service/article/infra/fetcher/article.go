@@ -2,8 +2,10 @@ package fetcher
 
 import (
 	"context"
-	"strings"
+	"fmt"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/finder"
@@ -23,6 +25,9 @@ func NewArticleFetcher(db db.DB) *ArticleFetcher {
 
 // ListByPage implementation
 func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter *finder.ArticleFilter) (*model.ArticleListView, error) {
+	if filter == nil {
+		filter = &finder.ArticleFilter{}
+	}
 	if len(filter.Tags) == 0 {
 		return f.listByPage(c, count, page)
 	}
@@ -44,16 +49,23 @@ func (f *ArticleFetcher) listByPage(c context.Context, count, page uint) (*model
 	}
 	defer rows.Close()
 
-	return f.buildArticlesList(c, rows, count, page)
+	return f.buildArticlesList(c, rows, count, page, nil)
 }
 
 func (f *ArticleFetcher) listByPageWithFitler(c context.Context, count, page uint, filter *finder.ArticleFilter) (*model.ArticleListView, error) {
 	stmt := f.db.Prepare(c, `
-		select uid, title, created_at from article a inner join article_tag t on a.id = t.article where t.name in (?) order by created_at desc limit ? offset ?
+		select uid, title, created_at from article a inner join article_tag t on a.id = t.article where t.name in `+
+		db.Masks(uint(len(filter.Tags)))+
+		` order by created_at desc limit ? offset ?
 	`)
 	defer stmt.Close()
 
-	rows, err := stmt.Query(c, strings.Join(filter.Tags, ","), count+1, (page-1)*count)
+	args := make([]interface{}, 0, 2+len(filter.Tags))
+	for _, tag := range filter.Tags {
+		args = append(args, tag)
+	}
+	args = append(args, count, (page-1)*count)
+	rows, err := stmt.Query(c, args...)
 	if err != nil {
 		if err == db.ErrNoRows {
 			return model.NewArticleListView(nil, 0, 0, 0, false), nil
@@ -62,13 +74,25 @@ func (f *ArticleFetcher) listByPageWithFitler(c context.Context, count, page uin
 	}
 	defer rows.Close()
 
-	return f.buildArticlesList(c, rows, count, page)
+	return f.buildArticlesList(c, rows, count, page, filter)
 }
 
-func (f *ArticleFetcher) buildArticlesList(c context.Context, rows *db.Rows, count, page uint) (*model.ArticleListView, error) {
-	total, err := db.Count(c, f.db, "article", "id", db.SQLOptions{})
-	if err != nil {
-		return nil, err
+func (f *ArticleFetcher) buildArticlesList(c context.Context, rows *db.Rows, count, page uint, filter *finder.ArticleFilter) (*model.ArticleListView, error) {
+	countArticlesSQL := `select count(a.id) from article a`
+	if filter != nil && len(filter.Tags) > 0 {
+		countArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name in ` + db.Masks(uint(len(filter.Tags)))
+	}
+
+	countArticles := f.db.Prepare(c, countArticlesSQL)
+	defer countArticles.Close()
+
+	var total uint
+	args := make([]interface{}, len(filter.Tags))
+	for i, tag := range filter.Tags {
+		args[i] = tag
+	}
+	if err := countArticles.QueryRow(c, args...).Scan(&total); err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("sql: %s, args: %#v", countArticlesSQL, args))
 	}
 
 	var (

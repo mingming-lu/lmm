@@ -146,11 +146,10 @@ func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 
 // ListArticles handles GET /v1/articles
 func (ui *UI) ListArticles(c http.Context) {
-	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(c, query.ListArticleQuery{
-		Count: c.Request().QueryParam("page"),
-		Page:  c.Request().QueryParam("perPage"),
-		Tags:  strings.Split(c.Request().QueryParam("tags"), ","),
-	})
+	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(
+		c,
+		ui.buildListArticleQueryFromContext(c),
+	)
 	switch errors.Cause(err) {
 	case nil:
 		c.JSON(http.StatusOK, ui.articleListViewToJSON(v))
@@ -164,17 +163,28 @@ func (ui *UI) ListArticles(c http.Context) {
 
 // ListArticlesByPagination handles GET /v2/articles
 func (ui *UI) ListArticlesByPagination(c http.Context) {
-	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(c, query.ListArticleQuery{
-		Count: c.Request().QueryParam("page"),
-		Page:  c.Request().QueryParam("perPage"),
-		Tags:  strings.Split(c.Request().QueryParam("tags"), ","),
-	})
+	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(
+		c,
+		ui.buildListArticleQueryFromContext(c),
+	)
 	switch err {
 	case nil:
 		c.JSON(http.StatusOK, ui.articleListViewToJSONV2(c, v))
 	default:
 		http.Error(c, err.Error())
 		http.ServiceUnavailable(c)
+	}
+}
+
+func (ui *UI) buildListArticleQueryFromContext(c http.Context) query.ListArticleQuery {
+	tags := make([]string, 0)
+	if tagsParam := c.Request().QueryParam("tags"); tagsParam != "" {
+		tags = strings.Split(tagsParam, ",")
+	}
+	return query.ListArticleQuery{
+		Count: c.Request().QueryParam("page"),
+		Page:  c.Request().QueryParam("perPage"),
+		Tags:  tags,
 	}
 }
 
