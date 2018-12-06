@@ -2,6 +2,7 @@ package ui
 
 import (
 	"os"
+	"sync"
 
 	"lmm/api/service/article/infra/fetcher"
 	"lmm/api/service/article/infra/persistence"
@@ -18,6 +19,7 @@ import (
 var (
 	mysql  db.DB
 	router *testing.Router
+	lock   sync.Mutex
 )
 
 func TestMain(m *testing.M) {
@@ -27,6 +29,8 @@ func TestMain(m *testing.M) {
 	router = testing.NewRouter()
 	router.POST("/v1/articles", auth.BearerAuth(ui.PostNewArticle))
 	router.PUT("/v1/articles/:articleID", auth.BearerAuth(ui.EditArticle))
+	router.GET("/v1/articles", ui.ListArticles)
+	router.GET("/v2/articles", ui.ListArticlesByPagination)
 
 	code := m.Run()
 
