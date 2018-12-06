@@ -28,72 +28,43 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter 
 	if filter == nil {
 		filter = &finder.ArticleFilter{}
 	}
-	if len(filter.Tags) == 0 {
-		return f.listByPage(c, count, page)
-	}
-	return f.listByPageWithFitler(c, count, page, filter)
-}
 
-func (f *ArticleFetcher) listByPage(c context.Context, count, page uint) (*model.ArticleListView, error) {
-	stmt := f.db.Prepare(c, `
-		select uid, title, created_at from article order by created_at desc limit ? offset ?
-	`)
-	defer stmt.Close()
-
-	rows, err := stmt.Query(c, count+1, (page-1)*count)
-	if err != nil {
-		if err == db.ErrNoRows {
-			return model.NewArticleListView(nil, 0, 0, 0, false), nil
-		}
-		return nil, err
-	}
-	defer rows.Close()
-
-	return f.buildArticlesList(c, rows, count, page, nil)
-}
-
-func (f *ArticleFetcher) listByPageWithFitler(c context.Context, count, page uint, filter *finder.ArticleFilter) (*model.ArticleListView, error) {
-	stmt := f.db.Prepare(c, `
-		select uid, title, created_at from article a inner join article_tag t on a.id = t.article where t.name in `+
-		db.Masks(uint(len(filter.Tags)))+
-		` order by created_at desc limit ? offset ?
-	`)
-	defer stmt.Close()
-
-	args := make([]interface{}, 0, 2+len(filter.Tags))
-	for _, tag := range filter.Tags {
-		args = append(args, tag)
-	}
-	args = append(args, count, (page-1)*count)
-	rows, err := stmt.Query(c, args...)
-	if err != nil {
-		if err == db.ErrNoRows {
-			return model.NewArticleListView(nil, 0, 0, 0, false), nil
-		}
-		return nil, err
-	}
-	defer rows.Close()
-
-	return f.buildArticlesList(c, rows, count, page, filter)
-}
-
-func (f *ArticleFetcher) buildArticlesList(c context.Context, rows *db.Rows, count, page uint, filter *finder.ArticleFilter) (*model.ArticleListView, error) {
 	countArticlesSQL := `select count(a.id) from article a`
-	if filter != nil && len(filter.Tags) > 0 {
+	if len(filter.Tags) > 0 {
 		countArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name in ` + db.Masks(uint(len(filter.Tags)))
 	}
 
 	countArticles := f.db.Prepare(c, countArticlesSQL)
 	defer countArticles.Close()
 
-	var total uint
-	args := make([]interface{}, len(filter.Tags))
+	fetchArticlesSQL := `select a.uid, a.title, a.created_at from article a`
+	if len(filter.Tags) > 0 {
+		fetchArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name in ` + db.Masks(uint(len(filter.Tags)))
+	}
+	fetchArticlesSQL += ` order by created_at desc limit ? offset ?`
+
+	fetchArticles := f.db.Prepare(c, fetchArticlesSQL)
+	defer fetchArticles.Close()
+
+	args := make([]interface{}, len(filter.Tags), 2+len(filter.Tags))
 	for i, tag := range filter.Tags {
 		args[i] = tag
 	}
+
+	var total uint
 	if err := countArticles.QueryRow(c, args...).Scan(&total); err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("sql: %s, args: %#v", countArticlesSQL, args))
 	}
+
+	args = append(args, count+1, (page-1)*count)
+	rows, err := fetchArticles.Query(c, args...)
+	if err != nil {
+		if err == db.ErrNoRows {
+			return model.NewArticleListView(nil, 0, 0, 0, false), nil
+		}
+		return nil, err
+	}
+	defer rows.Close()
 
 	var (
 		rawArticleID  string
