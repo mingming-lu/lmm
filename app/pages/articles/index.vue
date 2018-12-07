@@ -85,10 +85,12 @@
         <h3><i class="fas fa-hashtag"></i>Tags</h3>
         <p>
           <nuxt-link
+            class="link tag"
+            :class="{active: tag.name === $route.query.tag}"
             v-for="tag in tags"
             :key="tag.name"
-            to=""
-            class="link tag">
+            :to="buildLinkWithTagQuery(tag.name)"
+            >
             {{ tag.name }}
           </nuxt-link>
         </p>
@@ -145,7 +147,7 @@ export default {
     const q = buildURLEncodedString({
       page:    Boolean(query.page)    ? query.page    : 1,
       perPage: Boolean(query.perPage) ? query.perPage : 5,
-      tags:    Boolean(query.tags) ? query.tags : undefined,
+      tag:     Boolean(query.tag)     ? query.tag     : undefined,
     })
     const uri = `${apiPath}?${q}`
     return axios.all([
@@ -179,7 +181,7 @@ export default {
       }
     })
   },
-  watchQuery: ['page', 'perPage', 'tags'],
+  watchQuery: ['page', 'perPage', 'tag'],
   mounted() {
     window.addEventListener('resize', this.calcIsMobile)
     this.calcIsMobile()
@@ -188,6 +190,17 @@ export default {
     window.removeEventListener('resize', this.calcIsMobile)
   },
   methods: {
+    buildLinkWithTagQuery(tagName) {
+      const query = {...this.$route.query}
+
+      if (tagName === query.tag) {
+        query.tag = undefined
+      } else {
+        query.tag = tagName
+      }
+
+      return `${this.$route.path}?${buildURLEncodedString(query)}`
+    },
     formatted(dtString) {
       return formattedUTCString(dtString)
     },
@@ -284,6 +297,10 @@ export default {
         font-size: 0.98em;
         color: white !important;
         &:hover {
+          background-color: $color_accent;
+          opacity: 0.8;
+        }
+        &.active {
           background-color: $color_accent;
           opacity: 0.8;
         }

@@ -24,31 +24,27 @@ func NewArticleFetcher(db db.DB) *ArticleFetcher {
 }
 
 // ListByPage implementation
-func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter *finder.ArticleFilter) (*model.ArticleListView, error) {
-	if filter == nil {
-		filter = &finder.ArticleFilter{}
-	}
-
+func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter finder.ArticleFilter) (*model.ArticleListView, error) {
 	countArticlesSQL := `select count(a.id) from article a`
-	if len(filter.Tags) > 0 {
-		countArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name in ` + db.Masks(uint(len(filter.Tags)))
+	if filter.Tag != nil {
+		countArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name = ?`
 	}
 
 	countArticles := f.db.Prepare(c, countArticlesSQL)
 	defer countArticles.Close()
 
 	fetchArticlesSQL := `select a.uid, a.title, a.created_at from article a`
-	if len(filter.Tags) > 0 {
-		fetchArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name in ` + db.Masks(uint(len(filter.Tags)))
+	if filter.Tag != nil {
+		fetchArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name = ?`
 	}
 	fetchArticlesSQL += ` order by created_at desc limit ? offset ?`
 
 	fetchArticles := f.db.Prepare(c, fetchArticlesSQL)
 	defer fetchArticles.Close()
 
-	args := make([]interface{}, len(filter.Tags), 2+len(filter.Tags))
-	for i, tag := range filter.Tags {
-		args[i] = tag
+	args := make([]interface{}, 0, 3)
+	if filter.Tag != nil {
+		args = append(args, *filter.Tag)
 	}
 
 	var total uint

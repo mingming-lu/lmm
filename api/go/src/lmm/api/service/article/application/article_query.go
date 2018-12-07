@@ -2,8 +2,10 @@ package application
 
 import (
 	"context"
-	"lmm/api/service/article/application/query"
 
+	"github.com/pkg/errors"
+
+	"lmm/api/service/article/application/query"
 	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/util/stringutil"
@@ -21,27 +23,18 @@ func NewArticleQueryService(articleFinder finder.ArticleFinder) *ArticleQuerySer
 
 // ListArticlesByPage is used for listing articles on article index page
 func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.ListArticleQuery) (*model.ArticleListView, error) {
-	var (
-		count uint = 5
-		page  uint = 1
-		err   error
-	)
-	if q.Count != "" && q.Count != "5" {
-		count, err = stringutil.ParseUint(q.Count)
-		if err != nil || count < 1 {
-			return nil, ErrInvalidCount
-		}
+	count, err := stringutil.ParseUint(q.Count)
+	if err != nil || count < 1 {
+		return nil, errors.Wrap(ErrInvalidCount, err.Error())
 	}
 
-	if q.Page != "" && q.Page != "1" {
-		page, err = stringutil.ParseUint(q.Page)
-		if err != nil || page < 1 {
-			return nil, ErrInvalidPage
-		}
+	page, err := stringutil.ParseUint(q.Page)
+	if err != nil || page < 1 {
+		return nil, errors.Wrap(ErrInvalidPage, err.Error())
 	}
 
-	return app.articleFinder.ListByPage(c, count, page, &finder.ArticleFilter{
-		Tags: q.Tags,
+	return app.articleFinder.ListByPage(c, count, page, finder.ArticleFilter{
+		Tag: q.Tag,
 	})
 }
 

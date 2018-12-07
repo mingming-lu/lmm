@@ -53,8 +53,8 @@ func (ui *UI) UploadPhoto(c http.Context) {
 // ListImages handles GET /v1/assets/images
 func (ui *UI) ListImages(c http.Context) {
 	collection, err := ui.appService.ListImages(c,
-		c.Request().QueryParam("page"),
-		c.Request().QueryParam("perPage"),
+		c.Request().QueryParamOrDefault("page", "1"),
+		c.Request().QueryParamOrDefault("perPage", "100"),
 	)
 	if err == nil {
 		c.JSON(http.StatusOK, imageCollectionToJSON(collection))
@@ -73,8 +73,8 @@ func (ui *UI) ListImages(c http.Context) {
 // ListPhotos handles GET /v1/assets/photos
 func (ui *UI) ListPhotos(c http.Context) {
 	collection, err := ui.appService.ListPhotos(c,
-		c.Request().QueryParam("page"),
-		c.Request().QueryParam("perPage"),
+		c.Request().QueryParamOrDefault("page", "1"),
+		c.Request().QueryParamOrDefault("perPage", "10"),
 	)
 	if err == nil {
 		c.JSON(http.StatusOK, photoCollectionToJSON(collection))
