@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"lmm/api/service/article/application/query"
 	"math"
-	"strings"
 
 	"github.com/pkg/errors"
 
@@ -177,14 +176,10 @@ func (ui *UI) ListArticlesByPagination(c http.Context) {
 }
 
 func (ui *UI) buildListArticleQueryFromContext(c http.Context) query.ListArticleQuery {
-	tags := make([]string, 0)
-	if tagsParam := c.Request().QueryParam("tags"); tagsParam != "" {
-		tags = strings.Split(tagsParam, ",")
-	}
 	return query.ListArticleQuery{
-		Page:  c.Request().QueryParam("page"),
-		Count: c.Request().QueryParam("perPage"),
-		Tags:  tags,
+		Page:  c.Request().QueryParamOrDefault("page", "1"),
+		Count: c.Request().QueryParamOrDefault("perPage", "5"),
+		Tags:  c.Request().QueryParams("tags"),
 	}
 }
 
