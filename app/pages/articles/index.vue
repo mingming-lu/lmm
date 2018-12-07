@@ -302,7 +302,6 @@ export default {
         }
         &.active {
           background-color: $color_accent;
-          opacity: 0.8;
         }
       }
     }
