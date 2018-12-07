@@ -2,13 +2,13 @@ package ui
 
 import (
 	"fmt"
-	"lmm/api/service/article/application/query"
 	"math"
 
 	"github.com/pkg/errors"
 
 	"lmm/api/http"
 	"lmm/api/service/article/application"
+	"lmm/api/service/article/application/query"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
@@ -179,7 +179,7 @@ func (ui *UI) buildListArticleQueryFromContext(c http.Context) query.ListArticle
 	return query.ListArticleQuery{
 		Page:  c.Request().QueryParamOrDefault("page", "1"),
 		Count: c.Request().QueryParamOrDefault("perPage", "5"),
-		Tags:  c.Request().QueryParams("tags"),
+		Tag:   c.Request().QueryParam("tag"),
 	}
 }
 
