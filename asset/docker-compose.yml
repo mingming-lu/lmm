@@ -2,7 +2,7 @@ version: "3.7"
 services:
   asset:
     container_name: lmm-asset
-    image: golang:1.11
+    image: golang:1.11.2
     working_dir: /go/src/lmm/asset
     volumes:
       - ./go/pkg:/go/pkg
@@ -12,10 +12,11 @@ services:
     command: go run main.go
     environment:
       TZ: Asia/Tokyo
+      CGO_ENABLED: 0
       GO111MODULE: 'on'
   subscriber:
     container_name: lmm-asset-subscriber
-    image: golang:1.11
+    image: golang:1.11.2
     working_dir: /go/src/lmm/subscriber
     volumes:
       - ./go/pkg:/go/pkg
@@ -25,4 +26,5 @@ services:
     command: go run main.go
     environment:
       TZ: Asia/Tokyo
+      CGO_ENABLED: 0
       GO111MODULE: 'on'
