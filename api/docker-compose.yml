@@ -2,7 +2,7 @@ version: "3.7"
 services:
   api:
     container_name: lmm-api
-    image: golang:1.11.2-alpine
+    image: golang:1.11.2
     volumes:
       - ./go:/go
     working_dir: /go/src/lmm/api
