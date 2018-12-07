@@ -85,10 +85,12 @@
         <h3><i class="fas fa-hashtag"></i>Tags</h3>
         <p>
           <nuxt-link
+            class="link tag"
+            :class="{active: tag.name === $route.query.tag}"
             v-for="tag in tags"
             :key="tag.name"
             :to="buildLinkWithTagQuery(tag.name)"
-            class="link tag">
+            >
             {{ tag.name }}
           </nuxt-link>
         </p>
@@ -190,7 +192,13 @@ export default {
   methods: {
     buildLinkWithTagQuery(tagName) {
       const query = {...this.$route.query}
-      query.tag = tagName
+
+      if (tagName === query.tag) {
+        query.tag = undefined
+      } else {
+        query.tag = tagName
+      }
+
       return `${this.$route.path}?${buildURLEncodedString(query)}`
     },
     formatted(dtString) {
@@ -289,6 +297,10 @@ export default {
         font-size: 0.98em;
         color: white !important;
         &:hover {
+          background-color: $color_accent;
+          opacity: 0.8;
+        }
+        &.active {
           background-color: $color_accent;
           opacity: 0.8;
         }

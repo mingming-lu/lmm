@@ -18,7 +18,12 @@
         <div :class="{container: !isMobile}">
           <h3><i class="fas fa-hashtag"></i>Tags</h3>
           <p>
-            <nuxt-link to="" v-for="tag in tags" :key="tag.id" class="link tag">
+            <nuxt-link
+              class="link tag"
+              v-for="tag in tags"
+              :key="tag.id"
+              :to="buildLinkWithTagQuery(tag.name)"
+              >
               {{ tag.name }}
             </nuxt-link>
           </p>
@@ -44,7 +49,9 @@
 <script>
 import axios from 'axios'
 import Markdownit from 'markdown-it'
-import { formattedUTCString } from '~/assets/js/utils'
+import {
+  formattedUTCString,
+} from '~/assets/js/utils'
 export default {
   validate ({ params }) {
     return /^[\d\w]{8}$/.test(params.id)
@@ -130,6 +137,9 @@ export default {
     },
     calcIsMobile () {
       this.isMobile = window.innerWidth <= 768
+    },
+    buildLinkWithTagQuery(tagName) {
+      return `/articles?tag=${encodeURIComponent(tagName)}`
     },
     jumpToHash: (hash) => {
       location.href = hash
