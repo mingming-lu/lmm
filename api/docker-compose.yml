@@ -9,7 +9,6 @@ services:
     command: go run cmd/api/main.go
     environment:
       TZ: Asia/Tokyo
-      CGO_ENABLED: 0
       GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
     ports:
