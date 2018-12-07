@@ -87,7 +87,7 @@
           <nuxt-link
             v-for="tag in tags"
             :key="tag.name"
-            to=""
+            :to="buildLinkWithTagQuery(tag.name)"
             class="link tag">
             {{ tag.name }}
           </nuxt-link>
@@ -145,7 +145,7 @@ export default {
     const q = buildURLEncodedString({
       page:    Boolean(query.page)    ? query.page    : 1,
       perPage: Boolean(query.perPage) ? query.perPage : 5,
-      tags:    Boolean(query.tags) ? query.tags : undefined,
+      tag:     Boolean(query.tag)     ? query.tag     : undefined,
     })
     const uri = `${apiPath}?${q}`
     return axios.all([
@@ -179,7 +179,7 @@ export default {
       }
     })
   },
-  watchQuery: ['page', 'perPage', 'tags'],
+  watchQuery: ['page', 'perPage', 'tag'],
   mounted() {
     window.addEventListener('resize', this.calcIsMobile)
     this.calcIsMobile()
@@ -188,6 +188,11 @@ export default {
     window.removeEventListener('resize', this.calcIsMobile)
   },
   methods: {
+    buildLinkWithTagQuery(tagName) {
+      const query = {...this.$route.query}
+      query.tag = tagName
+      return `${this.$route.path}?${buildURLEncodedString(query)}`
+    },
     formatted(dtString) {
       return formattedUTCString(dtString)
     },
