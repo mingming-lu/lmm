@@ -63,9 +63,9 @@ func (r *Router) Handle(method string, path string, handler Handler) {
 
 		<-c.Done()
 		switch c.Err() {
-		case context.Canceled:
 		case context.DeadlineExceeded:
 			RequestTimeout(c)
+		default:
 		}
 	})
 }
