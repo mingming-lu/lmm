@@ -85,11 +85,3 @@ func (l *loggerImpl) Panic(c context.Context, msg string) {
 	reqID := extractRequestID(c)
 	l.core.With(zap.String("request_id", reqID)).Panic(msg)
 }
-
-func extractRequestID(c context.Context) string {
-	reqID, ok := c.Value(StrCtxKey("request_id")).(string)
-	if !ok || reqID == "" {
-		reqID = "-"
-	}
-	return reqID
-}
