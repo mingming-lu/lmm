@@ -191,6 +191,9 @@ export default {
   },
   methods: {
     buildLinkWithTagQuery(tagName) {
+      if (tagName === this.$route.query.tag) {
+        return '/articles'
+      }
       return `/articles?tag=${tagName}`
     },
     formatted(dtString) {
