@@ -22,6 +22,7 @@ type Logger interface {
 	Info(context.Context, string)
 	Warn(context.Context, string)
 	Error(context.Context, string)
+	Panic(context.Context, string)
 }
 
 // DefaultZapConfig returns zap config in default setting in this project
@@ -56,30 +57,31 @@ func Error(c context.Context, msg string) {
 	globalLogger.Warn(c, msg)
 }
 
+func Panic(c context.Context, msg string) {
+	globalLogger.Panic(c, msg)
+}
+
 type loggerImpl struct {
 	core *zap.Logger
 }
 
 func (l *loggerImpl) Info(c context.Context, msg string) {
-	reqID := l.extractRequestID(c)
+	reqID := extractRequestID(c)
 	l.core.With(zap.String("request_id", reqID)).Info(msg)
 
 }
 
 func (l *loggerImpl) Warn(c context.Context, msg string) {
-	reqID := l.extractRequestID(c)
-	l.core.With(zap.String("request_id", reqID)).Info(msg)
+	reqID := extractRequestID(c)
+	l.core.With(zap.String("request_id", reqID)).Warn(msg)
 }
 
 func (l *loggerImpl) Error(c context.Context, msg string) {
-	reqID := l.extractRequestID(c)
-	l.core.With(zap.String("request_id", reqID)).Info(msg)
+	reqID := extractRequestID(c)
+	l.core.With(zap.String("request_id", reqID)).Error(msg)
 }
 
-func (l *loggerImpl) extractRequestID(c context.Context) string {
-	reqID, ok := c.Value(StrCtxKey("request_id")).(string)
-	if !ok || reqID == "" {
-		reqID = "-"
-	}
-	return reqID
+func (l *loggerImpl) Panic(c context.Context, msg string) {
+	reqID := extractRequestID(c)
+	l.core.With(zap.String("request_id", reqID)).Panic(msg)
 }

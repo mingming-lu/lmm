@@ -45,8 +45,7 @@ func (ui *UI) Login(c http.Context) {
 			AccessToken: token.Hashed(),
 		})
 	default:
-		http.Warn(c, err.Error())
-		http.Unauthorized(c)
+		http.Panic(c, err.Error())
 	}
 }
 

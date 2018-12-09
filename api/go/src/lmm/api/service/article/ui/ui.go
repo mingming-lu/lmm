@@ -78,8 +78,7 @@ func (ui *UI) PostNewArticle(c http.Context) {
 	case domain.ErrNoSuchUser:
 		http.Unauthorized(c)
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Panic(c, err.Error())
 	}
 }
 
@@ -125,8 +124,7 @@ func (ui *UI) EditArticle(c http.Context) {
 	case domain.ErrNotArticleAuthor:
 		c.String(http.StatusForbidden, err.Error())
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Panic(c, err.Error())
 	}
 }
 
@@ -155,8 +153,7 @@ func (ui *UI) ListArticles(c http.Context) {
 	case application.ErrInvalidCount, application.ErrInvalidPage:
 		c.JSON(http.StatusBadRequest, err.Error())
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Panic(c, err.Error())
 	}
 }
 
@@ -170,8 +167,7 @@ func (ui *UI) ListArticlesByPagination(c http.Context) {
 	case nil:
 		c.JSON(http.StatusOK, ui.articleListViewToJSONV2(c, v))
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Panic(c, err.Error())
 	}
 }
 
@@ -240,8 +236,7 @@ func (ui *UI) GetArticle(c http.Context) {
 	case domain.ErrInvalidArticleID, domain.ErrNoSuchArticle:
 		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Panic(c, err.Error())
 	}
 }
 
@@ -268,8 +263,7 @@ func (ui *UI) GetAllArticleTags(c http.Context) {
 	case nil:
 		c.JSON(http.StatusOK, ui.tagListViewToJSON(view))
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Panic(c, err.Error())
 	}
 }
 
