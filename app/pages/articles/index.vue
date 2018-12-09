@@ -191,15 +191,7 @@ export default {
   },
   methods: {
     buildLinkWithTagQuery(tagName) {
-      const query = {...this.$route.query}
-
-      if (tagName === query.tag) {
-        query.tag = undefined
-      } else {
-        query.tag = tagName
-      }
-
-      return `${this.$route.path}?${buildURLEncodedString(query)}`
+      return `/articles?tag=${tagName}`
     },
     formatted(dtString) {
       return formattedUTCString(dtString)
