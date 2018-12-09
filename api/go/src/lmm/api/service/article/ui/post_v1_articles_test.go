@@ -15,6 +15,9 @@ import (
 )
 
 func TestPostArticles(tt *testing.T) {
+	lock.Lock()
+	defer lock.Unlock()
+
 	t := testing.NewTester(tt)
 	user := testutil.NewUser(mysql)
 

@@ -29,7 +29,7 @@ const buildURLEncodedString = obj => {
   return Object.entries(obj).filter(kv => {
     return kv[1]
   }).map(kv => {
-    return `${kv[0]}=${kv[1]}`
+    return `${kv[0]}=${encodeURIComponent(kv[1])}`
   }).join('&')
 }
 

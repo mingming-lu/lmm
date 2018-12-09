@@ -27,37 +27,52 @@ func (r *Request) PathParam(name string) string {
 	return r.pathParams.ByName(name)
 }
 
-func (r *Request) QueryParam(name string) string {
+func (r *Request) QueryParam(name string) *string {
+	r.parseQuery()
+	if ps := r.queryParams[name]; len(ps) != 0 {
+		return &ps[0]
+	}
+	return nil
+}
+
+func (r *Request) QueryParamOrDefault(name string, v string) string {
+	p := r.QueryParam(name)
+	if p == nil {
+		return v
+	}
+	return *p
+}
+
+func (r *Request) QueryParams(name string) []string {
+	r.parseQuery()
+	return r.queryParams[name]
+}
+
+func (r *Request) parseQuery() {
 	if r.queryParams == nil {
 		r.queryParams = r.Request.URL.Query()
 	}
-	return r.queryParams.Get(name)
 }
 
 func (r *Request) RequestID() string {
 	return r.Header.Get("X-Request-ID")
 }
 
-// RemoteAddr returns remote addr by cheking the following order:
+// ClientIP returns the client ip by cheking the following order:
 // X-Real-IP header
-// X-Forwarded-For header
 // RemoteAddr property
-func (r *Request) RemoteAddr() string {
+func (r *Request) ClientIP() string {
 	if remoteAddr := r.Header.Get("X-Real-IP"); remoteAddr != "" {
-		return remoteAddr
-	}
-
-	if remoteAddr := r.Header.Get("X-Forwarded-For"); remoteAddr != "" {
 		return remoteAddr
 	}
 
 	return r.Request.RemoteAddr
 }
 
-// Host returns host name by cheking the following order:
+// HostName returns host name by cheking the following order:
 // Host header
 // Host property
-func (r *Request) Host() string {
+func (r *Request) HostName() string {
 	if host := r.Header.Get("Host"); host != "" {
 		return host
 	}

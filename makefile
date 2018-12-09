@@ -29,9 +29,6 @@ start-asset:
 start-manager:
 	cd manager && make
 
-start-docs:
-	cd docs && make
-
 start-messaging:
 	cd messaging && make
 
@@ -55,9 +52,6 @@ stop-asset:
 
 stop-manager:
 	cd manager && make stop
-
-stop-docs:
-	cd docs && make stop
 
 stop-messaging:
 	cd messaging && make stop

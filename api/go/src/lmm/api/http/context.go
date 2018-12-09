@@ -94,3 +94,11 @@ func (c *contextImpl) With(ctx context.Context) Context {
 func (c *contextImpl) writeContentType(value string) {
 	c.Header("Content-Type", value)
 }
+
+func extractRequestID(c context.Context) string {
+	reqID, ok := c.Value(StrCtxKey("request_id")).(string)
+	if !ok || reqID == "" {
+		reqID = "-"
+	}
+	return reqID
+}

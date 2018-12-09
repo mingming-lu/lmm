@@ -2,9 +2,13 @@ package fetcher
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"lmm/api/service/article/domain"
+	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/storage/db"
 )
@@ -20,13 +24,36 @@ func NewArticleFetcher(db db.DB) *ArticleFetcher {
 }
 
 // ListByPage implementation
-func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model.ArticleListView, error) {
-	stmt := f.db.Prepare(c, `
-		select uid, title, created_at from article order by created_at desc limit ? offset ?
-	`)
-	defer stmt.Close()
+func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter finder.ArticleFilter) (*model.ArticleListView, error) {
+	countArticlesSQL := `select count(a.id) from article a`
+	if filter.Tag != nil {
+		countArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name = ?`
+	}
 
-	rows, err := stmt.Query(c, count+1, (page-1)*count)
+	countArticles := f.db.Prepare(c, countArticlesSQL)
+	defer countArticles.Close()
+
+	fetchArticlesSQL := `select a.uid, a.title, a.created_at from article a`
+	if filter.Tag != nil {
+		fetchArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name = ?`
+	}
+	fetchArticlesSQL += ` order by created_at desc limit ? offset ?`
+
+	fetchArticles := f.db.Prepare(c, fetchArticlesSQL)
+	defer fetchArticles.Close()
+
+	args := make([]interface{}, 0, 3)
+	if filter.Tag != nil {
+		args = append(args, *filter.Tag)
+	}
+
+	var total uint
+	if err := countArticles.QueryRow(c, args...).Scan(&total); err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("sql: %s, args: %#v", countArticlesSQL, args))
+	}
+
+	args = append(args, count+1, (page-1)*count)
+	rows, err := fetchArticles.Query(c, args...)
 	if err != nil {
 		if err == db.ErrNoRows {
 			return model.NewArticleListView(nil, 0, 0, 0, false), nil
@@ -34,11 +61,6 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint) (*model
 		return nil, err
 	}
 	defer rows.Close()
-
-	total, err := db.Count(c, f.db, "article", "id", db.SQLOptions{})
-	if err != nil {
-		return nil, err
-	}
 
 	var (
 		rawArticleID  string
