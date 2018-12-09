@@ -65,8 +65,7 @@ func (ui *UI) ListImages(c http.Context) {
 	case application.ErrInvalidPage, application.ErrInvalidPerPage:
 		http.NotFound(c)
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Panic(c, err.Error())
 	}
 }
 
@@ -85,8 +84,7 @@ func (ui *UI) ListPhotos(c http.Context) {
 	case application.ErrInvalidPage, application.ErrInvalidPerPage:
 		http.NotFound(c)
 	default:
-		http.Error(c, err.Error())
-		http.ServiceUnavailable(c)
+		http.Panic(c, err.Error())
 	}
 }
 
