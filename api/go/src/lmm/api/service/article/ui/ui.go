@@ -14,7 +14,6 @@ import (
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/domain/service"
-	userModel "lmm/api/service/auth/domain/model"
 	"lmm/api/util/stringutil"
 )
 
@@ -44,8 +43,8 @@ func NewUI(
 
 // PostNewArticle handles POST /1/articles
 func (ui *UI) PostNewArticle(c http.Context) {
-	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
-	if !ok {
+	userName := c.Request().Header.Get("X-LMM-ID")
+	if userName == "" {
 		http.Unauthorized(c)
 		return
 	}
@@ -62,7 +61,7 @@ func (ui *UI) PostNewArticle(c http.Context) {
 	}
 
 	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(c,
-		user.Name(),
+		userName,
 		*article.Title,
 		*article.Body,
 		article.Tags,
@@ -84,8 +83,8 @@ func (ui *UI) PostNewArticle(c http.Context) {
 
 // EditArticle handles PUT /1/article/:articleID
 func (ui *UI) EditArticle(c http.Context) {
-	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
-	if !ok {
+	userName := c.Request().Header.Get("X-LMM-ID")
+	if userName == "" {
 		http.Unauthorized(c)
 		return
 	}
@@ -102,7 +101,7 @@ func (ui *UI) EditArticle(c http.Context) {
 	}
 
 	err := ui.appService.ArticleCommandService().EditArticle(c,
-		user.Name(),
+		userName,
 		c.Request().PathParam("articleID"),
 		*article.Title,
 		*article.Body,
