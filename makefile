@@ -15,7 +15,7 @@ start:
 start-gateway:
 	cd gateway && make
 
-start-services: start-api start-app start-asset start-manager start-docs start-messaging start-logging
+start-services: start-api start-app start-asset start-manager start-messaging start-logging
 
 start-api:
 	cd api && make
@@ -39,7 +39,7 @@ stop:
 	make stop-services -j 4
 	make stop-gateway
 
-stop-services: stop-api stop-app stop-asset stop-manager stop-docs stop-messaging stop-logging
+stop-services: stop-api stop-app stop-asset stop-manager stop-messaging stop-logging
 
 stop-api:
 	cd api && make stop
