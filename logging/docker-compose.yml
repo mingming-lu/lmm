@@ -3,7 +3,7 @@ version: "3.7"
 services:
   pubsub:
     container_name: lmm-logging-pubsub
-    image: golang:1.11
+    image: golang:1.11.2
     volumes:
       - ./go:/go
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
