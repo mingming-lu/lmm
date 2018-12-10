@@ -64,7 +64,7 @@ func main() {
 	router := http.NewRouter()
 
 	// middlewares begin
-	// access logg
+	// access log
 	accessLogger := middleware.NewAccessLog(pubsubTopicPublisher)
 	defer accessLogger.Sync()
 	router.Use(accessLogger.AccessLog)
