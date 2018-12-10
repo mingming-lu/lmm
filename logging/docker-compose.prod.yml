@@ -1,0 +1,5 @@
+version: "3.7"
+
+services:
+  pubsub:
+    env_file: ./.env/prod.env
