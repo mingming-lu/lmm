@@ -20,6 +20,13 @@ const (
 	StatusServiceUnavailable  = http.StatusServiceUnavailable
 )
 
+const (
+	// self-defined status codes
+
+	// StatusClientAbort defines the code when client aborted before response from server
+	StatusClientAbort = 477
+)
+
 type Handler = func(Context)
 
 type Middleware = func(Handler) Handler
@@ -59,6 +66,10 @@ func RequestTimeout(c Context) {
 	HandleStatus(c, StatusRequestTimeout)
 }
 
+func ClientAbort(c Context) {
+	HandleStatus(c, StatusClientAbort)
+}
+
 func InternalServerError(c Context) {
 	HandleStatus(c, StatusInternalServerError)
 }
@@ -68,5 +79,9 @@ func ServiceUnavailable(c Context) {
 }
 
 func StatusText(code int) string {
+	if code == StatusClientAbort {
+		return "Client Abort"
+	}
+
 	return http.StatusText(code)
 }

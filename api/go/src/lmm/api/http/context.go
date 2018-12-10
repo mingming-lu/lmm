@@ -9,8 +9,22 @@ import (
 	"go.uber.org/zap"
 )
 
-// StrCtxKey stands for string context key
-type StrCtxKey string
+var (
+	RequestIDContextKey = &contextKey{"request-id"}
+)
+
+// ContextKey used for context key
+type ContextKey interface {
+	KeyName() string
+}
+
+type contextKey struct {
+	keyName string
+}
+
+func (k *contextKey) KeyName() string {
+	return k.keyName
+}
 
 // Context is a abstraction of http context
 type Context interface {
@@ -96,7 +110,7 @@ func (c *contextImpl) writeContentType(value string) {
 }
 
 func extractRequestID(c context.Context) string {
-	reqID, ok := c.Value(StrCtxKey("request_id")).(string)
+	reqID, ok := c.Value(RequestIDContextKey).(string)
 	if !ok || reqID == "" {
 		reqID = "-"
 	}

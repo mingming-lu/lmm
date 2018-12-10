@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"context"
-
 	"lmm/api/http"
 	"lmm/api/service/auth/application"
 	"lmm/api/service/auth/application/command"
@@ -59,8 +57,7 @@ func (ui *UI) BearerAuth(next http.Handler) http.Handler {
 			http.Unauthorized(c)
 			return
 		}
-		next(c.With(
-			context.WithValue(context.Background(), http.StrCtxKey("user"), user),
-		))
+		c.Request().Header.Set("X-LMM-ID", user.Name())
+		next(c)
 	}
 }

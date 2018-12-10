@@ -10,7 +10,6 @@ import (
 	"lmm/api/service/asset/application"
 	"lmm/api/service/asset/domain/repository"
 	"lmm/api/service/asset/domain/service"
-	userModel "lmm/api/service/auth/domain/model"
 )
 
 const (
@@ -89,8 +88,8 @@ func (ui *UI) ListPhotos(c http.Context) {
 }
 
 func (ui *UI) upload(c http.Context, keyName string) {
-	user, ok := c.Value(http.StrCtxKey("user")).(*userModel.User)
-	if !ok {
+	userName := c.Request().Header.Get("X-LMM-ID")
+	if userName == "" {
 		http.Unauthorized(c)
 		return
 	}
@@ -105,11 +104,11 @@ func (ui *UI) upload(c http.Context, keyName string) {
 	// upload
 	switch keyName {
 	case "image":
-		if err := ui.appService.UploadImage(c, user.Name(), data, ext); err != nil {
+		if err := ui.appService.UploadImage(c, userName, data, ext); err != nil {
 			panic(err)
 		}
 	case "photo":
-		if err := ui.appService.UploadPhoto(c, user.Name(), data, ext); err != nil {
+		if err := ui.appService.UploadPhoto(c, userName, data, ext); err != nil {
 			panic(err)
 		}
 	default:
