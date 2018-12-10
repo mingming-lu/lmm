@@ -10,12 +10,12 @@ dev:
 
 start:
 	make start-gateway
-	make start-services -j
+	make start-services -j 4
 
 start-gateway:
 	cd gateway && make
 
-start-services: start-api start-app start-asset start-manager start-messaging
+start-services: start-api start-app start-asset start-manager start-messaging start-logging
 
 start-api:
 	cd api && make
@@ -32,11 +32,14 @@ start-manager:
 start-messaging:
 	cd messaging && make
 
+start-logging:
+	cd logging && make
+
 stop:
-	make stop-services -j
+	make stop-services -j 4
 	make stop-gateway
 
-stop-services: stop-api stop-app stop-asset stop-manager stop-messaging
+stop-services: stop-api stop-app stop-asset stop-manager stop-messaging stop-logging
 
 stop-api:
 	cd api && make stop
@@ -52,6 +55,9 @@ stop-manager:
 
 stop-messaging:
 	cd messaging && make stop
+
+stop-logging:
+	cd logging && make stop
 
 stop-gateway:
 	cd gateway && make stop

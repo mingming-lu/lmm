@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"os"
+
 	_ "github.com/go-sql-driver/mysql"
-	"go.uber.org/zap"
 
 	"lmm/api/http"
+	"lmm/api/log"
+	"lmm/api/messaging/pubsub"
 	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
 	"lmm/api/storage/db"
@@ -33,11 +37,21 @@ import (
 )
 
 func main() {
-	logger := globalRecorder()
-	defer logger.Sync()
+	pubsubClient, err := pubsub.NewClient()
+	if err != nil {
+		panic(err)
+	}
+	defer pubsubClient.Close()
 
-	undo := zap.ReplaceGlobals(logger)
-	defer undo()
+	pubsubTopicPublisher := pubsub.NewPubSubTopicPublisher(
+		pubsubClient.Topic(os.Getenv("GCP_PUBSUB_LOGGING_TOPIC_ID")),
+		func() context.Context {
+			return context.Background()
+		},
+	)
+
+	callback := log.Init(pubsubTopicPublisher)
+	defer callback()
 
 	mysql := db.DefaultMySQL()
 	defer mysql.Close()
@@ -49,10 +63,16 @@ func main() {
 
 	router := http.NewRouter()
 
-	// middleware
-	router.Use(middleware.AccessLog)
+	// middlewares begin
+	// access log
+	accessLogger := middleware.NewAccessLog(pubsubTopicPublisher)
+	defer accessLogger.Sync()
+	router.Use(accessLogger.AccessLog)
+	// recovery
 	router.Use(middleware.Recovery)
+	// request id
 	router.Use(middleware.WithRequestID)
+	// cache control
 	router.Use(middleware.CacheControl)
 
 	// user
@@ -90,15 +110,4 @@ func main() {
 
 	server := http.NewServer(":8002", router)
 	server.Run()
-}
-
-func globalRecorder() *zap.Logger {
-	cfg := http.DefaultZapConfig()
-
-	logger, err := cfg.Build()
-	if err != nil {
-		panic(err)
-	}
-
-	return logger.Named("global")
 }

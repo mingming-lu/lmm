@@ -2,19 +2,14 @@ package http
 
 import (
 	"context"
-	"sync"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
+var logger *loggerImpl
+
 func init() {
-	cfg := DefaultZapConfig()
-	zapLogger, err := cfg.Build()
-	if err != nil {
-		panic(err)
-	}
-	ReplaceLogger(&loggerImpl{core: zapLogger.Named("http")})
+	logger = new(loggerImpl)
 }
 
 // Logger defines interface for logging
@@ -25,63 +20,29 @@ type Logger interface {
 	Panic(context.Context, string)
 }
 
-// DefaultZapConfig returns zap config in default setting in this project
-func DefaultZapConfig() zap.Config {
-	cfg := zap.NewProductionConfig()
-	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	return cfg
+// Log gets the singleton of default logger implementation
+func Log() Logger {
+	return logger
 }
 
-var mu sync.Mutex
-var globalLogger Logger
-
-// ReplaceLogger replaces http logger thread safely
-func ReplaceLogger(logger Logger) {
-	mu.Lock()
-	defer mu.Unlock()
-	globalLogger = logger
-}
-
-// Info log format
-func Info(c context.Context, msg string) {
-	globalLogger.Info(c, msg)
-}
-
-// Warn log format
-func Warn(c context.Context, msg string) {
-	globalLogger.Warn(c, msg)
-}
-
-// Error log format
-func Error(c context.Context, msg string) {
-	globalLogger.Warn(c, msg)
-}
-
-func Panic(c context.Context, msg string) {
-	globalLogger.Panic(c, msg)
-}
-
-type loggerImpl struct {
-	core *zap.Logger
-}
+type loggerImpl struct{}
 
 func (l *loggerImpl) Info(c context.Context, msg string) {
 	reqID := extractRequestID(c)
-	l.core.With(zap.String("request_id", reqID)).Info(msg)
-
+	zap.L().Info(msg, zap.String("request_id", reqID))
 }
 
 func (l *loggerImpl) Warn(c context.Context, msg string) {
 	reqID := extractRequestID(c)
-	l.core.With(zap.String("request_id", reqID)).Warn(msg)
+	zap.L().Warn(msg, zap.String("request_id", reqID))
 }
 
 func (l *loggerImpl) Error(c context.Context, msg string) {
 	reqID := extractRequestID(c)
-	l.core.With(zap.String("request_id", reqID)).Error(msg)
+	zap.L().Error(msg, zap.String("request_id", reqID))
 }
 
 func (l *loggerImpl) Panic(c context.Context, msg string) {
 	reqID := extractRequestID(c)
-	l.core.With(zap.String("request_id", reqID)).Panic(msg)
+	zap.L().Panic(msg, zap.String("request_id", reqID))
 }

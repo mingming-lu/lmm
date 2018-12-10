@@ -51,11 +51,9 @@ func DefaultClient() *Client {
 	util.Retry(-1, func() error {
 		client, err = NewClient(url)
 		if err != nil {
-			zap.L().Warn("retry connecting to rabbitmq...",
-				zap.String("error", err.Error()),
-				zap.String("host", host),
-				zap.String("port", port),
-				zap.String("user", user),
+			fmt.Printf(
+				"retry connecting to rabbitmq... error: %s, host: %s, port: %s, user: %s.",
+				err.Error(), host, port, user,
 			)
 			<-time.After(5 * time.Second)
 		}

@@ -80,7 +80,7 @@ func (c *contextImpl) JSON(statusCode int, data interface{}) {
 	c.writeContentType("application/json")
 	c.res.WriteHeader(statusCode)
 	if err := json.NewEncoder(c.res).Encode(data); err != nil {
-		Error(c, err.Error())
+		Log().Error(c, err.Error())
 	}
 }
 
@@ -96,7 +96,7 @@ func (c *contextImpl) String(statusCode int, s string) {
 	c.writeContentType("text/plain")
 	c.res.WriteHeader(statusCode)
 	if _, err := fmt.Fprint(c.res, s); err != nil {
-		Error(c, err.Error())
+		Log().Error(c, err.Error())
 	}
 }
 

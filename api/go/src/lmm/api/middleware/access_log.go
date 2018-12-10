@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"io"
+	"os"
 	"time"
 
 	"go.uber.org/zap"
@@ -9,17 +11,62 @@ import (
 	"lmm/api/http"
 )
 
-// AccessLog records access log
-func AccessLog(next http.Handler) http.Handler {
-	cfg := zap.NewProductionConfig()
-	cfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+var (
+	stdoutEnabler = zap.LevelEnablerFunc(func(lv zapcore.Level) bool {
+		return lv == zapcore.InfoLevel
+	})
+	stderrEnabler = zap.LevelEnablerFunc(func(lv zapcore.Level) bool {
+		return lv >= zapcore.WarnLevel
+	})
+)
 
-	logger, err := cfg.Build()
-	if err != nil {
-		panic(err)
+// AccessLogger struct
+type AccessLogger struct {
+	logger *zap.Logger
+	writer io.Writer
+}
+
+// NewAccessLog creates a new AccessLog
+func NewAccessLog(logWriter io.Writer) *AccessLogger {
+	encoderConfig := zapcore.EncoderConfig{
+		LevelKey:     "level",
+		MessageKey:   "msg",
+		NameKey:      "logger",
+		TimeKey:      "ts",
+		EncodeLevel:  zapcore.LowercaseLevelEncoder,
+		EncodeTime:   zapcore.ISO8601TimeEncoder,
+		EncodeCaller: zapcore.ShortCallerEncoder,
+		LineEnding:   zapcore.DefaultLineEnding,
 	}
-	logger = logger.Named("access_log")
 
+	encoder := zapcore.NewJSONEncoder(encoderConfig)
+
+	core := zapcore.NewTee(
+		zapcore.NewCore(encoder, newSyncWriter(logWriter), stderrEnabler),
+		zapcore.NewCore(encoder, zapcore.Lock(os.Stderr), stderrEnabler),
+		zapcore.NewCore(encoder, newSyncWriter(logWriter), stdoutEnabler),
+		zapcore.NewCore(encoder, zapcore.Lock(os.Stdout), stdoutEnabler),
+	)
+	core = zapcore.NewSampler(core, time.Second, 100, 100)
+
+	return &AccessLogger{
+		logger: zap.New(core).Named("access_log"),
+		writer: logWriter,
+	}
+}
+
+// Sync implementation
+func (l *AccessLogger) Sync() error {
+	return l.logger.Sync()
+}
+
+// Write may be not mutex
+func (l *AccessLogger) Write(p []byte) (int, error) {
+	return l.Write(p)
+}
+
+// AccessLog records access log
+func (l *AccessLogger) AccessLog(next http.Handler) http.Handler {
 	return func(c http.Context) {
 		start := time.Now()
 
@@ -41,11 +88,16 @@ func AccessLog(next http.Handler) http.Handler {
 		}
 
 		if status >= 500 {
-			logger.Error(http.StatusText(status), fields...)
+			l.logger.Error(http.StatusText(status), fields...)
 		} else if status >= 400 {
-			logger.Warn(http.StatusText(status), fields...)
+			l.logger.Warn(http.StatusText(status), fields...)
 		} else {
-			logger.Info(http.StatusText(status), fields...)
+			l.logger.Info(http.StatusText(status), fields...)
 		}
 	}
+}
+
+func newSyncWriter(w io.Writer) zapcore.WriteSyncer {
+	syncWriter := zapcore.AddSync(w)
+	return zapcore.Lock(syncWriter)
 }

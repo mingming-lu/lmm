@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  pubsub:
+    container_name: lmm-logging-pubsub
+    image: golang:1.11.2
+    volumes:
+      - ./go:/go
+      - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
+    working_dir: /go/src/lmm/logging/pubsub
+    environment:
+      TZ: Asia/Tokyo
+      GO111MODULE: 'on'
+    command: go run sub.go

@@ -5,11 +5,10 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/pkg/errors"
-
-	"go.uber.org/zap"
 
 	"lmm/api/util"
 )
@@ -67,11 +66,9 @@ func newBase(driver string, config Config) DB {
 	err = util.Retry(config.Retry, func() error {
 		db, err = tryToOpenDB(driver, dsn)
 		if err != nil {
-			zap.L().Warn("retry connecting to mysql...",
-				zap.String("error", err.Error()),
-				zap.String("host", config.Host),
-				zap.String("port", config.Port),
-				zap.String("db", config.Database),
+			fmt.Printf(
+				"retry connecting to MySQL... error: %s, host: %s, port: %s, db: %s.",
+				err.Error(), config.Host, config.Port, config.Database,
 			)
 			<-time.After(5 * time.Second)
 		}
@@ -79,7 +76,7 @@ func newBase(driver string, config Config) DB {
 	})
 
 	if err != nil {
-		zap.L().Panic(err.Error())
+		log.Print(err.Error())
 	}
 
 	return db

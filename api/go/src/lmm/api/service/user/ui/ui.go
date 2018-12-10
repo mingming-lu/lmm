@@ -46,6 +46,6 @@ func (ui *UI) SignUp(c http.Context) {
 	case domain.ErrUserPasswordTooWeak:
 		c.String(http.StatusBadRequest, domain.ErrUserPasswordTooWeak.Error())
 	default:
-		http.Panic(c, err.Error())
+		http.Log().Panic(c, err.Error())
 	}
 }

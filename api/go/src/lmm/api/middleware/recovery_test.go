@@ -13,7 +13,7 @@ func TestRecovery(tt *testing.T) {
 	router.Use(Recovery)
 	router.GET("/", func(c http.Context) {
 		if xPanic := c.Request().Header.Get("X-Panic"); xPanic != "" {
-			http.Panic(c, xPanic)
+			http.Log().Panic(c, xPanic)
 		}
 		c.String(http.StatusOK, "no panic")
 	})
