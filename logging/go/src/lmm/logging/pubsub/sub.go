@@ -106,7 +106,7 @@ func main() {
 		}
 		logger.Info("listen to pub/sub subscription", zap.String("subscription_id", loggingSubID))
 
-		err := pubsubClient.Subscription(os.Getenv(loggingSubID)).
+		err := pubsubClient.Subscription(loggingSubID).
 			Receive(context.Background(), func(c context.Context, msg *pubsub.Message) {
 				al := accessLog{}
 				if err := json.Unmarshal(msg.Data, &al); err != nil {
