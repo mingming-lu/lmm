@@ -5,6 +5,7 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"go.uber.org/zap"
 
 	"lmm/api/http"
 	"lmm/api/log"
@@ -36,15 +37,36 @@ import (
 	asset "lmm/api/service/asset/ui"
 )
 
+var (
+	gcpProjectID            string
+	gcpPubSubLoggingTopicID string
+)
+
+func init() {
+	gcpProjectID = os.Getenv("GCP_PROJECT_ID")
+	if gcpProjectID == "" {
+		zap.L().Panic("empty gcp project id")
+	}
+	zap.L().Info("gcp project id found", zap.String("project_id", gcpProjectID))
+
+	gcpPubSubLoggingTopicID = os.Getenv("GCP_PUBSUB_LOGGING_TOPIC_ID")
+	if gcpPubSubLoggingTopicID == "" {
+		zap.L().Panic("empty gcp pub/sub logging topic id")
+	}
+	zap.L().Info("gcp pub/sub logging topic id found",
+		zap.String("subscription_id", gcpPubSubLoggingTopicID),
+	)
+}
+
 func main() {
-	pubsubClient, err := pubsub.NewClient()
+	pubsubClient, err := pubsub.NewClient(gcpProjectID, "/gcp/credentials/service_account.json")
 	if err != nil {
 		panic(err)
 	}
 	defer pubsubClient.Close()
 
 	pubsubTopicPublisher := pubsub.NewPubSubTopicPublisher(
-		pubsubClient.Topic(os.Getenv("GCP_PUBSUB_LOGGING_TOPIC_ID")),
+		pubsubClient.Topic(gcpPubSubLoggingTopicID),
 		func() context.Context {
 			return context.Background()
 		},
@@ -64,7 +86,7 @@ func main() {
 	router := http.NewRouter()
 
 	// middlewares begin
-	// access log
+	// access logg
 	accessLogger := middleware.NewAccessLog(pubsubTopicPublisher)
 	defer accessLogger.Sync()
 	router.Use(accessLogger.AccessLog)

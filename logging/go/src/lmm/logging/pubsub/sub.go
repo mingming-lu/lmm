@@ -39,13 +39,15 @@ func init() {
 
 	projectID = os.Getenv("GCP_PROJECT_ID")
 	if projectID == "" {
-		panic("empty project id")
+		logger.Panic("empty project id")
 	}
+	logger.Info("gcp project id found", zap.String("project_id", projectID))
 
-	dataStoreLoggingKind = os.Getenv("GCP_DATASTORE_LOGGING_KING")
+	dataStoreLoggingKind = os.Getenv("GCP_DATASTORE_LOGGING_KIND")
 	if dataStoreLoggingKind == "" {
-		panic("empty kind")
+		logger.Panic("empty kind")
 	}
+	logger.Info("gcp datastore kind found", zap.String("datastore_kind", dataStoreLoggingKind))
 
 	c, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -67,7 +69,7 @@ func init() {
 	go func() {
 		dataStoreClient, err = datastore.NewClient(c, projectID, opts...)
 		if err != nil {
-			panic(err)
+			logger.Panic(err.Error())
 		}
 
 		logger.Info("connected to gcp datastore")
@@ -98,7 +100,13 @@ func main() {
 	defer dataStoreClient.Close()
 
 	go func() {
-		err := pubsubClient.Subscription(os.Getenv("GCP_PUBSUB_LOGGING_SUBSCRIPTION_ID")).
+		loggingSubID := os.Getenv("GCP_PUBSUB_LOGGING_SUBSCRIPTION_ID")
+		if loggingSubID == "" {
+			logger.Panic("empty subscription id")
+		}
+		logger.Info("listen to pub/sub subscription", zap.String("subscription_id", loggingSubID))
+
+		err := pubsubClient.Subscription(os.Getenv(loggingSubID)).
 			Receive(context.Background(), func(c context.Context, msg *pubsub.Message) {
 				al := accessLog{}
 				if err := json.Unmarshal(msg.Data, &al); err != nil {
