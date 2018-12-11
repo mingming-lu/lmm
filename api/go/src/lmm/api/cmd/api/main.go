@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
-	"go.uber.org/zap"
 
 	"lmm/api/http"
 	"lmm/api/log"
@@ -45,17 +45,15 @@ var (
 func init() {
 	gcpProjectID = os.Getenv("GCP_PROJECT_ID")
 	if gcpProjectID == "" {
-		zap.L().Panic("empty gcp project id")
+		panic("empty gcp project id")
 	}
-	zap.L().Info("gcp project id found", zap.String("project_id", gcpProjectID))
+	fmt.Printf("gcp project id: %s\n", gcpProjectID)
 
 	gcpPubSubLoggingTopicID = os.Getenv("GCP_PUBSUB_LOGGING_TOPIC_ID")
 	if gcpPubSubLoggingTopicID == "" {
-		zap.L().Panic("empty gcp pub/sub logging topic id")
+		panic("empty gcp pub/sub logging topic id")
 	}
-	zap.L().Info("gcp pub/sub logging topic id found",
-		zap.String("subscription_id", gcpPubSubLoggingTopicID),
-	)
+	fmt.Printf("gcp pub/sub logging topic id: %s\n", gcpPubSubLoggingTopicID)
 }
 
 func main() {
