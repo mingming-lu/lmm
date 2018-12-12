@@ -87,7 +87,7 @@ type accessLog struct {
 	LoggerName   string `datastore:"name"         json:"logger"`
 	Message      string `datastore:"message"      json:"msg"`
 	Status       int    `datastore:"status"       json:"status"`
-	RequestID    string `datastore:"request_id"   json:"request_id"`
+	RequestID    string `datastore:"requestID"    json:"request_id"`
 	ClientIP     string `datastore:"clientIP"     json:"client_ip"`
 	ForwardedFor string `datastore:"forwardedFor" json:"forwarded_for"`
 	UserAgent    string `datastore:"userAgent"    json:"ua"`
