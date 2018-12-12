@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"sync"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/pubsub"
@@ -34,9 +35,6 @@ func init() {
 		panic(err)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
-
 	projectID = os.Getenv("GCP_PROJECT_ID")
 	if projectID == "" {
 		logger.Panic("empty project id")
@@ -49,34 +47,38 @@ func init() {
 	}
 	logger.Info("gcp datastore kind found", zap.String("datastore_kind", dataStoreLoggingKind))
 
-	c, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
 	opts := []option.ClientOption{
 		option.WithCredentialsFile("/gcp/credentials/service_account.json"),
 	}
 
-	go func() {
-		pubsubClient, err = pubsub.NewClient(c, projectID, opts...)
-		if err != nil {
-			panic(err)
-		}
+	c, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	defer cancel()
 
+	g, c := errgroup.WithContext(c)
+
+	g.Go(func() error {
+		client, err := pubsub.NewClient(c, projectID, opts...)
+		if err != nil {
+			return err
+		}
+		pubsubClient = client
 		logger.Info("connected to gcp pub/sub")
-		wg.Done()
-	}()
+		return nil
+	})
 
-	go func() {
-		dataStoreClient, err = datastore.NewClient(c, projectID, opts...)
+	g.Go(func() error {
+		client, err := datastore.NewClient(c, projectID, opts...)
 		if err != nil {
-			logger.Panic(err.Error())
+			return err
 		}
-
+		dataStoreClient = client
 		logger.Info("connected to gcp datastore")
-		wg.Done()
-	}()
+		return nil
+	})
 
-	wg.Wait()
+	if err := g.Wait(); err != nil {
+		logger.Panic(err.Error())
+	}
 }
 
 type accessLog struct {
