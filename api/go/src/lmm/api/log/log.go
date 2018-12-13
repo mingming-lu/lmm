@@ -13,6 +13,11 @@ import (
 // Init initializes logger for std log and zap global logger
 // Expected to be called in main() first
 func Init(logWriter io.Writer) func() {
+	name := os.Getenv("LOGGER_NAME_API_LOG")
+	if name == "" {
+		panic("empty logger name")
+	}
+
 	encoderConfig := zapcore.EncoderConfig{
 		MessageKey:    "msg",
 		NameKey:       "logger",
@@ -41,7 +46,7 @@ func Init(logWriter io.Writer) func() {
 	core = zapcore.NewSampler(core, time.Second, 100, 100)
 
 	logger := zap.New(core).
-		Named("logger").
+		Named(name).
 		WithOptions(
 			zap.AddCaller(),
 			zap.AddCallerSkip(1),

@@ -57,7 +57,7 @@ func main() {
 	defer pubsubClient.Close()
 
 	callback := log.Init(pubsub.NewPubSubTopicPublisher(
-		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_ACCESS_LOG")),
+		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_LOG")),
 		func() context.Context {
 			return context.Background()
 		},
@@ -77,7 +77,7 @@ func main() {
 	// middlewares
 	// access log
 	accessLogger := middleware.NewAccessLog(pubsub.NewPubSubTopicPublisher(
-		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_LOG")),
+		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_ACCESS_LOG")),
 		func() context.Context {
 			return context.Background()
 		},
