@@ -38,8 +38,7 @@ import (
 )
 
 var (
-	gcpProjectID            string
-	gcpPubSubLoggingTopicID string
+	gcpProjectID string
 )
 
 func init() {
@@ -48,12 +47,6 @@ func init() {
 		panic("empty gcp project id")
 	}
 	fmt.Printf("gcp project id: %s\n", gcpProjectID)
-
-	gcpPubSubLoggingTopicID = os.Getenv("GCP_PUBSUB_LOGGING_TOPIC_ID")
-	if gcpPubSubLoggingTopicID == "" {
-		panic("empty gcp pub/sub logging topic id")
-	}
-	fmt.Printf("gcp pub/sub logging topic id: %s\n", gcpPubSubLoggingTopicID)
 }
 
 func main() {
@@ -63,14 +56,12 @@ func main() {
 	}
 	defer pubsubClient.Close()
 
-	pubsubTopicPublisher := pubsub.NewPubSubTopicPublisher(
-		pubsubClient.Topic(gcpPubSubLoggingTopicID),
+	callback := log.Init(pubsub.NewPubSubTopicPublisher(
+		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_LOG")),
 		func() context.Context {
 			return context.Background()
 		},
-	)
-
-	callback := log.Init(pubsubTopicPublisher)
+	))
 	defer callback()
 
 	mysql := db.DefaultMySQL()
@@ -83,9 +74,14 @@ func main() {
 
 	router := http.NewRouter()
 
-	// middlewares begin
-	// access logg
-	accessLogger := middleware.NewAccessLog(pubsubTopicPublisher)
+	// middlewares
+	// access log
+	accessLogger := middleware.NewAccessLog(pubsub.NewPubSubTopicPublisher(
+		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_ACCESS_LOG")),
+		func() context.Context {
+			return context.Background()
+		},
+	))
 	defer accessLogger.Sync()
 	router.Use(accessLogger.AccessLog)
 	// recovery
@@ -130,4 +126,12 @@ func main() {
 
 	server := http.NewServer(":8002", router)
 	server.Run()
+}
+
+func getEnvOrPanic(key string) string {
+	s := os.Getenv(key)
+	if s == "" {
+		panic("empty environment variable: " + key)
+	}
+	return s
 }

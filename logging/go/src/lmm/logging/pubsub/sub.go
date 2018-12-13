@@ -2,16 +2,19 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
-	"golang.org/x/sync/errgroup"
+	"lmm/logging/pubsub/subscription"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/pubsub"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/option"
 )
 
@@ -41,17 +44,11 @@ func init() {
 	}
 	logger.Info("gcp project id found", zap.String("project_id", projectID))
 
-	dataStoreLoggingKind = os.Getenv("GCP_DATASTORE_LOGGING_KIND")
-	if dataStoreLoggingKind == "" {
-		logger.Panic("empty kind")
-	}
-	logger.Info("gcp datastore kind found", zap.String("datastore_kind", dataStoreLoggingKind))
-
 	opts := []option.ClientOption{
 		option.WithCredentialsFile("/gcp/credentials/service_account.json"),
 	}
 
-	c, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	c, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	g, c := errgroup.WithContext(c)
@@ -81,59 +78,61 @@ func init() {
 	}
 }
 
-type accessLog struct {
-	Level        string `datastore:"level"        json:"level"`
-	TimeStamp    string `datastore:"time"         json:"ts"`
-	LoggerName   string `datastore:"name"         json:"logger"`
-	Message      string `datastore:"message"      json:"msg"`
-	Status       int    `datastore:"status"       json:"status"`
-	RequestID    string `datastore:"requestID"    json:"request_id"`
-	ClientIP     string `datastore:"clientIP"     json:"client_ip"`
-	ForwardedFor string `datastore:"forwardedFor" json:"forwarded_for"`
-	UserAgent    string `datastore:"userAgent"    json:"ua"`
-	Method       string `datastore:"method"       json:"method"`
-	Host         string `datastore:"host"         json:"host"`
-	URI          string `datastore:"uri"          json:"uri"`
-	Latency      string `datastore:"latency"      json:"latency"`
-}
-
 func main() {
 	defer pubsubClient.Close()
 	defer dataStoreClient.Close()
 
-	go func() {
-		loggingSubID := os.Getenv("GCP_PUBSUB_LOGGING_SUBSCRIPTION_ID")
-		if loggingSubID == "" {
-			logger.Panic("empty subscription id")
-		}
-		logger.Info("listen to pub/sub subscription", zap.String("subscription_id", loggingSubID))
+	undo := zap.ReplaceGlobals(logger)
+	defer undo()
 
-		err := pubsubClient.Subscription(loggingSubID).
-			Receive(context.Background(), func(c context.Context, msg *pubsub.Message) {
-				al := accessLog{}
-				if err := json.Unmarshal(msg.Data, &al); err != nil {
-					logger.Error(err.Error(),
-						zap.String("data", string(msg.Data[:])),
-					)
-				}
+	mainCtx, mainCancel := context.WithCancel(context.Background())
+	defer mainCancel()
 
-				k := datastore.IncompleteKey(dataStoreLoggingKind, nil)
-				if key, err := dataStoreClient.Put(c, k, &al); err != nil {
-					logger.Error(err.Error(),
-						zap.String("data", string(msg.Data[:])),
-					)
-				} else {
-					msg.Ack()
-					logger.Info("saved to datastore",
-						zap.Int64("id", key.ID),
-						zap.String("request_id", al.RequestID),
-					)
-				}
-			})
-		if err != nil {
-			logger.Panic(err.Error())
-		}
-	}()
+	term := newSigC()
+	term.Register(os.Interrupt, syscall.SIGTERM)
 
-	select{}
+	subscriptions := []subscription.Subscription{
+		subscription.NewAPILog(dataStoreClient),
+		subscription.NewAPIAccessLog(dataStoreClient),
+	}
+
+	for i := range subscriptions {
+		go func(i int, pbc *pubsub.Client) {
+			if err := pbc.Subscription(subscriptions[i].ID()).Receive(mainCtx, subscriptions[i].Subscriber()); err != nil {
+				logger.Error(err.Error())
+				term.Close()
+			}
+		}(i, pubsubClient)
+	}
+
+	time.Sleep(3 * time.Second)
+	term.Wait()
+	term.Close()
+	logger.Info("terminating...")
+}
+
+type sigC struct {
+	c     chan os.Signal
+	close sync.Once
+}
+
+func newSigC() *sigC {
+	return &sigC{
+		c: make(chan os.Signal, 1),
+	}
+}
+
+func (c *sigC) Register(sig ...os.Signal) {
+	signal.Notify(c.c, sig...)
+}
+
+func (c *sigC) Wait() os.Signal {
+	return <-c.c
+}
+
+func (c *sigC) Close() {
+	c.close.Do(func() {
+		signal.Stop(c.c)
+		close(c.c)
+	})
 }

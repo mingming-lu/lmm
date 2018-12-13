@@ -28,6 +28,11 @@ type AccessLogger struct {
 
 // NewAccessLog creates a new AccessLog
 func NewAccessLog(logWriter io.Writer) *AccessLogger {
+	name := os.Getenv("LOGGER_NAME_API_ACCESS_LOG")
+	if name == "" {
+		panic("empty access logger name")
+	}
+
 	encoderConfig := zapcore.EncoderConfig{
 		LevelKey:     "level",
 		MessageKey:   "msg",
@@ -50,7 +55,7 @@ func NewAccessLog(logWriter io.Writer) *AccessLogger {
 	core = zapcore.NewSampler(core, time.Second, 100, 100)
 
 	return &AccessLogger{
-		logger: zap.New(core).Named("access_log"),
+		logger: zap.New(core).Named(name),
 		writer: logWriter,
 	}
 }
