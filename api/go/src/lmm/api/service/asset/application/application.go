@@ -3,10 +3,18 @@ package application
 import (
 	"context"
 	"encoding/base64"
+	"image"
+	"mime/multipart"
+
+	// image encoder
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	"lmm/api/service/asset/domain"
 	"lmm/api/service/asset/domain/model"
 	"lmm/api/service/asset/domain/repository"
 	"lmm/api/service/asset/domain/service"
@@ -39,28 +47,42 @@ func NewService(
 }
 
 // UploadImage uploads image
-func (app *Service) UploadImage(c context.Context, username string, data []byte, extention string) error {
-	return app.uploadAsset(c, username, data, extention, model.Image)
+func (app *Service) UploadImage(c context.Context, username, extention string, file multipart.File) error {
+	return app.uploadAsset(c, model.Image, username, extention, file)
 }
 
 // UploadPhoto uploads photo
-func (app *Service) UploadPhoto(c context.Context, username string, data []byte, extention string) error {
-	return app.uploadAsset(c, username, data, extention, model.Photo)
+func (app *Service) UploadPhoto(c context.Context, username, extention string, file multipart.File) error {
+	return app.uploadAsset(c, model.Photo, username, extention, file)
 }
 
-func (app *Service) uploadAsset(c context.Context,
+func (app *Service) uploadAsset(c context.Context, assetType model.AssetType,
 	username string,
-	data []byte,
 	extention string,
-	assetType model.AssetType,
+	file multipart.File,
 ) error {
 	uploader, err := app.uploaderService.FromUserName(c, username)
 	if err != nil {
 		return err
 	}
 
-	name := base64.URLEncoding.EncodeToString([]byte(uuid.NewMD5(uuid.New(), data).String()))
-	asset := model.NewAsset(assetType, name+"."+extention, uploader, model.Data(data))
+	switch assetType {
+	case model.Image, model.Photo:
+		return app.uploadImage(c, uploader, assetType, extention, file)
+	default:
+		return domain.ErrUnsupportedAssetType
+	}
+}
+
+func (app *Service) uploadImage(c context.Context, uploader *model.Uploader, assetType model.AssetType, extention string, file multipart.File) error {
+	src, _, err := image.Decode(file)
+	if err != nil {
+		return errors.Wrap(err, "invalid multipart.File, not an image")
+	}
+
+	dst, err := service.DefaultImageEncoder.Encode(c, src)
+	name := base64.URLEncoding.EncodeToString([]byte(uuid.NewMD5(uuid.New(), dst).String()))
+	asset := model.NewAsset(assetType, name+".jpeg", uploader, dst)
 
 	return app.assetRepository.Save(c, asset)
 }

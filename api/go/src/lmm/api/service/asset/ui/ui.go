@@ -1,7 +1,8 @@
 package ui
 
 import (
-	"io/ioutil"
+	"context"
+	"lmm/api/service/asset/domain"
 	"mime/multipart"
 
 	"github.com/pkg/errors"
@@ -94,7 +95,7 @@ func (ui *UI) upload(c http.Context, keyName string) {
 		return
 	}
 
-	data, ext, err := formImageData(c, keyName)
+	file, ext, err := formImageData(c, keyName)
 	if err != nil {
 		http.Log().Error(c, err.Error())
 		c.String(http.StatusBadRequest, errors.Cause(err).Error())
@@ -104,11 +105,11 @@ func (ui *UI) upload(c http.Context, keyName string) {
 	// upload
 	switch keyName {
 	case "image":
-		if err := ui.appService.UploadImage(c, userName, data, ext); err != nil {
+		if err := ui.appService.UploadImage(c, userName, ext, file); err != nil {
 			panic(err)
 		}
 	case "photo":
-		if err := ui.appService.UploadPhoto(c, userName, data, ext); err != nil {
+		if err := ui.appService.UploadPhoto(c, userName, ext, file); err != nil {
 			panic(err)
 		}
 	default:
@@ -118,7 +119,7 @@ func (ui *UI) upload(c http.Context, keyName string) {
 	c.String(http.StatusCreated, "uploaded")
 }
 
-func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
+func formImageData(c http.Context, imageKey string) (multipart.File, string, error) {
 	if err := c.Request().ParseMultipartForm(maxFormDataSize); err != nil {
 		http.Log().Error(c, err.Error())
 		return nil, "", errors.Wrap(errImageMaxSizeExceeded, err.Error())
@@ -134,35 +135,29 @@ func formImageData(c http.Context, imageKey string) ([]byte, string, error) {
 		return nil, "", errMaxUploadExcceed
 	}
 
-	return openImage(assets[0])
+	return openImage(c, assets[0])
 }
 
-func openImage(fh *multipart.FileHeader) ([]byte, string, error) {
+func openImage(c context.Context, fh *multipart.FileHeader) (multipart.File, string, error) {
 	// check type
 	ext := ""
 	contentType := fh.Header.Get("Content-Type")
 	switch contentType {
 	case "image/gif":
-		ext = "gif"
+		ext = domain.ImageExtensionGIF
 	case "image/jpeg":
-		ext = "jpeg"
+		ext = domain.ImageExtensionJPEG
 	case "image/png":
-		ext = "png"
+		ext = domain.ImageExtensionPNG
 	default:
 		return nil, "", errNotAllowedImageType
 	}
 
-	f, err := fh.Open()
+	f, err := fh.Open() // must open
 	if err != nil {
-		// must open file otherwise go die
-		panic(err)
+		http.Log().Panic(c, err.Error())
 	}
 	defer f.Close()
 
-	data, err := ioutil.ReadAll(f)
-	if err != nil {
-		// if it can't read all, just go die
-		panic(err)
-	}
-	return data, ext, nil
+	return f, ext, nil
 }

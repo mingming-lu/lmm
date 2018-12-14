@@ -4,5 +4,12 @@ import "github.com/pkg/errors"
 
 var (
 	// ErrNoSuchUser error
-	ErrNoSuchUser = errors.New("no such user")
+	ErrNoSuchUser           = errors.New("no such user")
+	ErrUnsupportedAssetType = errors.New("unsupported asset type")
+)
+
+const (
+	ImageExtensionJPEG = "jpeg"
+	ImageExtensionPNG  = "png"
+	ImageExtensionGIF  = "gif"
 )
