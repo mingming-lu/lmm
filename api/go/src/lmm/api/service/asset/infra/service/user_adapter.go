@@ -21,8 +21,8 @@ func NewUserAdapter(db db.DB) service.UploaderService {
 	return &UserAdapter{db: db}
 }
 
-// FromUserName implementation
-func (adapter *UserAdapter) FromUserName(c context.Context, name string) (*model.Uploader, error) {
+// FromUserID implementation
+func (adapter *UserAdapter) FromUserID(c context.Context, name string) (*model.Uploader, error) {
 	stmt := adapter.db.Prepare(c, `select id from user where name = ?`)
 	defer stmt.Close()
 

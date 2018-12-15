@@ -3,10 +3,13 @@ package application
 import (
 	"context"
 	"encoding/base64"
+	"mime/multipart"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	"lmm/api/service/asset/application/command"
+	"lmm/api/service/asset/domain"
 	"lmm/api/service/asset/domain/model"
 	"lmm/api/service/asset/domain/repository"
 	"lmm/api/service/asset/domain/service"
@@ -38,29 +41,33 @@ func NewService(
 	}
 }
 
-// UploadImage uploads image
-func (app *Service) UploadImage(c context.Context, username string, data []byte, extention string) error {
-	return app.uploadAsset(c, username, data, extention, model.Image)
-}
-
-// UploadPhoto uploads photo
-func (app *Service) UploadPhoto(c context.Context, username string, data []byte, extention string) error {
-	return app.uploadAsset(c, username, data, extention, model.Photo)
-}
-
-func (app *Service) uploadAsset(c context.Context,
-	username string,
-	data []byte,
-	extention string,
-	assetType model.AssetType,
-) error {
-	uploader, err := app.uploaderService.FromUserName(c, username)
+// UploadAsset handles upload asset command
+func (app *Service) UploadAsset(c context.Context, cmd *command.UploadAsset) error {
+	uploader, err := app.uploaderService.FromUserID(c, cmd.UserID())
 	if err != nil {
+		return errors.Wrap(err, cmd.UserID())
+	}
+
+	t := cmd.Type()
+	switch t {
+	case model.Image, model.Photo:
+		return app.uploadImage(c, uploader, t, cmd.File())
+	default:
+		return errors.Wrap(domain.ErrUnsupportedAssetType, t.String())
+	}
+}
+
+func (app *Service) uploadImage(c context.Context, uploader *model.Uploader, assetType model.AssetType, file multipart.File) error {
+	dst, ext, err := service.DefaultImageEncoder.Encode(c, file)
+	if err != nil {
+		if err == domain.ErrUnsupportedImageFormat {
+			return errors.Wrap(err, ext)
+		}
 		return err
 	}
 
-	name := base64.URLEncoding.EncodeToString([]byte(uuid.NewMD5(uuid.New(), data).String()))
-	asset := model.NewAsset(assetType, name+"."+extention, uploader, model.Data(data))
+	name := base64.URLEncoding.EncodeToString([]byte(uuid.NewMD5(uuid.New(), dst).String()))
+	asset := model.NewAsset(assetType, name+"."+ext, uploader, dst)
 
 	return app.assetRepository.Save(c, asset)
 }
@@ -86,14 +93,6 @@ func (app *Service) ListPhotos(c context.Context, pageStr, perPageStr string) (*
 }
 
 func (app *Service) parseLimitAndCursorOrDefault(pageStr, perPageStr string) (uint, uint, error) {
-	if pageStr == "" {
-		pageStr = "1"
-	}
-
-	if perPageStr == "" {
-		perPageStr = "30"
-	}
-
 	page, err := stringutil.ParseUint(pageStr)
 	if err != nil {
 		return 0, 0, errors.Wrap(ErrInvalidPage, err.Error())

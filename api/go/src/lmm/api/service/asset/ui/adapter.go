@@ -1,6 +1,8 @@
 package ui
 
-import "lmm/api/service/asset/domain/model"
+import (
+	"lmm/api/service/asset/domain/model"
+)
 
 type imageListItem struct {
 	Name string `json:"name"`
