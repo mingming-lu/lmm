@@ -3,17 +3,12 @@ package application
 import (
 	"context"
 	"encoding/base64"
-	"image"
 	"mime/multipart"
-
-	// image encoder
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	"lmm/api/service/asset/application/command"
 	"lmm/api/service/asset/domain"
 	"lmm/api/service/asset/domain/model"
 	"lmm/api/service/asset/domain/repository"
@@ -46,43 +41,33 @@ func NewService(
 	}
 }
 
-// UploadImage uploads image
-func (app *Service) UploadImage(c context.Context, username, extention string, file multipart.File) error {
-	return app.uploadAsset(c, model.Image, username, extention, file)
-}
-
-// UploadPhoto uploads photo
-func (app *Service) UploadPhoto(c context.Context, username, extention string, file multipart.File) error {
-	return app.uploadAsset(c, model.Photo, username, extention, file)
-}
-
-func (app *Service) uploadAsset(c context.Context, assetType model.AssetType,
-	username string,
-	extention string,
-	file multipart.File,
-) error {
-	uploader, err := app.uploaderService.FromUserName(c, username)
+// UploadAsset handles upload asset command
+func (app *Service) UploadAsset(c context.Context, cmd *command.UploadAsset) error {
+	uploader, err := app.uploaderService.FromUserID(c, cmd.UserID())
 	if err != nil {
+		return errors.Wrap(err, cmd.UserID())
+	}
+
+	t := cmd.Type()
+	switch t {
+	case model.Image, model.Photo:
+		return app.uploadImage(c, uploader, t, cmd.File())
+	default:
+		return errors.Wrap(domain.ErrUnsupportedAssetType, t.String())
+	}
+}
+
+func (app *Service) uploadImage(c context.Context, uploader *model.Uploader, assetType model.AssetType, file multipart.File) error {
+	dst, ext, err := service.DefaultImageEncoder.Encode(c, file)
+	if err != nil {
+		if err == domain.ErrUnsupportedImageFormat {
+			return errors.Wrap(err, ext)
+		}
 		return err
 	}
 
-	switch assetType {
-	case model.Image, model.Photo:
-		return app.uploadImage(c, uploader, assetType, extention, file)
-	default:
-		return domain.ErrUnsupportedAssetType
-	}
-}
-
-func (app *Service) uploadImage(c context.Context, uploader *model.Uploader, assetType model.AssetType, extention string, file multipart.File) error {
-	src, _, err := image.Decode(file)
-	if err != nil {
-		return errors.Wrap(err, "invalid multipart.File, not an image")
-	}
-
-	dst, err := service.DefaultImageEncoder.Encode(c, src)
 	name := base64.URLEncoding.EncodeToString([]byte(uuid.NewMD5(uuid.New(), dst).String()))
-	asset := model.NewAsset(assetType, name+".jpeg", uploader, dst)
+	asset := model.NewAsset(assetType, name+"."+ext, uploader, dst)
 
 	return app.assetRepository.Save(c, asset)
 }
@@ -108,14 +93,6 @@ func (app *Service) ListPhotos(c context.Context, pageStr, perPageStr string) (*
 }
 
 func (app *Service) parseLimitAndCursorOrDefault(pageStr, perPageStr string) (uint, uint, error) {
-	if pageStr == "" {
-		pageStr = "1"
-	}
-
-	if perPageStr == "" {
-		perPageStr = "30"
-	}
-
 	page, err := stringutil.ParseUint(pageStr)
 	if err != nil {
 		return 0, 0, errors.Wrap(ErrInvalidPage, err.Error())

@@ -8,5 +8,5 @@ import (
 
 // UploaderService provides interface to convert user to uploader
 type UploaderService interface {
-	FromUserName(c context.Context, name string) (*model.Uploader, error)
+	FromUserID(c context.Context, name string) (*model.Uploader, error)
 }

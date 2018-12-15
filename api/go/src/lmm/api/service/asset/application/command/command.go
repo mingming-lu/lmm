@@ -1,21 +1,52 @@
 package command
 
-import "mime/multipart"
+import (
+	"mime/multipart"
 
+	"lmm/api/service/asset/domain/model"
+)
+
+// UploadAsset command
 type UploadAsset struct {
-	username  string
-	extention string
+	userID    string
+	assetType string
 	file      multipart.File
 }
 
-func (c *UploadAsset) UploaderName() string {
-	return c.username
+func NewUploadAsset(userID string, assetType string, file multipart.File) *UploadAsset {
+	return &UploadAsset{
+		userID:    userID,
+		assetType: assetType,
+		file:      file,
+	}
 }
 
-func (c *UploadAsset) Extention() string {
-	return c.extention
+// UserID getter
+func (cmd *UploadAsset) UserID() string {
+	return cmd.userID
 }
 
-func (c *UploadAsset) File() multipart.File {
-	return c.file
+// Type adapts asset type string to asset type model
+func (cmd *UploadAsset) Type() model.AssetType {
+	switch cmd.assetType {
+	case "image":
+		return model.Image
+	case "photo":
+		return model.Photo
+	default:
+		return &unknownAssetType{s: cmd.assetType}
+	}
+}
+
+// File gets mutipart.File
+func (cmd *UploadAsset) File() multipart.File {
+	return cmd.file
+}
+
+type unknownAssetType struct {
+	s string
+}
+
+func (t unknownAssetType) String() string {
+	return t.s
 }

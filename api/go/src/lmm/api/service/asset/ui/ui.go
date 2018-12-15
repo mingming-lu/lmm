@@ -1,28 +1,30 @@
 package ui
 
 import (
-	"context"
-	"lmm/api/service/asset/domain"
+	"fmt"
 	"mime/multipart"
 
 	"github.com/pkg/errors"
 
 	"lmm/api/http"
 	"lmm/api/service/asset/application"
+	"lmm/api/service/asset/application/command"
+	"lmm/api/service/asset/domain"
 	"lmm/api/service/asset/domain/repository"
 	"lmm/api/service/asset/domain/service"
 )
 
 const (
-	maxFormDataSize = 32 << 20 // 32MB
+	maxFormDataSize = 10 << 20 // 10MB
 	maxImageSize    = 2 << 20  // 2MB
 )
 
 var (
+	errRequestBodyTooLarge  = errors.New("request body too large")
 	errImageMaxSizeExceeded = errors.New("the max size of image to upload cannot be larger than 2MB")
-	errNotAllowedImageType  = errors.New("only gif, jpeg and png are allowed to upload")
 	errMaxUploadExcceed     = errors.New("only one image can be uploaded every time")
 	errNoImageToUpload      = errors.New("please upload an image")
+	errNotAllowedImageType  = errors.New("only gif, jpeg and png are allowed to upload")
 )
 
 // UI is a image UI
@@ -42,12 +44,12 @@ func New(
 
 // UploadImage handles POST /v1/assets/images
 func (ui *UI) UploadImage(c http.Context) {
-	ui.upload(c, "image")
+	ui.uploadImage(c, "image")
 }
 
 // UploadPhoto handles POST /v1/assets/photos
 func (ui *UI) UploadPhoto(c http.Context) {
-	ui.upload(c, "photo")
+	ui.uploadImage(c, "photo")
 }
 
 // ListImages handles GET /v1/assets/images
@@ -88,76 +90,73 @@ func (ui *UI) ListPhotos(c http.Context) {
 	}
 }
 
-func (ui *UI) upload(c http.Context, keyName string) {
-	userName := c.Request().Header.Get("X-LMM-ID")
-	if userName == "" {
+func (ui *UI) uploadImage(c http.Context, keyName string) {
+	userID := c.Request().Header.Get("X-LMM-ID")
+	if userID == "" {
 		http.Unauthorized(c)
 		return
 	}
 
-	file, ext, err := formImageData(c, keyName)
+	file, err := formImageData(c, keyName)
 	if err != nil {
-		http.Log().Error(c, err.Error())
+		http.Log().Warn(c, err.Error())
 		c.String(http.StatusBadRequest, errors.Cause(err).Error())
 		return
 	}
+	defer file.Close()
 
-	// upload
-	switch keyName {
-	case "image":
-		if err := ui.appService.UploadImage(c, userName, ext, file); err != nil {
-			panic(err)
-		}
-	case "photo":
-		if err := ui.appService.UploadPhoto(c, userName, ext, file); err != nil {
-			panic(err)
-		}
+	err = ui.appService.UploadAsset(c, command.NewUploadAsset(userID, keyName, file))
+	switch errors.Cause(err) {
+	case nil:
+		c.String(http.StatusCreated, "uploaded")
+	case domain.ErrUnsupportedImageFormat:
+		http.Log().Warn(c, err.Error())
+		c.String(http.StatusBadRequest, domain.ErrUnsupportedImageFormat.Error())
+	case domain.ErrNoSuchUser:
+		http.Log().Warn(c, err.Error())
+		http.Unauthorized(c)
+	case domain.ErrUnsupportedAssetType:
+		// unexpected (if no bug)
+		http.Log().Panic(c, err.Error())
 	default:
-		panic("unknown key name: '" + keyName + "'")
+		http.Log().Panic(c, err.Error())
 	}
-
-	c.String(http.StatusCreated, "uploaded")
 }
 
-func formImageData(c http.Context, imageKey string) (multipart.File, string, error) {
+func formImageData(c http.Context, imageKey string) (multipart.File, error) {
 	if err := c.Request().ParseMultipartForm(maxFormDataSize); err != nil {
-		http.Log().Error(c, err.Error())
-		return nil, "", errors.Wrap(errImageMaxSizeExceeded, err.Error())
+		return nil, errors.Wrap(errRequestBodyTooLarge, err.Error())
 	}
 	assets := c.Request().MultipartForm.File[imageKey]
-
-	if len(assets) == 0 {
-		return nil, "", errNoImageToUpload
-	}
-
-	if len(assets) > 1 {
-		http.Log().Error(c, "attend to upload multiple images")
-		return nil, "", errMaxUploadExcceed
-	}
-
-	return openImage(c, assets[0])
-}
-
-func openImage(c context.Context, fh *multipart.FileHeader) (multipart.File, string, error) {
-	// check type
-	ext := ""
-	contentType := fh.Header.Get("Content-Type")
-	switch contentType {
-	case "image/gif":
-		ext = domain.ImageExtensionGIF
-	case "image/jpeg":
-		ext = domain.ImageExtensionJPEG
-	case "image/png":
-		ext = domain.ImageExtensionPNG
+	switch len(assets) {
+	case 0:
+		return nil, errNoImageToUpload
+	case 1:
 	default:
-		return nil, "", errNotAllowedImageType
+		return nil, errors.Wrap(errMaxUploadExcceed, fmt.Sprintf("attempt to upload %d assets", len(assets)))
 	}
 
-	f, err := fh.Open() // must open
+	asset := assets[0]
+	if asset.Size > maxImageSize {
+		return nil, errImageMaxSizeExceeded
+	}
+
+	// check type
+	contentType := asset.Header.Get("Content-Type")
+	switch contentType {
+	case "image/bmp":
+	case "image/gif":
+	case "image/jpeg":
+	case "image/png":
+	case "image/webp":
+	default:
+		return nil, errors.Wrap(errNotAllowedImageType, contentType)
+	}
+
+	f, err := asset.Open() // must open
 	if err != nil {
 		http.Log().Panic(c, err.Error())
 	}
-	defer f.Close()
 
-	return f, ext, nil
+	return f, nil
 }
