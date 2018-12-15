@@ -1,4 +1,4 @@
-export default function({ $axios, isServer, route, req, redirect, store }) {
+export default async function({ $axios, isServer, route, req, redirect, store }) {
   if (isServer && !req) {
     return
   }
@@ -9,7 +9,7 @@ export default function({ $axios, isServer, route, req, redirect, store }) {
   let accessToken = window.localStorage.getItem('accessToken')
 
   if (accessToken && !store.state.accessToken) {
-    $axios.post('/v1/auth/login', {
+    await $axios.post('/v1/auth/login', {
           grantType: 'refreshToken',
         }, {
           headers: {
