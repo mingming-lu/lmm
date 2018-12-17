@@ -2,17 +2,17 @@ export {
   buildPageNumbers,
   buildURLEncodedString,
   formattedDate,
-  formattedTimeStamp,
-  formattedUTCString,
+  formattedDateFromTimeStamp,
+  formattedDateFromString,
   range,
 }
 
-function formattedTimeStamp(timestamp) {
+function formattedDateFromTimeStamp(timestamp) {
   let date = new Date(timestamp * 1e3)
   return formattedDate(date)
 }
 
-function formattedUTCString(s) {
+function formattedDateFromString(s) {
   let date = new Date(s)
   return formattedDate(date)
 }
@@ -26,24 +26,29 @@ function formattedDate(date) {
 }
 
 const buildURLEncodedString = obj => {
-  return Object.entries(obj).filter(kv => {
-    return kv[1]
-  }).map(kv => {
-    return `${kv[0]}=${encodeURIComponent(kv[1])}`
-  }).join('&')
+  return Object.entries(obj)
+    .filter(kv => {
+      return kv[1]
+    })
+    .map(kv => {
+      return `${kv[0]}=${encodeURIComponent(kv[1])}`
+    })
+    .join('&')
 }
 
-const range = (from, to, interval=1) => {
+const range = (from, to, interval = 1) => {
   if (from > to) {
     return []
   }
 
-  return Array(to - from + 1).fill(from).map((v, i) => {
-    return v + (i * interval)
-  })
+  return Array(to - from + 1)
+    .fill(from)
+    .map((v, i) => {
+      return v + i * interval
+    })
 }
 
-const buildPageNumbers = (page, total, maxItem=5) => {
+const buildPageNumbers = (page, total, maxItem = 5) => {
   if (page <= Math.ceil(maxItem / 2)) {
     return range(1, Math.min(total, maxItem))
   }
