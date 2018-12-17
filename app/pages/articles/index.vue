@@ -106,7 +106,7 @@ import LdsEllipsis from '~/components/loadings/LdsEllipsis'
 import {
   buildPageNumbers,
   buildURLEncodedString,
-  formattedUTCString,
+  formattedDateFromTimeStamp,
   range,
 } from '~/assets/js/utils'
 
@@ -197,7 +197,7 @@ export default {
       return `/articles?tag=${tagName}`
     },
     formatted(dtString) {
-      return formattedUTCString(dtString)
+      return formattedDateFromTimeStamp(dtString)
     },
     calcIsMobile() {
       this.isMobile = window.innerWidth <= 768

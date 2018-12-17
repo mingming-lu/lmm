@@ -183,7 +183,7 @@ func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAda
 	for i, item := range view.Items() {
 		items[i].ID = item.ID().String()
 		items[i].Title = item.Title()
-		items[i].PostAt = item.PostAt().UTC().String()
+		items[i].PostAt = item.PostAt().Unix()
 	}
 	return &articleListAdapter{
 		Articles:    items,
@@ -248,8 +248,8 @@ func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
 		ID:           view.ID().String(),
 		Title:        view.Content().Text().Title(),
 		Body:         view.Content().Text().Body(),
-		PostAt:       view.PostAt().UTC().String(),
-		LastEditedAt: view.LastEditedAt().UTC().String(),
+		PostAt:       view.PostAt().Unix(),
+		LastEditedAt: view.LastEditedAt().Unix(),
 		Tags:         tags,
 	}
 }

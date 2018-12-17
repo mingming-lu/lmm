@@ -50,7 +50,7 @@
 import axios from 'axios'
 import Markdownit from 'markdown-it'
 import {
-  formattedUTCString,
+  formattedDateFromTimeStamp,
 } from '~/assets/js/utils'
 export default {
   validate ({ params }) {
@@ -70,8 +70,8 @@ export default {
         subtitles:    [],
         body:         res.data.body,
         tags:         res.data.tags,
-        postAt:       formattedUTCString(res.data.post_at),
-        lastEditedAt: formattedUTCString(res.data.last_edited_at),
+        postAt:       formattedDateFromTimeStamp(res.data.post_at),
+        lastEditedAt: formattedDateFromTimeStamp(res.data.last_edited_at),
       }
     })
   },

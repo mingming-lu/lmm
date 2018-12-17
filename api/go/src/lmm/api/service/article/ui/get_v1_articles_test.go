@@ -30,11 +30,15 @@ func TestListArticleV1(tt *testing.T) {
 	for i := range articles {
 		articles[i].ID = uuid.New().String()[:8]
 		articles[i].Title = uuid.New().String()
-		articles[i].PostAt = time.Now().Add(10 - time.Duration(i)*time.Minute).UTC().Format("2006-01-02 15:04:05 -0700 MST")
+
+		postAtUnix := time.Now().Add(10 - time.Duration(i)*time.Minute).Unix()
+		articles[i].PostAt = postAtUnix
+
+		postAtFromUnix := time.Unix(postAtUnix, 0)
 
 		if _, err := mysql.Exec(c,
 			"insert into article (uid, user, title, body, created_at, updated_at) values(?, ?, ?, ?, ?, ?)",
-			articles[i].ID, user.ID(), articles[i].Title, uuid.New().String(), articles[i].PostAt[:19], articles[i].PostAt[:19],
+			articles[i].ID, user.ID(), articles[i].Title, uuid.New().String(), postAtFromUnix, postAtFromUnix,
 		); err != nil {
 			t.Log(err.Error())
 		}
