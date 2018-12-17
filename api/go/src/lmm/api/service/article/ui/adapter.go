@@ -25,15 +25,15 @@ type articleListAdapterV2 struct {
 type articleListItem struct {
 	ID     string `json:"id"`
 	Title  string `json:"title"`
-	PostAt string `json:"post_at"`
+	PostAt int64  `json:"post_at"`
 }
 
 type articleViewResponse struct {
 	ID           string           `json:"id"`
 	Title        string           `json:"title"`
 	Body         string           `json:"body"`
-	PostAt       string           `json:"post_at"`
-	LastEditedAt string           `json:"last_edited_at"`
+	PostAt       int64            `json:"post_at"`
+	LastEditedAt int64            `json:"last_edited_at"`
 	Tags         []articleViewTag `json:"tags"`
 }
 
