@@ -104,11 +104,12 @@ export default {
   methods: {
     fetchMorePhotos() {
       this.isPageLoaded = false
+      const nextPage = Number(this.page) + 1
       photoFetcher(this.$axios)
-        .fetch(Number(this.page) + 1)
+        .fetch(nextPage)
         .then(res => {
           const photos = res.data.photos
-          const next = res.data.hasNextPage ? `?page=${Number(page) + 1}` : undefined
+          const next = res.data.hasNextPage ? `?page=${nextPage}` : undefined
 
           this.photos.push(...photos)
           this.left.push(...photos.filter((item, index) => index % 2 === 0))
