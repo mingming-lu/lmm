@@ -107,7 +107,6 @@ import {
   buildPageNumbers,
   buildURLEncodedString,
   formattedDateFromTimeStamp,
-  range,
 } from '~/assets/js/utils'
 
 const apiPath = '/v2/articles'
