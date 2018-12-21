@@ -24,7 +24,7 @@
 
     <div v-if="hasNext && isPageLoaded" class="center">
       <br>
-      <button class="more" @click.prevent="fetchPhotos()">See more&hellip;</button>
+      <button class="more" @click.prevent="fetchMorePhotos()">See more&hellip;</button>
     </div>
 
     <div v-if="!hasNext && isPageLoaded" class="center">
@@ -36,52 +36,90 @@
 
 <script>
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
+import buildURLEncodedString from '~/assets/js/utils'
+
+const apiPath = '/v1/assets/photos'
+const photoFetcher = httpClient => {
+  return {
+    fetch: page => {
+      return httpClient.get(`${apiPath}?perPage=10&page=${page}`)
+    }
+  }
+}
+const buildLinks = (obj, path) => {
+  return Object.entries(obj)
+    .filter(kv => {
+      return Boolean(kv[1])
+    })
+    .map(kv => {
+      return {
+        rel:  kv[0],
+        href: kv[1].replace(apiPath, path)
+      }
+    })
+}
+
 export default {
   components: {
     LdsEllipsis
   },
   head() {
     return {
-      title: 'Photos'
+      title: 'Photos',
+      link:  this.links,
     }
   },
-  data() {
-    return {
-      isPageLoaded: false,
-      wideMode: false,
-      page: 0,
-      hasNext: true,
-      left: [],
-      right: [],
-      photos: []
-    }
+  asyncData({$axios, query, route}) {
+    const page = Boolean(query.page) ? query.page : 1
+
+    return photoFetcher($axios)
+      .fetch(page)
+      .then(res => {
+        const next = res.data.hasNextPage ? `${apiPath}?page=${Number(page) + 1}` : undefined
+        return {
+          photos:       res.data.photos,
+          left:         res.data.photos.filter((item, index) => index % 2 === 0),
+          right:        res.data.photos.filter((item, index) => index % 2 === 1),
+          page:         page,
+          hasNext:      res.data.hasNextPage,
+          isPageLoaded: true,
+          wideMode:     false,
+          links:        buildLinks({
+            next: next,
+          }, route.path),
+        }
+      })
+      .catch(e => {
+        console.log(e)
+      })
   },
+  watchQuery: ['page'],
   mounted() {
     window.addEventListener('resize', this.calcIsWideMode)
     this.calcIsWideMode()
-    this.fetchPhotos()
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.calcIsWideMode)
   },
   methods: {
-    fetchPhotos() {
-      this.page += 1
+    fetchMorePhotos() {
       this.isPageLoaded = false
-      this.$axios.get(`/v1/assets/photos?perPage=10&page=${this.page}`).then((res) => {
-        this.photos.push(...res.data.photos)
-        res.data.photos.forEach((photo, index) => {
-          if (index % 2 === 0) {
-            this.left.push(photo)
-          } else {
-            this.right.push(photo)
-          }
+      photoFetcher(this.$axios)
+        .fetch(Number(this.page) + 1)
+        .then(res => {
+          const photos = res.data.photos
+          const next = res.data.hasNextPage ? `?page=${Number(page) + 1}` : undefined
+
+          this.photos.push(...photos)
+          this.left.push(...photos.filter((item, index) => index % 2 === 0))
+          this.right.push(...photos.filter((item, index) => index % 2 === 1))
+          this.hasNext = res.data.hasNextPage
+          this.isPageLoaded = true
+          this.links = buildLinks({next: next}, this.$route.path)
         })
-        this.hasNext = res.data.hasNextPage
-        this.isPageLoaded = true
-      }).catch((e) => {
-        console.log(e)
-      })
+        .catch(e => {
+          console.log(e)
+        })
     },
     url: name => {
       // TODO, create a plugin to convert name to imageURL
