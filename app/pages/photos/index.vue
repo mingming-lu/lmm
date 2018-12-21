@@ -108,19 +108,19 @@ export default {
       photoFetcher(this.$axios)
         .fetch(nextPage)
         .then(res => {
-          const next = res.data.hasNextPage ? `?page=${nextPage}` : undefined
-          if (!next) {
-            return
-          }
+          this.isPageLoaded = true
+          this.hasNext = res.data.hasNextPage
 
           const photos = res.data.photos
-
           this.photos.push(...photos)
           this.left.push(...photos.filter((item, index) => index % 2 === 0))
           this.right.push(...photos.filter((item, index) => index % 2 === 1))
-          this.hasNext = res.data.hasNextPage
-          this.page = nextPage
-          this.isPageLoaded = true
+
+          let next = undefined
+          if (this.hasNext) {
+            this.page = nextPage
+            next = `${apiPath}?page=${nextPage}`
+          }
           this.links = buildLinks({next: next}, this.$route.path)
         })
         .catch(e => {
