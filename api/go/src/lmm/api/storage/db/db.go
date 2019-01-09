@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -11,13 +13,22 @@ type Rows = sql.Rows
 
 // Config defines config of database
 type Config struct {
+	Protocol string
 	Host     string
 	Port     string
 	User     string
 	Password string
 	Database string
+	Options  url.Values // dsn query parameters
 	// Retry defines retry time if connection fails, 0 for no retry, < 0 for infinite retries
 	Retry int
+}
+
+// DSN converts c to dsn string
+// See examples for MySQL: https://github.com/go-sql-driver/mysql
+func (c *Config) DSN() string {
+	return fmt.Sprintf("%s:%s@%s(%s:%s)/%s?%s",
+		c.User, c.Password, c.Protocol, c.Host, c.Port, c.Database, c.Options.Encode())
 }
 
 // DB is a database abstraction

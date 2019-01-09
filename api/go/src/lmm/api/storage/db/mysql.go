@@ -1,6 +1,7 @@
 package db
 
 import (
+	"net/url"
 	"os"
 	"time"
 )
@@ -12,7 +13,7 @@ type MySQL struct {
 
 // DefaultMySQL returns a new DB with default dsn
 func DefaultMySQL() DB {
-	config := Config{
+	c := Config{
 		User:     os.Getenv("MYSQL_USER"),
 		Password: os.Getenv("MYSQL_PASS"),
 		Host:     os.Getenv("MYSQL_HOST"),
@@ -21,7 +22,28 @@ func DefaultMySQL() DB {
 		Retry:    -1,
 	}
 
-	mysql := NewMySQL(config)
+	if c.User == "" {
+		c.User = "root"
+	}
+
+	if c.Protocol == "" {
+		c.Protocol = "tcp"
+	}
+
+	if c.Host == "" {
+		c.Host = "127.0.0.1"
+	}
+
+	if c.Port == "" {
+		c.Port = "3306"
+	}
+
+	c.Options = url.Values{}
+	c.Options.Add("parseTime", "true")
+	c.Options.Add("autocommit", "true")
+	c.Options.Add("tx_isolation", "'READ-COMMITTED'")
+
+	mysql := NewMySQL(c)
 	mysql.SetConnMaxLifetime(time.Hour)
 	mysql.SetMaxIdleConns(10)
 	mysql.SetMaxOpenConns(100)
@@ -31,5 +53,5 @@ func DefaultMySQL() DB {
 
 // NewMySQL returns a MySQL DB implementation
 func NewMySQL(config Config) DB {
-	return newBase("mysql", config)
+	return open("mysql", config)
 }
