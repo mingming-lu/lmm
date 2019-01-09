@@ -39,32 +39,14 @@ type base struct {
 	src *sql.DB
 }
 
-func newBase(driver string, config Config) DB {
-	if config.User == "" {
-		config.User = "root"
-	}
-	if config.Host == "" {
-		config.Host = "127.0.0.1"
-	}
-	if config.Port == "" {
-		config.Port = "3306"
-	}
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
-		config.User,
-		config.Password,
-		config.Host,
-		config.Port,
-		config.Database,
-	)
-
+func open(driver string, config Config) DB {
 	var (
 		db  DB
 		err error
 	)
 
 	err = util.Retry(config.Retry, func() error {
-		db, err = tryToOpenDB(driver, dsn)
+		db, err = tryToOpenDB(driver, config.DSN())
 		if err != nil {
 			fmt.Printf(
 				"retry connecting to MySQL... error: %s, host: %s, port: %s, db: %s.",
