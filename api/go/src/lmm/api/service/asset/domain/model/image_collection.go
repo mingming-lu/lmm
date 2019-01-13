@@ -2,7 +2,7 @@ package model
 
 // ImageDescriptor models the image descriptor
 type ImageDescriptor struct {
-	assetDescriptor
+	AssetDescriptor
 	id uint
 }
 
@@ -10,7 +10,7 @@ type ImageDescriptor struct {
 func NewImageDescriptor(id uint, name string) *ImageDescriptor {
 	return &ImageDescriptor{
 		id:              id,
-		assetDescriptor: assetDescriptor{name: name},
+		AssetDescriptor: AssetDescriptor{name: name, assetType: Image},
 	}
 }
 
