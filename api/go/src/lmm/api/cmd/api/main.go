@@ -116,7 +116,8 @@ func main() {
 	// asset
 	assetFinder := assetService.NewAssetFetcher(mysql)
 	assetRepo := assetStorage.NewAssetStorage(mysql, rabbitMQUploader)
-	asset := asset.New(assetFinder, assetRepo, assetService.NewUserAdapter(mysql))
+	imageService := assetService.NewImageService(mysql)
+	asset := asset.New(assetFinder, assetRepo, imageService, assetService.NewUserAdapter(mysql))
 	router.POST("/v1/assets/images", authUI.BearerAuth(asset.UploadImage))
 	router.GET("/v1/assets/images", asset.ListImages)
 	router.POST("/v1/assets/photos", authUI.BearerAuth(asset.UploadPhoto))

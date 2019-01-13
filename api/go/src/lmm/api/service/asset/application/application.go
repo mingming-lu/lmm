@@ -25,6 +25,7 @@ var (
 type Service struct {
 	uploaderService service.UploaderService
 	assetRepository repository.AssetRepository
+	imageService    service.ImageService
 	assetFinder     service.AssetFinder
 }
 
@@ -32,11 +33,13 @@ type Service struct {
 func NewService(
 	assetFinder service.AssetFinder,
 	assetRepository repository.AssetRepository,
+	imageService service.ImageService,
 	uploaderService service.UploaderService,
 ) *Service {
 	return &Service{
 		assetFinder:     assetFinder,
 		assetRepository: assetRepository,
+		imageService:    imageService,
 		uploaderService: uploaderService,
 	}
 }
@@ -107,4 +110,22 @@ func (app *Service) parseLimitAndCursorOrDefault(pageStr, perPageStr string) (ui
 	}
 
 	return page, perPage, nil
+}
+
+func (app *Service) SetPhotoAlt(c context.Context, cmd *command.SetImageAlt) error {
+	asset, err := app.assetRepository.FindByName(c, cmd.ImageName())
+	if err != nil {
+		return errors.Wrap(domain.ErrNoSuchAsset, err.Error())
+	}
+
+	if asset.Type() != model.Photo {
+		return domain.ErrInvalidTypeNotAPhoto
+	}
+
+	alts := make([]*model.Alt, len(cmd.AltNames()))
+	for i, name := range cmd.AltNames() {
+		alts[i] = model.NewAlt(asset.Name(), name)
+	}
+
+	return app.imageService.SetAlt(c, asset, alts)
 }

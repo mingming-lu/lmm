@@ -36,9 +36,15 @@ type UI struct {
 func New(
 	assetFinder service.AssetFinder,
 	assetRepository repository.AssetRepository,
+	imageService service.ImageService,
 	userAdapter service.UploaderService,
 ) *UI {
-	appService := application.NewService(assetFinder, assetRepository, userAdapter)
+	appService := application.NewService(
+		assetFinder,
+		assetRepository,
+		imageService,
+		userAdapter,
+	)
 	return &UI{appService: appService}
 }
 
