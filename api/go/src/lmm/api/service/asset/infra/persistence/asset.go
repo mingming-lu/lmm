@@ -22,6 +22,21 @@ func NewAssetStorage(db db.DB, uploader uploader.Uploader) *AssetStorage {
 	return &AssetStorage{db: db, uploader: uploader}
 }
 
+// FindByName implementation
+func (s *AssetStorage) FindByName(c context.Context, name string) (*model.AssetDescriptor, error) {
+	stmt := s.db.Prepare(c, "select name, type from asset where name = ? ")
+
+	var (
+		assetName string
+		assetType string
+	)
+	if err := stmt.QueryRow(c, name).Scan(&assetName, &assetType); err != nil {
+		return nil, err
+	}
+
+	return model.NewAssetDescriptor(assetName, assetType), nil
+}
+
 // Save implementation
 func (s *AssetStorage) Save(c context.Context, asset *model.Asset) error {
 	tx, err := s.db.Begin(c, nil)
