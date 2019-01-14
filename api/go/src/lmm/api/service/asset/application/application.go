@@ -112,7 +112,7 @@ func (app *Service) parseLimitAndCursorOrDefault(pageStr, perPageStr string) (ui
 	return page, perPage, nil
 }
 
-func (app *Service) SetPhotoAlt(c context.Context, cmd *command.SetImageAlt) error {
+func (app *Service) SetPhotoAlternateTexts(c context.Context, cmd *command.SetImageAlternateTexts) error {
 	asset, err := app.assetRepository.FindByName(c, cmd.ImageName())
 	if err != nil {
 		return errors.Wrap(domain.ErrNoSuchAsset, err.Error())

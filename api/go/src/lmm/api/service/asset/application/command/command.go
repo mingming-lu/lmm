@@ -51,18 +51,26 @@ func (t unknownAssetType) String() string {
 	return t.s
 }
 
-// SetImageAlt is the command to set image's alt
-type SetImageAlt struct {
+// SetImageAlternateTexts is the command to set image's alt
+type SetImageAlternateTexts struct {
 	imageName string
 	altNames  []string
 }
 
+// NewSetImageAlternateTexts creates a new SetImageAlternateTexts command
+func NewSetImageAlternateTexts(imageName string, altNames []string) *SetImageAlternateTexts {
+	return &SetImageAlternateTexts{
+		imageName: imageName,
+		altNames:  altNames,
+	}
+}
+
 // ImageName returns image's name
-func (cmd *SetImageAlt) ImageName() string {
+func (cmd *SetImageAlternateTexts) ImageName() string {
 	return cmd.imageName
 }
 
 // AltNames returns alt names to set
-func (cmd *SetImageAlt) AltNames() []string {
+func (cmd *SetImageAlternateTexts) AltNames() []string {
 	return cmd.altNames
 }

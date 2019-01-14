@@ -8,13 +8,13 @@ type AssetDescriptor struct {
 	assetType AssetType
 }
 
-func NewAssetDescriptor(name, assetType string) *AssetDescriptor {
+func NewAssetDescriptor(name string, assetType AssetType) *AssetDescriptor {
 	a := &AssetDescriptor{name: name}
 
 	switch assetType {
-	case "image":
+	case Image:
 		a.assetType = Image
-	case "photo":
+	case Photo:
 		a.assetType = Photo
 	default:
 		a.assetType = Unknown
