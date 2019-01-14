@@ -36,9 +36,15 @@ type UI struct {
 func New(
 	assetFinder service.AssetFinder,
 	assetRepository repository.AssetRepository,
+	imageService service.ImageService,
 	userAdapter service.UploaderService,
 ) *UI {
-	appService := application.NewService(assetFinder, assetRepository, userAdapter)
+	appService := application.NewService(
+		assetFinder,
+		assetRepository,
+		imageService,
+		userAdapter,
+	)
 	return &UI{appService: appService}
 }
 
@@ -159,4 +165,37 @@ func formImageData(c http.Context, imageKey string) (multipart.File, error) {
 	}
 
 	return f, nil
+}
+
+// PutPhotoAlternateTexts handles PUT /v1/assets/photos/:photo/alts
+func (ui *UI) PutPhotoAlternateTexts(c http.Context) {
+	userID := c.Request().Header.Get("X-LMM-ID")
+	if userID == "" {
+		http.Unauthorized(c)
+		return
+	}
+
+	imageName := c.Request().PathParam("photo")
+
+	altNames := putPhotoAltsRequestBody{}
+	if err := c.Request().Bind(&altNames); err != nil {
+		http.Log().Warn(c, err.Error())
+		http.BadRequest(c)
+		return
+	}
+
+	err := ui.appService.SetPhotoAlternateTexts(c,
+		command.NewSetImageAlternateTexts(imageName, altNames.Names),
+	)
+
+	switch errors.Cause(err) {
+	case nil:
+		http.NoContent(c)
+	case domain.ErrInvalidTypeNotAPhoto:
+		c.String(http.StatusBadRequest, domain.ErrInvalidTypeNotAPhoto.Error())
+	case domain.ErrNoSuchAsset:
+		c.String(http.StatusNotFound, domain.ErrNoSuchAsset.Error())
+	default:
+		http.Log().Panic(c, err.Error())
+	}
 }

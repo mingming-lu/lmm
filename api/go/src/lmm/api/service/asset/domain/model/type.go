@@ -5,6 +5,15 @@ import "fmt"
 // AssetType is a type
 type AssetType fmt.Stringer
 
+// Unknown asset type
+var Unknown AssetType = &unknown{}
+
+type unknown struct{}
+
+func (t unknown) String() string {
+	return "unknown"
+}
+
 // Image asset type
 var Image AssetType = &image{}
 

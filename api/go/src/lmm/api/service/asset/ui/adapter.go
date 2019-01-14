@@ -43,3 +43,7 @@ func photoCollectionToJSON(collection *model.PhotoCollection) *photoListJSON {
 		HasNextPage: collection.HasNextPage(),
 	}
 }
+
+type putPhotoAltsRequestBody struct {
+	Names []string `json:"names"`
+}

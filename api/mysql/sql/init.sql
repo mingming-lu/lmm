@@ -47,3 +47,13 @@ CREATE TABLE IF NOT EXISTS `asset` (
 	UNIQUE `name` (`name`),
 	INDEX `created_at` (`created_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+
+CREATE TABLE IF NOT EXISTS `image_alt` (
+	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`asset` INT UNSIGNED NOT NULL,
+	`name` VARCHAR(255) NOT NULL,
+	`created_at` DATETIME NOT NULL,
+	PRIMARY KEY (`id`),
+	UNIQUE `name` (`asset`, `name`),
+	INDEX `created_at` (`created_at`)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
