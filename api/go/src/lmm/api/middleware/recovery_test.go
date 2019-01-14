@@ -9,7 +9,7 @@ import (
 func TestRecovery(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	router := testing.NewRouter()
+	router := http.NewRouter()
 	router.Use(Recovery)
 	router.GET("/", func(c http.Context) {
 		if xPanic := c.Request().Header.Get("X-Panic"); xPanic != "" {

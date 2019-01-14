@@ -34,9 +34,14 @@ type Router struct {
 
 // NewRouter creates new router
 func NewRouter() *Router {
+	router := httprouter.New()
+	router.NotFound = notFoundHandler(func(c Context) {
+		NotFound(c)
+	})
+
 	return &Router{
 		middlewares: make([]Middleware, 0),
-		router:      httprouter.New(),
+		router:      router,
 	}
 }
 
@@ -93,6 +98,11 @@ func (r *Router) PUT(path string, handler Handler) {
 // DELETE registers handler to handle DELETE method with given path
 func (r *Router) DELETE(path string, handler Handler) {
 	r.Handle(http.MethodDelete, path, handler)
+}
+
+// NotFound registers not found handler to r
+func (r *Router) NotFound(h Handler) {
+	r.router.NotFound = notFoundHandler(h)
 }
 
 // ServeHTTP implements http.Handler.ServeHTTP

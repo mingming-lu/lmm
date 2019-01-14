@@ -4,6 +4,7 @@ import (
 	"os"
 	"sync"
 
+	"lmm/api/http"
 	"lmm/api/service/article/infra/fetcher"
 	"lmm/api/service/article/infra/persistence"
 	"lmm/api/service/article/infra/service"
@@ -18,7 +19,7 @@ import (
 
 var (
 	mysql  db.DB
-	router *testing.Router
+	router *http.Router
 	lock   sync.Mutex
 )
 
@@ -26,7 +27,7 @@ func TestMain(m *testing.M) {
 	mysql = db.DefaultMySQL()
 	auth := auth(mysql)
 	ui := articleUI(mysql)
-	router = testing.NewRouter()
+	router = http.NewRouter()
 	router.POST("/v1/articles", auth.BearerAuth(ui.PostNewArticle))
 	router.PUT("/v1/articles/:articleID", auth.BearerAuth(ui.EditArticle))
 	router.GET("/v1/articles", ui.ListArticles)
