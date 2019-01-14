@@ -29,6 +29,16 @@ const (
 
 type Handler = func(Context)
 
+type notFoundHandler Handler
+
+func (h notFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	c := &contextImpl{
+		req: NewRequest(r, nil),
+		res: newResponseImpl(w),
+	}
+	h(c)
+}
+
 type Middleware = func(Handler) Handler
 
 func Serve(addr string, r *Router) {

@@ -12,7 +12,7 @@ func TestWithRequestID(tt *testing.T) {
 	uuid := uuidutil.New()
 	sig := uuidutil.New()
 
-	router := testing.NewRouter()
+	router := http.NewRouter()
 	router.Use(WithRequestID)
 	router.GET("/", func(c http.Context) {
 		requestID, ok := c.Value(http.RequestIDContextKey).(string)
