@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-
-	router "lmm/api/http"
 )
 
 type RequestOptions struct {
@@ -69,12 +67,4 @@ func (r *Response) Body() string {
 		panic(err)
 	}
 	return string(b)
-}
-
-type Router struct {
-	*router.Router
-}
-
-func NewRouter() *Router {
-	return &Router{Router: router.NewRouter()}
 }
