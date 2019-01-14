@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"lmm/api/service/asset/domain"
 	"lmm/api/service/asset/domain/model"
 	"lmm/api/storage/db"
 
@@ -34,13 +35,29 @@ func (s *ImageService) SetAlt(c context.Context, asset *model.AssetDescriptor, a
 
 	var assetID uint
 	if err := stmt.QueryRow(c, asset.Name()).Scan(&assetID); err != nil {
+		err = errors.Wrap(domain.ErrNoSuchAsset, err.Error())
 		if e := tx.Rollback(); e != nil {
 			return errors.Wrap(err, e.Error())
 		}
 		return err
 	}
 
-	insertAlt, err := tx.Prepare(c, "insert into image_alt (asset, name, created_at) values(?, ?, ?) on duplicate key update id = id")
+	deleteAltByAssetID, err := tx.Prepare(c, "delete from image_alt where asset = ?")
+	if err != nil {
+		if e := tx.Rollback(); e != nil {
+			return errors.Wrap(err, e.Error())
+		}
+		return err
+	}
+
+	if _, err := deleteAltByAssetID.Exec(c, assetID); err != nil && err != db.ErrNoRows {
+		if e := tx.Rollback(); e != nil {
+			return errors.Wrap(err, e.Error())
+		}
+		return err
+	}
+
+	insertAlt, err := tx.Prepare(c, "insert into image_alt (asset, name, created_at) values(?, ?, ?)")
 	if err != nil {
 		if e := tx.Rollback(); e != nil {
 			return errors.Wrap(err, e.Error())
