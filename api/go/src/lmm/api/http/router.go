@@ -34,9 +34,14 @@ type Router struct {
 
 // NewRouter creates new router
 func NewRouter() *Router {
+	router := httprouter.New()
+	router.NotFound = notFoundHandler(func(c Context) {
+		NotFound(c)
+	})
+
 	return &Router{
 		middlewares: make([]Middleware, 0),
-		router:      httprouter.New(),
+		router:      router,
 	}
 }
 
