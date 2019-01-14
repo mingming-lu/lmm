@@ -100,6 +100,11 @@ func (r *Router) DELETE(path string, handler Handler) {
 	r.Handle(http.MethodDelete, path, handler)
 }
 
+// NotFound registers not found handler to r
+func (r *Router) NotFound(h Handler) {
+	r.router.NotFound = notFoundHandler(h)
+}
+
 // ServeHTTP implements http.Handler.ServeHTTP
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r.router.ServeHTTP(w, req)
