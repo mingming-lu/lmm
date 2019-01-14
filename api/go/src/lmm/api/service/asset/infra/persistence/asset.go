@@ -27,14 +27,14 @@ func (s *AssetStorage) FindByName(c context.Context, name string) (*model.AssetD
 	stmt := s.db.Prepare(c, "select name, type from asset where name = ? ")
 
 	var (
-		assetName string
-		assetType string
+		assetName     string
+		assetTypeCode uint8
 	)
-	if err := stmt.QueryRow(c, name).Scan(&assetName, &assetType); err != nil {
+	if err := stmt.QueryRow(c, name).Scan(&assetName, &assetTypeCode); err != nil {
 		return nil, err
 	}
 
-	return model.NewAssetDescriptor(assetName, assetType), nil
+	return model.NewAssetDescriptor(assetName, s.decodeAssetType(assetTypeCode)), nil
 }
 
 // Save implementation
@@ -54,7 +54,7 @@ func (s *AssetStorage) Save(c context.Context, asset *model.Asset) error {
 
 	if _, err := stmt.Exec(c,
 		asset.Name(),
-		s.assetTypeMap(asset.Type().String()),
+		s.encodeAssetType(asset.Type()),
 		asset.Uploader().ID(),
 		time.Now(),
 	); err != nil {
@@ -85,13 +85,24 @@ func (s *AssetStorage) Remove(c context.Context, asset *model.Asset) error {
 	panic("not implemented")
 }
 
-func (s *AssetStorage) assetTypeMap(assetTypeName string) uint8 {
-	switch assetTypeName {
+func (s *AssetStorage) encodeAssetType(assetType model.AssetType) uint8 {
+	switch assetType.String() {
 	case "image":
 		return 0
 	case "photo":
 		return 1
 	default:
-		panic("invalid asset type: '" + assetTypeName + "'")
+		panic("invalid asset type: '" + assetType.String() + "'")
+	}
+}
+
+func (s *AssetStorage) decodeAssetType(code uint8) model.AssetType {
+	switch code {
+	case 0:
+		return model.Image
+	case 1:
+		return model.Photo
+	default:
+		panic("invalid asset code: '" + string(code) + "'")
 	}
 }
