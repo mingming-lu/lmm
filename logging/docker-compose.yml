@@ -12,3 +12,10 @@ services:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
     command: go run sub.go
+    networks:
+      - lmm
+
+networks:
+  lmm:
+    external:
+      name: lmm

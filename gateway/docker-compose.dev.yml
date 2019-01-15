@@ -3,12 +3,3 @@ services:
   nginx:
     volumes:
       - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
-    ports:
-      - 80:80
-      - 443:443
-    networks:
-      - lmm
-
-networks:
-  lmm:
-    name: lmm

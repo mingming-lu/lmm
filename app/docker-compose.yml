@@ -7,3 +7,10 @@ services:
       - .:/app
     environment:
       TZ: Asia/Tokyo
+    networks:
+      - lmm
+
+networks:
+  lmm:
+    external:
+      name: lmm

@@ -35,7 +35,8 @@ module.exports = {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '~/plugins/directives.js'
+    '~/plugins/directives.js',
+    '~/plugins/axios.js'
   ],
 
   /*
