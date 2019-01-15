@@ -15,7 +15,6 @@ services:
     depends_on:
       - mysql
     networks:
-      - lmm
       - lmm-api
   mysql:
     container_name: lmm-api-mysql
@@ -33,6 +32,3 @@ services:
 networks:
   lmm-api:
     name: lmm-api
-  lmm:
-    external:
-      name: lmm

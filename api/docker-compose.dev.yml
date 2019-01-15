@@ -16,9 +16,11 @@ services:
       HTTP_TIMEOUT_SECOND: 3
     networks:
       - lmm
-      - lmm-api
   mysql:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
-    networks:
-      - lmm-api
+
+networks:
+  lmm:
+    external:
+      name: lmm

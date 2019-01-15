@@ -5,6 +5,13 @@ services:
       - ./.env/prod.env
     environment:
       APP_HOST: https://www.lumingming.net
+    networks:
+      - lmm
   mysql:
     env_file:
       - ./mysql/.env/prod.env
+
+networks:
+  lmm:
+    external:
+      name: lmm
