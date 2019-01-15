@@ -3,6 +3,7 @@ services:
   nginx:
     container_name: lmm-gateway-nginx
     image: nginx:1.14.1-alpine
+    restart: on-failure
     volumes:
       - ./nginx/run:/var/run
       - ./nginx/log:/var/log/nginx
