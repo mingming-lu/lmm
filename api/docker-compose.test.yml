@@ -4,15 +4,13 @@ services:
     env_file:
       - ./.env/test.env
     environment:
-      MYSQL_HOST: api-mysql
+      MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_NAME: lmm_test
       MYSQL_USER: root
       HTTP_TIMEOUT_SECOND: 1
     working_dir: /go/src/lmm/api
     command: bash -c "go test ./... -count 1 -cover -v"
-    links:
-      - mysql:api-mysql
   mysql:
     volumes:
       - ./mysql/sql/init_test.sql:/mysql/sql/init_test.sql

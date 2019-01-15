@@ -5,10 +5,6 @@ services:
       - ./.env/prod.env
     environment:
       APP_HOST: https://www.lumingming.net
-    network_mode:
-      host
   mysql:
     env_file:
       - ./mysql/.env/prod.env
-    network_mode:
-      host
