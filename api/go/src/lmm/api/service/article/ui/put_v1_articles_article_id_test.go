@@ -53,7 +53,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTags:       []string{"foo", "bar"},
 			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
 			ResStatusCode: http.StatusNoContent,
-			ResBody:       http.StatusText(http.StatusNoContent),
+			ResBody:       "",
 		},
 		"NoTags": {
 			ArticleID:     articleID,
@@ -62,7 +62,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
 			ResStatusCode: http.StatusNoContent,
-			ResBody:       http.StatusText(http.StatusNoContent),
+			ResBody:       "",
 		},
 		"Unauthorized": {
 			ArticleID:     articleID,
