@@ -25,7 +25,8 @@ func imageCollectionToJSON(collection *model.ImageCollection) *imageListJSON {
 }
 
 type photoListItem struct {
-	Name string `json:"name"`
+	Name string   `json:"name"`
+	Alts []string `json:"alts"`
 }
 
 type photoListJSON struct {
@@ -37,6 +38,7 @@ func photoCollectionToJSON(collection *model.PhotoCollection) *photoListJSON {
 	photos := make([]photoListItem, len(collection.List()), len(collection.List()))
 	for i, photo := range collection.List() {
 		photos[i].Name = photo.Name()
+		photos[i].Alts = photo.AlternateTexts()
 	}
 	return &photoListJSON{
 		Photos:      photos,

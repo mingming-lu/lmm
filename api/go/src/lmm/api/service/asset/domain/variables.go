@@ -17,4 +17,7 @@ var (
 
 	// ErrInvalidTypeNotAPhoto error
 	ErrInvalidTypeNotAPhoto = errors.New("not a photo")
+
+	// ErrDuplicateImageAlt error
+	ErrDuplicateImageAlt = errors.New("duplicate image alternate text")
 )

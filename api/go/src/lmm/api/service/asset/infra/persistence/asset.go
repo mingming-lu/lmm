@@ -25,6 +25,7 @@ func NewAssetStorage(db db.DB, uploader uploader.Uploader) *AssetStorage {
 // FindByName implementation
 func (s *AssetStorage) FindByName(c context.Context, name string) (*model.AssetDescriptor, error) {
 	stmt := s.db.Prepare(c, "select name, type from asset where name = ? ")
+	defer stmt.Close()
 
 	var (
 		assetName     string
