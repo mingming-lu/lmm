@@ -57,7 +57,7 @@ func Created(c Context) {
 }
 
 func NoContent(c Context) {
-	HandleStatus(c, http.StatusNoContent)
+	c.Response().WriteHeader(StatusNoContent)
 }
 
 func BadRequest(c Context) {
