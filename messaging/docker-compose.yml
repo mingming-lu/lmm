@@ -6,7 +6,11 @@ services:
     volumes:
       - ./rabbitmq/lib:/var/lib/rabbitmq
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-    ports:
-      - 5672:5672
-      - 15672:15672
     command: sh -c "rabbitmq-plugins enable rabbitmq_management; rabbitmq-server"
+    networks:
+      - lmm
+
+networks:
+  lmm:
+    external:
+      name: lmm

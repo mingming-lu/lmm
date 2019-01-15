@@ -12,8 +12,10 @@ services:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
-    ports:
-      - 8002:8002
+    depends_on:
+      - mysql
+    networks:
+      - lmm-api
   mysql:
     container_name: lmm-api-mysql
     image: mysql:5.7
@@ -24,3 +26,9 @@ services:
       - ./mysql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       TZ: Asia/Tokyo
+    networks:
+      - lmm-api
+
+networks:
+  lmm-api:
+    name: lmm-api

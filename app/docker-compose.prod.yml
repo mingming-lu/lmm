@@ -9,4 +9,3 @@ services:
       API_URL: https://api.lumingming.net
       API_URL_BROWSER: https://api.lumingming.net
       ASSET_URL: https://asset.lumingming.net     
-    network_mode: host

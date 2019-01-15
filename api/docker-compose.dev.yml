@@ -5,29 +5,22 @@ services:
       - ./.env/dev.env
     environment:
       APP_HOST: https://www.lmm.local
-      MYSQL_HOST: api-mysql
+      MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_NAME: lmm
       MYSQL_USER: root
-      RABBIT_HOST: host.docker.internal
+      RABBIT_HOST: rabbitmq
       RABBIT_PORT: 5672
       RABBIT_USER: guest
       RABBIT_PASS: guest
       HTTP_TIMEOUT_SECOND: 3
-    links:
-      - mysql:api-mysql
     networks:
       - lmm
-      - lmm-api
   mysql:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
-    networks:
-      - lmm-api
 
 networks:
-  lmm-api:
-    name: lmm-api
   lmm:
     external:
       name: lmm
