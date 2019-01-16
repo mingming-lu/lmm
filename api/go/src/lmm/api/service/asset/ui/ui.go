@@ -14,9 +14,9 @@ import (
 	"lmm/api/service/asset/domain/service"
 )
 
-const (
-	maxFormDataSize = 10 << 20 // 10MB
-	maxImageSize    = 2 << 20  // 2MB
+var (
+	maxFormDataSize int64 = 10 << 20 // 10MB
+	maxImageSize    int64 = 2 << 20  // 2MB
 )
 
 var (

@@ -101,7 +101,7 @@ func TestListArticleV1(tt *testing.T) {
 	for testName, testCase := range cases {
 		t.Run(testName, func(_ *testing.T) {
 			req := testing.GET("/v1/articles"+testName, nil)
-			res := testing.Do(req, router)
+			res := testing.DoRequest(req, router)
 
 			t.Is(http.StatusOK, res.StatusCode())
 

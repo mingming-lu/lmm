@@ -27,6 +27,8 @@ const (
 	StatusClientAbort = 477
 )
 
+type Header = http.Header
+
 type Handler = func(Context)
 
 type notFoundHandler Handler

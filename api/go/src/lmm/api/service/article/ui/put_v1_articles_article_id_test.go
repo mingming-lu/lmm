@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"io"
 	"regexp"
 	"strings"
 
@@ -22,12 +21,14 @@ func TestPutArticlews(tt *testing.T) {
 	user := testutil.NewUser(mysql)
 
 	res := postArticles(
-		map[string]string{"Authorization": "Bearer " + user.AccessToken()},
-		testing.StructToRequestBody(postArticleAdapter{
-			Title: stringutil.Pointer("title"),
-			Body:  stringutil.Pointer("body"),
-			Tags:  []string{"tag"},
-		}),
+		&testing.RequestOptions{
+			Headers: http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
+			FormData: testing.StructToRequestBody(postArticleAdapter{
+				Title: stringutil.Pointer("title"),
+				Body:  stringutil.Pointer("body"),
+				Tags:  []string{"tag"},
+			}),
+		},
 	)
 
 	if !t.Is(http.StatusCreated, res.StatusCode()) {
@@ -42,7 +43,7 @@ func TestPutArticlews(tt *testing.T) {
 		ReqTitle      *string
 		ReqBody       *string
 		ReqTags       []string
-		ReqHeaders    map[string]string
+		ReqHeaders    http.Header
 		ResStatusCode int
 		ResBody       string
 	}{
@@ -51,7 +52,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       []string{"foo", "bar"},
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			ResStatusCode: http.StatusNoContent,
 			ResBody:       "",
 		},
@@ -60,7 +61,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			ResStatusCode: http.StatusNoContent,
 			ResBody:       "",
 		},
@@ -78,7 +79,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer("dummy"),
 			ReqBody:       stringutil.Pointer("dummy"),
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + testutil.NewUser(mysql).AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testutil.NewUser(mysql).AccessToken()}},
 			ResStatusCode: http.StatusForbidden,
 			ResBody:       domain.ErrNotArticleAuthor.Error(),
 		},
@@ -87,7 +88,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer("dummy"),
 			ReqBody:       stringutil.Pointer("dummy"),
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + testutil.NewUser(mysql).AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testutil.NewUser(mysql).AccessToken()}},
 			ResStatusCode: http.StatusNotFound,
 			ResBody:       domain.ErrNoSuchArticle.Error(),
 		},
@@ -96,7 +97,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer("dummy"),
 			ReqBody:       stringutil.Pointer("dummy"),
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + testutil.NewUser(mysql).AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testutil.NewUser(mysql).AccessToken()}},
 			ResStatusCode: http.StatusNotFound,
 			ResBody:       domain.ErrNoSuchArticle.Error(),
 		},
@@ -105,7 +106,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      nil,
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			ResStatusCode: http.StatusBadRequest,
 			ResBody:       errTitleRequired.Error(),
 		},
@@ -114,7 +115,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
 			ReqBody:       nil,
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			ResStatusCode: http.StatusBadRequest,
 			ResBody:       errBodyRequired.Error(),
 		},
@@ -123,7 +124,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       nil,
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			ResStatusCode: http.StatusBadRequest,
 			ResBody:       errTagsRequired.Error(),
 		},
@@ -132,7 +133,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer(""),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			ResStatusCode: http.StatusBadRequest,
 			ResBody:       domain.ErrEmptyArticleTitle.Error(),
 		},
@@ -141,7 +142,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer("!@#$"),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			ResStatusCode: http.StatusBadRequest,
 			ResBody:       domain.ErrInvalidArticleTitle.Error(),
 		},
@@ -150,7 +151,7 @@ func TestPutArticlews(tt *testing.T) {
 			ReqTitle:      stringutil.Pointer(strings.Repeat("t", 141)),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       make([]string, 0),
-			ReqHeaders:    map[string]string{"Authorization": "Bearer " + user.AccessToken()},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			ResStatusCode: http.StatusBadRequest,
 			ResBody:       domain.ErrArticleTitleTooLong.Error(),
 		},
@@ -158,21 +159,23 @@ func TestPutArticlews(tt *testing.T) {
 
 	for testName, testCase := range cases {
 		t.Run(testName, func(_ *testing.T) {
-			res := putArticles(testCase.ArticleID, testCase.ReqHeaders, testing.StructToRequestBody(postArticleAdapter{
-				Title: testCase.ReqTitle,
-				Body:  testCase.ReqBody,
-				Tags:  testCase.ReqTags,
-			}))
+			res := putArticles(testCase.ArticleID, &testing.RequestOptions{
+				Headers: testCase.ReqHeaders,
+				FormData: testing.StructToRequestBody(postArticleAdapter{
+					Title: testCase.ReqTitle,
+					Body:  testCase.ReqBody,
+					Tags:  testCase.ReqTags,
+				},
+				),
+			})
 			t.Is(testCase.ResStatusCode, res.StatusCode())
 			t.Is(testCase.ResBody, res.Body())
 		})
 	}
 }
 
-func putArticles(articleID string, headers map[string]string, requestBody io.ReadCloser) *testing.Response {
-	request := testing.PUT("/v1/articles/"+articleID, requestBody, &testing.RequestOptions{
-		Headers: headers,
-	})
+func putArticles(articleID string, opts *testing.RequestOptions) *testing.Response {
+	request := testing.PUT("/v1/articles/"+articleID, opts)
 
-	return testing.Do(request, router)
+	return testing.DoRequest(request, router)
 }

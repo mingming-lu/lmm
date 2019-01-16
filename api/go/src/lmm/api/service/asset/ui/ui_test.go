@@ -18,6 +18,7 @@ import (
 )
 
 var (
+	mysql   db.DB
 	handler Handler
 )
 
@@ -55,12 +56,24 @@ func NewHandler(db db.DB) Handler {
 	router.GET("/v1/assets/photos", assetUI.ListPhotos)
 
 	return func(req *http.Request) *testing.Response {
-		return testing.Do(req, router)
+		return testing.DoRequest(req, router)
 	}
 }
 
+func (handle Handler) postAssetsPhotos(opts *testing.RequestOptions) *testing.Response {
+	return handle(testing.POST("/v1/assets/photos", opts))
+}
+
+func (handle Handler) putAssetsPhotosAlts(photoFileName string, opts *testing.RequestOptions) *testing.Response {
+	return handle(testing.PUT("/v1/assets/photos/"+photoFileName+"/alts", opts))
+}
+
+func (handle Handler) getAssetsPhotos(opts *testing.RequestOptions) *testing.Response {
+	return handle(testing.GET("/v1/assets/photos", opts))
+}
+
 func TestMain(m *testing.M) {
-	mysql := db.DefaultMySQL()
+	mysql = db.DefaultMySQL()
 
 	handler = NewHandler(mysql)
 
