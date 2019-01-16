@@ -3,4 +3,3 @@ services:
   nginx:
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
-    network_mode: host
