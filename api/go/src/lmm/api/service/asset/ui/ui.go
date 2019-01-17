@@ -1,8 +1,10 @@
 package ui
 
 import (
+	"bytes"
 	"fmt"
 	"mime/multipart"
+	net "net/http"
 
 	"github.com/pkg/errors"
 
@@ -20,11 +22,10 @@ var (
 )
 
 var (
-	errRequestBodyTooLarge  = errors.New("request body too large")
 	errImageMaxSizeExceeded = errors.New("the max size of image to upload cannot be larger than 2MB")
 	errMaxUploadExcceed     = errors.New("only one image can be uploaded every time")
 	errNoImageToUpload      = errors.New("please upload an image")
-	errNotAllowedImageType  = errors.New("only gif, jpeg and png are allowed to upload")
+	errNotAllowedImageType  = errors.New("unsupported image format")
 )
 
 // UI is a image UI
@@ -37,12 +38,14 @@ func New(
 	assetFinder service.AssetFinder,
 	assetRepository repository.AssetRepository,
 	imageService service.ImageService,
+	imageEncoder service.ImageEncoder,
 	userAdapter service.UploaderService,
 ) *UI {
 	appService := application.NewService(
 		assetFinder,
 		assetRepository,
 		imageService,
+		imageEncoder,
 		userAdapter,
 	)
 	return &UI{appService: appService}
@@ -103,15 +106,28 @@ func (ui *UI) uploadImage(c http.Context, keyName string) {
 		return
 	}
 
-	file, err := formImageData(c, keyName)
-	if err != nil {
+	buf, ok := bufPool.Get().(*bytes.Buffer)
+	if !ok {
+		panic("expected a *bytes.Buffer")
+	}
+	defer bufPool.Put(buf)
+
+	err := formImageData(c, keyName, buf)
+	switch errors.Cause(err) {
+	case nil:
+	case multipart.ErrMessageTooLarge:
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	case http.ErrNotMultipart:
+		http.BadRequest(c)
+		return
+	default:
 		http.Log().Warn(c, err.Error())
 		c.String(http.StatusBadRequest, errors.Cause(err).Error())
 		return
 	}
-	defer file.Close()
 
-	err = ui.appService.UploadAsset(c, command.NewUploadAsset(userID, keyName, file))
+	err = ui.appService.UploadAsset(c, command.NewUploadAsset(userID, keyName, buf.Bytes()))
 	switch errors.Cause(err) {
 	case nil:
 		c.String(http.StatusCreated, "uploaded")
@@ -129,26 +145,38 @@ func (ui *UI) uploadImage(c http.Context, keyName string) {
 	}
 }
 
-func formImageData(c http.Context, imageKey string) (multipart.File, error) {
+func formImageData(c http.Context, imageKey string, buf *bytes.Buffer) error {
 	if err := c.Request().ParseMultipartForm(maxFormDataSize); err != nil {
-		return nil, errors.Wrap(errRequestBodyTooLarge, err.Error())
+		return err
 	}
 	assets := c.Request().MultipartForm.File[imageKey]
 	switch len(assets) {
 	case 0:
-		return nil, errNoImageToUpload
+		return errNoImageToUpload
 	case 1:
 	default:
-		return nil, errors.Wrap(errMaxUploadExcceed, fmt.Sprintf("attempt to upload %d assets", len(assets)))
+		return errors.Wrap(errMaxUploadExcceed, fmt.Sprintf("attempt to upload %d assets", len(assets)))
 	}
 
 	asset := assets[0]
 	if asset.Size > maxImageSize {
-		return nil, errImageMaxSizeExceeded
+		return errImageMaxSizeExceeded
 	}
 
-	// check type
-	contentType := asset.Header.Get("Content-Type")
+	f, err := asset.Open() // must open
+	if err != nil {
+		http.Log().Panic(c, err.Error())
+	}
+	defer f.Close()
+
+	buf.Reset()
+	if size, err := buf.ReadFrom(f); err != nil {
+		panic(err)
+	} else if size > maxImageSize {
+		return errImageMaxSizeExceeded
+	}
+
+	contentType := net.DetectContentType(buf.Bytes())
 	switch contentType {
 	case "image/bmp":
 	case "image/gif":
@@ -156,15 +184,10 @@ func formImageData(c http.Context, imageKey string) (multipart.File, error) {
 	case "image/png":
 	case "image/webp":
 	default:
-		return nil, errors.Wrap(errNotAllowedImageType, contentType)
+		return errors.Wrap(errNotAllowedImageType, contentType)
 	}
 
-	f, err := asset.Open() // must open
-	if err != nil {
-		http.Log().Panic(c, err.Error())
-	}
-
-	return f, nil
+	return nil
 }
 
 // PutPhotoAlternateTexts handles PUT /v1/assets/photos/:photo/alts

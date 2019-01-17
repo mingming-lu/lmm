@@ -1,8 +1,6 @@
 package command
 
 import (
-	"mime/multipart"
-
 	"lmm/api/service/asset/domain/model"
 )
 
@@ -10,14 +8,14 @@ import (
 type UploadAsset struct {
 	userID    string
 	assetType string
-	file      multipart.File
+	data      []byte
 }
 
-func NewUploadAsset(userID string, assetType string, file multipart.File) *UploadAsset {
+func NewUploadAsset(userID string, assetType string, data []byte) *UploadAsset {
 	return &UploadAsset{
 		userID:    userID,
 		assetType: assetType,
-		file:      file,
+		data:      data,
 	}
 }
 
@@ -38,9 +36,9 @@ func (cmd *UploadAsset) Type() model.AssetType {
 	}
 }
 
-// File gets mutipart.File
-func (cmd *UploadAsset) File() multipart.File {
-	return cmd.file
+// Data gets cmd's data
+func (cmd *UploadAsset) Data() []byte {
+	return cmd.data
 }
 
 type unknownAssetType struct {

@@ -32,6 +32,7 @@ import (
 	articleUI "lmm/api/service/article/ui"
 
 	// asset
+	assetDomainService "lmm/api/service/asset/domain/service"
 	assetStorage "lmm/api/service/asset/infra/persistence"
 	assetService "lmm/api/service/asset/infra/service"
 	asset "lmm/api/service/asset/ui"
@@ -117,7 +118,8 @@ func main() {
 	assetFinder := assetService.NewAssetFetcher(mysql)
 	assetRepo := assetStorage.NewAssetStorage(mysql, rabbitMQUploader)
 	imageService := assetService.NewImageService(mysql)
-	asset := asset.New(assetFinder, assetRepo, imageService, assetService.NewUserAdapter(mysql))
+	imageEncoder := &assetDomainService.NopImageEncoder{}
+	asset := asset.New(assetFinder, assetRepo, imageService, imageEncoder, assetService.NewUserAdapter(mysql))
 	router.POST("/v1/assets/images", authUI.BearerAuth(asset.UploadImage))
 	router.GET("/v1/assets/images", asset.ListImages)
 	router.POST("/v1/assets/photos", authUI.BearerAuth(asset.UploadPhoto))

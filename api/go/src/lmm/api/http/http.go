@@ -20,6 +20,10 @@ const (
 	StatusServiceUnavailable  = http.StatusServiceUnavailable
 )
 
+var (
+	ErrNotMultipart = http.ErrNotMultipart
+)
+
 const (
 	// self-defined status codes
 
