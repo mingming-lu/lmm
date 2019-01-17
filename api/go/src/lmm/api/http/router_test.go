@@ -13,7 +13,7 @@ func TestRouterNotFound(tt *testing.T) {
 		router := NewRouter()
 
 		req := testing.GET("/", nil)
-		res := testing.Do(req, router)
+		res := testing.DoRequest(req, router)
 
 		t.Is(StatusNotFound, res.StatusCode())
 		t.Is(StatusText(StatusNotFound), res.Body())
@@ -28,7 +28,7 @@ func TestRouterNotFound(tt *testing.T) {
 		})
 
 		req := testing.GET("/", nil)
-		res := testing.Do(req, router)
+		res := testing.DoRequest(req, router)
 
 		t.Is(StatusOK, res.StatusCode())
 		t.Is(plainText, res.Body())
@@ -43,6 +43,6 @@ func TestHandleTimeout(tt *testing.T) {
 		time.Sleep(5 * time.Second)
 	})
 
-	res := testing.Do(testing.GET("/timeout", nil), router)
+	res := testing.DoRequest(testing.GET("/timeout", nil), router)
 	t.Is(http.StatusRequestTimeout, res.StatusCode())
 }

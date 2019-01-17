@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"time"
 
 	"lmm/api/service/asset/domain"
 	"lmm/api/service/asset/domain/model"
@@ -25,16 +24,17 @@ func (s *ImageService) SetAlt(c context.Context, asset *model.AssetDescriptor, a
 		return err
 	}
 
-	stmt, err := tx.Prepare(c, "select id from asset where name = ?")
+	selectAsset, err := tx.Prepare(c, "select id from asset where name = ?")
 	if err != nil {
 		if e := tx.Rollback(); e != nil {
 			return errors.Wrap(err, e.Error())
 		}
 		return err
 	}
+	defer selectAsset.Close()
 
 	var assetID uint
-	if err := stmt.QueryRow(c, asset.Name()).Scan(&assetID); err != nil {
+	if err := selectAsset.QueryRow(c, asset.Name()).Scan(&assetID); err != nil {
 		err = errors.Wrap(domain.ErrNoSuchAsset, err.Error())
 		if e := tx.Rollback(); e != nil {
 			return errors.Wrap(err, e.Error())
@@ -49,6 +49,7 @@ func (s *ImageService) SetAlt(c context.Context, asset *model.AssetDescriptor, a
 		}
 		return err
 	}
+	defer deleteAltByAssetID.Close()
 
 	if _, err := deleteAltByAssetID.Exec(c, assetID); err != nil && err != db.ErrNoRows {
 		if e := tx.Rollback(); e != nil {
@@ -57,17 +58,17 @@ func (s *ImageService) SetAlt(c context.Context, asset *model.AssetDescriptor, a
 		return err
 	}
 
-	insertAlt, err := tx.Prepare(c, "insert into image_alt (asset, name, created_at) values(?, ?, ?)")
+	insertAlt, err := tx.Prepare(c, "insert into image_alt (asset, name) values(?, ?)")
 	if err != nil {
 		if e := tx.Rollback(); e != nil {
 			return errors.Wrap(err, e.Error())
 		}
 		return err
 	}
+	defer insertAlt.Close()
 
-	now := time.Now()
 	for _, alt := range alts {
-		if _, err := insertAlt.Exec(c, assetID, alt.Name(), now); err != nil {
+		if _, err := insertAlt.Exec(c, assetID, alt.Name()); err != nil {
 			if e := tx.Rollback(); e != nil {
 				return errors.Wrap(err, e.Error())
 			}

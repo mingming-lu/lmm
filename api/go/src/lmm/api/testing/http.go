@@ -5,44 +5,69 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 )
 
+// RequestOptions defines options used by request
 type RequestOptions struct {
-	Headers map[string]string
+	Headers         http.Header
+	FormData        io.Reader // should convert json or url-encoded string into io.Reader
+	QueryParameters url.Values
 }
 
-func NewRequest(method, path string, body io.Reader, opts *RequestOptions) *http.Request {
-	req := httptest.NewRequest(method, path, body)
-	if opts != nil {
-		for k, v := range opts.Headers {
-			req.Header.Add(k, v)
+// NewRequest creates a new request for testing
+func NewRequest(method, path string, opts *RequestOptions) *http.Request {
+	if opts == nil {
+		opts = &RequestOptions{}
+	}
+
+	req := httptest.NewRequest(method, path, opts.FormData)
+
+	// copy headers
+	for head, values := range opts.Headers {
+		for _, value := range values {
+			req.Header.Add(head, value)
+		}
+	}
+
+	// copy query parameters
+	q := req.URL.Query()
+	for name, values := range opts.QueryParameters {
+		for _, value := range values {
+			q.Add(name, value)
 		}
 	}
 
 	return req
 }
 
-func Do(req *http.Request, handler http.Handler) *Response {
+// DoRequest does request and return a response for testing
+func DoRequest(req *http.Request, handler http.Handler) *Response {
 	res := NewResponse()
+
 	handler.ServeHTTP(res, req)
 
 	return res
 }
 
+// GET creates a GET request
 func GET(path string, opts *RequestOptions) *http.Request {
-	return NewRequest(http.MethodGet, path, nil, opts)
+	return NewRequest(http.MethodGet, path, opts)
 }
 
-func POST(path string, body io.Reader, opts *RequestOptions) *http.Request {
-	return NewRequest(http.MethodPost, path, body, opts)
+// POST creates a POST request
+func POST(path string, opts *RequestOptions) *http.Request {
+	return NewRequest(http.MethodPost, path, opts)
 }
 
-func PUT(path string, body io.Reader, opts *RequestOptions) *http.Request {
-	return NewRequest(http.MethodPut, path, body, opts)
+// PUT creates a PUT request
+func PUT(path string, opts *RequestOptions) *http.Request {
+	return NewRequest(http.MethodPut, path, opts)
 }
 
+// DELETE creates a DELETE request
 func DELETE(path string, opts *RequestOptions) *http.Request {
-	return NewRequest(http.MethodDelete, path, nil, opts)
+	return NewRequest(http.MethodDelete, path, opts)
 }
 
 type Response struct {

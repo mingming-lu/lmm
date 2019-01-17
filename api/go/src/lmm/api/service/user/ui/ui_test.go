@@ -3,6 +3,7 @@ package ui
 import (
 	"io"
 	"os"
+	"strings"
 
 	"lmm/api/http"
 	"lmm/api/service/user/application"
@@ -11,7 +12,6 @@ import (
 	"lmm/api/storage/db"
 	"lmm/api/testing"
 	"lmm/api/util/stringutil"
-	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
@@ -99,7 +99,9 @@ func TestPostUser(tt *testing.T) {
 }
 
 func postUser(requestBody io.ReadCloser) *testing.Response {
-	request := testing.POST("/v1/users", requestBody, nil)
+	request := testing.POST("/v1/users", &testing.RequestOptions{
+		FormData: requestBody,
+	})
 
-	return testing.Do(request, router)
+	return testing.DoRequest(request, router)
 }

@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"encoding/base64"
-	"mime/multipart"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -26,6 +25,7 @@ type Service struct {
 	uploaderService service.UploaderService
 	assetRepository repository.AssetRepository
 	imageService    service.ImageService
+	imageEncoder    service.ImageEncoder
 	assetFinder     service.AssetFinder
 }
 
@@ -34,12 +34,14 @@ func NewService(
 	assetFinder service.AssetFinder,
 	assetRepository repository.AssetRepository,
 	imageService service.ImageService,
+	imageEncoder service.ImageEncoder,
 	uploaderService service.UploaderService,
 ) *Service {
 	return &Service{
 		assetFinder:     assetFinder,
 		assetRepository: assetRepository,
 		imageService:    imageService,
+		imageEncoder:    imageEncoder,
 		uploaderService: uploaderService,
 	}
 }
@@ -54,14 +56,14 @@ func (app *Service) UploadAsset(c context.Context, cmd *command.UploadAsset) err
 	t := cmd.Type()
 	switch t {
 	case model.Image, model.Photo:
-		return app.uploadImage(c, uploader, t, cmd.File())
+		return app.uploadImage(c, uploader, t, cmd.Data())
 	default:
 		return errors.Wrap(domain.ErrUnsupportedAssetType, t.String())
 	}
 }
 
-func (app *Service) uploadImage(c context.Context, uploader *model.Uploader, assetType model.AssetType, file multipart.File) error {
-	dst, ext, err := service.DefaultImageEncoder.Encode(c, file)
+func (app *Service) uploadImage(c context.Context, uploader *model.Uploader, assetType model.AssetType, data []byte) error {
+	dst, ext, err := app.imageEncoder.Encode(c, data)
 	if err != nil {
 		if err == domain.ErrUnsupportedImageFormat {
 			return errors.Wrap(err, ext)

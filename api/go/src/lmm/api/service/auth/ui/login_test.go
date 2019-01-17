@@ -46,13 +46,13 @@ func TestLogin(tt *testing.T) {
 	for testname, testcase := range cases {
 		t.Run(testname, func(_ *testing.T) {
 			res := login(testcase.GrantType,
-				map[string]string{"Authorization": testcase.AuthFunc()})
+				http.Header{"Authorization": []string{testcase.AuthFunc()}})
 			t.Is(http.StatusOK, res.StatusCode())
 
 			accessToken := testutil.ExtractAccessToken(res.Body())
 
 			t.Run(testname+"/ValidateAccessToken", func(_ *testing.T) {
-				res := dummy(map[string]string{"Authorization": "Bearer " + accessToken})
+				res := dummy(http.Header{"Authorization": []string{"Bearer " + accessToken}})
 				t.Is(http.StatusOK, res.StatusCode())
 				t.Is("OK", res.Body())
 			})
@@ -60,23 +60,20 @@ func TestLogin(tt *testing.T) {
 	}
 }
 
-func login(grantType string, headers map[string]string) *testing.Response {
-	request := testing.POST(
-		"/v1/auth/login",
-		testing.StructToRequestBody(loginRequestBody{
+func login(grantType string, headers http.Header) *testing.Response {
+	request := testing.POST("/v1/auth/login", &testing.RequestOptions{
+		Headers: headers,
+		FormData: testing.StructToRequestBody(loginRequestBody{
 			GrantType: grantType,
 		}),
-		&testing.RequestOptions{
-			Headers: headers,
-		},
-	)
-	return testing.Do(request, router)
+	})
+	return testing.DoRequest(request, router)
 }
 
-func dummy(headers map[string]string) *testing.Response {
+func dummy(headers http.Header) *testing.Response {
 	request := testing.GET("/v1/dummy", &testing.RequestOptions{
 		Headers: headers,
 	})
 
-	return testing.Do(request, router)
+	return testing.DoRequest(request, router)
 }

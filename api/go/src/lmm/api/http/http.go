@@ -20,12 +20,18 @@ const (
 	StatusServiceUnavailable  = http.StatusServiceUnavailable
 )
 
+var (
+	ErrNotMultipart = http.ErrNotMultipart
+)
+
 const (
 	// self-defined status codes
 
 	// StatusClientAbort defines the code when client aborted before response from server
 	StatusClientAbort = 477
 )
+
+type Header = http.Header
 
 type Handler = func(Context)
 
@@ -57,7 +63,7 @@ func Created(c Context) {
 }
 
 func NoContent(c Context) {
-	HandleStatus(c, http.StatusNoContent)
+	c.Response().WriteHeader(StatusNoContent)
 }
 
 func BadRequest(c Context) {
