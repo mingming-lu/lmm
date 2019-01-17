@@ -6,6 +6,7 @@ import (
 	"os"
 
 	api "lmm/api/http"
+	domainService "lmm/api/service/asset/domain/service"
 	"lmm/api/service/asset/infra/persistence"
 	"lmm/api/service/asset/infra/service"
 	authApp "lmm/api/service/auth/application"
@@ -47,6 +48,7 @@ func NewHandler(db db.DB) Handler {
 		service.NewAssetFetcher(db),
 		persistence.NewAssetStorage(db, &NopUploader{}),
 		service.NewImageService(db),
+		&domainService.NopImageEncoder{},
 		service.NewUserAdapter(db),
 	)
 
