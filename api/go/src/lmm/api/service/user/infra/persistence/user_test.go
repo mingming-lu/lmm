@@ -14,24 +14,25 @@ import (
 )
 
 func TestSaveUser(tt *testing.T) {
-	t := testing.NewTester(tt)
 	c := context.Background()
 
 	token := stringutil.ReplaceAll(uuid.New().String(), "-", "")
 
 	pw, err := model.NewPassword("notweakpassword123!?")
-	if !t.NoError(err) {
-		t.FailNow()
+	if err != nil {
+		tt.Fatal(err)
 	}
 
 	username := "U" + stringutil.ReplaceAll(uuid.New().String(), "-", "")[:8]
 
 	user, err := model.NewUser(username, *pw, token)
-	if !t.NoError(err) {
-		t.FailNow()
+	if err != nil {
+		tt.Fatal(err)
 	}
 
-	t.Run("Success", func(_ *testing.T) {
+	tt.Run("Success", func(tt *testing.T) {
+		t := testing.NewTester(tt)
+
 		t.NoError(userRepo.Save(c, user))
 
 		var (
@@ -49,7 +50,9 @@ func TestSaveUser(tt *testing.T) {
 		t.Is(token, tokenFound)
 	})
 
-	t.Run("DuplicateUserName", func(_ *testing.T) {
+	tt.Run("DuplicateUserName", func(tt *testing.T) {
+		t := testing.NewTester(tt)
+
 		t.IsError(
 			domain.ErrUserNameAlreadyUsed,
 			errors.Cause(userRepo.Save(c, user)),

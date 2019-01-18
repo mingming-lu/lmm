@@ -2,13 +2,12 @@ package middleware
 
 import (
 	"context"
+
 	"lmm/api/http"
 	"lmm/api/testing"
 )
 
 func TestRecovery(tt *testing.T) {
-	t := testing.NewTester(tt)
-
 	router := http.NewRouter()
 	router.Use(Recovery)
 	router.GET("/", func(c http.Context) {
@@ -18,7 +17,8 @@ func TestRecovery(tt *testing.T) {
 		c.String(http.StatusOK, "no panic")
 	})
 
-	t.Run("NormalPanic", func(_ *testing.T) {
+	tt.Run("NormalPanic", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		req := testing.GET("/", nil)
 		req.Header.Add("X-Panic", "panic!!!")
 		res := testing.DoRequest(req, router)
@@ -27,7 +27,8 @@ func TestRecovery(tt *testing.T) {
 		t.Is(http.StatusText(http.StatusInternalServerError), res.Body())
 	})
 
-	t.Run("ContextCanceled", func(_ *testing.T) {
+	tt.Run("ContextCanceled", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		req := testing.GET("/", nil)
 		req.Header.Add("X-Panic", context.Canceled.Error())
 		res := testing.DoRequest(req, router)
@@ -36,7 +37,8 @@ func TestRecovery(tt *testing.T) {
 		t.Is(http.StatusText(http.StatusClientAbort), res.Body())
 	})
 
-	t.Run("NoPanic", func(_ *testing.T) {
+	tt.Run("NoPanic", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		req := testing.GET("/", nil)
 		res := testing.DoRequest(req, router)
 

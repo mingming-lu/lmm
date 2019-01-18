@@ -14,15 +14,16 @@ import (
 )
 
 func TestSaveArticle(tt *testing.T) {
-	t := testing.NewTester(tt)
 	c := context.Background()
 
 	user := testutil.NewUser(mysql)
 
 	author, err := authorService.AuthorFromUserName(c, user.Name())
-	t.NoError(err)
+	if err != nil {
+		tt.Fatal(err)
+	}
 
-	t.Run("Success", func(_ *testing.T) {
+	tt.Run("Success", func(tt *testing.T) {
 		cases := map[string]struct {
 			Title string
 			Body  string
@@ -41,7 +42,8 @@ func TestSaveArticle(tt *testing.T) {
 		}
 
 		for testName, testCase := range cases {
-			t.Run(testName, func(_ *testing.T) {
+			tt.Run(testName, func(tt *testing.T) {
+				t := testing.NewTester(tt)
 				article, err := articleService.NewArticleToPost(c, author,
 					testCase.Title,
 					testCase.Body,
@@ -59,7 +61,8 @@ func TestSaveArticle(tt *testing.T) {
 				t.NoError(err)
 				t.Are(testCase.Tags, tags)
 
-				t.Run("EditArticle", func(_ *testing.T) {
+				tt.Run("EditArticle", func(tt *testing.T) {
+					t := testing.NewTester(tt)
 					text, err := model.NewText(uuid.New().String()[:8], uuid.New().String())
 					t.NoError(err)
 					tags := func() []*model.Tag {
@@ -97,26 +100,33 @@ func TestSaveArticle(tt *testing.T) {
 }
 
 func TestFindArticleByID(tt *testing.T) {
-	t := testing.NewTester(tt)
 	c := context.Background()
 
 	user := testutil.NewUser(mysql)
 
 	author, err := authorService.AuthorFromUserName(c, user.Name())
-	t.NoError(err)
+	if err != nil {
+		tt.Fatal(err)
+	}
 
 	article, err := articleService.NewArticleToPost(c, author, "awesome title", "awesome body", nil)
-	t.NoError(err)
+	if err != nil {
+		tt.Fatal(err)
+	}
 
-	t.Run("NotFound", func(_ *testing.T) {
+	tt.Run("NotFound", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		articleGot, err := articleRepository.FindByID(c, article.ID())
 		t.IsError(domain.ErrNoSuchArticle, err)
 		t.Nil(articleGot)
 	})
 
-	t.NoError(articleRepository.Save(c, article))
+	if err := articleRepository.Save(c, article); err != nil {
+		tt.Fatal(err)
+	}
 
-	t.Run("Found", func(_ *testing.T) {
+	tt.Run("Found", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		articleGot, err := articleRepository.FindByID(c, article.ID())
 		t.NoError(err)
 		t.Is(article, articleGot)

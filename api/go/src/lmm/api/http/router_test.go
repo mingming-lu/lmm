@@ -1,15 +1,15 @@
 package http
 
 import (
-	"lmm/api/testing"
 	"net/http"
 	"time"
+
+	"lmm/api/testing"
 )
 
 func TestRouterNotFound(tt *testing.T) {
-	t := testing.NewTester(tt)
-
-	t.Run("DefaultNotFoundHandler", func(_ *testing.T) {
+	tt.Run("DefaultNotFoundHandler", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		router := NewRouter()
 
 		req := testing.GET("/", nil)
@@ -19,7 +19,8 @@ func TestRouterNotFound(tt *testing.T) {
 		t.Is(StatusText(StatusNotFound), res.Body())
 	})
 
-	t.Run("SpecifiedNotFoundHandler", func(_ *testing.T) {
+	tt.Run("SpecifiedNotFoundHandler", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		plainText := "pretended OK"
 
 		router := NewRouter()

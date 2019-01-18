@@ -16,13 +16,12 @@ func TestListArticleV1(tt *testing.T) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	t := testing.NewTester(tt)
 	c := context.Background()
 
 	user := testutil.NewUser(mysql)
 
 	if _, err := mysql.Exec(context.Background(), "truncate table article"); err != nil {
-		t.FailNow()
+		tt.Fatal(err)
 	}
 
 	var articles [9]articleListItem
@@ -40,7 +39,7 @@ func TestListArticleV1(tt *testing.T) {
 			"insert into article (uid, user, title, body, created_at, updated_at) values(?, ?, ?, ?, ?, ?)",
 			articles[i].ID, user.ID(), articles[i].Title, uuid.New().String(), postAtFromUnix, postAtFromUnix,
 		); err != nil {
-			t.Log(err.Error())
+			tt.Fatal(err)
 		}
 	}
 	cases := map[string]articleListAdapter{
@@ -99,7 +98,8 @@ func TestListArticleV1(tt *testing.T) {
 	}
 
 	for testName, testCase := range cases {
-		t.Run(testName, func(_ *testing.T) {
+		tt.Run(testName, func(tt *testing.T) {
+			t := testing.NewTester(tt)
 			req := testing.GET("/v1/articles"+testName, nil)
 			res := testing.DoRequest(req, router)
 

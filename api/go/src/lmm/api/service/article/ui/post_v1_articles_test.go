@@ -17,7 +17,6 @@ func TestPostArticles(tt *testing.T) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	t := testing.NewTester(tt)
 	user := testutil.NewUser(mysql)
 
 	cases := map[string]struct {
@@ -119,7 +118,8 @@ func TestPostArticles(tt *testing.T) {
 	}
 
 	for testName, testCase := range cases {
-		t.Run(testName, func(_ *testing.T) {
+		tt.Run(testName, func(tt *testing.T) {
+			t := testing.NewTester(tt)
 			res := postArticles(&testing.RequestOptions{
 				Headers: testCase.ReqHeaders,
 				FormData: testing.StructToRequestBody(

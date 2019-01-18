@@ -55,10 +55,10 @@ func TestMain(m *testing.M) {
 }
 
 func TestBasicAuth(tt *testing.T) {
-	t := testing.NewTester(tt)
 	c := context.Background()
 
-	t.Run("Success", func(_ *testing.T) {
+	tt.Run("Success", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		auth := basicAuth{
 			UserName: registeredUserName,
 			Password: registeredUserPassword,
@@ -74,13 +74,14 @@ func TestBasicAuth(tt *testing.T) {
 		t.Is(token.Raw(), registeredUserToken)
 	})
 
-	t.Run("InvalidBasicAuthFormat", func(_ *testing.T) {
+	tt.Run("InvalidBasicAuthFormat", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		token, err := appService.BasicAuth(c, "whatever")
 		t.IsError(domain.ErrInvalidBasicAuthFormat, errors.Cause(err))
 		t.Nil(token)
 	})
 
-	t.Run("Fail", func(_ *testing.T) {
+	tt.Run("Fail", func(tt *testing.T) {
 		cases := map[string]struct {
 			UserName string
 			Password string
@@ -91,7 +92,8 @@ func TestBasicAuth(tt *testing.T) {
 		}
 
 		for testName, testCase := range cases {
-			t.Run(testName, func(_ *testing.T) {
+			tt.Run(testName, func(tt *testing.T) {
+				t := testing.NewTester(tt)
 				auth := basicAuth{
 					UserName: testCase.UserName,
 					Password: testCase.Password,
@@ -109,27 +111,29 @@ func TestBasicAuth(tt *testing.T) {
 }
 
 func TestBearerAuth(tt *testing.T) {
-	t := testing.NewTester(tt)
 	c := context.Background()
 
 	token, err := appService.tokenService.Encode(registeredUserToken)
-	if !t.NoError(err) {
-		t.FailNow()
+	if err != nil {
+		tt.Fatal(err)
 	}
 
-	t.Run("Success", func(_ *testing.T) {
+	tt.Run("Success", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		user, err := appService.BearerAuth(c, "Bearer "+token.Hashed())
 		t.NoError(err)
 		t.Is(token.Raw(), user.RawToken())
 	})
 
-	t.Run("InvalidTokenFormat", func(_ *testing.T) {
+	tt.Run("InvalidTokenFormat", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		user, err := appService.BearerAuth(c, token.Hashed())
 		t.IsError(domain.ErrInvalidBearerAuthFormat, errors.Cause(err))
 		t.Nil(user)
 	})
 
-	t.Run("NoSuchUser", func(_ *testing.T) {
+	tt.Run("NoSuchUser", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		token, err := appService.tokenService.Encode(uuid.New().String())
 		if !t.NoError(err) {
 			t.FailNow()
