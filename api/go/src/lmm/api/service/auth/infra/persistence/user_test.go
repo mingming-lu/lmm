@@ -12,13 +12,13 @@ import (
 )
 
 func TestUserStorage(tt *testing.T) {
-	t := testing.NewTester(tt)
 	c := context.Background()
 
 	user := testutil.NewUser(dbEngine)
 
-	t.Run("FindByName", func(_ *testing.T) {
-		t.Run("Found", func(_ *testing.T) {
+	tt.Run("FindByName", func(tt *testing.T) {
+		tt.Run("Found", func(tt *testing.T) {
+			t := testing.NewTester(tt)
 			userFound, err := userRepo.FindByName(c, user.Name())
 			t.NoError(err)
 			t.NotNil(userFound)
@@ -26,15 +26,17 @@ func TestUserStorage(tt *testing.T) {
 			t.Is(user.RawToken(), userFound.RawToken())
 		})
 
-		t.Run("NotFound", func(_ *testing.T) {
+		tt.Run("NotFound", func(tt *testing.T) {
+			t := testing.NewTester(tt)
 			userFound, err := userRepo.FindByName(c, "whatever")
 			t.IsError(domain.ErrNoSuchUser, errors.Cause(err))
 			t.Nil(userFound)
 		})
 	})
 
-	t.Run("FindByToken", func(_ *testing.T) {
-		t.Run("Found", func(_ *testing.T) {
+	tt.Run("FindByToken", func(tt *testing.T) {
+		tt.Run("Found", func(tt *testing.T) {
+			t := testing.NewTester(tt)
 			token, err := service.NewTokenService().Encode(user.RawToken())
 			if !t.NoError(err) {
 				t.FailNow()
@@ -45,7 +47,8 @@ func TestUserStorage(tt *testing.T) {
 			t.Is(user.Name(), userFound.Name())
 			t.Is(token.Raw(), userFound.RawToken())
 		})
-		t.Run("NotFound", func(_ *testing.T) {
+		tt.Run("NotFound", func(tt *testing.T) {
+			t := testing.NewTester(tt)
 			otherToken, err := service.NewTokenService().Encode("whatever")
 			if !t.NoError(err) {
 				t.FailNow()

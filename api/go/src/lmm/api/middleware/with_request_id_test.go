@@ -21,7 +21,8 @@ func TestWithRequestID(tt *testing.T) {
 		c.String(http.StatusOK, sig)
 	})
 
-	t.Run("WithRequestID", func(_ *testing.T) {
+	tt.Run("WithRequestID", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		req := testing.GET("/", nil)
 		req.Header.Set("X-Request-ID", uuid)
 		res := testing.DoRequest(req, router)
@@ -30,7 +31,8 @@ func TestWithRequestID(tt *testing.T) {
 		t.Is(sig, res.Body())
 	})
 
-	t.Run("WithoutRequestID", func(_ *testing.T) {
+	tt.Run("WithoutRequestID", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		req := testing.GET("/", nil)
 		res := testing.DoRequest(req, router)
 

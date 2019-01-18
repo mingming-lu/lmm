@@ -17,7 +17,6 @@ func TestPutArticlews(tt *testing.T) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	t := testing.NewTester(tt)
 	user := testutil.NewUser(mysql)
 
 	res := postArticles(
@@ -31,8 +30,8 @@ func TestPutArticlews(tt *testing.T) {
 		},
 	)
 
-	if !t.Is(http.StatusCreated, res.StatusCode()) {
-		t.FailNow()
+	if res.StatusCode() != http.StatusCreated {
+		tt.Fatal("failed to create test article data")
 	}
 
 	groups := regexp.MustCompile(`^/v1/articles/(\w+)$`).FindStringSubmatch(res.Header().Get("Location"))
@@ -158,7 +157,8 @@ func TestPutArticlews(tt *testing.T) {
 	}
 
 	for testName, testCase := range cases {
-		t.Run(testName, func(_ *testing.T) {
+		tt.Run(testName, func(tt *testing.T) {
+			t := testing.NewTester(tt)
 			res := putArticles(testCase.ArticleID, &testing.RequestOptions{
 				Headers: testCase.ReqHeaders,
 				FormData: testing.StructToRequestBody(postArticleAdapter{

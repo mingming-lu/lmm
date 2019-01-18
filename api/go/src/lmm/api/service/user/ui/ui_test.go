@@ -39,12 +39,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestPostUser(tt *testing.T) {
-	t := testing.NewTester(tt)
-
 	username := "U" + stringutil.ReplaceAll(uuid.New().String(), "-", "")[:8]
 	password := uuid.New().String()
 
-	t.Run("Success", func(_ *testing.T) {
+	tt.Run("Success", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		res := postUser(testing.StructToRequestBody(signUpRequestBody{
 			Name:     username,
 			Password: password,
@@ -54,7 +53,7 @@ func TestPostUser(tt *testing.T) {
 		t.Is("success", res.Body())
 	})
 
-	t.Run("Fail", func(_ *testing.T) {
+	tt.Run("Fail", func(tt *testing.T) {
 		cases := map[string]struct {
 			UserName   string
 			Password   string
@@ -85,7 +84,8 @@ func TestPostUser(tt *testing.T) {
 		}
 
 		for testName, testCase := range cases {
-			t.Run(testName, func(_ *testing.T) {
+			tt.Run(testName, func(tt *testing.T) {
+				t := testing.NewTester(tt)
 				res := postUser(testing.StructToRequestBody(signUpRequestBody{
 					Name:     testCase.UserName,
 					Password: testCase.Password,

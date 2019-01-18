@@ -11,7 +11,6 @@ import (
 )
 
 func TestLogin(tt *testing.T) {
-	t := testing.NewTester(tt)
 	user := testutil.NewUser(dbEngine)
 
 	cases := map[string]struct {
@@ -26,8 +25,8 @@ func TestLogin(tt *testing.T) {
 				}
 				auth := basicAuth{UserName: user.Name(), Password: user.RawPassword()}
 				b, err := json.Marshal(auth)
-				if !t.NoError(err) {
-					t.FailNow()
+				if err != nil {
+					tt.Fatal(err)
 				}
 				b64 := base64.URLEncoding.EncodeToString(b)
 
@@ -44,14 +43,16 @@ func TestLogin(tt *testing.T) {
 	}
 
 	for testname, testcase := range cases {
-		t.Run(testname, func(_ *testing.T) {
+		tt.Run(testname, func(tt *testing.T) {
+			t := testing.NewTester(tt)
 			res := login(testcase.GrantType,
 				http.Header{"Authorization": []string{testcase.AuthFunc()}})
 			t.Is(http.StatusOK, res.StatusCode())
 
 			accessToken := testutil.ExtractAccessToken(res.Body())
 
-			t.Run(testname+"/ValidateAccessToken", func(_ *testing.T) {
+			tt.Run(testname+"/ValidateAccessToken", func(tt *testing.T) {
+				t := testing.NewTester(tt)
 				res := dummy(http.Header{"Authorization": []string{"Bearer " + accessToken}})
 				t.Is(http.StatusOK, res.StatusCode())
 				t.Is("OK", res.Body())

@@ -47,10 +47,10 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegisterNewUser(tt *testing.T) {
-	t := testing.NewTester(tt)
 	c := context.Background()
 
-	t.Run("Success", func(_ *testing.T) {
+	tt.Run("Success", func(tt *testing.T) {
+		t := testing.NewTester(tt)
 		username, password := "username", "~!@#$%^&*()-_=+{[}]|\\:;\"'<,>.?/"
 		nameGot, err := testAppService.RegisterNewUser(c, username, password)
 		t.NoError(err)
@@ -68,7 +68,7 @@ func TestRegisterNewUser(tt *testing.T) {
 		})
 	})
 
-	t.Run("Fail", func(_ *testing.T) {
+	tt.Run("Fail", func(tt *testing.T) {
 		cases := map[string]struct {
 			UserName string
 			Password string
@@ -98,7 +98,8 @@ func TestRegisterNewUser(tt *testing.T) {
 		}
 
 		for testName, testCase := range cases {
-			t.Run(testName, func(_ *testing.T) {
+			tt.Run(testName, func(tt *testing.T) {
+				t := testing.NewTester(tt)
 				nameGot, err := testAppService.RegisterNewUser(c,
 					testCase.UserName,
 					testCase.Password,
