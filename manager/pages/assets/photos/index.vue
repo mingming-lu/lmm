@@ -10,26 +10,19 @@
     <v-flex xs12>
       <v-card v-if="photos.length">
         <v-container grid-list-sm fluid>
-          <v-layout row wrap>
+          <v-layout row wrap align-center>
             <v-flex
               v-for="photo in photos"
               :key="photo.name"
               xs4
             >
-              <v-img
-                class="img"
-                @click="copyURLToClipboard(photo.name)"
-                :src="wrapAssetURL(photo.name)"
-              >
-                <v-layout
-                  slot="placeholder"
+              <nuxt-link :to="`/assets/photos/${photo.name}`">
+                <v-img
+                  class="img"
+                  :src="wrapAssetURL(photo.name)"
                 >
-                  <v-progress-circular
-                    indeterminate
-                    color="grey lighten-5"
-                  />
-                </v-layout>
-              </v-img>
+                </v-img>
+              </nuxt-link>
             </v-flex>
           </v-layout>
         </v-container>
@@ -46,14 +39,6 @@
     >
       <v-icon>add_a_photo</v-icon>
     </v-btn>
-    <v-snackbar
-      v-model="copied"
-      :timeout="2000"
-      bottom
-      color="success"
-    >
-      The URL has been copied to clipboard.
-    </v-snackbar>
   </v-layout>
 </template>
 
@@ -82,24 +67,7 @@ export default {
         }
       })
   },
-  data() {
-    return {
-      copied: false,
-    }
-  },
   methods: {
-    copyURLToClipboard(name) {
-      const textArea = document.createElement("textarea");
-      const url = this.wrapAssetURL(name)
-      textArea.value = url
-      textArea.style = 'display: none'
-      document.body.appendChild(textArea);
-      textArea.select()
-      if (document.execCommand('copy') === true) {
-        this.copied = true
-      }
-      document.body.removeChild(textArea);
-    },
     pickOnePhoto() {
       this.$refs.photoPicker.click()
     },

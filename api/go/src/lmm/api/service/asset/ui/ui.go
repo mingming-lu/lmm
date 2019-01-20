@@ -222,3 +222,26 @@ func (ui *UI) PutPhotoAlternateTexts(c http.Context) {
 		http.Log().Panic(c, err.Error())
 	}
 }
+
+// GetPhotoDescription handles GET /v1/assets/photos/:photo
+func (ui *UI) GetPhotoDescription(c http.Context) {
+	userID := c.Request().Header.Get("X-LMM-ID")
+	if userID == "" {
+		http.Unauthorized(c)
+		return
+	}
+
+	descriptor, err := ui.appService.GetPhotoDescription(c, c.Request().PathParam("photo"))
+	switch errors.Cause(err) {
+	case nil:
+		c.JSON(http.StatusOK, &photoListItem{
+			Name: descriptor.Name(),
+			Alts: descriptor.AlternateTexts(),
+		})
+	case domain.ErrNoSuchPhoto:
+		http.Log().Warn(c, err.Error())
+		c.String(http.StatusNotFound, domain.ErrNoSuchPhoto.Error())
+	default:
+		http.Log().Panic(c, err.Error())
+	}
+}

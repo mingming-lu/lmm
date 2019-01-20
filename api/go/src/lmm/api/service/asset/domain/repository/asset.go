@@ -8,7 +8,8 @@ import (
 
 // AssetRepository provides a interface to deal with persistence of asset
 type AssetRepository interface {
-	FindByName(c context.Context, name string) (*model.AssetDescriptor, error)
+	FindAssetByName(c context.Context, name string) (*model.AssetDescriptor, error)
+	FindPhotoByName(c context.Context, name string) (*model.PhotoDescriptor, error)
 	Save(c context.Context, asset *model.Asset) error
 	Remove(c context.Context, asset *model.Asset) error
 }
