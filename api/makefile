@@ -6,6 +6,9 @@ install:
 start:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
+build:
+	docker-compose -f docker-compose.yml run --rm --no-deps api bash -c "cd cmd/api && go install -v"
+
 prod:
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
