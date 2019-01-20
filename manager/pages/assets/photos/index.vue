@@ -16,20 +16,21 @@
               :key="photo.name"
               xs4
             >
-              <v-img
-                class="img"
-                @click="copyURLToClipboard(photo.name)"
-                :src="wrapAssetURL(photo.name)"
-              >
-                <v-layout
-                  slot="placeholder"
+              <nuxt-link :to="`/assets/photos/${photo.name}`">
+                <v-img
+                  class="img"
+                  :src="wrapAssetURL(photo.name)"
                 >
-                  <v-progress-circular
-                    indeterminate
-                    color="grey lighten-5"
-                  />
-                </v-layout>
-              </v-img>
+                  <v-layout
+                    slot="placeholder"
+                  >
+                    <v-progress-circular
+                      indeterminate
+                      color="grey lighten-5"
+                    />
+                  </v-layout>
+                </v-img>
+              </nuxt-link>
             </v-flex>
           </v-layout>
         </v-container>
@@ -88,18 +89,6 @@ export default {
     }
   },
   methods: {
-    copyURLToClipboard(name) {
-      const textArea = document.createElement("textarea");
-      const url = this.wrapAssetURL(name)
-      textArea.value = url
-      textArea.style = 'display: none'
-      document.body.appendChild(textArea);
-      textArea.select()
-      if (document.execCommand('copy') === true) {
-        this.copied = true
-      }
-      document.body.removeChild(textArea);
-    },
     pickOnePhoto() {
       this.$refs.photoPicker.click()
     },
