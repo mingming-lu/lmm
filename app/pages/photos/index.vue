@@ -3,18 +3,31 @@
     <div v-if="wideMode" class="content">
       <div class="left">
         <div :class="{container: wideMode}">
-          <img v-for="photo in left" :key="photo.name" :src="url(photo.name)">
+          <img
+            v-for="photo in left"
+            :key="photo.name"
+            :src="url(photo.name)"
+            :alt="photo.alts.join(' ')"
+            >
         </div>
       </div>
       <div class="right">
         <div :class="{container: wideMode}">
-          <img v-for="photo in right" :key="photo.name" :src="url(photo.name)">
+          <img
+            v-for="photo in right"
+            :key="photo.name"
+            :src="url(photo.name)"
+            :alt="photo.alts.join(' ')"
+            >
         </div>
       </div>
     </div>
     <div v-else>
       <div v-for="photo in photos" :key="photo.name">
-        <img :src="url(photo.name)">
+        <img
+          :src="url(photo.name)"
+          :alt="photo.alts.join(' ')"
+          >
       </div>
     </div>
 

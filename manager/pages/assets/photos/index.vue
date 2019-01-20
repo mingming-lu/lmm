@@ -10,7 +10,7 @@
     <v-flex xs12>
       <v-card v-if="photos.length">
         <v-container grid-list-sm fluid>
-          <v-layout row wrap>
+          <v-layout row wrap align-center>
             <v-flex
               v-for="photo in photos"
               :key="photo.name"
@@ -21,14 +21,6 @@
                   class="img"
                   :src="wrapAssetURL(photo.name)"
                 >
-                  <v-layout
-                    slot="placeholder"
-                  >
-                    <v-progress-circular
-                      indeterminate
-                      color="grey lighten-5"
-                    />
-                  </v-layout>
                 </v-img>
               </nuxt-link>
             </v-flex>
@@ -47,14 +39,6 @@
     >
       <v-icon>add_a_photo</v-icon>
     </v-btn>
-    <v-snackbar
-      v-model="copied"
-      :timeout="2000"
-      bottom
-      color="success"
-    >
-      The URL has been copied to clipboard.
-    </v-snackbar>
   </v-layout>
 </template>
 
@@ -82,11 +66,6 @@ export default {
           hasNextPage: res.data.hasNextPage
         }
       })
-  },
-  data() {
-    return {
-      copied: false,
-    }
   },
   methods: {
     pickOnePhoto() {

@@ -1,5 +1,45 @@
 <template>
-  <img :src="src" :alt="alt">
+  <div>
+    <v-btn
+      absolute
+      color="accent"
+      dark
+      fab
+      right
+      top
+      @click="commit"
+    >
+      <v-icon>done</v-icon>
+    </v-btn>
+    <v-combobox
+      v-model="alts"
+      label="alternate text"
+      chips
+      multiple
+    >
+      <template slot="selection" slot-scope="data">
+        <v-chip
+          close
+          @input="removeAlt(data.item)"
+        >
+          <strong>{{ data.item }}</strong>&nbsp;
+        </v-chip>
+      </template>
+    </v-combobox>
+    <v-img
+      :src="photoSrcOf(name)"
+      :alt="alts.join(' ')"
+      >
+    </v-img>
+    <v-snackbar
+      v-model="committed"
+      bottom
+      color="success"
+      :timeout="2000"
+    >
+      Committed
+    </v-snackbar>
+  </div>
 </template>
 
 <script>
@@ -21,11 +61,38 @@ export default {
     return photoFetcher($axios).fetch(params.name)
       .then(res => {
         return {
-          src:  `${process.env.ASSET_URL}/photos/${res.data.name}`,
-          alt: res.data.alts.join(' '),
+          name: res.data.name,
+          alts: res.data.alts,
         }
       })
   },
+  data() {
+    return {
+      committed: false,
+    }
+  },
+  methods: {
+    photoSrcOf(name) {
+      return `${process.env.ASSET_URL}/photos/${name}`
+    },
+    removeAlt(name) {
+      this.alts.splice(this.alts.indexOf(name), 1)
+      this.alts = [...this.alts]
+    },
+    commit() {
+      this.$axios.put(`/v1/assets/photos/${this.name}/alts`, {
+        names: this.alts.map(alt => { return alt }),
+      }, {
+        headers: {
+          Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`,
+        },
+      }).then(res => {
+        this.committed = true
+      }).catch(err => {
+        alert(err)
+      })
+    },
+  }
 }
 </script>
 
