@@ -109,7 +109,7 @@ import {
   formattedDateFromTimeStamp,
 } from '~/assets/js/utils'
 
-const apiPath = '/v2/articles'
+const apiPath = '/v1/articles'
 
 const articleFetcher = axiosClient => {
   return {
@@ -144,6 +144,7 @@ export default {
   },
   asyncData({$axios, query, route}) {
     const q = buildURLEncodedString({
+      flavor:  true,
       page:    Boolean(query.page)    ? query.page    : 1,
       perPage: Boolean(query.perPage) ? query.perPage : 5,
       tag:     Boolean(query.tag)     ? query.tag     : undefined,

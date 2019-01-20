@@ -148,23 +148,13 @@ func (ui *UI) ListArticles(c http.Context) {
 	)
 	switch errors.Cause(err) {
 	case nil:
-		c.JSON(http.StatusOK, ui.articleListViewToJSON(v))
+		if c.Request().QueryParamOrDefault("flavor", "") == "true" {
+			c.JSON(http.StatusOK, ui.articleListViewToJSONV2(c, v))
+		} else {
+			c.JSON(http.StatusOK, ui.articleListViewToJSON(v))
+		}
 	case application.ErrInvalidCount, application.ErrInvalidPage:
 		c.JSON(http.StatusBadRequest, err.Error())
-	default:
-		http.Log().Panic(c, err.Error())
-	}
-}
-
-// ListArticlesByPagination handles GET /v2/articles
-func (ui *UI) ListArticlesByPagination(c http.Context) {
-	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(
-		c,
-		ui.buildListArticleQueryFromContext(c),
-	)
-	switch err {
-	case nil:
-		c.JSON(http.StatusOK, ui.articleListViewToJSONV2(c, v))
 	default:
 		http.Log().Panic(c, err.Error())
 	}
