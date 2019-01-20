@@ -115,7 +115,7 @@ func (app *Service) parseLimitAndCursorOrDefault(pageStr, perPageStr string) (ui
 }
 
 func (app *Service) SetPhotoAlternateTexts(c context.Context, cmd *command.SetImageAlternateTexts) error {
-	asset, err := app.assetRepository.FindByName(c, cmd.ImageName())
+	asset, err := app.assetRepository.FindAssetByName(c, cmd.ImageName())
 	if err != nil {
 		return errors.Wrap(domain.ErrNoSuchAsset, err.Error())
 	}
@@ -130,4 +130,13 @@ func (app *Service) SetPhotoAlternateTexts(c context.Context, cmd *command.SetIm
 	}
 
 	return app.imageService.SetAlt(c, asset, alts)
+}
+
+// GetPhotoDescription get photo's description
+func (app *Service) GetPhotoDescription(c context.Context, name string) (*model.PhotoDescriptor, error) {
+	photo, err := app.assetRepository.FindPhotoByName(c, name)
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrNoSuchPhoto, err.Error())
+	}
+	return photo, nil
 }

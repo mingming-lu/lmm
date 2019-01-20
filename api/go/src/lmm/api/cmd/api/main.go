@@ -125,6 +125,7 @@ func main() {
 	router.POST("/v1/assets/photos", authUI.BearerAuth(asset.UploadPhoto))
 	router.PUT("/v1/assets/photos/:photo/alts", authUI.BearerAuth(asset.PutPhotoAlternateTexts))
 	router.GET("/v1/assets/photos", asset.ListPhotos)
+	router.GET("/v1/assets/photos/:photo", authUI.BearerAuth(nil))
 
 	server := http.NewServer(":8002", router)
 	server.Run()

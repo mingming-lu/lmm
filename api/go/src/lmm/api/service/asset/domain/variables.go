@@ -9,6 +9,9 @@ var (
 	// ErrNoSuchUser error
 	ErrNoSuchUser = errors.New("no such user")
 
+	// ErrNoSuchPhoto error
+	ErrNoSuchPhoto = errors.New("no such photo")
+
 	// ErrUnsupportedAssetType error
 	ErrUnsupportedAssetType = errors.New("unsupported asset type")
 
