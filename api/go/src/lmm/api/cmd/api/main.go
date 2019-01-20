@@ -110,7 +110,6 @@ func main() {
 	router.POST("/v1/articles", authUI.BearerAuth(articleUI.PostNewArticle))
 	router.PUT("/v1/articles/:articleID", authUI.BearerAuth(articleUI.EditArticle))
 	router.GET("/v1/articles", articleUI.ListArticles)
-	router.GET("/v2/articles", articleUI.ListArticlesByPagination)
 	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
 
