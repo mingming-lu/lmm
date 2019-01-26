@@ -28,7 +28,7 @@ func NewArticleStorage(db db.DB, authorService service.AuthorService) *ArticleSt
 
 // NextID generate a random string
 func (s *ArticleStorage) NextID(c context.Context) string {
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(uuid.New().String())))[:8]
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(uuid.New().String())))
 }
 
 // Save persist a article domain model
