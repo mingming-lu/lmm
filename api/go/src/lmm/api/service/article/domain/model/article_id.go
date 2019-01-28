@@ -29,6 +29,11 @@ func NewArticleID(s string) (*ArticleID, error) {
 	return &id, nil
 }
 
+// Raw gets raw article id in string
+func (id *ArticleID) Raw() string {
+	return id.id
+}
+
 // String gets alias or raw article id
 func (id *ArticleID) String() string {
 	if id.alias != "" {
@@ -51,6 +56,10 @@ func (id *ArticleID) SetAlias(alias string) error {
 	alias = strings.ToLower(alias)
 	if !patternAliasArticleID.MatchString(alias) {
 		return domain.ErrInvalidAliasArticleID
+	}
+	if alias == id.id {
+		alias = ""
+		return nil
 	}
 	id.alias = alias
 	return nil

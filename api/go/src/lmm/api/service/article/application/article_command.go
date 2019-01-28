@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"lmm/api/service/article/application/command"
 
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
@@ -45,27 +46,33 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, userName, ti
 }
 
 // EditArticle is used for edit the article content
-func (app *ArticleCommandService) EditArticle(c context.Context, userName, rawArticleID, title, body string, tagNames []string) error {
-	author, err := app.authorService.AuthorFromUserName(c, userName)
+func (app *ArticleCommandService) EditArticle(c context.Context, cmd *command.EditArticle) error {
+	author, err := app.authorService.AuthorFromUserName(c, cmd.UserName)
 	if err != nil {
 		return err
 	}
 
-	article, err := app.articleWithID(c, rawArticleID)
+	article, err := app.articleWithID(c, cmd.TargetArticleID)
 	if err != nil {
 		return err
+	}
+
+	if cmd.AliasArticleID != "" {
+		if err := article.ID().SetAlias(cmd.AliasArticleID); err != nil {
+			return err
+		}
 	}
 
 	if article.Author().Name() != author.Name() {
 		return domain.ErrNotArticleAuthor
 	}
 
-	newText, err := model.NewText(title, body)
+	newText, err := model.NewText(cmd.Title, cmd.Body)
 	if err != nil {
 		return err
 	}
 
-	newTags, err := app.tagsFromNames(tagNames, article.ID())
+	newTags, err := app.tagsFromNames(cmd.TagNames, article.ID())
 	if err != nil {
 		return err
 	}
