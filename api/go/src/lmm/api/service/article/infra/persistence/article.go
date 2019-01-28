@@ -49,9 +49,9 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 	}
 
 	saveArticle, err := tx.Prepare(c, `
-		insert into article (uid, user, title, body, created_at, updated_at)
-		values (?, ?, ?, ?, ?, ?)
-		on duplicate key update id = LAST_INSERT_ID(id), title = ?, body = ?, updated_at = ?
+		insert into article (uid, alias_uid, user, title, body, created_at, updated_at)
+		values (?, ?, ?, ?, ?, ?, ?)
+		on duplicate key update id = LAST_INSERT_ID(id), alias_uid = ?, title = ?, body = ?, updated_at = ?
 	`)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
@@ -92,12 +92,14 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 	}
 
 	res, err := saveArticle.Exec(c,
+		article.ID().Raw(),
 		article.ID().String(),
 		userID,
 		article.Content().Text().Title(),
 		article.Content().Text().Body(),
 		now,
 		now,
+		article.ID().String(),
 		article.Content().Text().Title(),
 		article.Content().Text().Body(),
 		now,
@@ -149,7 +151,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 	}
 
 	stmt, err := tx.Prepare(c, `
-		select id, uid, user, title, body from article where uid = ? for update
+		select id, uid, alias_uid, user, title, body from article where uid = ? for update
 	`)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
@@ -158,7 +160,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 		return nil, err
 	}
 
-	article, err := s.userModelFromRow(c, stmt.QueryRow(c, id.String()))
+	article, err := s.articleModelFromRow(c, stmt.QueryRow(c, id.String()))
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return nil, err
@@ -173,15 +175,16 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 	return article, nil
 }
 
-func (s *ArticleStorage) userModelFromRow(c context.Context, row *sql.Row) (*model.Article, error) {
+func (s *ArticleStorage) articleModelFromRow(c context.Context, row *sql.Row) (*model.Article, error) {
 	var (
-		id           int
-		rawArticleID string
-		userID       int
-		title        string
-		body         string
+		id             int
+		rawArticleID   string
+		aliasArticleID string
+		userID         int
+		title          string
+		body           string
 	)
-	if err := row.Scan(&id, &rawArticleID, &userID, &title, &body); err != nil {
+	if err := row.Scan(&id, &rawArticleID, &aliasArticleID, &userID, &title, &body); err != nil {
 		if err == db.ErrNoRows {
 			return nil, domain.ErrNoSuchArticle
 		}
@@ -239,5 +242,9 @@ func (s *ArticleStorage) userModelFromRow(c context.Context, row *sql.Row) (*mod
 		return nil, err
 	}
 
-	return model.NewArticle(articleID, author, content), nil
+	article := model.NewArticle(articleID, author, content)
+	if err := article.ID().SetAlias(aliasArticleID); err != nil {
+		return nil, err
+	}
+	return article, nil
 }
