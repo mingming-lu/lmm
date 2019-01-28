@@ -36,8 +36,8 @@ func TestListArticleV1(tt *testing.T) {
 		postAtFromUnix := time.Unix(postAtUnix, 0)
 
 		if _, err := mysql.Exec(c,
-			"insert into article (uid, user, title, body, created_at, updated_at) values(?, ?, ?, ?, ?, ?)",
-			articles[i].ID, user.ID(), articles[i].Title, uuid.New().String(), postAtFromUnix, postAtFromUnix,
+			"insert into article (uid, alias_uid, user, title, body, created_at, updated_at) values(?, ?, ?, ?, ?, ?, ?)",
+			articles[i].ID, "", user.ID(), articles[i].Title, uuid.New().String(), postAtFromUnix, postAtFromUnix,
 		); err != nil {
 			tt.Fatal(err)
 		}
