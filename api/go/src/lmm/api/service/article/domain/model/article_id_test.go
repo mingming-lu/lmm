@@ -5,6 +5,8 @@ import (
 
 	"lmm/api/service/article/domain"
 	"lmm/api/testing"
+
+	"github.com/google/uuid"
 )
 
 func TestNewArticleID(tt *testing.T) {
@@ -87,4 +89,21 @@ func TestNewArticleID(tt *testing.T) {
 			})
 		}
 	})
+}
+
+func TestSetArticleIDAlias(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	rawID := uuid.New().String()
+	id, err := NewArticleID(rawID)
+
+	t.NoError(err)
+	t.NotNil(id)
+	t.Is(rawID, id.String())
+
+	t.NoError(id.SetAlias("awesome-article"))
+	t.Is("awesome-article", id.String())
+
+	t.Error(domain.ErrInvalidAliasArticleID, id.SetAlias("!!???"))
+	t.Is("awesome-article", id.String())
 }
