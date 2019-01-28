@@ -8,7 +8,7 @@ import (
 	"lmm/api/service/article/domain"
 )
 
-var patternArticleID = regexp.MustCompile("^[0-9a-z-]{8,80}$")
+var patternArticleID = regexp.MustCompile("^[0-9a-z-]{32,64}$")
 
 // ArticleID is the model to identify article
 type ArticleID struct {

@@ -27,7 +27,7 @@ func TestListArticleV1(tt *testing.T) {
 	var articles [9]articleListItem
 
 	for i := range articles {
-		articles[i].ID = uuid.New().String()[:8]
+		articles[i].ID = uuid.New().String()
 		articles[i].Title = uuid.New().String()
 
 		postAtUnix := time.Now().Add(10 - time.Duration(i)*time.Minute).Unix()

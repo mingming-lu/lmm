@@ -9,8 +9,8 @@ import (
 
 func TestNewArticleID(tt *testing.T) {
 
-	minLength := 8
-	maxLength := 80
+	minLength := 32
+	maxLength := 64
 
 	tt.Run("Valid", func(tt *testing.T) {
 		type Case struct {
@@ -19,12 +19,34 @@ func TestNewArticleID(tt *testing.T) {
 		}
 
 		cases := map[string]Case{
-			"AllNumber": Case{Input: "12345678", Output: "12345678"},
-			"AllLower":  Case{Input: "aaaaaaaa", Output: "aaaaaaaa"},
-			"AllUpper":  Case{Input: "AAAAAAAA", Output: "aaaaaaaa"},
-			"HasUpper":  Case{Input: "AaAaAAaa", Output: "aaaaaaaa"},
-			"HasNumber": Case{Input: "aBcD1234", Output: "abcd1234"},
-			"HasHypen":  Case{Input: "aaaa-aaaa", Output: "aaaa-aaaa"},
+			"AllNumber": Case{
+				Input:  strings.Repeat("1234", 8),
+				Output: strings.Repeat("1234", 8),
+			},
+			"AllLower": Case{
+				Input:  strings.Repeat("abcd", 8),
+				Output: strings.Repeat("abcd", 8),
+			},
+			"AllUpper": Case{
+				Input:  strings.Repeat("LGTM", 8),
+				Output: strings.Repeat("lgtm", 8),
+			},
+			"HasUpper": Case{
+				Input:  strings.Repeat("AbCdE", 7),
+				Output: strings.Repeat("abcde", 7),
+			},
+			"HasNumber": Case{
+				Input:  strings.Repeat("plan9", 7),
+				Output: strings.Repeat("plan9", 7),
+			},
+			"HasHypen": Case{
+				Input:  strings.Repeat("b-tree", 6),
+				Output: strings.Repeat("b-tree", 6),
+			},
+			"MinLength": Case{
+				Input:  strings.Repeat("f", minLength),
+				Output: strings.Repeat("f", minLength),
+			},
 			"MaxLength": Case{
 				Input:  strings.Repeat("z", maxLength),
 				Output: strings.Repeat("z", maxLength),
@@ -52,7 +74,7 @@ func TestNewArticleID(tt *testing.T) {
 		cases := map[string]Case{
 			"TooShort":      Case{Input: strings.Repeat("v", minLength-1), Error: domain.ErrInvalidArticleID},
 			"TooLong":       Case{Input: strings.Repeat("h", maxLength+1), Error: domain.ErrInvalidArticleID},
-			"UnallowedChar": Case{Input: "not-avaiable-char!", Error: domain.ErrInvalidArticleID},
+			"UnallowedChar": Case{Input: strings.Repeat("!", minLength), Error: domain.ErrInvalidArticleID},
 		}
 
 		for testname, testcase := range cases {
