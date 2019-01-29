@@ -42,3 +42,25 @@ func TestCommandImpl(tt *testing.T) {
 
 	t.Is(uint64(11), cmd.count)
 }
+
+func TestRegisterCommand(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	cmd := &counter{}
+
+	Register("count1", cmd)
+
+	c, ok := commands["count1"]
+	t.True(ok)
+	t.Is(cmd, c)
+}
+
+func TestExecuteCommand(tt *testing.T) {
+	t := testing.NewTester(tt)
+
+	cmd := &counter{}
+	Register("count2", cmd)
+	Execute(context.Background(), "count2")
+
+	t.Is(uint64(1), cmd.count)
+}
