@@ -16,6 +16,7 @@ jobs:
             cd api
             chmod -R 777 mysql
             mkdir -p .env
+            touch .env/prod.env
             echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
             make install
             make build
