@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"lmm/api/domain/model"
+
+	"github.com/pkg/errors"
 )
 
 // ArticleListViewItem is the item struct of AriticleListView
@@ -18,7 +20,7 @@ type ArticleListViewItem struct {
 func NewArticleListViewItem(rawArticleID string, title string, postAt time.Time) (*ArticleListViewItem, error) {
 	articleID, err := NewArticleID(rawArticleID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, rawArticleID)
 	}
 
 	return &ArticleListViewItem{id: articleID, title: title, postAt: postAt}, nil
