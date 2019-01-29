@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"encoding/json"
 	"regexp"
 	"strings"
 
@@ -177,7 +178,8 @@ func TestPutArticlews(tt *testing.T) {
 
 	tt.Run("EditAliasID", func(tt *testing.T) {
 		t := testing.NewTester(tt)
-		res := putArticles(articleID, &testing.RequestOptions{
+
+		putArticleRes := putArticles(articleID, &testing.RequestOptions{
 			Headers: http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
 			FormData: testing.StructToRequestBody(postArticleAdapter{
 				AliasID: "awesome-article",
@@ -187,8 +189,17 @@ func TestPutArticlews(tt *testing.T) {
 			},
 			),
 		})
-		t.Is(http.StatusNoContent, res.StatusCode())
-		t.Is("", res.Body())
+		t.Is(http.StatusNoContent, putArticleRes.StatusCode())
+		t.Is("", putArticleRes.Body())
+
+		getArticleRes := getArticleByID(articleID)
+		t.Is(http.StatusOK, getArticleRes.StatusCode())
+
+		articleJSON := articleViewResponse{}
+		t.NoError(json.Unmarshal([]byte(getArticleRes.Body()), &articleJSON))
+		t.Is("awesome-article", articleJSON.ID)
+		t.Is("awesome-title", articleJSON.Title)
+		t.Is("awesome-body", articleJSON.Body)
 	})
 }
 

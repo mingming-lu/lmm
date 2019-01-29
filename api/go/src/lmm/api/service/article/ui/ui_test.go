@@ -31,6 +31,7 @@ func TestMain(m *testing.M) {
 	router.POST("/v1/articles", auth.BearerAuth(ui.PostNewArticle))
 	router.PUT("/v1/articles/:articleID", auth.BearerAuth(ui.EditArticle))
 	router.GET("/v1/articles", ui.ListArticles)
+	router.GET("/v1/articles/:articleID", ui.GetArticle)
 
 	code := m.Run()
 
@@ -52,4 +53,9 @@ func auth(db db.DB) *authUI.UI {
 	repo := authStorage.NewUserStorage(db)
 	app := authApp.NewService(repo)
 	return authUI.NewUI(app)
+}
+
+func getArticleByID(articleID string) *testing.Response {
+	request := testing.GET("/v1/articles/"+articleID, nil)
+	return testing.DoRequest(request, router)
 }
