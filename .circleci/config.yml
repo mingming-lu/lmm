@@ -6,20 +6,22 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build API
+          name: Setup
+          command: |
+            pip install --upgrade pip
+            pip install docker-compose
+      - run:
+          name: Setup API
           command: |
             cd api
+            chmod -R 777 mysql
+            echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
+            mkdir -p .env
+            make install
             make build
       - run:
           name: Test API
           command: |
-            cd api
-            mkdir -p .env
-            chmod -R 777 mysql
-            echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
-            pip install --upgrade pip
-            pip install docker-compose
-            make install
             make test
       - run:
           name: Test API CLI
