@@ -28,4 +28,4 @@ jobs:
           name: Test API CLI
           command: |
             cd api
-            make cli env=dev commands="hello-world"
+            make cli env=prod commands="hello-world"
