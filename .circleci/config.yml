@@ -6,6 +6,11 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Build API
+          command: |
+            cd api
+            make build
+      - run:
           name: Test API
           command: |
             cd api
@@ -16,3 +21,8 @@ jobs:
             pip install docker-compose
             make install
             make test
+      - run:
+          name: Test API CLI
+          command: |
+            cd api
+            make cli env=dev commands="hello-world"
