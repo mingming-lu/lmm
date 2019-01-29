@@ -33,7 +33,7 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter 
 	countArticles := f.db.Prepare(c, countArticlesSQL)
 	defer countArticles.Close()
 
-	fetchArticlesSQL := `select a.uid, a.title, a.created_at from article a`
+	fetchArticlesSQL := `select a.uid, a.alias_uid, a.title, a.created_at from article a`
 	if filter.Tag != nil {
 		fetchArticlesSQL += ` inner join article_tag t on a.id = t.article where t.name = ?`
 	}
@@ -63,16 +63,23 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter 
 	defer rows.Close()
 
 	var (
-		rawArticleID  string
-		articleTitle  string
-		articlePostAt time.Time
+		rawArticleID   string
+		aliasArticleID string
+		articleTitle   string
+		articlePostAt  time.Time
 	)
 	articles := make([]*model.ArticleListViewItem, 0)
 	for rows.Next() {
-		if err := rows.Scan(&rawArticleID, &articleTitle, &articlePostAt); err != nil {
+		if err := rows.Scan(&rawArticleID, &aliasArticleID, &articleTitle, &articlePostAt); err != nil {
 			return nil, err
 		}
-		article, err := model.NewArticleListViewItem(rawArticleID, articleTitle, articlePostAt)
+
+		articleID := rawArticleID
+		if aliasArticleID != "" && aliasArticleID != articleID {
+			articleID = aliasArticleID
+		}
+
+		article, err := model.NewArticleListViewItem(articleID, articleTitle, articlePostAt)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +98,7 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter 
 // FindByID implementation
 func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*model.ArticleView, error) {
 	selectArticle := f.db.Prepare(c, `
-		select id, uid, title, body, created_at, updated_at from article where uid = ?
+		select id, uid, alias_uid, title, body, created_at, updated_at from article where uid = ?
 	`)
 	defer selectArticle.Close()
 
@@ -103,13 +110,22 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 	var (
 		linkedID        uint
 		rawArticleID    string
+		aliasArticleID  string
 		articleTitle    string
 		articleBody     string
 		articlePostAt   time.Time
 		articleEditedAt time.Time
 	)
 
-	err := selectArticle.QueryRow(c, id.String()).Scan(&linkedID, &rawArticleID, &articleTitle, &articleBody, &articlePostAt, &articleEditedAt)
+	err := selectArticle.QueryRow(c, id.String()).Scan(
+		&linkedID,
+		&rawArticleID,
+		&aliasArticleID,
+		&articleTitle,
+		&articleBody,
+		&articlePostAt,
+		&articleEditedAt,
+	)
 	if err != nil {
 		if err == db.ErrNoRows {
 			return nil, domain.ErrNoSuchArticle
@@ -121,6 +137,10 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 	if err != nil {
 		return nil, err
 	}
+	if err := articleID.SetAlias(aliasArticleID); err != nil {
+		return nil, err
+	}
+
 	articleText, err := model.NewText(articleTitle, articleBody)
 	if err != nil {
 		return nil, err

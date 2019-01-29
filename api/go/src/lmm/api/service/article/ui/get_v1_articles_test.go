@@ -27,7 +27,7 @@ func TestListArticleV1(tt *testing.T) {
 	var articles [9]articleListItem
 
 	for i := range articles {
-		articles[i].ID = uuid.New().String()[:8]
+		articles[i].ID = uuid.New().String()
 		articles[i].Title = uuid.New().String()
 
 		postAtUnix := time.Now().Add(10 - time.Duration(i)*time.Minute).Unix()
@@ -36,8 +36,8 @@ func TestListArticleV1(tt *testing.T) {
 		postAtFromUnix := time.Unix(postAtUnix, 0)
 
 		if _, err := mysql.Exec(c,
-			"insert into article (uid, user, title, body, created_at, updated_at) values(?, ?, ?, ?, ?, ?)",
-			articles[i].ID, user.ID(), articles[i].Title, uuid.New().String(), postAtFromUnix, postAtFromUnix,
+			"insert into article (uid, alias_uid, user, title, body, created_at, updated_at) values(?, ?, ?, ?, ?, ?, ?)",
+			articles[i].ID, "", user.ID(), articles[i].Title, uuid.New().String(), postAtFromUnix, postAtFromUnix,
 		); err != nil {
 			tt.Fatal(err)
 		}

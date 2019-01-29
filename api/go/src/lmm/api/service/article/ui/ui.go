@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"lmm/api/service/article/application/command"
 	"math"
 
 	"github.com/pkg/errors"
@@ -101,11 +102,14 @@ func (ui *UI) EditArticle(c http.Context) {
 	}
 
 	err := ui.appService.ArticleCommandService().EditArticle(c,
-		userName,
-		c.Request().PathParam("articleID"),
-		*article.Title,
-		*article.Body,
-		article.Tags,
+		&command.EditArticle{
+			UserName:        userName,
+			TargetArticleID: c.Request().PathParam("articleID"),
+			AliasArticleID:  article.AliasID,
+			Title:           *article.Title,
+			Body:            *article.Body,
+			TagNames:        article.Tags,
+		},
 	)
 	switch errors.Cause(err) {
 	case nil:

@@ -13,6 +13,19 @@ import (
 	"lmm/api/util/testutil"
 )
 
+func TestNextArticleID(tt *testing.T) {
+	t := testing.NewTester(tt)
+	c := context.Background()
+
+	idStr := articleRepository.NextID(c)
+	id, err := model.NewArticleID(idStr)
+	if !t.NoError(err) {
+		t.Logf(err.Error(), idStr)
+	}
+	t.NotNil(id)
+	t.Is(idStr, id.String())
+}
+
 func TestSaveArticle(tt *testing.T) {
 	c := context.Background()
 

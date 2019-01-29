@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"encoding/json"
 	"regexp"
 	"strings"
 
@@ -39,6 +40,7 @@ func TestPutArticlews(tt *testing.T) {
 
 	cases := map[string]struct {
 		ArticleID     string
+		ReqAliasID    string
 		ReqTitle      *string
 		ReqBody       *string
 		ReqTags       []string
@@ -162,9 +164,10 @@ func TestPutArticlews(tt *testing.T) {
 			res := putArticles(testCase.ArticleID, &testing.RequestOptions{
 				Headers: testCase.ReqHeaders,
 				FormData: testing.StructToRequestBody(postArticleAdapter{
-					Title: testCase.ReqTitle,
-					Body:  testCase.ReqBody,
-					Tags:  testCase.ReqTags,
+					AliasID: testCase.ReqAliasID,
+					Title:   testCase.ReqTitle,
+					Body:    testCase.ReqBody,
+					Tags:    testCase.ReqTags,
 				},
 				),
 			})
@@ -172,6 +175,32 @@ func TestPutArticlews(tt *testing.T) {
 			t.Is(testCase.ResBody, res.Body())
 		})
 	}
+
+	tt.Run("EditAliasID", func(tt *testing.T) {
+		t := testing.NewTester(tt)
+
+		putArticleRes := putArticles(articleID, &testing.RequestOptions{
+			Headers: http.Header{"Authorization": []string{"Bearer " + user.AccessToken()}},
+			FormData: testing.StructToRequestBody(postArticleAdapter{
+				AliasID: "awesome-article",
+				Title:   stringutil.Pointer("awesome-title"),
+				Body:    stringutil.Pointer("awesome-body"),
+				Tags:    []string{"awesome-tag"},
+			},
+			),
+		})
+		t.Is(http.StatusNoContent, putArticleRes.StatusCode())
+		t.Is("", putArticleRes.Body())
+
+		getArticleRes := getArticleByID(articleID)
+		t.Is(http.StatusOK, getArticleRes.StatusCode())
+
+		articleJSON := articleViewResponse{}
+		t.NoError(json.Unmarshal([]byte(getArticleRes.Body()), &articleJSON))
+		t.Is("awesome-article", articleJSON.ID)
+		t.Is("awesome-title", articleJSON.Title)
+		t.Is("awesome-body", articleJSON.Body)
+	})
 }
 
 func putArticles(articleID string, opts *testing.RequestOptions) *testing.Response {
