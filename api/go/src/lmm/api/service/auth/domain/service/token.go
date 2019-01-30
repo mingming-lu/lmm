@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	tokenSecretKey  = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
-	defaultLiftTime = int64(86400)
+	tokenSecretKey = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
+	defaultExpire  = int64(86400)
 )
 
 func init() {
@@ -44,7 +44,7 @@ func NewTokenService() TokenService {
 type tokenService struct{}
 
 func (s *tokenService) Encode(rawToken string) (*model.Token, error) {
-	expire := time.Now().Unix() + defaultLiftTime
+	expire := time.Now().Unix() + defaultExpire
 
 	token := fmt.Sprintf("%d:%s", expire, rawToken)
 	b := []byte(token)
