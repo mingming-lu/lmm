@@ -117,7 +117,7 @@ func (ui *UI) EditArticle(c http.Context) {
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrInvalidArticleID:
-		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
+		c.String(http.StatusBadRequest, domain.ErrInvalidArticleID.Error())
 	case domain.ErrInvalidArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrNoSuchArticle:

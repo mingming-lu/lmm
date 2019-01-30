@@ -3,6 +3,7 @@
     <v-layout :row="row" :column="!row">
       <v-flex xs6>
         <v-text-field label="title" required v-model="articleTitle"/>
+        <v-text-field label="alias id" required v-model="newArticleID"/>
         <v-combobox
           v-model="articleTags"
           :items="tags"
@@ -38,14 +39,6 @@
     >
       <v-icon>autorenew</v-icon>
     </v-btn>
-    <v-snackbar
-      v-model="updatedSnackbar"
-      bottom
-      color="success"
-      :timeout="3000"
-    >
-      Updated
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -61,13 +54,13 @@ const fetcher = axiosClient => {
       ])
       .then(([article, tags]) => {
         return {
-          articleID:       article.data.id,
-          articleTitle:    article.data.title,
-          articleBody:     article.data.body,
-          articleTags:     article.data.tags.map(tag => { return tag.name }),
-          tags:            tags.data.map(tag => { return tag.name }),
-          row:             false,
-          updatedSnackbar: false,
+          articleID:    article.data.id,
+          newArticleID: article.data.id,
+          articleTitle: article.data.title,
+          articleBody:  article.data.body,
+          articleTags:  article.data.tags.map(tag => { return tag.name }),
+          tags:         tags.data.map(tag => { return tag.name }),
+          row:          false,
         }
       })
     }
@@ -110,23 +103,18 @@ export default {
     updateArticle() {
       this.$axios
         .put(`/v1/articles/${this.articleID}`, {
-          title: this.articleTitle,
-          body:  this.articleBody,
-          tags:  this.articleTags,
+          alias_id: this.newArticleID,
+          title:    this.articleTitle,
+          body:     this.articleBody,
+          tags:     this.articleTags,
         }, {
           headers: {
             Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`,
           },
         })
         .then(res => {
-          this.updatedSnackbar = true
-          fetcher(this.$axios).fetch(this.articleID).then(data => {
-            this.articleID    = data.articleID
-            this.articleTitle = data.articleTitle
-            this.articleBody  = data.articleBody
-            this.articleTags  = data.articleTags
-            this.tags         = data.tags
-          })
+          alert("success")
+          this.$router.replace({ path: `/articles` })
         })
         .catch(e => {
           alert(e)
