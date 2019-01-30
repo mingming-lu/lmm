@@ -10,7 +10,7 @@
         >
           <v-list-tile-content>
             <v-list-tile-title v-text="article.title" />
-            <v-list-tile-sub-title v-text="new Date(article.post_at).toLocaleString()" />
+            <v-list-tile-sub-title v-text="new Date(article.post_at * 1e3).toLocaleString()" />
           </v-list-tile-content>
         </v-list-tile>
       </template>
