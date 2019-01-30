@@ -43,5 +43,5 @@ func (s *ArticleService) NewArticleToPost(c context.Context, author *model.Autho
 		return nil, err
 	}
 
-	return model.NewArticle(articleID, author, content), nil
+	return model.NewArticle(articleID, author, content, nil), nil
 }
