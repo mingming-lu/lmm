@@ -2,10 +2,10 @@ package persistence
 
 import (
 	"context"
-	"time"
 
 	"github.com/pkg/errors"
 
+	"lmm/api/clock"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
@@ -30,7 +30,7 @@ func (s *UserStorage) Save(c context.Context, user *model.User) error {
 	`)
 	defer stmt.Close()
 
-	now := time.Now()
+	now := clock.Now()
 
 	_, err := stmt.Exec(c, user.Name(), user.Password(), user.Token(), now)
 
