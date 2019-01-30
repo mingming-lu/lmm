@@ -98,7 +98,7 @@ func (f *ArticleFetcher) ListByPage(c context.Context, count, page uint, filter 
 // FindByID implementation
 func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*model.ArticleView, error) {
 	selectArticle := f.db.Prepare(c, `
-		select id, uid, alias_uid, title, body, created_at, updated_at from article where uid = ?
+		select id, uid, alias_uid, title, body, created_at, updated_at from article where alias_uid = ? or uid = ?
 	`)
 	defer selectArticle.Close()
 
@@ -117,7 +117,7 @@ func (f *ArticleFetcher) FindByID(c context.Context, id *model.ArticleID) (*mode
 		articleEditedAt time.Time
 	)
 
-	err := selectArticle.QueryRow(c, id.String()).Scan(
+	err := selectArticle.QueryRow(c, id.String(), id.Raw()).Scan(
 		&linkedID,
 		&rawArticleID,
 		&aliasArticleID,

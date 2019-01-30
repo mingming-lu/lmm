@@ -3,10 +3,10 @@ package persistence
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"github.com/pkg/errors"
 
+	"lmm/api/clock"
 	"lmm/api/service/asset/domain/model"
 	"lmm/api/storage/db"
 	"lmm/api/storage/uploader"
@@ -134,7 +134,7 @@ func (s *AssetStorage) Save(c context.Context, asset *model.Asset) error {
 		asset.Name(),
 		s.encodeAssetType(asset.Type()),
 		asset.Uploader().ID(),
-		time.Now(),
+		clock.Now(),
 	); err != nil {
 		if e := tx.Rollback(); e != nil {
 			return errors.Wrap(err, e.Error())

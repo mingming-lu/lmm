@@ -80,8 +80,6 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	now := time.Now()
-
 	var userID int
 
 	if err := findUserID.QueryRow(c, article.Author().Name()).Scan(&userID); err != nil {
@@ -97,12 +95,12 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		userID,
 		article.Content().Text().Title(),
 		article.Content().Text().Body(),
-		now,
-		now,
+		article.LastModified(),
+		article.LastModified(),
 		article.ID().String(),
 		article.Content().Text().Title(),
 		article.Content().Text().Body(),
-		now,
+		article.LastModified(),
 	)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
@@ -151,7 +149,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 	}
 
 	stmt, err := tx.Prepare(c, `
-		select id, uid, alias_uid, user, title, body from article where uid = ? for update
+		select id, uid, alias_uid, user, title, body,updated_at from article where alias_uid = ? or uid = ? for update
 	`)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
@@ -160,7 +158,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 		return nil, err
 	}
 
-	article, err := s.articleModelFromRow(c, stmt.QueryRow(c, id.String()))
+	article, err := s.articleModelFromRow(c, stmt.QueryRow(c, id.String(), id.Raw()))
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return nil, err
@@ -183,8 +181,9 @@ func (s *ArticleStorage) articleModelFromRow(c context.Context, row *sql.Row) (*
 		userID         int
 		title          string
 		body           string
+		lastModified   time.Time
 	)
-	if err := row.Scan(&id, &rawArticleID, &aliasArticleID, &userID, &title, &body); err != nil {
+	if err := row.Scan(&id, &rawArticleID, &aliasArticleID, &userID, &title, &body, &lastModified); err != nil {
 		if err == db.ErrNoRows {
 			return nil, domain.ErrNoSuchArticle
 		}
@@ -242,7 +241,7 @@ func (s *ArticleStorage) articleModelFromRow(c context.Context, row *sql.Row) (*
 		return nil, err
 	}
 
-	article := model.NewArticle(articleID, author, content)
+	article := model.NewArticle(articleID, author, content, &lastModified)
 	if err := article.ID().SetAlias(aliasArticleID); err != nil {
 		return nil, err
 	}

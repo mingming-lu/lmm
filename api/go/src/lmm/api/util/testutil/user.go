@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"lmm/api/clock"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/storage/db"
 	"lmm/api/util/stringutil"
@@ -41,7 +42,7 @@ func NewUser(db db.DB) User {
 		panic(err)
 	}
 
-	now := time.Now()
+	now := clock.Now()
 
 	res, err := db.Exec(context.Background(),
 		`insert into user (name, password, token, created_at) values (?, ?, ?, ?)`,
