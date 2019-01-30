@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS `article` (
 	`updated_at` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE `uid` (`uid`),
+	UNIQUE `alias_uid` (`alias_uid`),
 	INDEX `created_at` (`created_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
