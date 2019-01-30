@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   manager:
-    command: sh -c "npm --prefix /manager run build && npm --prefix /manager start"
+    command: sh -c "npm --prefix /manager start"
     environment:
       SERVER_HOST: '0.0.0.0'
       SERVER_PORT: 8004
