@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	patternArticleID      = regexp.MustCompile("^[0-9a-z-]{32,64}$")
+	patternArticleID      = regexp.MustCompile("^[0-9a-z-]{8,64}$")
 	patternAliasArticleID = regexp.MustCompile("^[0-9a-z-]{8,80}$")
 )
 

@@ -86,7 +86,7 @@ export default {
     }
   },
   validate({query}) {
-    return /^[\d\w]{32,64}$/.test(query.articleID)
+    return /^[\d\w-]{8,80}$/.test(query.articleID)
   },
   asyncData({$axios, query}) {
     return fetcher($axios).fetch(query.articleID)

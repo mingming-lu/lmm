@@ -54,7 +54,7 @@ import {
 } from '~/assets/js/utils'
 export default {
   validate ({ params }) {
-    return /^[\d\w]{32,64}$/.test(params.id)
+    return /^[\d\w-]{8,80}$/.test(params.id)
   },
   head () {
     return {

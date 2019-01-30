@@ -11,7 +11,7 @@ import (
 
 func TestNewArticleID(tt *testing.T) {
 
-	minLength := 32
+	minLength := 8
 	maxLength := 64
 
 	tt.Run("Valid", func(tt *testing.T) {
