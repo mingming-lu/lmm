@@ -151,7 +151,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 	}
 
 	stmt, err := tx.Prepare(c, `
-		select id, uid, alias_uid, user, title, body from article where uid = ? for update
+		select id, uid, alias_uid, user, title, body from article where alias_uid = ? or uid = ? for update
 	`)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
@@ -160,7 +160,7 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 		return nil, err
 	}
 
-	article, err := s.articleModelFromRow(c, stmt.QueryRow(c, id.String()))
+	article, err := s.articleModelFromRow(c, stmt.QueryRow(c, id.String(), id.Raw()))
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
 			return nil, err
