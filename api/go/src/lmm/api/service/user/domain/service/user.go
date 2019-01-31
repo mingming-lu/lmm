@@ -22,5 +22,6 @@ func AssignUserRole(operator *model.User, targetUser *model.User, role model.Rol
 		return err
 	}
 
+	// TODO persistence changing of user role
 	return nil
 }
