@@ -21,12 +21,12 @@ func NewUserStorage(db db.DB) repository.UserRepository {
 
 // FindByName implementation
 func (s *UserStorage) FindByName(c context.Context, name string) (*model.User, error) {
-	return s.findUser(c, `select name, password, token from user where name = ?`, name)
+	return s.findUser(c, `select name, password, token, role from user where name = ?`, name)
 }
 
 // FindByToken implementation
 func (s *UserStorage) FindByToken(c context.Context, token *model.Token) (*model.User, error) {
-	return s.findUser(c, `select name, password, token from user where token = ?`, token.Raw())
+	return s.findUser(c, `select name, password, token, role from user where token = ?`, token.Raw())
 }
 
 func (s *UserStorage) findUser(c context.Context, query string, args ...interface{}) (*model.User, error) {
@@ -37,9 +37,10 @@ func (s *UserStorage) findUser(c context.Context, query string, args ...interfac
 		userName     string
 		userPassword string
 		userToken    string
+		userRole     string
 	)
 
-	err := stmt.QueryRow(c, args...).Scan(&userName, &userPassword, &userToken)
+	err := stmt.QueryRow(c, args...).Scan(&userName, &userPassword, &userToken, &userRole)
 	if err != nil {
 		if err == db.ErrNoRows {
 			return nil, domain.ErrNoSuchUser
@@ -47,5 +48,5 @@ func (s *UserStorage) findUser(c context.Context, query string, args ...interfac
 		return nil, err
 	}
 
-	return model.NewUser(userName, userPassword, userToken), nil
+	return model.NewUser(userName, userPassword, userToken, userRole), nil
 }
