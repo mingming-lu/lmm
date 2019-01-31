@@ -38,7 +38,7 @@ func (s *Service) RegisterNewUser(c context.Context, name, password string) (str
 		return "", domain.ErrUserPasswordTooWeak
 	}
 
-	user, err := model.NewUser(name, *pw, token)
+	user, err := model.NewUser(name, *pw, token, model.Ordinary)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to register new user")
 	}

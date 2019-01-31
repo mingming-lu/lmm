@@ -25,7 +25,7 @@ func TestSaveUser(tt *testing.T) {
 
 	username := "U" + stringutil.ReplaceAll(uuid.New().String(), "-", "")[:8]
 
-	user, err := model.NewUser(username, *pw, token)
+	user, err := model.NewUser(username, *pw, token, model.Ordinary)
 	if err != nil {
 		tt.Fatal(err)
 	}
