@@ -3,6 +3,9 @@ package domain
 import "github.com/pkg/errors"
 
 var (
+	// ErrNoPermission error
+	ErrNoPermission = errors.New("no permission")
+
 	// ErrInvalidPassword error
 	ErrInvalidPassword = errors.New("invalid password")
 
@@ -14,6 +17,9 @@ var (
 
 	// ErrInvalidUserToken error
 	ErrInvalidUserToken = errors.New("invalid user token, expect a uuid v4")
+
+	// ErrInvalidPermission error
+	ErrInvalidPermission = errors.New("invalid permission")
 
 	// ErrNoSuchUser error
 	ErrNoSuchUser = errors.New("no such user")
