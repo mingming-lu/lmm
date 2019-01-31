@@ -18,6 +18,9 @@ var (
 	// ErrNoSuchUser error
 	ErrNoSuchUser = errors.New("no such user")
 
+	// ErrNoSuchRole error
+	ErrNoSuchRole = errors.New("no such role")
+
 	// ErrUserNameAlreadyUsed error
 	ErrUserNameAlreadyUsed = errors.New("user name has already been used")
 

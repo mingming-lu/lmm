@@ -19,12 +19,13 @@ var (
 type User struct {
 	model.Entity
 	name     string
+	role     Role
 	password string
 	token    string
 }
 
 // NewUser creates a new user domain model
-func NewUser(name string, password Password, token string) (*User, error) {
+func NewUser(name string, password Password, token string, role Role) (*User, error) {
 	user := User{}
 
 	if err := user.setName(name); err != nil {
@@ -39,12 +40,30 @@ func NewUser(name string, password Password, token string) (*User, error) {
 		return nil, err
 	}
 
+	if err := user.AssignRole(role); err != nil {
+		return nil, err
+	}
+
 	return &user, nil
 }
 
 // Name gets user's name
 func (user *User) Name() string {
 	return user.name
+}
+
+func (user *User) Role() Role {
+	return user.role
+}
+
+func (user *User) AssignRole(role Role) error {
+	switch role {
+	case Admin, Guest, Ordinary:
+		user.role = role
+		return nil
+	default:
+		return domain.ErrNoSuchRole
+	}
 }
 
 func (user *User) setName(name string) error {

@@ -37,6 +37,7 @@ func NewUser(db db.DB) User {
 		username,
 		*password,
 		stringutil.ReplaceAll(uuid.New().String(), "-", ""),
+		model.Admin,
 	)
 	if err != nil {
 		panic(err)
