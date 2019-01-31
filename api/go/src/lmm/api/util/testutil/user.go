@@ -46,8 +46,8 @@ func NewUser(db db.DB) User {
 	now := clock.Now()
 
 	res, err := db.Exec(context.Background(),
-		`insert into user (name, password, token, created_at) values (?, ?, ?, ?)`,
-		user.Name(), user.Password(), user.Token(), now,
+		`insert into user (name, password, token, role, created_at) values (?, ?, ?, ?, ?)`,
+		user.Name(), user.Password(), user.Token(), user.Role().Name(), now,
 	)
 	if err != nil {
 		panic(err)

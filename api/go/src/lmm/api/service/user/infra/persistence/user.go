@@ -26,13 +26,13 @@ func NewUserStorage(db db.DB) repository.UserRepository {
 // Save persists a user model
 func (s *UserStorage) Save(c context.Context, user *model.User) error {
 	stmt := s.db.Prepare(c, `
-		insert into user (name, password, token, created_at) values(?, ?, ?, ?)
+		insert into user (name, password, token, role, created_at) values(?, ?, ?, ?, ?)
 	`)
 	defer stmt.Close()
 
 	now := clock.Now()
 
-	_, err := stmt.Exec(c, user.Name(), user.Password(), user.Token(), now)
+	_, err := stmt.Exec(c, user.Name(), user.Password(), user.Token(), user.Role().Name(), now)
 
 	if key, _, ok := mysqlutil.CheckDuplicateKeyError(err); ok && key == "name" {
 		return errors.Wrap(domain.ErrUserNameAlreadyUsed, err.Error())

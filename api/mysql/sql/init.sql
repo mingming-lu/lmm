@@ -7,10 +7,23 @@ CREATE TABLE IF NOT EXISTS `user` (
 	`name` VARCHAR(255) NOT NULL,
 	`password` VARCHAR(255) NOT NULL,
 	`token` VARCHAR(255) NOT NULL,
+	`role` VARCHAR(31) NOT NULL,
 	`created_at` DATETIME NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE `name` (`name`),
 	UNIQUE `token` (`token`)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+
+CREATE TABLE IF NOT EXISTS `user_role_change_history` (
+	`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+	`operator` BIGINT UNSIGNED NOT NULL, -- user.id
+	`operator_role` VARCHAR(31) NOT NULL, -- user.role
+	`target_user` BIGINT UNSIGNED NOT NULL, -- user.id
+	`target_user_role` VARCHAR(31) NOT NULL, -- user.role
+	`target_role` VARCHAR(31) NOT NULL, -- user.role
+	`changed_at` DATETIME NOT NULL,
+	PRIMARY KEY (id),
+	INDEX `changed_at` (`changed_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS `article` (
