@@ -6,9 +6,11 @@ import (
 	"github.com/pkg/errors"
 
 	"lmm/api/clock"
+	"lmm/api/http"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
+	"lmm/api/service/user/domain/service"
 	"lmm/api/storage/db"
 	"lmm/api/util/mysqlutil"
 )
@@ -41,7 +43,26 @@ func (s *UserStorage) Save(c context.Context, user *model.User) error {
 	return err
 }
 
-// FindByUserName implementation
-func (s *UserStorage) FindByUserName(c context.Context, username string) (*model.User, error) {
+// FindByName implementation
+func (s *UserStorage) FindByName(c context.Context, username string) (*model.User, error) {
 	panic("not implemented")
+}
+
+// DescribeByName implementation
+func (s *UserStorage) DescribeByName(c context.Context, username string) (*model.UserDescriptor, error) {
+	stmt := s.db.Prepare(c, `select role from user where name = ?`)
+	defer stmt.Close()
+
+	var rolename string
+
+	if err := stmt.QueryRow(c, username).Scan(&rolename); err != nil {
+		return nil, err
+	}
+
+	role := service.RoleAdapter(rolename)
+	if role == model.Guest {
+		http.Log().Panic(c, "expected not a guest")
+	}
+
+	return model.NewUserDescriptor(username, role)
 }

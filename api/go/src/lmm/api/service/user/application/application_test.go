@@ -24,20 +24,24 @@ type InmemoryUserRepository struct {
 }
 
 func (repo *InmemoryUserRepository) Save(c context.Context, user *model.User) error {
-	if user, _ := repo.FindByUserName(c, user.Name()); user != nil {
+	if user, _ := repo.FindByName(c, user.Name()); user != nil {
 		return domain.ErrUserNameAlreadyUsed
 	}
 	repo.memory = append(repo.memory, user)
 	return nil
 }
 
-func (repo *InmemoryUserRepository) FindByUserName(c context.Context, username string) (*model.User, error) {
+func (repo *InmemoryUserRepository) FindByName(c context.Context, username string) (*model.User, error) {
 	for _, user := range repo.memory {
 		if user.Name() == username {
 			return user, nil
 		}
 	}
 	return nil, domain.ErrNoSuchUser
+}
+
+func (repo *InmemoryUserRepository) DescribeByName(c context.Context, username string) (*model.UserDescriptor, error) {
+	panic("not implemented")
 }
 
 func TestMain(m *testing.M) {
@@ -56,7 +60,7 @@ func TestRegisterNewUser(tt *testing.T) {
 		t.NoError(err)
 		t.Is(username, nameGot)
 
-		user, err := testAppService.userRepository.FindByUserName(c, "username")
+		user, err := testAppService.userRepository.FindByName(c, "username")
 		t.NoError(err)
 		t.Is(username, user.Name())
 		t.NoError(bcrypt.CompareHashAndPassword(
