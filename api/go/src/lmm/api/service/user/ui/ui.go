@@ -3,6 +3,7 @@ package ui
 import (
 	"lmm/api/http"
 	"lmm/api/service/user/application"
+	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/domain"
 
 	"github.com/pkg/errors"
@@ -45,6 +46,36 @@ func (ui *UI) SignUp(c http.Context) {
 		c.String(http.StatusBadRequest, domain.ErrUserPasswordTooLong.Error())
 	case domain.ErrUserPasswordTooWeak:
 		c.String(http.StatusBadRequest, domain.ErrUserPasswordTooWeak.Error())
+	default:
+		http.Log().Panic(c, err.Error())
+	}
+}
+
+// AssignUserRole handles PUT /v1/users/:user/role
+func (ui *UI) AssignUserRole(c http.Context) {
+	userName := c.Request().Header.Get("X-LMM-ID")
+	if userName == "" {
+		http.Unauthorized(c)
+		return
+	}
+
+	targetUserName := c.Request().PathParam("user")
+	requestBody := &assignRoleRequestBody{}
+	if err := c.Request().Bind(&requestBody); err != nil {
+		http.BadRequest(c)
+		return
+	}
+
+	err := ui.appService.AssignRole(c, command.AssignRole{
+		OperatorUser: userName,
+		TargetUser:   targetUserName,
+		TargetRole:   requestBody.Role,
+	})
+	switch errors.Cause(err) {
+	case nil:
+		http.NoContent(c)
+	case domain.ErrNoSuchRole:
+		c.String(http.StatusBadRequest, domain.ErrNoSuchRole.Error())
 	default:
 		http.Log().Panic(c, err.Error())
 	}

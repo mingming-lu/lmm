@@ -2,10 +2,12 @@ package application
 
 import (
 	"context"
+	"lmm/api/service/user/domain/service"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
@@ -48,4 +50,20 @@ func (s *Service) RegisterNewUser(c context.Context, name, password string) (str
 	}
 
 	return name, nil
+}
+
+// AssignRole handles command which operator assign user to role
+func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
+	operator, err := s.userRepository.FindByUserName(c, cmd.OperatorUser)
+	if err != nil {
+		panic(errors.Wrapf(err, "operator not found: %s", cmd.OperatorUser))
+	}
+
+	user, err := s.userRepository.FindByUserName(c, cmd.TargetRole)
+	if err != nil {
+		return err
+	}
+
+	role := service.RoleAdapter(cmd.TargetRole)
+	return service.AssignUserRole(operator, user, role)
 }

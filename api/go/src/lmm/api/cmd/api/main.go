@@ -90,17 +90,18 @@ func main() {
 	// request id
 	router.Use(middleware.WithRequestID)
 
-	// user
-	userRepo := userStorage.NewUserStorage(mysql)
-	userAppService := userApp.NewService(userRepo)
-	userUI := userUI.NewUI(userAppService)
-	router.POST("/v1/users", userUI.SignUp)
-
 	// auth
 	authRepo := authStorage.NewUserStorage(mysql)
 	authAppService := authApp.NewService(authRepo)
 	authUI := authUI.NewUI(authAppService)
 	router.POST("/v1/auth/login", authUI.Login)
+
+	// user
+	userRepo := userStorage.NewUserStorage(mysql)
+	userAppService := userApp.NewService(userRepo)
+	userUI := userUI.NewUI(userAppService)
+	router.POST("/v1/users", userUI.SignUp)
+	router.PUT("/v1/users/:user/role", authUI.BearerAuth(userUI.AssignUserRole))
 
 	// article
 	authorAdapter := authorService.NewAuthorAdapter(mysql)
