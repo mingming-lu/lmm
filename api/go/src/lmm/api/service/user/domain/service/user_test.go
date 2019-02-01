@@ -13,8 +13,8 @@ import (
 
 func TestAssignUserRole(tt *testing.T) {
 	type TestCase struct {
-		operator    *model.User
-		targetUser  *model.User
+		operator    *model.UserDescriptor
+		targetUser  *model.UserDescriptor
 		targetRole  model.Role
 		expectedErr error
 	}
@@ -87,26 +87,20 @@ func TestAssignUserRole(tt *testing.T) {
 	}
 }
 
-func newAdmin() *model.User {
+func newAdmin() *model.UserDescriptor {
 	return newUserWithRole(model.Admin)
 }
 
-func newOrdinary() *model.User {
+func newOrdinary() *model.UserDescriptor {
 	return newUserWithRole(model.Ordinary)
 }
 
-func newUserWithRole(role model.Role) *model.User {
-	randomString := uuid.New().String
+func newUserWithRole(role model.Role) *model.UserDescriptor {
 	randomUserName := func() string {
-		return "u" + randomString()[:7]
+		return "u" + uuid.New().String()[:7]
 	}
 
-	pw, err := model.NewPassword(randomString())
-	if err != nil {
-		panic(err)
-	}
-
-	user, err := model.NewUser(randomUserName(), *pw, randomString(), role)
+	user, err := model.NewUserDescriptor(randomUserName(), role)
 	if err != nil {
 		panic(err)
 	}

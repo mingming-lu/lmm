@@ -15,11 +15,27 @@ var (
 	patternUserName = regexp.MustCompile(`^[a-zA-Z]{1}[0-9a-zA-Z_-]{2,17}$`)
 )
 
+type UserDescriptor struct {
+	model.Entity
+	name string
+	role Role
+}
+
+func NewUserDescriptor(name string, role Role) (*UserDescriptor, error) {
+	user := UserDescriptor{}
+
+	if err := user.setName(name); err != nil {
+		return nil, err
+	}
+
+	user.role = role
+
+	return &user, nil
+}
+
 // User domain model
 type User struct {
-	model.Entity
-	name     string
-	role     Role
+	UserDescriptor
 	password string
 	token    string
 }
@@ -48,19 +64,19 @@ func NewUser(name string, password Password, token string, role Role) (*User, er
 }
 
 // Name gets user's name
-func (user *User) Name() string {
+func (user *UserDescriptor) Name() string {
 	return user.name
 }
 
-func (user *User) Is(target *User) bool {
+func (user *UserDescriptor) Is(target *UserDescriptor) bool {
 	return user.Name() == target.Name()
 }
 
-func (user *User) Role() Role {
+func (user *UserDescriptor) Role() Role {
 	return user.role
 }
 
-func (user *User) AssignRole(role Role) error {
+func (user *UserDescriptor) AssignRole(role Role) error {
 	switch role {
 	case Admin, Guest, Ordinary:
 		user.role = role
@@ -70,7 +86,7 @@ func (user *User) AssignRole(role Role) error {
 	}
 }
 
-func (user *User) setName(name string) error {
+func (user *UserDescriptor) setName(name string) error {
 	if !patternUserName.MatchString(name) {
 		return domain.ErrInvalidUserName
 	}
