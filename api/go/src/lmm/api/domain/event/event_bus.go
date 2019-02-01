@@ -50,7 +50,7 @@ func (b *bus) Publish(c context.Context, e Event) error {
 	if len(allErrors) > 0 {
 		err := ErrEventHandleFailed
 		for _, e := range allErrors {
-			errors.Wrap(err, e.Error())
+			err = errors.Wrap(err, e.Error())
 		}
 		return err
 	}
