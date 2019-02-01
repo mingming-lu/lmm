@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS `user_role_change_history` (
 	`operator` BIGINT UNSIGNED NOT NULL, -- user.id
 	`operator_role` VARCHAR(31) NOT NULL, -- user.role
 	`target_user` BIGINT UNSIGNED NOT NULL, -- user.id
-	`target_user_role` VARCHAR(31) NOT NULL, -- user.role
-	`target_role` VARCHAR(31) NOT NULL, -- user.role
+	`from` VARCHAR(31) NOT NULL, -- user.role
+	`to` VARCHAR(31) NOT NULL, -- user.role
 	`changed_at` DATETIME NOT NULL,
 	PRIMARY KEY (id),
 	INDEX `changed_at` (`changed_at`)
