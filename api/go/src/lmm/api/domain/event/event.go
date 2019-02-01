@@ -1,6 +1,12 @@
 package event
 
-import "time"
+import (
+	"time"
+
+	"github.com/pkg/errors"
+)
+
+var ErrInvalidEvent = errors.New("invalid event")
 
 type Event interface {
 	Topic() string

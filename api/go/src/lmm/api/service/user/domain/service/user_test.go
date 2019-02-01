@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/testing"
@@ -74,10 +76,11 @@ func TestAssignUserRole(tt *testing.T) {
 		},
 	}
 
+	c := context.Background()
 	for testname, testcase := range cases {
 		tt.Run(testname, func(tt *testing.T) {
 			t := testing.NewTester(tt)
-			err := AssignUserRole(testcase.operator, testcase.targetUser, testcase.targetRole)
+			err := AssignUserRole(c, testcase.operator, testcase.targetUser, testcase.targetRole)
 
 			t.Is(testcase.expectedErr, errors.Cause(err))
 		})
@@ -94,13 +97,16 @@ func newOrdinary() *model.User {
 
 func newUserWithRole(role model.Role) *model.User {
 	randomString := uuid.New().String
+	randomUserName := func() string {
+		return "u" + randomString()[:7]
+	}
 
 	pw, err := model.NewPassword(randomString())
 	if err != nil {
 		panic(err)
 	}
 
-	user, err := model.NewUser(role.Name(), *pw, randomString(), role)
+	user, err := model.NewUser(randomUserName(), *pw, randomString(), role)
 	if err != nil {
 		panic(err)
 	}

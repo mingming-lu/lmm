@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"lmm/api/service/user/domain/service"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -11,6 +10,7 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
+	"lmm/api/service/user/domain/service"
 	"lmm/api/util/stringutil"
 )
 
@@ -65,5 +65,6 @@ func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
 	}
 
 	role := service.RoleAdapter(cmd.TargetRole)
-	return service.AssignUserRole(operator, user, role)
+
+	return service.AssignUserRole(c, operator, user, role)
 }

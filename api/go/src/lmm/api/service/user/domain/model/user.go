@@ -52,6 +52,10 @@ func (user *User) Name() string {
 	return user.name
 }
 
+func (user *User) Is(target *User) bool {
+	return user.Name() == target.Name()
+}
+
 func (user *User) Role() Role {
 	return user.role
 }

@@ -76,8 +76,8 @@ func newBus() Bus {
 	}
 }
 
-// GlobalBus ger event bus singleton
-func GlobalBus() Bus {
+// SyncBus gets global sync event bus singleton
+func SyncBus() Bus {
 	globalBusLock.Lock()
 	defer globalBusLock.Unlock()
 

@@ -27,6 +27,9 @@ var (
 	// ErrNoSuchRole error
 	ErrNoSuchRole = errors.New("no such role")
 
+	// ErrCannotAssignSelfRole error
+	ErrCannotAssignSelfRole = errors.New("cannot assign self role")
+
 	// ErrUserNameAlreadyUsed error
 	ErrUserNameAlreadyUsed = errors.New("user name has already been used")
 
