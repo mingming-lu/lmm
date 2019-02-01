@@ -12,11 +12,12 @@ type User struct {
 	name     string
 	password string
 	rawToken string
+	role     string
 }
 
 // NewUser creates a new user
-func NewUser(name, password, rawToken string) *User {
-	return &User{name: name, password: password, rawToken: rawToken}
+func NewUser(name, password, rawToken, role string) *User {
+	return &User{name: name, password: password, rawToken: rawToken, role: role}
 }
 
 // Name gets user name
@@ -40,4 +41,9 @@ func (user *User) ComparePassword(rawPassword string) bool {
 // RawToken gets user's raw token
 func (user *User) RawToken() string {
 	return user.rawToken
+}
+
+// Role gets users' role
+func (user *User) Role() string {
+	return user.role
 }

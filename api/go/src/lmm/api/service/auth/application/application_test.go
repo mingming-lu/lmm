@@ -23,6 +23,7 @@ var (
 	registeredUserPassword       = "whatever"
 	registeredUserHashedPassword = ""
 	registeredUserToken          = stringutil.ReplaceAll(uuid.New().String(), "-", "")
+	registeredUserRole           = "geeker"
 )
 
 type InMemoryUserRepository struct {
@@ -31,14 +32,14 @@ type InMemoryUserRepository struct {
 
 func (repo *InMemoryUserRepository) FindByName(c context.Context, name string) (*model.User, error) {
 	if name == registeredUserName {
-		return model.NewUser(registeredUserName, registeredUserHashedPassword, registeredUserToken), nil
+		return model.NewUser(registeredUserName, registeredUserHashedPassword, registeredUserToken, registeredUserRole), nil
 	}
 	return nil, domain.ErrNoSuchUser
 }
 
 func (repo *InMemoryUserRepository) FindByToken(c context.Context, token *model.Token) (*model.User, error) {
 	if token.Raw() == registeredUserToken {
-		return model.NewUser(registeredUserName, registeredUserHashedPassword, registeredUserToken), nil
+		return model.NewUser(registeredUserName, registeredUserHashedPassword, registeredUserToken, registeredUserRole), nil
 	}
 	return nil, domain.ErrNoSuchUser
 }

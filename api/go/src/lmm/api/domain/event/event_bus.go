@@ -50,7 +50,7 @@ func (b *bus) Publish(c context.Context, e Event) error {
 	if len(allErrors) > 0 {
 		err := ErrEventHandleFailed
 		for _, e := range allErrors {
-			errors.Wrap(err, e.Error())
+			err = errors.Wrap(err, e.Error())
 		}
 		return err
 	}
@@ -76,8 +76,8 @@ func newBus() Bus {
 	}
 }
 
-// GlobalBus ger event bus singleton
-func GlobalBus() Bus {
+// SyncBus gets global sync event bus singleton
+func SyncBus() Bus {
 	globalBusLock.Lock()
 	defer globalBusLock.Unlock()
 

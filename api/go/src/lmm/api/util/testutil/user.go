@@ -20,6 +20,7 @@ type User struct {
 	encryptedPassword string
 	rawToken          string
 	accessToken       string
+	role              string
 	createdAt         time.Time
 }
 
@@ -37,6 +38,7 @@ func NewUser(db db.DB) User {
 		username,
 		*password,
 		stringutil.ReplaceAll(uuid.New().String(), "-", ""),
+		model.Ordinary,
 	)
 	if err != nil {
 		panic(err)
@@ -45,8 +47,8 @@ func NewUser(db db.DB) User {
 	now := clock.Now()
 
 	res, err := db.Exec(context.Background(),
-		`insert into user (name, password, token, created_at) values (?, ?, ?, ?)`,
-		user.Name(), user.Password(), user.Token(), now,
+		`insert into user (name, password, token, role, created_at) values (?, ?, ?, ?, ?)`,
+		user.Name(), user.Password(), user.Token(), user.Role().Name(), now,
 	)
 	if err != nil {
 		panic(err)
@@ -64,6 +66,7 @@ func NewUser(db db.DB) User {
 		encryptedPassword: user.Password(),
 		rawToken:          user.Token(),
 		accessToken:       EncodeToken(user.Token()).Hashed(),
+		role:              user.Role().Name(),
 		createdAt:         now,
 	}
 }
@@ -90,6 +93,10 @@ func (u User) RawToken() string {
 
 func (u User) AccessToken() string {
 	return u.accessToken
+}
+
+func (u User) Role() string {
+	return u.role
 }
 
 func (u User) CreatedAt() time.Time {

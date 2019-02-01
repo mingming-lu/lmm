@@ -15,16 +15,33 @@ var (
 	patternUserName = regexp.MustCompile(`^[a-zA-Z]{1}[0-9a-zA-Z_-]{2,17}$`)
 )
 
+type UserDescriptor struct {
+	model.Entity
+	name string
+	role Role
+}
+
+func NewUserDescriptor(name string, role Role) (*UserDescriptor, error) {
+	user := UserDescriptor{}
+
+	if err := user.setName(name); err != nil {
+		return nil, err
+	}
+
+	user.role = role
+
+	return &user, nil
+}
+
 // User domain model
 type User struct {
-	model.Entity
-	name     string
+	UserDescriptor
 	password string
 	token    string
 }
 
 // NewUser creates a new user domain model
-func NewUser(name string, password Password, token string) (*User, error) {
+func NewUser(name string, password Password, token string, role Role) (*User, error) {
 	user := User{}
 
 	if err := user.setName(name); err != nil {
@@ -39,15 +56,37 @@ func NewUser(name string, password Password, token string) (*User, error) {
 		return nil, err
 	}
 
+	if err := user.AssignRole(role); err != nil {
+		return nil, err
+	}
+
 	return &user, nil
 }
 
 // Name gets user's name
-func (user *User) Name() string {
+func (user *UserDescriptor) Name() string {
 	return user.name
 }
 
-func (user *User) setName(name string) error {
+func (user *UserDescriptor) Is(target *UserDescriptor) bool {
+	return user.Name() == target.Name()
+}
+
+func (user *UserDescriptor) Role() Role {
+	return user.role
+}
+
+func (user *UserDescriptor) AssignRole(role Role) error {
+	switch role {
+	case Admin, Guest, Ordinary:
+		user.role = role
+		return nil
+	default:
+		return domain.ErrNoSuchRole
+	}
+}
+
+func (user *UserDescriptor) setName(name string) error {
 	if !patternUserName.MatchString(name) {
 		return domain.ErrInvalidUserName
 	}

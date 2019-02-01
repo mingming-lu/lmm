@@ -58,6 +58,7 @@ func (ui *UI) BearerAuth(next http.Handler) http.Handler {
 			return
 		}
 		c.Request().Header.Set("X-LMM-ID", user.Name())
+		c.Request().Header.Set("X-LMM-Role", user.Role())
 		next(c)
 	}
 }

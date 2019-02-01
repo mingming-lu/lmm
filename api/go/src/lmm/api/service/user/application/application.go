@@ -6,9 +6,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
+	"lmm/api/http"
+	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
+	"lmm/api/service/user/domain/service"
 	"lmm/api/util/stringutil"
 )
 
@@ -38,7 +41,7 @@ func (s *Service) RegisterNewUser(c context.Context, name, password string) (str
 		return "", domain.ErrUserPasswordTooWeak
 	}
 
-	user, err := model.NewUser(name, *pw, token)
+	user, err := model.NewUser(name, *pw, token, model.Ordinary)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to register new user")
 	}
@@ -48,4 +51,21 @@ func (s *Service) RegisterNewUser(c context.Context, name, password string) (str
 	}
 
 	return name, nil
+}
+
+// AssignRole handles command which operator assign user to role
+func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
+	operator, err := s.userRepository.DescribeByName(c, cmd.OperatorUser)
+	if err != nil {
+		http.Log().Panic(c, errors.Wrapf(err, "operator not found: %s", cmd.OperatorUser).Error())
+	}
+
+	user, err := s.userRepository.DescribeByName(c, cmd.TargetUser)
+	if err != nil {
+		return errors.Wrap(domain.ErrNoSuchUser, cmd.TargetUser)
+	}
+
+	role := service.RoleAdapter(cmd.TargetRole)
+
+	return service.AssignUserRole(c, operator, user, role)
 }
