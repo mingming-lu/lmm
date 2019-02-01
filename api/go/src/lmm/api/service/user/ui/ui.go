@@ -74,8 +74,14 @@ func (ui *UI) AssignUserRole(c http.Context) {
 	switch errors.Cause(err) {
 	case nil:
 		http.NoContent(c)
+	case domain.ErrCannotAssignSelfRole:
+		c.String(http.StatusBadRequest, domain.ErrCannotAssignSelfRole.Error())
 	case domain.ErrNoSuchRole:
 		c.String(http.StatusBadRequest, domain.ErrNoSuchRole.Error())
+	case domain.ErrNoPermission:
+		c.String(http.StatusForbidden, domain.ErrNoPermission.Error())
+	case domain.ErrNoSuchUser:
+		c.String(http.StatusNotFound, domain.ErrNoSuchUser.Error())
 	default:
 		http.Log().Panic(c, err.Error())
 	}
