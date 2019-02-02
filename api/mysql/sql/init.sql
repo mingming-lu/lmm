@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS `user` (
 	`created_at` DATETIME NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE `name` (`name`),
-	UNIQUE `token` (`token`)
+	UNIQUE `token` (`token`),
+	INDEX `description` (`name`, `role`, `created_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS `user_role_change_history` (
