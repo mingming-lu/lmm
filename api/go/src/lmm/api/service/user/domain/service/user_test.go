@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"lmm/api/clock"
 	"lmm/api/event"
 	"lmm/api/service/user/domain"
 	userEvent "lmm/api/service/user/domain/event"
@@ -102,7 +103,7 @@ func newUserWithRole(role model.Role) *model.UserDescriptor {
 		return "u" + uuid.New().String()[:7]
 	}
 
-	user, err := model.NewUserDescriptor(randomUserName(), role)
+	user, err := model.NewUserDescriptor(randomUserName(), role, clock.Now())
 	if err != nil {
 		panic(err)
 	}

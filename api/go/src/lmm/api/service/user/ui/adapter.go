@@ -10,6 +10,7 @@ type assignRoleRequestBody struct {
 }
 
 type userView struct {
-	Name string `json:"name"`
-	Role string `json:"role"`
+	Name           string `json:"name"`
+	Role           string `json:"role"`
+	RegisteredDate int64  `json:"registered_date,string"`
 }

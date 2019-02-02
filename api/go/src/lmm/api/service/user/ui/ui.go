@@ -122,8 +122,9 @@ func (ui *UI) usersToJSONView(users []*model.UserDescriptor) []userView {
 	usersView := make([]userView, len(users), len(users))
 	for i, user := range users {
 		usersView[i] = userView{
-			Name: user.Name(),
-			Role: user.Role().Name(),
+			Name:           user.Name(),
+			Role:           user.Role().Name(),
+			RegisteredDate: user.RegisteredAt().Unix(),
 		}
 	}
 	return usersView
