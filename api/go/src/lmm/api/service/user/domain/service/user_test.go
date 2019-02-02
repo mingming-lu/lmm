@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 
+	"lmm/api/event"
 	"lmm/api/service/user/domain"
+	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/testing"
 
@@ -106,4 +108,8 @@ func newUserWithRole(role model.Role) *model.UserDescriptor {
 	}
 
 	return user
+}
+
+func init() {
+	event.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, event.NopEventHandler)
 }
