@@ -12,6 +12,7 @@ import (
 var (
 	ErrEmptyEventTopic   = errors.New("event topic cannot be empty")
 	ErrEventHandleFailed = errors.New("failed to handle event")
+	ErrUnRegisteredEvent = errors.New("unregistered event")
 )
 
 var (
@@ -35,15 +36,21 @@ type bus struct {
 
 func (b *bus) Publish(c context.Context, e Event) error {
 	globalBusLock.RLock()
-	defer globalBusLock.RUnlock()
 
 	if e.Topic() == "" {
 		return ErrEmptyEventTopic
 	}
 
+	handlers, ok := b.handlers[e.Topic()]
+	globalBusLock.RUnlock()
+
+	if !ok || len(handlers) == 0 {
+		return errors.Wrap(ErrUnRegisteredEvent, e.Topic())
+	}
+
 	group, ctx := errgroup.WithContext(c)
 
-	for _, handler := range b.handlers[e.Topic()] {
+	for _, handler := range handlers {
 		group.Go(func() error {
 			return handler(ctx, e)
 		})
