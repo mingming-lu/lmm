@@ -6,6 +6,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"net/url"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -86,7 +88,23 @@ func Count(c context.Context, db DB, table, column string, opts SQLOptions) (uin
 	return count, nil
 }
 
-// Masks build a string in a (?,?,?) like format
+var stringBuilderPool = sync.Pool{
+	New: func() interface{} {
+		return new(strings.Builder)
+	},
+}
+
+// called with stringBuilderPool.Put(sb)
+func mustStringBuilder() *strings.Builder {
+	sb, ok := stringBuilderPool.Get().(*strings.Builder)
+	if !ok {
+		panic("expected a *strings.Builder")
+	}
+	sb.Reset()
+	return sb
+}
+
+// Masks builds a string in a (?,?,?) like format
 func Masks(length uint) string {
 	switch length {
 	case 0:
@@ -94,13 +112,35 @@ func Masks(length uint) string {
 	case 1:
 		return "(?)"
 	default:
-		var (
-			i uint = 1
-			s      = "(?"
-		)
-		for ; i < length; i++ {
-			s += ",?"
+		sb := mustStringBuilder()
+		defer stringBuilderPool.Put(sb)
+
+		sb.WriteString("(?")
+		for i := uint(1); i < length; i++ {
+			sb.WriteString(",?")
 		}
-		return s + ")"
+		sb.WriteString(")")
+
+		return sb.String()
+	}
+}
+
+// FieldMasks builds a (field,?,?,?) like string
+func FieldMasks(field string, length uint) string {
+	switch length {
+	case 0:
+		return ""
+	default:
+		sb := mustStringBuilder()
+		defer stringBuilderPool.Put(sb)
+
+		sb.WriteString("(")
+		sb.WriteString(field)
+		for i := uint(0); i < length; i++ {
+			sb.WriteString(",?")
+		}
+		sb.WriteString(")")
+
+		return sb.String()
 	}
 }

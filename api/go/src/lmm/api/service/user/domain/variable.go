@@ -44,4 +44,10 @@ var (
 
 	// ErrUserPasswordTooWeak error
 	ErrUserPasswordTooWeak = errors.New("user password is too weak")
+
+	ErrInvalidPage = errors.New("invalid page")
+
+	ErrInvalidCount = errors.New("invalid count")
+
+	ErrInvalidViewOrder = errors.New("invalid order")
 )

@@ -8,6 +8,7 @@ import (
 
 	"lmm/api/http"
 	"lmm/api/service/user/application/command"
+	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
@@ -68,4 +69,47 @@ func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
 	role := service.RoleAdapter(cmd.TargetRole)
 
 	return service.AssignUserRole(c, operator, user, role)
+}
+
+const maxCount uint = 100
+
+func (s *Service) ViewAllUsersByOptions(c context.Context, query query.ViewAllUsers) ([]*model.UserDescriptor, error) {
+	page, err := stringutil.ParseUint(query.Page)
+	if err != nil || page == 0 {
+		return nil, errors.Wrap(domain.ErrInvalidPage, query.Page)
+	}
+
+	count, err := stringutil.ParseUint(query.Count)
+	if err != nil || count > maxCount {
+		return nil, errors.Wrap(domain.ErrInvalidCount, query.Count)
+	}
+
+	order, err := s.mappingOrder(query.OrderBy, query.Order)
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrInvalidViewOrder, query.Order)
+	}
+	return s.userRepository.DescribeAll(c, repository.DescribeAllOptions{
+		Page:  page,
+		Count: count,
+		Order: order,
+	})
+}
+
+func (s *Service) mappingOrder(orderBy, order string) (repository.DescribeAllOrder, error) {
+	switch orderBy + "_" + order {
+	case "name_asc":
+		return repository.DescribeAllOrderByNameAsc, nil
+	case "name_desc":
+		return repository.DescribeAllOrderByNameDesc, nil
+	case "registered_date_asc":
+		return repository.DescribeAllOrderByRegisteredDateAsc, nil
+	case "registered_date_desc":
+		return repository.DescribeAllOrderByRegisteredDateDesc, nil
+	case "role_asc":
+		return repository.DescribeAllOrderByRoleAsc, nil
+	case "role_desc":
+		return repository.DescribeAllOrderByRoleDesc, nil
+	default:
+		return repository.DescribeAllOrder(-1), domain.ErrInvalidViewOrder
+	}
 }

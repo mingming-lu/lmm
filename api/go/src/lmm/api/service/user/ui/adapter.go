@@ -8,3 +8,8 @@ type signUpRequestBody struct {
 type assignRoleRequestBody struct {
 	Role string `json:"role"`
 }
+
+type userView struct {
+	Name string `json:"name"`
+	Role string `json:"role"`
+}

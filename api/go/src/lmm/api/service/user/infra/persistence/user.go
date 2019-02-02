@@ -66,3 +66,51 @@ func (s *UserStorage) DescribeByName(c context.Context, username string) (*model
 
 	return model.NewUserDescriptor(username, role)
 }
+
+func (s *UserStorage) DescribeAll(c context.Context, options repository.DescribeAllOptions) ([]*model.UserDescriptor, error) {
+	stmt := s.db.Prepare(c,
+		`select name, role from user order by `+s.mappingOrder(options.Order)+` limit ? offset ?`)
+	defer stmt.Close()
+
+	rows, err := stmt.Query(c, options.Count, (options.Page-1)*options.Count)
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]*model.UserDescriptor, 0)
+
+	var username, rolename string
+	for rows.Next() {
+		if err := rows.Scan(&username, &rolename); err != nil {
+			return nil, err
+		}
+		role := service.RoleAdapter(rolename)
+		user, err := model.NewUserDescriptor(username, role)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	rows.Close()
+
+	return users, nil
+}
+
+func (s *UserStorage) mappingOrder(order repository.DescribeAllOrder) string {
+	switch order {
+	case repository.DescribeAllOrderByNameAsc:
+		return "name asc"
+	case repository.DescribeAllOrderByNameDesc:
+		return "name desc"
+	case repository.DescribeAllOrderByRoleAsc:
+		return "role asc, name asc"
+	case repository.DescribeAllOrderByRoleDesc:
+		return "role desc, name asc"
+	case repository.DescribeAllOrderByRegisteredDateAsc:
+		return "created_at asc, name asc"
+	case repository.DescribeAllOrderByRegisteredDateDesc:
+		return "created_at desc, name asc"
+	default:
+		panic("invalid order")
+	}
+}

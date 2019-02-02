@@ -4,7 +4,9 @@ import (
 	"lmm/api/http"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/application/command"
+	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
+	"lmm/api/service/user/domain/model"
 
 	"github.com/pkg/errors"
 )
@@ -89,4 +91,40 @@ func (ui *UI) AssignUserRole(c http.Context) {
 
 // ViewAllUsers handles GET /v1/users
 func (ui *UI) ViewAllUsers(c http.Context) {
+	userName := c.Request().Header.Get("X-LMM-ID")
+	if userName == "" {
+		http.Unauthorized(c)
+		return
+	}
+
+	users, err := ui.appService.ViewAllUsersByOptions(c, query.ViewAllUsers{
+		Page:    c.Request().QueryParamOrDefault("page", "1"),
+		Count:   c.Request().QueryParamOrDefault("count", "100"),
+		OrderBy: c.Request().QueryParamOrDefault("order_by", "registered_date"),
+		Order:   c.Request().QueryParamOrDefault("order", "desc"),
+	})
+
+	switch errors.Cause(err) {
+	case nil:
+		c.JSON(http.StatusOK, ui.usersToJSONView(users))
+	case domain.ErrInvalidPage:
+		c.String(http.StatusBadRequest, err.Error())
+	case domain.ErrInvalidCount:
+		c.String(http.StatusBadRequest, err.Error())
+	case domain.ErrInvalidViewOrder:
+		c.String(http.StatusBadRequest, err.Error())
+	default:
+		http.Log().Panic(c, err.Error())
+	}
+}
+
+func (ui *UI) usersToJSONView(users []*model.UserDescriptor) []userView {
+	usersView := make([]userView, len(users), len(users))
+	for i, user := range users {
+		usersView[i] = userView{
+			Name: user.Name(),
+			Role: user.Role().Name(),
+		}
+	}
+	return usersView
 }
