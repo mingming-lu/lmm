@@ -86,3 +86,7 @@ func (ui *UI) AssignUserRole(c http.Context) {
 		http.Log().Panic(c, err.Error())
 	}
 }
+
+// ViewAllUsers handles GET /v1/users
+func (ui *UI) ViewAllUsers(c http.Context) {
+}
