@@ -1,6 +1,6 @@
 package model
 
-import "lmm/api/domain/model"
+import "lmm/api/model"
 
 // Author is the model of article author
 type Author struct {

@@ -3,7 +3,7 @@ package model
 import (
 	"regexp"
 
-	"lmm/api/domain/model"
+	"lmm/api/model"
 	"lmm/api/service/user/domain"
 )
 

@@ -1,6 +1,6 @@
 package model
 
-import "lmm/api/domain/model"
+import "lmm/api/model"
 
 // Uploader models image's uploader
 type Uploader struct {

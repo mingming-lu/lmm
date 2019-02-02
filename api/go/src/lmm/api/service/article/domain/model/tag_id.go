@@ -1,6 +1,6 @@
 package model
 
-import "lmm/api/domain/model"
+import "lmm/api/model"
 
 // TagID is a value object to identify tag
 type TagID struct {

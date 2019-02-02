@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	domain "lmm/api/domain/event"
+	"lmm/api/event"
 	"lmm/api/http"
-	"lmm/api/service/user/domain/event"
+	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/storage/db"
 
 	"github.com/pkg/errors"
@@ -23,10 +23,10 @@ func NewSubscriber(db db.DB) *Subscriber {
 }
 
 // OnUserRoleChanged implements event handler to handle UserRoleChanged
-func (s *Subscriber) OnUserRoleChanged(c context.Context, e domain.Event) error {
-	userRoleChanged, ok := e.(*event.UserRoleChanged)
+func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
+	userRoleChanged, ok := e.(*userEvent.UserRoleChanged)
 	if !ok {
-		return errors.Wrap(domain.ErrInvalidEvent, e.Topic())
+		return errors.Wrap(event.ErrInvalidEvent, e.Topic())
 	}
 
 	tx, err := s.db.Begin(c, &sql.TxOptions{

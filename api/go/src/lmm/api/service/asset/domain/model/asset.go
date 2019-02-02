@@ -1,7 +1,7 @@
 package model
 
 import (
-	"lmm/api/domain/model"
+	"lmm/api/model"
 )
 
 // Asset domain entity
