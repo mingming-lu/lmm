@@ -41,26 +41,25 @@ func (b *bus) Publish(c context.Context, e Event) error {
 		return ErrEmptyEventTopic
 	}
 
-	cancelCtx, cancel := context.WithCancel(c)
-	group, ctx := errgroup.WithContext(cancelCtx)
+	group, ctx := errgroup.WithContext(c)
 
 	for _, handler := range b.handlers[e.Topic()] {
 		group.Go(func() error {
-			return handler(c, e)
+			return handler(ctx, e)
 		})
 	}
 
+	errChan := make(chan error, 1)
 	go func() {
-		group.Wait()
-		cancel()
+		errChan <- group.Wait()
 	}()
 
-	<-ctx.Done()
-	if ctx.Err() == context.DeadlineExceeded {
-		return context.DeadlineExceeded
+	select {
+	case err := <-errChan:
+		return err
+	case <-c.Done():
+		return c.Err()
 	}
-
-	return group.Wait()
 }
 
 func (b *bus) Subscribe(e Event, handler EventHandler) error {
