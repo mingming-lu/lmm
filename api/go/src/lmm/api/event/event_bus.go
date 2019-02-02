@@ -4,6 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/pkg/errors"
 )
 
@@ -39,22 +41,25 @@ func (b *bus) Publish(c context.Context, e Event) error {
 		return ErrEmptyEventTopic
 	}
 
-	allErrors := []error{}
+	group, ctx := errgroup.WithContext(c)
 
 	for _, handler := range b.handlers[e.Topic()] {
-		if err := handler(c, e); err != nil {
-			allErrors = append(allErrors, err)
-		}
+		group.Go(func() error {
+			return handler(ctx, e)
+		})
 	}
 
-	if len(allErrors) > 0 {
-		err := ErrEventHandleFailed
-		for _, e := range allErrors {
-			err = errors.Wrap(err, e.Error())
-		}
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- group.Wait()
+	}()
+
+	select {
+	case err := <-errChan:
 		return err
+	case <-c.Done():
+		return c.Err()
 	}
-	return nil
 }
 
 func (b *bus) Subscribe(e Event, handler EventHandler) error {
