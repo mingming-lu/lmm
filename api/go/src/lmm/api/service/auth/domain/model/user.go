@@ -3,7 +3,7 @@ package model
 import (
 	"golang.org/x/crypto/bcrypt"
 
-	"lmm/api/domain/model"
+	"lmm/api/model"
 )
 
 // User domain model

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"lmm/api/clock"
-	"lmm/api/domain/model"
+	"lmm/api/model"
 )
 
 // Article is an aggregate root model

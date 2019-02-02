@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 
-	"lmm/api/domain/model"
+	"lmm/api/model"
 	"lmm/api/service/user/domain"
 	"lmm/api/util/uuidutil"
 )

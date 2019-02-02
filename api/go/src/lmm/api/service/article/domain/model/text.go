@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"lmm/api/domain/model"
+	"lmm/api/model"
 	"lmm/api/service/article/domain"
 )
 

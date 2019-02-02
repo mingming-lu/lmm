@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	eventBus "lmm/api/domain/event"
+	"lmm/api/event"
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/event"
+	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/model"
 
 	"github.com/pkg/errors"
@@ -30,7 +30,7 @@ func AssignUserRole(c context.Context, operator *model.UserDescriptor, targetUse
 		return err
 	}
 
-	return eventBus.SyncBus().Publish(c, event.NewUserRoleChangedEvent(
+	return event.SyncBus().Publish(c, userEvent.NewUserRoleChangedEvent(
 		operator.Name(), targetUser.Name(), targetUser.Role().Name(),
 	))
 }

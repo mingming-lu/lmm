@@ -3,7 +3,7 @@ package model
 import (
 	"sort"
 
-	"lmm/api/domain/model"
+	"lmm/api/model"
 	"lmm/api/service/article/domain"
 )
 
