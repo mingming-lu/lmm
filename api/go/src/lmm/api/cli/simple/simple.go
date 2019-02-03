@@ -2,10 +2,10 @@ package simple
 
 import (
 	"context"
-	"lmm/api/storage/db"
 	"log"
 
 	"lmm/api/cli"
+	"lmm/api/storage/db"
 )
 
 // NewCommand creates a cli.Command implement
@@ -21,43 +21,10 @@ func init() {
 		log.Println("hello world")
 		return nil
 	}))
-	cli.Register("addRoleColumnToUserTable", NewCommand(func(c context.Context) error {
+	cli.Register("addUserDescriptionIndex", NewCommand(func(c context.Context) error {
 		mysql := db.DefaultMySQL()
-		defer mysql.Close()
 
-		_, err := mysql.Exec(c, `
-ALTER TABLE user ADD COLUMN role VARCHAR(31) NOT NULL
-		`)
-		return err
-	}))
-	cli.Register("createTableUserRoleChangeHistory", NewCommand(func(c context.Context) error {
-		mysql := db.DefaultMySQL()
-		defer mysql.Close()
-
-		mysql.Exec(c, `
-DROP TABLE IF EXISTS user_role_change_history;
-`)
-
-		_, err := mysql.Exec(c, `
-CREATE TABLE IF NOT EXISTS user_role_change_history (
-	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-	operator BIGINT UNSIGNED NOT NULL,
-	operator_role VARCHAR(31) NOT NULL,
-	target_user BIGINT UNSIGNED NOT NULL,
-	from_role VARCHAR(31) NOT NULL,
-	to_role VARCHAR(31) NOT NULL,
-	changed_at DATETIME NOT NULL,
-	PRIMARY KEY (id),
-	INDEX changed_at (changed_at)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
-`)
-		return err
-	}))
-	cli.Register("assignExistingUserRoleAsAdmin", NewCommand(func(c context.Context) error {
-		mysql := db.DefaultMySQL()
-		defer mysql.Close()
-
-		_, err := mysql.Exec(c, `update user set role = 'admin'`)
+		_, err := mysql.Exec(c, `ALTER TABLE user ADD INDEX description (name, role, created_at)`)
 		return err
 	}))
 }

@@ -2,10 +2,12 @@ package model
 
 import (
 	"regexp"
+	"time"
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 
+	"lmm/api/clock"
 	"lmm/api/model"
 	"lmm/api/service/user/domain"
 	"lmm/api/util/uuidutil"
@@ -17,18 +19,20 @@ var (
 
 type UserDescriptor struct {
 	model.Entity
-	name string
-	role Role
+	name         string
+	role         Role
+	registeredAt time.Time
 }
 
-func NewUserDescriptor(name string, role Role) (*UserDescriptor, error) {
-	user := UserDescriptor{}
+func NewUserDescriptor(name string, role Role, registeredAt time.Time) (*UserDescriptor, error) {
+	user := UserDescriptor{
+		role:         role,
+		registeredAt: registeredAt,
+	}
 
 	if err := user.setName(name); err != nil {
 		return nil, err
 	}
-
-	user.role = role
 
 	return &user, nil
 }
@@ -60,6 +64,8 @@ func NewUser(name string, password Password, token string, role Role) (*User, er
 		return nil, err
 	}
 
+	user.registeredAt = clock.Now()
+
 	return &user, nil
 }
 
@@ -84,6 +90,10 @@ func (user *UserDescriptor) AssignRole(role Role) error {
 	default:
 		return domain.ErrNoSuchRole
 	}
+}
+
+func (user *UserDescriptor) RegisteredAt() time.Time {
+	return user.registeredAt
 }
 
 func (user *UserDescriptor) setName(name string) error {

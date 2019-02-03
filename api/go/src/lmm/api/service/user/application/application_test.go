@@ -11,6 +11,7 @@ import (
 
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
+	"lmm/api/service/user/domain/repository"
 	"lmm/api/testing"
 	"lmm/api/util/uuidutil"
 )
@@ -41,6 +42,10 @@ func (repo *InmemoryUserRepository) FindByName(c context.Context, username strin
 }
 
 func (repo *InmemoryUserRepository) DescribeByName(c context.Context, username string) (*model.UserDescriptor, error) {
+	panic("not implemented")
+}
+
+func (repo *InmemoryUserRepository) DescribeAll(context.Context, repository.DescribeAllOptions) ([]*model.UserDescriptor, error) {
 	panic("not implemented")
 }
 
