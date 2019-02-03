@@ -58,6 +58,7 @@ export default {
         { icon: 'create', title: 'Articles', to: '/articles' },
         { icon: 'photo_library', title: 'Assets (Images)', to: '/assets/images' },
         { icon: 'photo_camera', title: 'Assets (Photos)', to: '/assets/photos' },
+        { icon: 'people', title: 'Users', to: '/users' },
         { icon: 'exit_to_app', title: 'Logout', to: '/logout'},
       ],
       miniVariant: true,

@@ -42,7 +42,12 @@ export default {
           to: '/assets/photos',
           name: 'Assets (Photos)',
           description: 'Upload photos or view uploaded photos'
-        }
+        },
+        {
+          to: '/users',
+          name: 'Users',
+          description: 'View all users',
+        },
       ]
     }
   }
