@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"encoding/json"
+
 	"lmm/api/http"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/application/command"
@@ -97,16 +99,17 @@ func (ui *UI) ViewAllUsers(c http.Context) {
 		return
 	}
 
-	users, err := ui.appService.ViewAllUsersByOptions(c, query.ViewAllUsers{
+	q := query.ViewAllUsers{
 		Page:    c.Request().QueryParamOrDefault("page", "1"),
 		Count:   c.Request().QueryParamOrDefault("count", "100"),
-		OrderBy: c.Request().QueryParamOrDefault("order_by", "registered_date"),
-		Order:   c.Request().QueryParamOrDefault("order", "desc"),
-	})
+		OrderBy: c.Request().QueryParamOrDefault("sort_by", "registered_date"),
+		Order:   c.Request().QueryParamOrDefault("sort", "desc"),
+	}
+	users, err := ui.appService.ViewAllUsersByOptions(c, q)
 
 	switch errors.Cause(err) {
 	case nil:
-		c.JSON(http.StatusOK, ui.usersToJSONView(users))
+		c.JSON(http.StatusOK, ui.usersToJSONView(q, users))
 	case domain.ErrInvalidPage:
 		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrInvalidCount:
@@ -118,14 +121,22 @@ func (ui *UI) ViewAllUsers(c http.Context) {
 	}
 }
 
-func (ui *UI) usersToJSONView(users []*model.UserDescriptor) []userView {
-	usersView := make([]userView, len(users), len(users))
+func (ui *UI) usersToJSONView(query query.ViewAllUsers, users []*model.UserDescriptor) usersView {
+	userItems := make([]userView, len(users), len(users))
 	for i, user := range users {
-		usersView[i] = userView{
+		userItems[i] = userView{
 			Name:           user.Name(),
 			Role:           user.Role().Name(),
 			RegisteredDate: user.RegisteredAt().Unix(),
 		}
 	}
-	return usersView
+
+	return usersView{
+		Users:  userItems,
+		Count:  len(userItems),
+		Page:   json.Number(query.Page),
+		Total:  len(userItems),
+		Sort:   query.Order,
+		SortBy: query.OrderBy,
+	}
 }
