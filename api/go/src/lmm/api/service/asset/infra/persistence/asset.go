@@ -51,10 +51,7 @@ func (s *AssetStorage) FindAssetByName(c context.Context, name string) (*model.A
 }
 
 func (s *AssetStorage) findAssetByName(c context.Context, tx db.Tx, name string) (*asset, error) {
-	stmt, err := tx.Prepare(c, `select id, name, type from asset where name = ?`)
-	if err != nil {
-		panic(err)
-	}
+	stmt := tx.Prepare(c, `select id, name, type from asset where name = ?`)
 	defer stmt.Close()
 
 	a := &asset{}
@@ -75,39 +72,27 @@ func (s *AssetStorage) FindPhotoByName(c context.Context, name string) (*model.P
 		panic(err)
 	}
 
-	stmt, err := tx.Prepare(c, `select name from image_alt where asset = ?`)
-	if err != nil {
-		panic(err)
-	}
+	stmt := tx.Prepare(c, `select name from image_alt where asset = ?`)
 	defer stmt.Close()
 
 	a, err := s.findAssetByName(c, tx, name)
 	if err != nil {
-		if e := tx.Rollback(); e != nil {
-			return nil, errors.Wrap(err, e.Error())
-		}
-		return nil, err
+		return nil, db.RollbackWithError(tx, err)
 	}
 	photo := model.NewPhotoDescriptor(a.id, a.name)
 
 	rows, err := stmt.Query(c, a.id)
 	if err != nil {
-		if e := tx.Rollback(); e != nil {
-			return nil, errors.Wrap(err, e.Error())
-		}
-		return nil, err
+		return nil, db.RollbackWithError(tx, err)
 	}
 
 	var altName string
 	for rows.Next() {
 		if err := rows.Scan(&altName); err != nil {
-			panic(err)
+			return nil, db.RollbackWithError(tx, err)
 		}
 		if err := photo.AddAlternateText(altName); err != nil {
-			if e := tx.Rollback(); e != nil {
-				return nil, errors.Wrap(err, e.Error())
-			}
-			return nil, err
+			return nil, db.RollbackWithError(tx, err)
 		}
 	}
 	rows.Close()
@@ -122,13 +107,8 @@ func (s *AssetStorage) Save(c context.Context, asset *model.Asset) error {
 		return err
 	}
 
-	stmt, err := tx.Prepare(c, `insert into asset (name, type, user, created_at) values (?, ?, ?, ?)`)
-	if err != nil {
-		if e := tx.Rollback(); e != nil {
-			return errors.Wrap(err, e.Error())
-		}
-		return err
-	}
+	stmt := tx.Prepare(c, `insert into asset (name, type, user, created_at) values (?, ?, ?, ?)`)
+	defer stmt.Close()
 
 	if _, err := stmt.Exec(c,
 		asset.Name(),
@@ -136,10 +116,7 @@ func (s *AssetStorage) Save(c context.Context, asset *model.Asset) error {
 		asset.Uploader().ID(),
 		clock.Now(),
 	); err != nil {
-		if e := tx.Rollback(); e != nil {
-			return errors.Wrap(err, e.Error())
-		}
-		return err
+		return db.RollbackWithError(tx, err)
 	}
 
 	if err := s.uploader.Upload(c,
@@ -149,10 +126,7 @@ func (s *AssetStorage) Save(c context.Context, asset *model.Asset) error {
 			Type: asset.Type().String(),
 		},
 	); err != nil {
-		if e := tx.Rollback(); e != nil {
-			return errors.Wrap(err, e.Error())
-		}
-		return err
+		return db.RollbackWithError(tx, err)
 	}
 
 	return tx.Commit()

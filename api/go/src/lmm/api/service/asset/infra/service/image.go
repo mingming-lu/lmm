@@ -24,55 +24,37 @@ func (s *ImageService) SetAlt(c context.Context, asset *model.AssetDescriptor, a
 		return err
 	}
 
-	selectAsset, err := tx.Prepare(c, "select id from asset where name = ?")
+	selectAsset := tx.Prepare(c, "select id from asset where name = ?")
 	if err != nil {
-		if e := tx.Rollback(); e != nil {
-			return errors.Wrap(err, e.Error())
-		}
-		return err
+		return db.RollbackWithError(tx, err)
 	}
 	defer selectAsset.Close()
 
 	var assetID uint
 	if err := selectAsset.QueryRow(c, asset.Name()).Scan(&assetID); err != nil {
 		err = errors.Wrap(domain.ErrNoSuchAsset, err.Error())
-		if e := tx.Rollback(); e != nil {
-			return errors.Wrap(err, e.Error())
-		}
-		return err
+		return db.RollbackWithError(tx, err)
 	}
 
-	deleteAltByAssetID, err := tx.Prepare(c, "delete from image_alt where asset = ?")
+	deleteAltByAssetID := tx.Prepare(c, "delete from image_alt where asset = ?")
 	if err != nil {
-		if e := tx.Rollback(); e != nil {
-			return errors.Wrap(err, e.Error())
-		}
-		return err
+		return db.RollbackWithError(tx, err)
 	}
 	defer deleteAltByAssetID.Close()
 
 	if _, err := deleteAltByAssetID.Exec(c, assetID); err != nil && err != db.ErrNoRows {
-		if e := tx.Rollback(); e != nil {
-			return errors.Wrap(err, e.Error())
-		}
-		return err
+		return db.RollbackWithError(tx, err)
 	}
 
-	insertAlt, err := tx.Prepare(c, "insert into image_alt (asset, name) values(?, ?)")
+	insertAlt := tx.Prepare(c, "insert into image_alt (asset, name) values(?, ?)")
 	if err != nil {
-		if e := tx.Rollback(); e != nil {
-			return errors.Wrap(err, e.Error())
-		}
-		return err
+		return db.RollbackWithError(tx, err)
 	}
 	defer insertAlt.Close()
 
 	for _, alt := range alts {
 		if _, err := insertAlt.Exec(c, assetID, alt.Name()); err != nil {
-			if e := tx.Rollback(); e != nil {
-				return errors.Wrap(err, e.Error())
-			}
-			return err
+			return db.RollbackWithError(tx, err)
 		}
 	}
 
