@@ -180,9 +180,15 @@ i {
       font-size: 2em;
     }
     .text {
-      font-size: 1.1em;
+      font-size: 1em;
       line-height: 1.8;
       text-align: justify;
+      @media screen and (min-width: $max_width_device + 1) {
+        font-size: 1.1em;
+      }
+      @media screen and (max-width: $max_width_device) {
+        font-size: 1em;
+      }
     }
     .info {
       // opacity: 0.6;

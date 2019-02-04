@@ -182,11 +182,12 @@ export default {
 header {
   background-color: $color_primary_dark;
   border: none;
-  font-size: 1.5em;
   @media screen and (min-width: $max_width_device + 1) {
+    font-size: 1.5em;
     padding: 48px;
   }
   @media screen and (max-width: $max_width_device) {
+    font-size: 1.2em;
     position: sticky;
     top: 0;
   }
