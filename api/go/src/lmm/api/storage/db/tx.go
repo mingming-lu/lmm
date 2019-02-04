@@ -11,7 +11,7 @@ type Tx interface {
 
 	Exec(c context.Context, query string, args ...interface{}) (sql.Result, error)
 
-	Prepare(c context.Context, query string) (Stmt, error)
+	Prepare(c context.Context, query string) Stmt
 
 	Query(c context.Context, query string, args ...interface{}) (*sql.Rows, error)
 
@@ -32,12 +32,12 @@ func (tx *tx) Exec(c context.Context, query string, args ...interface{}) (sql.Re
 	return tx.Tx.ExecContext(c, query, args...)
 }
 
-func (tx *tx) Prepare(c context.Context, query string) (Stmt, error) {
+func (tx *tx) Prepare(c context.Context, query string) Stmt {
 	st, err := tx.Tx.PrepareContext(c, query)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return &stmt{Stmt: st}, nil
+	return &stmt{Stmt: st}
 }
 
 func (tx *tx) Query(c context.Context, query string, args ...interface{}) (*sql.Rows, error) {
