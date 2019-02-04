@@ -45,7 +45,7 @@ func (repo *InmemoryUserRepository) DescribeByName(c context.Context, username s
 	panic("not implemented")
 }
 
-func (repo *InmemoryUserRepository) DescribeAll(context.Context, repository.DescribeAllOptions) ([]*model.UserDescriptor, error) {
+func (repo *InmemoryUserRepository) DescribeAll(context.Context, repository.DescribeAllOptions) ([]*model.UserDescriptor, uint, error) {
 	panic("not implemented")
 }
 

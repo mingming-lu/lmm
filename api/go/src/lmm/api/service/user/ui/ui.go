@@ -105,11 +105,11 @@ func (ui *UI) ViewAllUsers(c http.Context) {
 		OrderBy: c.Request().QueryParamOrDefault("sort_by", "registered_date"),
 		Order:   c.Request().QueryParamOrDefault("sort", "desc"),
 	}
-	users, err := ui.appService.ViewAllUsersByOptions(c, q)
+	users, totalUsers, err := ui.appService.ViewAllUsersByOptions(c, q)
 
 	switch errors.Cause(err) {
 	case nil:
-		c.JSON(http.StatusOK, ui.usersToJSONView(q, users))
+		c.JSON(http.StatusOK, ui.usersToJSONView(q, users, totalUsers))
 	case domain.ErrInvalidPage:
 		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrInvalidCount:
@@ -121,7 +121,7 @@ func (ui *UI) ViewAllUsers(c http.Context) {
 	}
 }
 
-func (ui *UI) usersToJSONView(query query.ViewAllUsers, users []*model.UserDescriptor) usersView {
+func (ui *UI) usersToJSONView(query query.ViewAllUsers, users []*model.UserDescriptor, totalUsers uint) usersView {
 	userItems := make([]userView, len(users), len(users))
 	for i, user := range users {
 		userItems[i] = userView{
@@ -135,7 +135,7 @@ func (ui *UI) usersToJSONView(query query.ViewAllUsers, users []*model.UserDescr
 		Users:  userItems,
 		Count:  len(userItems),
 		Page:   json.Number(query.Page),
-		Total:  len(userItems),
+		Total:  totalUsers,
 		Sort:   query.Order,
 		SortBy: query.OrderBy,
 	}
