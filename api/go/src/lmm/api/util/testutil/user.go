@@ -24,6 +24,16 @@ type User struct {
 	createdAt         time.Time
 }
 
+// NewAdmin creates a new admin user for testing
+func NewAdmin(db db.DB) User {
+	user := NewUser(db)
+	_, err := db.Exec(context.TODO(), `update user set role = ? where name = ?`, "admin", user.Name())
+	if err != nil {
+		panic(err)
+	}
+	return user
+}
+
 // NewUser creates a user for testing
 func NewUser(db db.DB) User {
 	username := "U" + uuid.New().String()[:8]
@@ -46,7 +56,7 @@ func NewUser(db db.DB) User {
 
 	now := clock.Now()
 
-	res, err := db.Exec(context.Background(),
+	res, err := db.Exec(context.TODO(),
 		`insert into user (name, password, token, role, created_at) values (?, ?, ?, ?, ?)`,
 		user.Name(), user.Password(), user.Token(), user.Role().Name(), now,
 	)
