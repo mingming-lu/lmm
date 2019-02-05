@@ -50,7 +50,7 @@ const usersHandler = httpClient => {
       })
     },
     changeRole: (username, role) => {
-      return httpClient.put(`/v1/users/${username}`, {
+      return httpClient.put(`/v1/users/${username}/role`, {
         role: role,
       }, {
         headers: {
