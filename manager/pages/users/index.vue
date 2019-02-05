@@ -9,9 +9,24 @@
     class="elevation-1"
   >
     <template slot="items" slot-scope="props">
-      <td :class="{'primary--text': props.item.name === me}">{{ props.item.name }}</td>
-      <td>{{ props.item.role }}</td>
-      <td>{{ formattedTime(props.item.registered_date) }}</td>
+      <td
+        width="40%"
+        :class="{'primary--text': props.item.name === me}"
+        >
+        {{ props.item.name }}
+      </td>
+      <td width="40%">
+        <v-flex xs12 sm6 d-flex>
+          <v-select
+            :disabled="props.item.name === me"
+            :items="roles"
+            v-model="props.item.role"
+            @input="assignUserRole(props.item.name, props.item.role, $event)"
+          >
+          </v-select>
+        </v-flex>
+      </td>
+      <td width="20%">{{ formattedTime(props.item.registered_date) }}</td>
     </template>
   </v-data-table>
 </template>
@@ -35,7 +50,7 @@ const usersHandler = httpClient => {
       })
     },
     changeRole: (username, role) => {
-      return httpClient.put(`/v1/users/${username}`, {
+      return httpClient.put(`/v1/users/${username}/role`, {
         role: role,
       }, {
         headers: {
@@ -49,6 +64,7 @@ const usersHandler = httpClient => {
 export default {
   data () {
     return {
+      roles: ['admin', 'ordinary'],
       headers: [
         { text: 'Name',            value: 'name'            },
         { text: 'Role',            value: 'role'            },
@@ -67,12 +83,22 @@ export default {
       },
     }
   },
-  computed: {
-  },
   methods: {
     formattedTime(dtString) {
       return formattedDateFromTimeStamp(dtString)
     },
+    assignUserRole(userName, oldRole, newRole) {
+      if (!confirm(`going to change the role of "${userName}" into ${newRole}`)) {
+        return
+      }
+      usersHandler(this.$axios).changeRole(userName, oldRole, newRole).catch(err => {
+        if (!err.response) {
+          console.log(err)
+          return
+        }
+        alert(err.response.data)
+      })
+    }
   },
   watch: {
     pagination: {
@@ -85,7 +111,6 @@ export default {
           sort:    newOne.descending ? 'desc' : 'asc',
         }
         usersHandler(this.$axios).fetchByQuery(query).then(res => {
-          console.log(res.headers)
           this.me                    = res.headers['x-lmm-user']
           this.users                 = res.data.users
           this.pagination.sortBy     = res.data.sort_by
