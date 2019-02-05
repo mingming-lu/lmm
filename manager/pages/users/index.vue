@@ -111,7 +111,6 @@ export default {
           sort:    newOne.descending ? 'desc' : 'asc',
         }
         usersHandler(this.$axios).fetchByQuery(query).then(res => {
-          console.log(res.headers)
           this.me                    = res.headers['x-lmm-user']
           this.users                 = res.data.users
           this.pagination.sortBy     = res.data.sort_by
