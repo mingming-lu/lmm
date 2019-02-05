@@ -62,6 +62,24 @@ const usersHandler = httpClient => {
 }
 
 export default {
+  asyncData({$axios}) {
+    return usersHandler($axios).fetchByQuery({})
+      .then(res => {
+        return {
+          loading: false,
+          users: res.data.users,
+          me: res.headers['x-lmm-user'],
+          pagination: {
+            sortBy:           res.data.sort_by,
+            descending:       res.data.sort === 'desc' ? true : false,
+            page:             res.data.page,
+            rowsPerPage:      res.data.count,
+            totalItems:       res.data.total,
+            rowsPerPageItems: [50, 100],
+          },
+        }
+      })
+  },
   data () {
     return {
       roles: ['admin', 'ordinary'],
@@ -70,17 +88,7 @@ export default {
         { text: 'Role',            value: 'role'            },
         { text: 'Registered Date', value: 'registered_date' },
       ],
-      users: [],
-      me: '',
       loading: true,
-      pagination: {
-        descending:       true,
-        page:             1,
-        sortBy:           'registered_date',
-        totalItems:       0,
-        rowsPerPage:      50,
-        rowsPerPageItems: [50, 100],
-      },
     }
   },
   methods: {
@@ -103,6 +111,9 @@ export default {
   watch: {
     pagination: {
       handler(newOne, oldOne) {
+        if (Object.keys(newOne).every(key => newOne[key] === oldOne[key])) {
+          return
+        }
         this.loading = true
         const query = {
           page:    newOne.page,
@@ -111,12 +122,14 @@ export default {
           sort:    newOne.descending ? 'desc' : 'asc',
         }
         usersHandler(this.$axios).fetchByQuery(query).then(res => {
-          this.me                    = res.headers['x-lmm-user']
-          this.users                 = res.data.users
-          this.pagination.sortBy     = res.data.sort_by
-          this.pagination.descending = res.data.sort === 'desc' ? true : false
-          this.pagination.page       = res.data.page
-          this.loading               = false
+          this.me                     = res.headers['x-lmm-user']
+          this.users                  = res.data.users
+          this.pagination.sortBy      = res.data.sort_by
+          this.pagination.descending  = res.data.sort === 'desc' ? true : false
+          this.pagination.page        = res.data.page
+          this.pagination.rowsPerPage = res.data.count
+          this.pagination.totalItems  = res.data.total
+          this.loading                = false
         })
       },
       deep: true,

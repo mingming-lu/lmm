@@ -101,7 +101,7 @@ func (ui *UI) ViewAllUsers(c http.Context) {
 
 	q := query.ViewAllUsers{
 		Page:    c.Request().QueryParamOrDefault("page", "1"),
-		Count:   c.Request().QueryParamOrDefault("count", "100"),
+		Count:   c.Request().QueryParamOrDefault("count", "50"),
 		OrderBy: c.Request().QueryParamOrDefault("sort_by", "registered_date"),
 		Order:   c.Request().QueryParamOrDefault("sort", "desc"),
 	}
@@ -133,7 +133,7 @@ func (ui *UI) usersToJSONView(query query.ViewAllUsers, users []*model.UserDescr
 
 	return usersView{
 		Users:  userItems,
-		Count:  len(userItems),
+		Count:  json.Number(query.Count),
 		Page:   json.Number(query.Page),
 		Total:  totalUsers,
 		Sort:   query.Order,
