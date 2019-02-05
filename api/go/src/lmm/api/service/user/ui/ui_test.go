@@ -6,6 +6,9 @@ import (
 	"strings"
 
 	"lmm/api/http"
+	authApp "lmm/api/service/auth/application"
+	authStorage "lmm/api/service/auth/infra/persistence"
+	authUI "lmm/api/service/auth/ui"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/infra/persistence"
@@ -18,16 +21,25 @@ import (
 )
 
 var (
+	mysql  db.DB
 	router *http.Router
 )
 
 func TestMain(m *testing.M) {
-	mysql := db.DefaultMySQL()
+	mysql = db.DefaultMySQL()
+
+	authRepo := authStorage.NewUserStorage(mysql)
+	authAppService := authApp.NewService(authRepo)
+	authUI := authUI.NewUI(authAppService)
+
 	userRepo := persistence.NewUserStorage(mysql)
 	appService := application.NewService(userRepo)
 	ui := NewUI(appService)
 	router = http.NewRouter()
+
 	router.POST("/v1/users", ui.SignUp)
+	router.PUT("/v1/users/:user/role", authUI.BearerAuth(ui.AssignUserRole))
+	router.GET("/v1/users", authUI.BearerAuth(ui.ViewAllUsers))
 
 	code := m.Run()
 
@@ -104,4 +116,16 @@ func postUser(requestBody io.ReadCloser) *testing.Response {
 	})
 
 	return testing.DoRequest(request, router)
+}
+
+func getUsers(opts *testing.RequestOptions) *testing.Response {
+	req := testing.GET("/v1/users", opts)
+
+	return testing.DoRequest(req, router)
+}
+
+func assignUserRole(username string, opts *testing.RequestOptions) *testing.Response {
+	req := testing.PUT("/v1/users/"+username+"/role", opts)
+
+	return testing.DoRequest(req, router)
 }
