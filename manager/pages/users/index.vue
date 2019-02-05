@@ -111,6 +111,9 @@ export default {
   watch: {
     pagination: {
       handler(newOne, oldOne) {
+        if (Object.keys(newOne).every(key => newOne[key] === oldOne[key])) {
+          return
+        }
         this.loading = true
         const query = {
           page:    newOne.page,
