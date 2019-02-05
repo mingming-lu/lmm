@@ -5,12 +5,14 @@ import (
 	"os"
 	"strings"
 
+	"lmm/api/event"
 	"lmm/api/http"
 	authApp "lmm/api/service/auth/application"
 	authStorage "lmm/api/service/auth/infra/persistence"
 	authUI "lmm/api/service/auth/ui"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
+	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/service/user/infra/persistence"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
@@ -36,6 +38,8 @@ func TestMain(m *testing.M) {
 	appService := application.NewService(userRepo)
 	ui := NewUI(appService)
 	router = http.NewRouter()
+
+	event.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, event.NopEventHandler)
 
 	router.POST("/v1/users", ui.SignUp)
 	router.PUT("/v1/users/:user/role", authUI.BearerAuth(ui.AssignUserRole))

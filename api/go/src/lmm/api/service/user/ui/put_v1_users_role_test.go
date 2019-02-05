@@ -7,6 +7,8 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/testing"
 	"lmm/api/util/testutil"
+
+	"github.com/google/uuid"
 )
 
 func TestPUTV1UsersRole(tt *testing.T) {
@@ -69,7 +71,7 @@ func TestPUTV1UsersRole(tt *testing.T) {
 			},
 			"NotFound/NoSuchUser": failCase{
 				ReqHeader:      authorizationHeader,
-				TargetUserName: admin.Name(),
+				TargetUserName: "u" + uuid.New().String()[:7],
 				ReqBody:        testing.StructToRequestBody(validForm{Role: "admin"}),
 				ResStatus:      http.StatusNotFound,
 				ResBody:        domain.ErrNoSuchUser.Error(),
