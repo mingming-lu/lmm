@@ -133,7 +133,7 @@ func (ui *UI) usersToJSONView(query query.ViewAllUsers, users []*model.UserDescr
 
 	return usersView{
 		Users:  userItems,
-		Count:  len(userItems),
+		Count:  json.Number(query.Count),
 		Page:   json.Number(query.Page),
 		Total:  totalUsers,
 		Sort:   query.Order,

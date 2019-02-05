@@ -20,7 +20,7 @@ type userView struct {
 type usersView struct {
 	Users  []userView  `json:"users"`
 	Page   json.Number `json:"page,number"`
-	Count  int         `json:"count"`
+	Count  json.Number `json:"count"`
 	Total  uint        `json:"total"`
 	SortBy string      `json:"sort_by"`
 	Sort   string      `json:"sort"`
