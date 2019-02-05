@@ -64,6 +64,7 @@ const usersHandler = httpClient => {
 export default {
   data () {
     return {
+      roles: ['admin', 'ordinary'],
       headers: [
         { text: 'Name',            value: 'name'            },
         { text: 'Role',            value: 'role'            },
