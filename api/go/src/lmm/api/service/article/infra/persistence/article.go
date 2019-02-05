@@ -38,7 +38,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	findUserID, err := tx.Prepare(c, `
+	findUserID := tx.Prepare(c, `
 		select id from user where name = ?
 	`)
 	if err != nil {
@@ -48,7 +48,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	saveArticle, err := tx.Prepare(c, `
+	saveArticle := tx.Prepare(c, `
 		insert into article (uid, alias_uid, user, title, body, created_at, updated_at)
 		values (?, ?, ?, ?, ?, ?, ?)
 		on duplicate key update id = LAST_INSERT_ID(id), alias_uid = ?, title = ?, body = ?, updated_at = ?
@@ -60,7 +60,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	deleteTags, err := tx.Prepare(c, `
+	deleteTags := tx.Prepare(c, `
 		delete at from article_tag at left join article a on a.id = at.article where at.article = ?
 	`)
 	if err != nil {
@@ -70,7 +70,7 @@ func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
 		return err
 	}
 
-	saveTags, err := tx.Prepare(c, `
+	saveTags := tx.Prepare(c, `
 		insert into article_tag (article, sort, name) values (?, ?, ?)
 	`)
 	if err != nil {
@@ -148,22 +148,14 @@ func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*mode
 		return nil, err
 	}
 
-	stmt, err := tx.Prepare(c, `
+	stmt := tx.Prepare(c, `
 		select id, uid, alias_uid, user, title, body,updated_at from article where alias_uid = ? or uid = ? for update
 	`)
-	if err != nil {
-		if err := tx.Rollback(); err != nil {
-			return nil, err
-		}
-		return nil, err
-	}
+	defer stmt.Close()
 
 	article, err := s.articleModelFromRow(c, stmt.QueryRow(c, id.String(), id.Raw()))
 	if err != nil {
-		if err := tx.Rollback(); err != nil {
-			return nil, err
-		}
-		return nil, err
+		return nil, db.RollbackWithError(tx, err)
 	}
 
 	if err := tx.Commit(); err != nil {

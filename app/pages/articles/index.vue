@@ -225,10 +225,10 @@ export default {
     }
     .title {
       @media screen and (min-width: $max_width_device + 1) {
-        font-size: 1.66em;
+        font-size: 1.5em;
       }
       @media screen and(max-width: $max_width_device) {
-        font-size: 1.5em;
+        font-size: 1.2em;
       }
     }
     .post-at {

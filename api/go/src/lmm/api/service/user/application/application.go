@@ -73,20 +73,20 @@ func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
 
 const maxCount uint = 100
 
-func (s *Service) ViewAllUsersByOptions(c context.Context, query query.ViewAllUsers) ([]*model.UserDescriptor, error) {
+func (s *Service) ViewAllUsersByOptions(c context.Context, query query.ViewAllUsers) ([]*model.UserDescriptor, uint, error) {
 	page, err := stringutil.ParseUint(query.Page)
 	if err != nil || page == 0 {
-		return nil, errors.Wrap(domain.ErrInvalidPage, query.Page)
+		return nil, 0, errors.Wrap(domain.ErrInvalidPage, query.Page)
 	}
 
 	count, err := stringutil.ParseUint(query.Count)
 	if err != nil || count > maxCount {
-		return nil, errors.Wrap(domain.ErrInvalidCount, query.Count)
+		return nil, 0, errors.Wrap(domain.ErrInvalidCount, query.Count)
 	}
 
 	order, err := s.mappingOrder(query.OrderBy, query.Order)
 	if err != nil {
-		return nil, errors.Wrap(domain.ErrInvalidViewOrder, query.Order)
+		return nil, 0, errors.Wrap(domain.ErrInvalidViewOrder, query.Order)
 	}
 	return s.userRepository.DescribeAll(c, repository.DescribeAllOptions{
 		Page:  page,

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 
 	"lmm/api/event"
-	"lmm/api/http"
 	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/storage/db"
 
@@ -36,33 +35,21 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 		return err
 	}
 
-	searchUsers, err := tx.Prepare(c, `
+	searchUsers := tx.Prepare(c, `
 		select id, role from user where name in (?, ?) order by field (name, ?, ?) for update
 	`)
-	if err != nil {
-		tx.Rollback()
-		http.Log().Panic(c, err.Error())
-	}
 	defer searchUsers.Close()
 
-	setRole, err := tx.Prepare(c, `
+	setRole := tx.Prepare(c, `
 		update user set role = ? where name = ?
 	`)
-	if err != nil {
-		tx.Rollback()
-		http.Log().Panic(c, err.Error())
-	}
 	defer setRole.Close()
 
-	recordChangeHistory, err := tx.Prepare(c, `
+	recordChangeHistory := tx.Prepare(c, `
 		insert into user_role_change_history (
 			operator, operator_role, target_user, from_role, to_role, changed_at
 		) values (?, ?, ?, ?, ?, ?)
 	`)
-	if err != nil {
-		tx.Rollback()
-		http.Log().Panic(c, err.Error())
-	}
 	defer recordChangeHistory.Close()
 
 	var (
@@ -78,19 +65,16 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 			userRoleChanged.OperatorUser(), userRoleChanged.TargetUser(),
 		)
 		if err != nil {
-			tx.Rollback()
-			return err
+			return db.RollbackWithError(tx, err)
 		}
 
 		rows.Next()
 		if err := rows.Scan(&operatorUserID, &operatorUserRole); err != nil {
-			tx.Rollback()
-			return err
+			return db.RollbackWithError(tx, err)
 		}
 		rows.Next()
 		if err := rows.Scan(&targetUserID, &targetUserRole); err != nil {
-			tx.Rollback()
-			return err
+			return db.RollbackWithError(tx, err)
 		}
 		rows.Close()
 	}
@@ -98,8 +82,7 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 	{
 		_, err := setRole.Exec(c, userRoleChanged.TargetRole(), userRoleChanged.TargetUser())
 		if err != nil {
-			tx.Rollback()
-			return err
+			return db.RollbackWithError(tx, err)
 		}
 	}
 
@@ -113,8 +96,7 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 			userRoleChanged.OccurredAt(),
 		)
 		if err != nil {
-			tx.Rollback()
-			return err
+			return db.RollbackWithError(tx, err)
 		}
 	}
 

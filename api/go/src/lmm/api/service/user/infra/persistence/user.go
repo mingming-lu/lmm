@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/pkg/errors"
@@ -68,14 +69,31 @@ func (s *UserStorage) DescribeByName(c context.Context, username string) (*model
 	return model.NewUserDescriptor(username, role, createdAt)
 }
 
-func (s *UserStorage) DescribeAll(c context.Context, options repository.DescribeAllOptions) ([]*model.UserDescriptor, error) {
-	stmt := s.db.Prepare(c,
-		`select name, role, created_at from user order by `+s.mappingOrder(options.Order)+` limit ? offset ?`)
-	defer stmt.Close()
-
-	rows, err := stmt.Query(c, options.Count, (options.Page-1)*options.Count)
+// DescribeAll implementation
+func (s *UserStorage) DescribeAll(c context.Context, options repository.DescribeAllOptions) ([]*model.UserDescriptor, uint, error) {
+	tx, err := s.db.Begin(c, &sql.TxOptions{
+		ReadOnly:  true,
+		Isolation: sql.LevelRepeatableRead,
+	})
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	countUsers := tx.Prepare(c, `select count(*) from user`)
+	defer countUsers.Close()
+
+	selectUsers := tx.Prepare(c,
+		`select name, role, created_at from user order by `+s.mappingOrder(options.Order)+` limit ? offset ?`)
+	defer selectUsers.Close()
+
+	var totalUsers uint
+	if err := countUsers.QueryRow(c).Scan(&totalUsers); err != nil {
+		return nil, 0, db.RollbackWithError(tx, err)
+	}
+
+	rows, err := selectUsers.Query(c, options.Count, (options.Page-1)*options.Count)
+	if err != nil {
+		return nil, 0, db.RollbackWithError(tx, err)
 	}
 
 	users := make([]*model.UserDescriptor, 0)
@@ -88,18 +106,24 @@ func (s *UserStorage) DescribeAll(c context.Context, options repository.Describe
 
 	for rows.Next() {
 		if err := rows.Scan(&username, &rolename, &createdAt); err != nil {
-			return nil, err
+			return nil, 0, db.RollbackWithError(tx, err)
 		}
 		role := service.RoleAdapter(rolename)
 		user, err := model.NewUserDescriptor(username, role, createdAt)
 		if err != nil {
-			return nil, err
+			return nil, 0, db.RollbackWithError(tx, err)
 		}
 		users = append(users, user)
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, 0, db.RollbackWithError(tx, err)
+	}
 
-	return users, nil
+	if err := tx.Commit(); err != nil {
+		http.Log().Warn(c, err.Error())
+	}
+
+	return users, totalUsers, err
 }
 
 func (s *UserStorage) mappingOrder(order repository.DescribeAllOrder) string {

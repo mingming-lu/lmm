@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type Rows = sql.Rows
@@ -67,6 +69,18 @@ type SQLOptions struct {
 	Where   string
 	OrderBy string
 	Limit   string
+}
+
+func RollbackWithError(tx Tx, err error) error {
+	if err == nil {
+		return tx.Rollback()
+	}
+
+	if e := tx.Rollback(); e != nil {
+		return errors.Wrap(err, e.Error())
+	}
+
+	return err
 }
 
 // Count counts the number of columns from table
