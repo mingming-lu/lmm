@@ -20,7 +20,9 @@ func NewRequest(r *http.Request, params httprouter.Params) *Request {
 }
 
 func (r *Request) Bind(schema interface{}) error {
-	return json.NewDecoder(r.Request.Body).Decode(schema)
+	decoder := json.NewDecoder(r.Request.Body)
+	decoder.DisallowUnknownFields()
+	return decoder.Decode(schema)
 }
 
 func (r *Request) PathParam(name string) string {
