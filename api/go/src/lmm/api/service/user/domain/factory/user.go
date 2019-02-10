@@ -4,9 +4,7 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/service"
-	"lmm/api/util/stringutil"
-
-	"github.com/google/uuid"
+	"lmm/api/util/uuidutil"
 )
 
 type Factory struct {
@@ -25,8 +23,7 @@ func (f *Factory) NewUser(username, password string) (*model.User, error) {
 		return nil, err
 	}
 
-	token := uuid.New().String()
-	token = stringutil.ReplaceAll(token, "-", "")
+	token := uuidutil.NewUUID()
 
 	return model.NewUser(username, hashedPassword, token, model.Ordinary)
 }

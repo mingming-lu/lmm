@@ -3,11 +3,12 @@ package messaging
 import (
 	"context"
 	"database/sql"
-	"lmm/api/service/user/domain"
 
 	"lmm/api/event"
+	"lmm/api/service/user/domain"
 	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/storage/db"
+	"lmm/api/util/uuidutil"
 
 	"github.com/pkg/errors"
 )
@@ -48,8 +49,7 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 
 	recordChangeHistory := tx.Prepare(c, `
 		insert into user_role_change_history (
-			operator, operator_role, target_user, from_role, to_role, changed_at
-		) values (?, ?, ?, ?, ?, ?)
+			operator, operator_role, target_user, from_role, to_role, changed_at) values (?, ?, ?, ?, ?, ?)
 	`)
 	defer recordChangeHistory.Close()
 
@@ -118,13 +118,16 @@ func (s *Subscriber) OnUserPasswordChanged(c context.Context, e event.Event) err
 		return err
 	}
 
-	searchUserID := tx.Prepare(c, `select id from user where name = ?`)
+	searchUserID := tx.Prepare(c, `select id from user where name = ? for update`)
 	defer searchUserID.Close()
 
 	recordChanged := tx.Prepare(c,
 		`insert into user_password_change_history (user, changed_at) values(?, ?)`,
 	)
 	defer recordChanged.Close()
+
+	resetUserToken := tx.Prepare(c, `update user set token = ? where id = ?`)
+	defer resetUserToken.Close()
 
 	var userID int64
 	if err := searchUserID.QueryRow(c, userPasswordChanged.UserName()).Scan(&userID); err != nil {
@@ -135,6 +138,11 @@ func (s *Subscriber) OnUserPasswordChanged(c context.Context, e event.Event) err
 	}
 
 	if _, err := recordChanged.Exec(c, userID, userPasswordChanged.OccurredAt()); err != nil {
+		return db.RollbackWithError(tx, err)
+	}
+
+	newToken := uuidutil.NewUUID()
+	if _, err := resetUserToken.Exec(c, newToken, userID); err != nil {
 		return db.RollbackWithError(tx, err)
 	}
 
