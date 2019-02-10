@@ -2,12 +2,12 @@ package application
 
 import (
 	"context"
-	"lmm/api/service/user/domain/event"
 
 	"lmm/api/http"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
+	"lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
@@ -19,6 +19,7 @@ import (
 
 // Service is a application service
 type Service struct {
+	encrypter      service.EncryptService
 	factory        *factory.Factory
 	userRepository repository.UserRepository
 }
@@ -27,6 +28,7 @@ type Service struct {
 func NewService(userRepository repository.UserRepository) *Service {
 	encrypter := &service.BcryptService{}
 	return &Service{
+		encrypter:      encrypter,
 		factory:        factory.NewFactory(encrypter),
 		userRepository: userRepository,
 	}
@@ -110,6 +112,10 @@ func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePasswo
 	user, err := s.userRepository.FindByName(c, cmd.User)
 	if err != nil {
 		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
+	}
+
+	if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
+		return domain.ErrUserPassword
 	}
 
 	hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)

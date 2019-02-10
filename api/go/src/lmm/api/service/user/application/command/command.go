@@ -10,5 +10,6 @@ type AssignRole struct {
 // ChangePassword command
 type ChangePassword struct {
 	User        string
+	OldPassword string
 	NewPassword string
 }

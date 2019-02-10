@@ -108,7 +108,8 @@ func (ui *UI) ChangeUserPassword(c http.Context) {
 
 	err := ui.appService.UserChangePassword(c, command.ChangePassword{
 		User:        userName,
-		NewPassword: requestBody.Password,
+		OldPassword: requestBody.OldPassword,
+		NewPassword: requestBody.NewPassword,
 	})
 
 	originalError := errors.Cause(err)

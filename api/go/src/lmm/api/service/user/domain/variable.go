@@ -33,6 +33,9 @@ var (
 	// ErrUserNameAlreadyUsed error
 	ErrUserNameAlreadyUsed = errors.New("user name has already been used")
 
+	// ErrUserPassword error
+	ErrUserPassword = errors.New("user password error")
+
 	// ErrUserPasswordEmpty error
 	ErrUserPasswordEmpty = errors.New("user password is empty")
 
