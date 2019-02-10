@@ -114,18 +114,24 @@ func (ui *UI) EditArticle(c http.Context) {
 	switch errors.Cause(err) {
 	case nil:
 		http.NoContent(c)
-	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
+
+	case
+		domain.ErrArticleTitleTooLong,
+		domain.ErrEmptyArticleTitle,
+		domain.ErrInvalidArticleTitle,
+		domain.ErrInvalidAliasArticleID:
+
 		c.String(http.StatusBadRequest, err.Error())
-	case domain.ErrInvalidArticleID:
-		c.String(http.StatusBadRequest, domain.ErrInvalidArticleID.Error())
-	case domain.ErrInvalidArticleTitle:
-		c.String(http.StatusBadRequest, err.Error())
-	case domain.ErrNoSuchArticle:
-		c.String(http.StatusNotFound, err.Error())
+
+	case domain.ErrNoSuchArticle, domain.ErrInvalidArticleID:
+		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
+
 	case domain.ErrNoSuchUser:
 		http.Unauthorized(c)
+
 	case domain.ErrNotArticleAuthor:
 		c.String(http.StatusForbidden, err.Error())
+
 	default:
 		http.Log().Panic(c, err.Error())
 	}

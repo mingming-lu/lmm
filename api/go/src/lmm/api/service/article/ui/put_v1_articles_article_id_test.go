@@ -94,7 +94,7 @@ func TestPutArticlews(tt *testing.T) {
 			ResBody:       domain.ErrNoSuchArticle.Error(),
 		},
 		"InvalidArticleID": {
-			ArticleID:     "over8charcters",
+			ArticleID:     "!nv@lidchrcter$",
 			ReqTitle:      stringutil.Pointer("dummy"),
 			ReqBody:       stringutil.Pointer("dummy"),
 			ReqTags:       make([]string, 0),
