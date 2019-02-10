@@ -12,6 +12,6 @@ func PublishUserRoleChanged(c context.Context, operator, user, targetRole string
 	))
 }
 
-func PublishUserPasswordChanged(c context.Context, username string) error {
-	return event.SyncBus().Publish(c, NewUserPasswordChangedEvent(username))
+func PublishUserPasswordChanged(c context.Context, username, password string) error {
+	return event.SyncBus().Publish(c, NewUserPasswordChangedEvent(username, password))
 }

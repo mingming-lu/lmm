@@ -127,5 +127,5 @@ func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePasswo
 		return err
 	}
 
-	return event.PublishUserPasswordChanged(c, user.Name())
+	return event.PublishUserPasswordChanged(c, user.Name(), user.Password())
 }

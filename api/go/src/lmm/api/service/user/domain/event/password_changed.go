@@ -12,12 +12,14 @@ const (
 
 type UserPasswordChanged struct {
 	username  string
+	password  string
 	changedAt time.Time
 }
 
-func NewUserPasswordChangedEvent(username string) *UserPasswordChanged {
+func NewUserPasswordChangedEvent(username, password string) *UserPasswordChanged {
 	return &UserPasswordChanged{
 		username:  username,
+		password:  password,
 		changedAt: clock.Now(),
 	}
 }
@@ -28,6 +30,10 @@ func (event *UserPasswordChanged) Topic() string {
 
 func (event *UserPasswordChanged) UserName() string {
 	return event.username
+}
+
+func (event *UserPasswordChanged) Password() string {
+	return event.password
 }
 
 func (event *UserPasswordChanged) OccurredAt() time.Time {

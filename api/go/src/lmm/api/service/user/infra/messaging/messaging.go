@@ -118,19 +118,19 @@ func (s *Subscriber) OnUserPasswordChanged(c context.Context, e event.Event) err
 		return err
 	}
 
-	searchUserID := tx.Prepare(c, `select id from user where name = ? for update`)
-	defer searchUserID.Close()
+	lockUser := tx.Prepare(c, `select id from user where name = ? for update`)
+	defer lockUser.Close()
 
 	recordChanged := tx.Prepare(c,
 		`insert into user_password_change_history (user, changed_at) values(?, ?)`,
 	)
 	defer recordChanged.Close()
 
-	resetUserToken := tx.Prepare(c, `update user set token = ? where id = ?`)
-	defer resetUserToken.Close()
+	updateUser := tx.Prepare(c, `update user set token = ?, password = ? where id = ?`)
+	defer updateUser.Close()
 
 	var userID int64
-	if err := searchUserID.QueryRow(c, userPasswordChanged.UserName()).Scan(&userID); err != nil {
+	if err := lockUser.QueryRow(c, userPasswordChanged.UserName()).Scan(&userID); err != nil {
 		if err == sql.ErrNoRows {
 			return db.RollbackWithError(tx, domain.ErrNoSuchUser)
 		}
@@ -142,7 +142,8 @@ func (s *Subscriber) OnUserPasswordChanged(c context.Context, e event.Event) err
 	}
 
 	newToken := uuidutil.NewUUID()
-	if _, err := resetUserToken.Exec(c, newToken, userID); err != nil {
+	password := userPasswordChanged.Password()
+	if _, err := updateUser.Exec(c, newToken, password, userID); err != nil {
 		return db.RollbackWithError(tx, err)
 	}
 
