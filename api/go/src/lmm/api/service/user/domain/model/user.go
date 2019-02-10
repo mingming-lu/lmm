@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"golang.org/x/crypto/bcrypt"
 
 	"lmm/api/clock"
 	"lmm/api/model"
@@ -45,14 +44,14 @@ type User struct {
 }
 
 // NewUser creates a new user domain model
-func NewUser(name string, password Password, token string, role Role) (*User, error) {
+func NewUser(name, password, token string, role Role) (*User, error) {
 	user := User{}
 
 	if err := user.setName(name); err != nil {
 		return nil, err
 	}
 
-	if err := user.setPassword(password.String()); err != nil {
+	if err := user.setPassword(password); err != nil {
 		return nil, err
 	}
 
@@ -60,7 +59,7 @@ func NewUser(name string, password Password, token string, role Role) (*User, er
 		return nil, err
 	}
 
-	if err := user.AssignRole(role); err != nil {
+	if err := user.ChangeRole(role); err != nil {
 		return nil, err
 	}
 
@@ -82,7 +81,7 @@ func (user *UserDescriptor) Role() Role {
 	return user.role
 }
 
-func (user *UserDescriptor) AssignRole(role Role) error {
+func (user *UserDescriptor) ChangeRole(role Role) error {
 	switch role {
 	case Admin, Guest, Ordinary:
 		user.role = role
@@ -109,19 +108,13 @@ func (user *User) Password() string {
 	return user.password
 }
 
-// ChangePassword changes password to given raw password
-func (user *User) ChangePassword(newPassword Password) error {
-	return user.setPassword(newPassword.String())
+// ChangePassword changes password to given newPassword
+func (user *User) ChangePassword(newPassword string) error {
+	return user.setPassword(newPassword)
 }
 
 func (user *User) setPassword(password string) error {
-	b, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return errors.Wrap(err, "failed to encrypt password")
-	}
-
-	user.password = string(b)
-
+	user.password = password
 	return nil
 }
 

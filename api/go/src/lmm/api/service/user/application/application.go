@@ -2,56 +2,48 @@ package application
 
 import (
 	"context"
-
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
+	"lmm/api/service/user/domain/event"
 
 	"lmm/api/http"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
+	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
 	"lmm/api/service/user/domain/service"
 	"lmm/api/util/stringutil"
+
+	"github.com/pkg/errors"
 )
 
 // Service is a application service
 type Service struct {
+	factory        *factory.Factory
 	userRepository repository.UserRepository
 }
 
 // NewService creates a new Service pointer
 func NewService(userRepository repository.UserRepository) *Service {
+	encrypter := &service.BcryptService{}
 	return &Service{
+		factory:        factory.NewFactory(encrypter),
 		userRepository: userRepository,
 	}
 }
 
 // RegisterNewUser registers new user
 func (s *Service) RegisterNewUser(c context.Context, name, password string) (string, error) {
-	token := uuid.New().String()
-	token = stringutil.ReplaceAll(token, "-", "")
-
-	pw, err := model.NewPassword(password)
+	user, err := s.factory.NewUser(name, password)
 	if err != nil {
-		return "", errors.Wrap(err, "invalid input password")
-	}
-
-	if pw.IsWeak() {
-		return "", domain.ErrUserPasswordTooWeak
-	}
-
-	user, err := model.NewUser(name, *pw, token, model.Ordinary)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to register new user")
+		return "", err
 	}
 
 	if err := s.userRepository.Save(c, user); err != nil {
-		return "", errors.Wrap(err, "failed to save user")
+		return "", err
 	}
 
-	return name, nil
+	return user.Name(), nil
 }
 
 // AssignRole handles command which operator assign user to role

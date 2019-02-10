@@ -8,7 +8,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/model"
+	"lmm/api/service/user/domain/factory"
+	"lmm/api/service/user/domain/service"
 	"lmm/api/testing"
 	"lmm/api/util/stringutil"
 )
@@ -16,16 +17,12 @@ import (
 func TestSaveUser(tt *testing.T) {
 	c := context.Background()
 
-	token := stringutil.ReplaceAll(uuid.New().String(), "-", "")
-
-	pw, err := model.NewPassword("notweakpassword123!?")
-	if err != nil {
-		tt.Fatal(err)
-	}
+	builder := factory.NewFactory(&service.BcryptService{})
 
 	username := "U" + stringutil.ReplaceAll(uuid.New().String(), "-", "")[:8]
+	password := "notweakpassword123!?"
+	user, err := builder.NewUser(username, password)
 
-	user, err := model.NewUser(username, *pw, token, model.Ordinary)
 	if err != nil {
 		tt.Fatal(err)
 	}
@@ -46,8 +43,7 @@ func TestSaveUser(tt *testing.T) {
 			).Scan(&nameFound, &passwordFound, &tokenFound),
 		)
 		t.Is(username, nameFound)
-		t.NoError(bcrypt.CompareHashAndPassword([]byte(passwordFound), []byte(pw.String())))
-		t.Is(token, tokenFound)
+		t.NoError(bcrypt.CompareHashAndPassword([]byte(passwordFound), []byte(password)))
 	})
 
 	tt.Run("DuplicateUserName", func(tt *testing.T) {
