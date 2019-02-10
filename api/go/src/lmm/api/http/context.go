@@ -9,12 +9,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type contextKey int
-
-const (
-	RequestIDContextKey contextKey = iota
-)
-
 // Context is a abstraction of http context
 type Context interface {
 	context.Context
@@ -96,12 +90,4 @@ func (c *contextImpl) With(ctx context.Context) Context {
 
 func (c *contextImpl) writeContentType(value string) {
 	c.Header("Content-Type", value)
-}
-
-func extractRequestID(c context.Context) string {
-	reqID, ok := c.Value(RequestIDContextKey).(string)
-	if !ok || reqID == "" {
-		reqID = "-"
-	}
-	return reqID
 }

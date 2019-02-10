@@ -3,6 +3,7 @@ package middleware
 import (
 	"lmm/api/http"
 	"lmm/api/testing"
+	"lmm/api/util/contextutil"
 	"lmm/api/util/uuidutil"
 )
 
@@ -15,9 +16,8 @@ func TestWithRequestID(tt *testing.T) {
 	router := http.NewRouter()
 	router.Use(WithRequestID)
 	router.GET("/", func(c http.Context) {
-		requestID, ok := c.Value(http.RequestIDContextKey).(string)
-		t.True(ok)
-		t.Is(uuid, requestID)
+		reqID := contextutil.RequestID(c)
+		t.Is(uuid, reqID)
 		c.String(http.StatusOK, sig)
 	})
 
