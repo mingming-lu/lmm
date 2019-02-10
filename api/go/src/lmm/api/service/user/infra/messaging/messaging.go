@@ -3,6 +3,7 @@ package messaging
 import (
 	"context"
 	"database/sql"
+	"lmm/api/service/user/domain"
 
 	"lmm/api/event"
 	userEvent "lmm/api/service/user/domain/event"
@@ -98,6 +99,43 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 		if err != nil {
 			return db.RollbackWithError(tx, err)
 		}
+	}
+
+	return tx.Commit()
+}
+
+// OnUserPasswordChanged implements event handler to handle UserPasswordChanged
+func (s *Subscriber) OnUserPasswordChanged(c context.Context, e event.Event) error {
+	userPasswordChanged, ok := e.(*userEvent.UserPasswordChanged)
+	if !ok {
+		return errors.Wrap(event.ErrInvalidEvent, e.Topic())
+	}
+
+	tx, err := s.db.Begin(c, &sql.TxOptions{
+		Isolation: sql.LevelReadCommitted,
+	})
+	if err != nil {
+		return err
+	}
+
+	searchUserID := tx.Prepare(c, `select id from user where name = ?`)
+	defer searchUserID.Close()
+
+	recordChanged := tx.Prepare(c,
+		`insert into user_password_change_history (user, changed_at) values(?, ?)`,
+	)
+	defer recordChanged.Close()
+
+	var userID int64
+	if err := searchUserID.QueryRow(c, userPasswordChanged.UserName()).Scan(&userID); err != nil {
+		if err == sql.ErrNoRows {
+			return db.RollbackWithError(tx, domain.ErrNoSuchUser)
+		}
+		return db.RollbackWithError(tx, err)
+	}
+
+	if _, err := recordChanged.Exec(c, userID, userPasswordChanged.OccurredAt()); err != nil {
+		return db.RollbackWithError(tx, err)
 	}
 
 	return tx.Commit()
