@@ -93,12 +93,6 @@ func (ui *UI) AssignUserRole(c http.Context) {
 
 // ChangeUserPassword handles PUT /v1/user/:user/password
 func (ui *UI) ChangeUserPassword(c http.Context) {
-	userName := c.Request().Header.Get("X-LMM-ID")
-	if userName == "" {
-		http.Unauthorized(c)
-		return
-	}
-
 	requestBody := changePasswordRequestBody{}
 	if err := c.Request().Bind(&requestBody); err != nil {
 		http.Log().Warn(c, err.Error())
@@ -107,7 +101,7 @@ func (ui *UI) ChangeUserPassword(c http.Context) {
 	}
 
 	err := ui.appService.UserChangePassword(c, command.ChangePassword{
-		User:        userName,
+		User:        c.Request().PathParam("user"),
 		OldPassword: requestBody.OldPassword,
 		NewPassword: requestBody.NewPassword,
 	})
