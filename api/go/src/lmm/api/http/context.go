@@ -9,22 +9,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	RequestIDContextKey = &contextKey{"request-id"}
+type contextKey int
+
+const (
+	RequestIDContextKey contextKey = iota
 )
-
-// ContextKey used for context key
-type ContextKey interface {
-	KeyName() string
-}
-
-type contextKey struct {
-	keyName string
-}
-
-func (k *contextKey) KeyName() string {
-	return k.keyName
-}
 
 // Context is a abstraction of http context
 type Context interface {
