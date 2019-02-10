@@ -3,6 +3,8 @@ package http
 import (
 	"context"
 
+	"lmm/api/util/contextutil"
+
 	"go.uber.org/zap"
 )
 
@@ -28,21 +30,17 @@ func Log() Logger {
 type loggerImpl struct{}
 
 func (l *loggerImpl) Info(c context.Context, msg string) {
-	reqID := extractRequestID(c)
-	zap.L().Info(msg, zap.String("request_id", reqID))
+	zap.L().Info(msg, zap.String("request_id", contextutil.RequestID(c)))
 }
 
 func (l *loggerImpl) Warn(c context.Context, msg string) {
-	reqID := extractRequestID(c)
-	zap.L().Warn(msg, zap.String("request_id", reqID))
+	zap.L().Warn(msg, zap.String("request_id", contextutil.RequestID(c)))
 }
 
 func (l *loggerImpl) Error(c context.Context, msg string) {
-	reqID := extractRequestID(c)
-	zap.L().Error(msg, zap.String("request_id", reqID))
+	zap.L().Error(msg, zap.String("request_id", contextutil.RequestID(c)))
 }
 
 func (l *loggerImpl) Panic(c context.Context, msg string) {
-	reqID := extractRequestID(c)
-	zap.L().Panic(msg, zap.String("request_id", reqID))
+	zap.L().Panic(msg, zap.String("request_id", contextutil.RequestID(c)))
 }

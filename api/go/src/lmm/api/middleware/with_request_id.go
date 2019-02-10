@@ -1,9 +1,8 @@
 package middleware
 
 import (
-	"context"
-
 	"lmm/api/http"
+	"lmm/api/util/contextutil"
 )
 
 // WithRequestID adds request id value to context
@@ -16,7 +15,7 @@ func WithRequestID(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(c.Request().Context(), http.RequestIDContextKey, requestID)
+		ctx := contextutil.WithRequestID(c.Request().Context(), requestID)
 
 		next(c.With(ctx))
 	}
