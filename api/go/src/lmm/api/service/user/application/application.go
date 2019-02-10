@@ -105,3 +105,21 @@ func (s *Service) mappingOrder(orderBy, order string) (repository.DescribeAllOrd
 		return repository.DescribeAllOrder(-1), domain.ErrInvalidViewOrder
 	}
 }
+
+func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePassword) error {
+	user, err := s.userRepository.FindByName(c, cmd.User)
+	if err != nil {
+		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
+	}
+
+	hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	if err := user.ChangePassword(hashedPassword); err != nil {
+		return err
+	}
+
+	return event.PublishUserPasswordChanged(c, user.Name())
+}
