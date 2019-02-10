@@ -3,6 +3,7 @@ package middleware
 import (
 	"io"
 	"os"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -70,6 +71,68 @@ func (l *AccessLogger) Write(p []byte) (int, error) {
 	return l.Write(p)
 }
 
+type accessLogFields struct {
+	fields []zap.Field
+}
+
+func newAccessLogFields() *accessLogFields {
+	f := accessLogFields{
+		fields: make([]zap.Field, 9, 9),
+	}
+	return &f
+}
+
+var zapFieldsPool = sync.Pool{
+	New: func() interface{} {
+		return newAccessLogFields()
+	},
+}
+
+func buildAccessLogFields(status int, reqID, ip, xff, ua, method, host, uri, latency string) *accessLogFields {
+	f, ok := zapFieldsPool.Get().(*accessLogFields)
+	if !ok {
+		panic("expected a *accessLogFields")
+	}
+
+	f.fields[0].Type = zapcore.Int64Type
+	f.fields[0].Key = "status"
+	f.fields[0].Integer = int64(status)
+
+	f.fields[1].Type = zapcore.StringType
+	f.fields[1].Key = "request_id"
+	f.fields[1].String = reqID
+
+	f.fields[2].Type = zapcore.StringType
+	f.fields[2].Key = "client_ip"
+	f.fields[2].String = ip
+
+	f.fields[3].Type = zapcore.StringType
+	f.fields[3].Key = "forwarded_for"
+	f.fields[3].String = xff
+
+	f.fields[4].Type = zapcore.StringType
+	f.fields[4].Key = "ua"
+	f.fields[4].String = ua
+
+	f.fields[5].Type = zapcore.StringType
+	f.fields[5].Key = "method"
+	f.fields[5].String = method
+
+	f.fields[6].Type = zapcore.StringType
+	f.fields[6].Key = "host"
+	f.fields[6].String = host
+
+	f.fields[7].Type = zapcore.StringType
+	f.fields[7].Key = "uri"
+	f.fields[7].String = uri
+
+	f.fields[8].Type = zapcore.StringType
+	f.fields[8].Key = "latency"
+	f.fields[8].String = latency
+
+	return f
+}
+
 // AccessLog records access log
 func (l *AccessLogger) AccessLog(next http.Handler) http.Handler {
 	return func(c http.Context) {
@@ -80,25 +143,27 @@ func (l *AccessLogger) AccessLog(next http.Handler) http.Handler {
 		req := c.Request()
 		res := c.Response()
 		status := res.StatusCode()
-		fields := []zap.Field{
-			zap.Int("status", status),
-			zap.String("request_id", req.RequestID()),
-			zap.String("client_ip", req.ClientIP()),
-			zap.String("forwarded_for", req.Header.Get("X-Forwarded-For")),
-			zap.String("ua", req.UserAgent()),
-			zap.String("method", req.Method),
-			zap.String("host", req.HostName()),
-			zap.String("uri", req.RequestURI),
-			zap.String("latency", time.Since(start).String()),
-		}
+		f := buildAccessLogFields(
+			status,
+			req.RequestID(),
+			req.ClientIP(),
+			req.Header.Get("X-Forwarded-For"),
+			req.UserAgent(),
+			req.Method,
+			req.HostName(),
+			req.RequestURI,
+			time.Since(start).String(),
+		)
 
 		if status >= 500 {
-			l.logger.Error(http.StatusText(status), fields...)
+			l.logger.Error(http.StatusText(status), f.fields...)
 		} else if status >= 400 {
-			l.logger.Warn(http.StatusText(status), fields...)
+			l.logger.Warn(http.StatusText(status), f.fields...)
 		} else {
-			l.logger.Info(http.StatusText(status), fields...)
+			l.logger.Info(http.StatusText(status), f.fields...)
 		}
+
+		zapFieldsPool.Put(f)
 	}
 }
 
