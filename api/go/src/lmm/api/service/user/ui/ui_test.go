@@ -56,12 +56,14 @@ func TestMain(m *testing.M) {
 
 func TestPostUser(tt *testing.T) {
 	username := "U" + stringutil.ReplaceAll(uuid.New().String(), "-", "")[:8]
+	email := username + "@lmm.local"
 	password := uuid.New().String()
 
 	tt.Run("Success", func(tt *testing.T) {
 		t := testing.NewTester(tt)
 		res := postUser(testing.StructToRequestBody(signUpRequestBody{
 			Name:     username,
+			Email:    email,
 			Password: password,
 		}))
 
@@ -72,30 +74,37 @@ func TestPostUser(tt *testing.T) {
 	tt.Run("Fail", func(tt *testing.T) {
 		cases := map[string]struct {
 			UserName   string
+			Email      string
 			Password   string
 			StatusCode int
 			Body       string
 		}{
 			"InvalidUserName": {
-				"1234", password, 400, domain.ErrInvalidUserName.Error(),
+				"1234", email, password, 400, domain.ErrInvalidUserName.Error(),
 			},
 			"DuplicateUserName": {
-				username, password, 409, domain.ErrUserNameAlreadyUsed.Error(),
+				username, email, password, 409, domain.ErrUserNameAlreadyUsed.Error(),
+			},
+			"EmptyEmail": {
+				username, "", password, 400, domain.ErrInvalidEmail.Error(),
+			},
+			"InvalidEmail": {
+				username, "example.com", password, 400, domain.ErrInvalidEmail.Error(),
 			},
 			"EmptyPassword": {
-				username, "", 400, domain.ErrUserPasswordEmpty.Error(),
+				username, email, "", 400, domain.ErrUserPasswordEmpty.Error(),
 			},
 			"InvalidPassword": {
-				username, "不合法的密码", 400, domain.ErrInvalidPassword.Error(),
+				username, email, "不合法的密码", 400, domain.ErrInvalidPassword.Error(),
 			},
 			"ShortPassword": {
-				username, "qwert", 400, domain.ErrUserPasswordTooShort.Error(),
+				username, email, "qwert", 400, domain.ErrUserPasswordTooShort.Error(),
 			},
 			"LongPassword": {
-				username, strings.Repeat("s", 251), 400, domain.ErrUserPasswordTooLong.Error(),
+				username, email, strings.Repeat("s", 251), 400, domain.ErrUserPasswordTooLong.Error(),
 			},
 			"WeakPassword": {
-				username, "password", 400, domain.ErrUserPasswordTooWeak.Error(),
+				username, email, "password", 400, domain.ErrUserPasswordTooWeak.Error(),
 			},
 		}
 
@@ -104,6 +113,7 @@ func TestPostUser(tt *testing.T) {
 				t := testing.NewTester(tt)
 				res := postUser(testing.StructToRequestBody(signUpRequestBody{
 					Name:     testCase.UserName,
+					Email:    testCase.Email,
 					Password: testCase.Password,
 				}))
 

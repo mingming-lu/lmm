@@ -28,28 +28,30 @@ func (ui *UI) SignUp(c http.Context) {
 	reqBody := signUpRequestBody{}
 	c.Request().Bind(&reqBody)
 
-	_, err := ui.appService.RegisterNewUser(c,
-		reqBody.Name,
-		reqBody.Password,
-	)
+	_, err := ui.appService.RegisterNewUser(c, command.Register{
+		UserName:     reqBody.Name,
+		EmailAddress: reqBody.Email,
+		Password:     reqBody.Password,
+	})
 
-	switch errors.Cause(err) {
+	originalError := errors.Cause(err)
+	switch originalError {
 	case nil:
 		c.String(http.StatusCreated, "success")
-	case domain.ErrInvalidUserName:
-		c.String(http.StatusBadRequest, domain.ErrInvalidUserName.Error())
+
+	case
+		domain.ErrInvalidUserName,
+		domain.ErrUserPasswordEmpty,
+		domain.ErrInvalidPassword,
+		domain.ErrUserPasswordTooShort,
+		domain.ErrUserPasswordTooWeak,
+		domain.ErrUserPasswordTooLong,
+		domain.ErrInvalidEmail:
+		c.String(http.StatusBadRequest, originalError.Error())
+
 	case domain.ErrUserNameAlreadyUsed:
 		c.String(http.StatusConflict, domain.ErrUserNameAlreadyUsed.Error())
-	case domain.ErrUserPasswordEmpty:
-		c.String(http.StatusBadRequest, domain.ErrUserPasswordEmpty.Error())
-	case domain.ErrInvalidPassword:
-		c.String(http.StatusBadRequest, domain.ErrInvalidPassword.Error())
-	case domain.ErrUserPasswordTooShort:
-		c.String(http.StatusBadRequest, domain.ErrUserPasswordTooShort.Error())
-	case domain.ErrUserPasswordTooLong:
-		c.String(http.StatusBadRequest, domain.ErrUserPasswordTooLong.Error())
-	case domain.ErrUserPasswordTooWeak:
-		c.String(http.StatusBadRequest, domain.ErrUserPasswordTooWeak.Error())
+
 	default:
 		http.Log().Panic(c, err.Error())
 	}

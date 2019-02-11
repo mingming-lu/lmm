@@ -66,7 +66,7 @@ func TestOnUserPasswordChanged(tt *testing.T) {
 func newUser() *model.User {
 	testuser := testutil.NewUser(mysql)
 
-	user, err := model.NewUser(testuser.Name(), testuser.EncryptedPassword(), testuser.RawToken(), testuser.Role())
+	user, err := model.NewUser(testuser.Name(), testuser.Email(), testuser.EncryptedPassword(), testuser.RawToken(), testuser.Role(), testuser.CreatedAt())
 	if err != nil {
 		panic(err)
 	}

@@ -29,11 +29,11 @@ func NewUserStorage(db db.DB) repository.UserRepository {
 // Save persists a user model
 func (s *UserStorage) Save(c context.Context, user *model.User) error {
 	stmt := s.db.Prepare(c, `
-		insert into user (name, password, token, role, created_at) values(?, ?, ?, ?, ?)
+		insert into user (name, email, password, token, role, created_at) values(?, ?, ?, ?, ?, ?)
 	`)
 	defer stmt.Close()
 
-	_, err := stmt.Exec(c, user.Name(), user.Password(), user.Token(), user.Role().Name(), user.RegisteredAt())
+	_, err := stmt.Exec(c, user.Name(), user.Email(), user.Password(), user.Token(), user.Role().Name(), user.RegisteredAt())
 
 	if key, _, ok := mysqlutil.CheckDuplicateKeyError(err); ok && key == "name" {
 		return errors.Wrap(domain.ErrUserNameAlreadyUsed, err.Error())
@@ -44,24 +44,25 @@ func (s *UserStorage) Save(c context.Context, user *model.User) error {
 
 // FindByName implementation
 func (s *UserStorage) FindByName(c context.Context, username string) (*model.User, error) {
-	stmt := s.db.Prepare(c, `select name, password, token, role, created_at from user where name = ?`)
+	stmt := s.db.Prepare(c, `select name, email, password, token, role, created_at from user where name = ?`)
 	defer stmt.Close()
 
 	var (
 		name         string
+		email        string
 		password     string
 		token        string
 		rawRole      string
 		registeredAt time.Time
 	)
 
-	if err := stmt.QueryRow(c, username).Scan(&name, &password, &token, &rawRole, &registeredAt); err != nil {
+	if err := stmt.QueryRow(c, username).Scan(&name, &email, &password, &token, &rawRole, &registeredAt); err != nil {
 		return nil, err
 	}
 
 	role := service.RoleAdapter(rawRole)
 
-	return model.NewUser(name, password, token, role)
+	return model.NewUser(name, email, password, token, role, registeredAt)
 }
 
 // DescribeAll implementation
@@ -78,7 +79,7 @@ func (s *UserStorage) DescribeAll(c context.Context, options repository.Describe
 	defer countUsers.Close()
 
 	selectUsers := tx.Prepare(c,
-		`select name, role, created_at from user order by `+s.mappingOrder(options.Order)+` limit ? offset ?`)
+		`select name, email, role, created_at from user order by `+s.mappingOrder(options.Order)+` limit ? offset ?`)
 	defer selectUsers.Close()
 
 	var totalUsers uint
@@ -95,16 +96,17 @@ func (s *UserStorage) DescribeAll(c context.Context, options repository.Describe
 
 	var (
 		username  string
+		emailaddr string
 		rolename  string
 		createdAt time.Time
 	)
 
 	for rows.Next() {
-		if err := rows.Scan(&username, &rolename, &createdAt); err != nil {
+		if err := rows.Scan(&username, &emailaddr, &rolename, &createdAt); err != nil {
 			return nil, 0, db.RollbackWithError(tx, err)
 		}
 		role := service.RoleAdapter(rolename)
-		user, err := model.NewUserDescriptor(username, role, createdAt)
+		user, err := model.NewUserDescriptor(username, emailaddr, role, createdAt)
 		if err != nil {
 			return nil, 0, db.RollbackWithError(tx, err)
 		}

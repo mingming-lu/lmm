@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"lmm/api/clock"
 	"lmm/api/messaging"
 	"lmm/api/service/user/domain"
 	userEvent "lmm/api/service/user/domain/event"
@@ -98,13 +99,12 @@ func newOrdinary() *model.User {
 }
 
 func newUserWithRole(role model.Role) *model.User {
-	randomUserName := func() string {
-		return "u" + uuid.New().String()[:7]
-	}
+	randomUserName := "u" + uuid.New().String()[:7]
+	email := randomUserName + "@lmm.local"
 	password := uuid.New().String()
 	token := uuid.New().String()
 
-	user, err := model.NewUser(randomUserName(), password, token, role)
+	user, err := model.NewUser(randomUserName, email, password, token, role, clock.Now())
 	if err != nil {
 		panic(err)
 	}

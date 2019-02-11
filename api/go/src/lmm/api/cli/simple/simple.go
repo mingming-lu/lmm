@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"golang.org/x/sync/errgroup"
+
 	"lmm/api/cli"
 	"lmm/api/storage/db"
 )
@@ -41,5 +43,30 @@ CREATE TABLE IF NOT EXISTS user_password_change_history (
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 		`)
 		return err
+	}))
+
+	cli.Register("addEmailColumnToUserTable", NewCommand(func(c context.Context) error {
+		mysql := db.DefaultMySQL()
+		defer mysql.Close()
+
+		g := errgroup.Group{}
+		g.Go(func() error {
+			mysql.Exec(c, `ALTER TABLE user ADD COLUMN email VARCHAR(255) NOT NULL;`)
+			return nil
+		})
+
+		g.Go(func() error {
+			if _, err := mysql.Exec(c, `ALTER TABLE user drop KEY email`); err != nil {
+				return err
+			}
+
+			if _, err := mysql.Exec(c, `ALTER TABLE user ADD UNIQUE KEY email (email);`); err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		return g.Wait()
 	}))
 }
