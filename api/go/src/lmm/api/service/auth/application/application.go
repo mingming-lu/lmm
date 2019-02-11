@@ -3,7 +3,6 @@ package application
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"regexp"
@@ -102,10 +101,7 @@ func (s *Service) BearerAuth(c context.Context, authorization string) (*model.Us
 
 	user, err := s.userRepository.FindByToken(c, token)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, domain.ErrInvalidAuthToken
-		}
-		return nil, err
+		return nil, errors.Wrap(domain.ErrInvalidAuthToken, err.Error())
 	}
 
 	return user, nil

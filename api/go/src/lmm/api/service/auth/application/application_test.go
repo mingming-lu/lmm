@@ -140,7 +140,7 @@ func TestBearerAuth(tt *testing.T) {
 			t.FailNow()
 		}
 		user, err := appService.BearerAuth(c, "Bearer "+token.Hashed())
-		t.IsError(domain.ErrNoSuchUser, errors.Cause(err))
+		t.IsError(domain.ErrInvalidAuthToken, errors.Cause(err))
 		t.Nil(user)
 	})
 }

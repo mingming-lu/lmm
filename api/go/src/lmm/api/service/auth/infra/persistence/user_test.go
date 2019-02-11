@@ -2,10 +2,10 @@ package persistence
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/pkg/errors"
 
-	"lmm/api/service/auth/domain"
 	"lmm/api/service/auth/domain/service"
 	"lmm/api/testing"
 	"lmm/api/util/testutil"
@@ -29,7 +29,7 @@ func TestUserStorage(tt *testing.T) {
 		tt.Run("NotFound", func(tt *testing.T) {
 			t := testing.NewTester(tt)
 			userFound, err := userRepo.FindByName(c, "whatever")
-			t.IsError(domain.ErrNoSuchUser, errors.Cause(err))
+			t.IsError(sql.ErrNoRows, errors.Cause(err))
 			t.Nil(userFound)
 		})
 	})
@@ -54,7 +54,7 @@ func TestUserStorage(tt *testing.T) {
 				t.FailNow()
 			}
 			userFound, err := userRepo.FindByToken(c, otherToken)
-			t.IsError(domain.ErrNoSuchUser, errors.Cause(err))
+			t.IsError(sql.ErrNoRows, errors.Cause(err))
 			t.Nil(userFound)
 		})
 	})
