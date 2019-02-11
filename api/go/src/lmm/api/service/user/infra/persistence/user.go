@@ -64,28 +64,6 @@ func (s *UserStorage) FindByName(c context.Context, username string) (*model.Use
 	return model.NewUser(name, password, token, role)
 }
 
-// DescribeByName implementation
-func (s *UserStorage) DescribeByName(c context.Context, username string) (*model.UserDescriptor, error) {
-	stmt := s.db.Prepare(c, `select role, created_at from user where name = ?`)
-	defer stmt.Close()
-
-	var (
-		rolename  string
-		createdAt time.Time
-	)
-
-	if err := stmt.QueryRow(c, username).Scan(&rolename, &createdAt); err != nil {
-		return nil, err
-	}
-
-	role := service.RoleAdapter(rolename)
-	if role == model.Guest {
-		http.Log().Panic(c, "expected not a guest")
-	}
-
-	return model.NewUserDescriptor(username, role, createdAt)
-}
-
 // DescribeAll implementation
 func (s *UserStorage) DescribeAll(c context.Context, options repository.DescribeAllOptions) ([]*model.UserDescriptor, uint, error) {
 	tx, err := s.db.Begin(c, &sql.TxOptions{
