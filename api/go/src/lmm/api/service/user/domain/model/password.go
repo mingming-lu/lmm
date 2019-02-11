@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"lmm/api/model"
+	"lmm/api/service/base/model"
 	"lmm/api/service/user/domain"
 	"lmm/api/util/mathutil"
 )

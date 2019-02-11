@@ -3,8 +3,8 @@ package model
 import (
 	"sort"
 
-	"lmm/api/model"
 	"lmm/api/service/article/domain"
+	"lmm/api/service/base/model"
 )
 
 // Content shows article's content those are editable

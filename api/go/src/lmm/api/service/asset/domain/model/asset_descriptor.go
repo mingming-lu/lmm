@@ -1,6 +1,6 @@
 package model
 
-import "lmm/api/model"
+import "lmm/api/service/base/model"
 
 type AssetDescriptor struct {
 	model.ValueObject

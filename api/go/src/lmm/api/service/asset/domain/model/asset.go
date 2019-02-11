@@ -1,8 +1,6 @@
 package model
 
-import (
-	"lmm/api/model"
-)
+import "lmm/api/service/base/model"
 
 // Asset domain entity
 type Asset struct {

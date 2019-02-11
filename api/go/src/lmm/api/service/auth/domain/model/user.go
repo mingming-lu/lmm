@@ -1,9 +1,9 @@
 package model
 
 import (
-	"golang.org/x/crypto/bcrypt"
+	"lmm/api/service/base/model"
 
-	"lmm/api/model"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User domain model
