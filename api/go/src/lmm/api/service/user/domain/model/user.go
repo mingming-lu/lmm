@@ -134,3 +134,8 @@ func (user *User) setToken(token string) error {
 	user.token = token
 	return nil
 }
+
+// Is compares if two users are the same
+func (user *User) Is(other *User) bool {
+	return user.UserDescriptor.Is(&other.UserDescriptor)
+}

@@ -11,7 +11,7 @@ import (
 )
 
 // AssignUserRole allows operator assign targetUser to role
-func AssignUserRole(c context.Context, operator *model.UserDescriptor, targetUser *model.UserDescriptor, role model.Role) error {
+func AssignUserRole(c context.Context, operator *model.User, targetUser *model.User, role model.Role) error {
 	if operator.Is(targetUser) {
 		return domain.ErrCannotAssignSelfRole
 	}

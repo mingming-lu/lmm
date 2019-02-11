@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 
-	"lmm/api/clock"
 	"lmm/api/event"
 	"lmm/api/service/user/domain"
 	userEvent "lmm/api/service/user/domain/event"
@@ -16,8 +15,8 @@ import (
 
 func TestAssignUserRole(tt *testing.T) {
 	type TestCase struct {
-		operator    *model.UserDescriptor
-		targetUser  *model.UserDescriptor
+		operator    *model.User
+		targetUser  *model.User
 		targetRole  model.Role
 		expectedErr error
 	}
@@ -90,20 +89,22 @@ func TestAssignUserRole(tt *testing.T) {
 	}
 }
 
-func newAdmin() *model.UserDescriptor {
+func newAdmin() *model.User {
 	return newUserWithRole(model.Admin)
 }
 
-func newOrdinary() *model.UserDescriptor {
+func newOrdinary() *model.User {
 	return newUserWithRole(model.Ordinary)
 }
 
-func newUserWithRole(role model.Role) *model.UserDescriptor {
+func newUserWithRole(role model.Role) *model.User {
 	randomUserName := func() string {
 		return "u" + uuid.New().String()[:7]
 	}
+	password := uuid.New().String()
+	token := uuid.New().String()
 
-	user, err := model.NewUserDescriptor(randomUserName(), role, clock.Now())
+	user, err := model.NewUser(randomUserName(), password, token, role)
 	if err != nil {
 		panic(err)
 	}

@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 
-	"lmm/api/http"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
@@ -50,14 +49,14 @@ func (s *Service) RegisterNewUser(c context.Context, name, password string) (str
 
 // AssignRole handles command which operator assign user to role
 func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
-	operator, err := s.userRepository.DescribeByName(c, cmd.OperatorUser)
+	operator, err := s.userRepository.FindByName(c, cmd.OperatorUser)
 	if err != nil {
-		http.Log().Panic(c, errors.Wrapf(err, "operator not found: %s", cmd.OperatorUser).Error())
+		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
 	}
 
-	user, err := s.userRepository.DescribeByName(c, cmd.TargetUser)
+	user, err := s.userRepository.FindByName(c, cmd.TargetUser)
 	if err != nil {
-		return errors.Wrap(domain.ErrNoSuchUser, cmd.TargetUser)
+		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
 	}
 
 	role := service.RoleAdapter(cmd.TargetRole)
