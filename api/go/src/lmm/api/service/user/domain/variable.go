@@ -53,4 +53,6 @@ var (
 	ErrInvalidCount = errors.New("invalid count")
 
 	ErrInvalidViewOrder = errors.New("invalid order")
+
+	ErrInvalidEmail = errors.New("invalid email")
 )
