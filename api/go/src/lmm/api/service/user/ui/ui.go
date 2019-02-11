@@ -111,6 +111,9 @@ func (ui *UI) ChangeUserPassword(c http.Context) {
 	case nil:
 		http.NoContent(c)
 
+	case domain.ErrUserPassword:
+		c.String(http.StatusUnauthorized, domain.ErrUserPassword.Error())
+
 	case
 		domain.ErrUserPasswordEmpty,
 		domain.ErrUserPasswordTooShort,

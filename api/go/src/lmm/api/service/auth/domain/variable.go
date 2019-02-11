@@ -7,6 +7,7 @@ var (
 	ErrInvalidBasicAuthFormat  = errors.New("invalid basic auth format")
 	ErrInvalidBearerAuthFormat = errors.New("invalid bearer auth format")
 	ErrInvalidGrantType        = errors.New("invalid grant type")
+	ErrInvalidAuthToken        = errors.New("invalid auth token")
 	ErrInvalidTokenFormat      = errors.New("invalid token format")
 	ErrInvalidTokenLength      = errors.New("invalid token length")
 	ErrNoSuchUser              = errors.New("no such user")
