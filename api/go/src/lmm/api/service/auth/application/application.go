@@ -73,7 +73,7 @@ func (s *Service) BasicAuth(c context.Context, authorization string) (*model.Tok
 
 	user, err := s.userRepository.FindByName(c, auth.UserName)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot find user named '%s'", auth.UserName)
+		return nil, errors.Wrap(domain.ErrNoSuchUser, err.Error())
 	}
 
 	if !user.ComparePassword(auth.Password) {
@@ -99,7 +99,12 @@ func (s *Service) BearerAuth(c context.Context, authorization string) (*model.Us
 		return nil, domain.ErrTokenExpired
 	}
 
-	return s.userRepository.FindByToken(c, token)
+	user, err := s.userRepository.FindByToken(c, token)
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrInvalidAuthToken, err.Error())
+	}
+
+	return user, nil
 }
 
 // RefreshToken refreshes access token in bearer auth format

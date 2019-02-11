@@ -10,6 +10,7 @@ import (
 	"lmm/api/util/stringutil"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User model for testing
@@ -20,7 +21,7 @@ type User struct {
 	encryptedPassword string
 	rawToken          string
 	accessToken       string
-	role              string
+	role              model.Role
 	createdAt         time.Time
 }
 
@@ -44,9 +45,14 @@ func NewUser(db db.DB) User {
 		panic(err)
 	}
 
+	b, err := bcrypt.GenerateFromPassword([]byte(password.String()), bcrypt.DefaultCost)
+	if err != nil {
+		panic(err)
+	}
+
 	user, err := model.NewUser(
 		username,
-		*password,
+		string(b),
 		stringutil.ReplaceAll(uuid.New().String(), "-", ""),
 		model.Ordinary,
 	)
@@ -76,7 +82,7 @@ func NewUser(db db.DB) User {
 		encryptedPassword: user.Password(),
 		rawToken:          user.Token(),
 		accessToken:       EncodeToken(user.Token()).Hashed(),
-		role:              user.Role().Name(),
+		role:              user.Role(),
 		createdAt:         now,
 	}
 }
@@ -105,7 +111,7 @@ func (u User) AccessToken() string {
 	return u.accessToken
 }
 
-func (u User) Role() string {
+func (u User) Role() model.Role {
 	return u.role
 }
 

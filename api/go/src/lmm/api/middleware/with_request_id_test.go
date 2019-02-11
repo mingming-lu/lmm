@@ -10,8 +10,8 @@ import (
 func TestWithRequestID(tt *testing.T) {
 	t := testing.NewTester(tt)
 
-	uuid := uuidutil.New()
-	sig := uuidutil.New()
+	uuid := uuidutil.NewUUID()
+	sig := uuidutil.NewUUID()
 
 	router := http.NewRouter()
 	router.Use(WithRequestID)

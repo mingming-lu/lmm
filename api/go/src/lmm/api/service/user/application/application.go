@@ -3,67 +3,60 @@ package application
 import (
 	"context"
 
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-
-	"lmm/api/http"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
+	"lmm/api/service/user/domain/event"
+	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
 	"lmm/api/service/user/domain/service"
 	"lmm/api/util/stringutil"
+
+	"github.com/pkg/errors"
 )
 
 // Service is a application service
 type Service struct {
+	encrypter      service.EncryptService
+	factory        *factory.Factory
 	userRepository repository.UserRepository
 }
 
 // NewService creates a new Service pointer
 func NewService(userRepository repository.UserRepository) *Service {
+	encrypter := &service.BcryptService{}
 	return &Service{
+		encrypter:      encrypter,
+		factory:        factory.NewFactory(encrypter),
 		userRepository: userRepository,
 	}
 }
 
 // RegisterNewUser registers new user
 func (s *Service) RegisterNewUser(c context.Context, name, password string) (string, error) {
-	token := uuid.New().String()
-	token = stringutil.ReplaceAll(token, "-", "")
-
-	pw, err := model.NewPassword(password)
+	user, err := s.factory.NewUser(name, password)
 	if err != nil {
-		return "", errors.Wrap(err, "invalid input password")
-	}
-
-	if pw.IsWeak() {
-		return "", domain.ErrUserPasswordTooWeak
-	}
-
-	user, err := model.NewUser(name, *pw, token, model.Ordinary)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to register new user")
+		return "", err
 	}
 
 	if err := s.userRepository.Save(c, user); err != nil {
-		return "", errors.Wrap(err, "failed to save user")
+		return "", err
 	}
 
-	return name, nil
+	return user.Name(), nil
 }
 
 // AssignRole handles command which operator assign user to role
 func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
-	operator, err := s.userRepository.DescribeByName(c, cmd.OperatorUser)
+	operator, err := s.userRepository.FindByName(c, cmd.OperatorUser)
 	if err != nil {
-		http.Log().Panic(c, errors.Wrapf(err, "operator not found: %s", cmd.OperatorUser).Error())
+		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
 	}
 
-	user, err := s.userRepository.DescribeByName(c, cmd.TargetUser)
+	user, err := s.userRepository.FindByName(c, cmd.TargetUser)
 	if err != nil {
-		return errors.Wrap(domain.ErrNoSuchUser, cmd.TargetUser)
+		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
 	}
 
 	role := service.RoleAdapter(cmd.TargetRole)
@@ -112,4 +105,26 @@ func (s *Service) mappingOrder(orderBy, order string) (repository.DescribeAllOrd
 	default:
 		return repository.DescribeAllOrder(-1), domain.ErrInvalidViewOrder
 	}
+}
+
+func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePassword) error {
+	user, err := s.userRepository.FindByName(c, cmd.User)
+	if err != nil {
+		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
+	}
+
+	if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
+		return domain.ErrUserPassword
+	}
+
+	hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	if err := user.ChangePassword(hashedPassword); err != nil {
+		return err
+	}
+
+	return event.PublishUserPasswordChanged(c, user.Name(), user.Password())
 }

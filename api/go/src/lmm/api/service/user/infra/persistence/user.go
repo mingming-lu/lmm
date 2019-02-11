@@ -44,29 +44,24 @@ func (s *UserStorage) Save(c context.Context, user *model.User) error {
 
 // FindByName implementation
 func (s *UserStorage) FindByName(c context.Context, username string) (*model.User, error) {
-	panic("not implemented")
-}
-
-// DescribeByName implementation
-func (s *UserStorage) DescribeByName(c context.Context, username string) (*model.UserDescriptor, error) {
-	stmt := s.db.Prepare(c, `select role, created_at from user where name = ?`)
+	stmt := s.db.Prepare(c, `select name, password, token, role, created_at from user where name = ?`)
 	defer stmt.Close()
 
 	var (
-		rolename  string
-		createdAt time.Time
+		name         string
+		password     string
+		token        string
+		rawRole      string
+		registeredAt time.Time
 	)
 
-	if err := stmt.QueryRow(c, username).Scan(&rolename, &createdAt); err != nil {
+	if err := stmt.QueryRow(c, username).Scan(&name, &password, &token, &rawRole, &registeredAt); err != nil {
 		return nil, err
 	}
 
-	role := service.RoleAdapter(rolename)
-	if role == model.Guest {
-		http.Log().Panic(c, "expected not a guest")
-	}
+	role := service.RoleAdapter(rawRole)
 
-	return model.NewUserDescriptor(username, role, createdAt)
+	return model.NewUser(name, password, token, role)
 }
 
 // DescribeAll implementation

@@ -5,8 +5,10 @@ import (
 	"database/sql"
 
 	"lmm/api/event"
+	"lmm/api/service/user/domain"
 	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/storage/db"
+	"lmm/api/util/uuidutil"
 
 	"github.com/pkg/errors"
 )
@@ -47,8 +49,7 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 
 	recordChangeHistory := tx.Prepare(c, `
 		insert into user_role_change_history (
-			operator, operator_role, target_user, from_role, to_role, changed_at
-		) values (?, ?, ?, ?, ?, ?)
+			operator, operator_role, target_user, from_role, to_role, changed_at) values (?, ?, ?, ?, ?, ?)
 	`)
 	defer recordChangeHistory.Close()
 
@@ -98,6 +99,52 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 		if err != nil {
 			return db.RollbackWithError(tx, err)
 		}
+	}
+
+	return tx.Commit()
+}
+
+// OnUserPasswordChanged implements event handler to handle UserPasswordChanged
+func (s *Subscriber) OnUserPasswordChanged(c context.Context, e event.Event) error {
+	userPasswordChanged, ok := e.(*userEvent.UserPasswordChanged)
+	if !ok {
+		return errors.Wrap(event.ErrInvalidEvent, e.Topic())
+	}
+
+	tx, err := s.db.Begin(c, &sql.TxOptions{
+		Isolation: sql.LevelReadCommitted,
+	})
+	if err != nil {
+		return err
+	}
+
+	lockUser := tx.Prepare(c, `select id from user where name = ? for update`)
+	defer lockUser.Close()
+
+	recordChanged := tx.Prepare(c,
+		`insert into user_password_change_history (user, changed_at) values(?, ?)`,
+	)
+	defer recordChanged.Close()
+
+	updateUser := tx.Prepare(c, `update user set token = ?, password = ? where id = ?`)
+	defer updateUser.Close()
+
+	var userID int64
+	if err := lockUser.QueryRow(c, userPasswordChanged.UserName()).Scan(&userID); err != nil {
+		if err == sql.ErrNoRows {
+			return db.RollbackWithError(tx, domain.ErrNoSuchUser)
+		}
+		return db.RollbackWithError(tx, err)
+	}
+
+	if _, err := recordChanged.Exec(c, userID, userPasswordChanged.OccurredAt()); err != nil {
+		return db.RollbackWithError(tx, err)
+	}
+
+	newToken := uuidutil.NewUUID()
+	password := userPasswordChanged.Password()
+	if _, err := updateUser.Exec(c, newToken, password, userID); err != nil {
+		return db.RollbackWithError(tx, err)
 	}
 
 	return tx.Commit()

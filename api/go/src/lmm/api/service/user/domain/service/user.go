@@ -3,16 +3,15 @@ package service
 import (
 	"context"
 
-	"lmm/api/event"
 	"lmm/api/service/user/domain"
-	userEvent "lmm/api/service/user/domain/event"
+	"lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/model"
 
 	"github.com/pkg/errors"
 )
 
 // AssignUserRole allows operator assign targetUser to role
-func AssignUserRole(c context.Context, operator *model.UserDescriptor, targetUser *model.UserDescriptor, role model.Role) error {
+func AssignUserRole(c context.Context, operator *model.User, targetUser *model.User, role model.Role) error {
 	if operator.Is(targetUser) {
 		return domain.ErrCannotAssignSelfRole
 	}
@@ -26,11 +25,9 @@ func AssignUserRole(c context.Context, operator *model.UserDescriptor, targetUse
 		return domain.ErrNoPermission
 	}
 
-	if err := targetUser.AssignRole(role); err != nil {
+	if err := targetUser.ChangeRole(role); err != nil {
 		return err
 	}
 
-	return event.SyncBus().Publish(c, userEvent.NewUserRoleChangedEvent(
-		operator.Name(), targetUser.Name(), targetUser.Role().Name(),
-	))
+	return event.PublishUserRoleChanged(c, operator.Name(), targetUser.Name(), targetUser.Role().Name())
 }

@@ -1,5 +1,6 @@
 package model
 
+// Permission model
 type Permission uint64
 
 const (

@@ -41,10 +41,6 @@ func (repo *InmemoryUserRepository) FindByName(c context.Context, username strin
 	return nil, domain.ErrNoSuchUser
 }
 
-func (repo *InmemoryUserRepository) DescribeByName(c context.Context, username string) (*model.UserDescriptor, error) {
-	panic("not implemented")
-}
-
 func (repo *InmemoryUserRepository) DescribeAll(context.Context, repository.DescribeAllOptions) ([]*model.UserDescriptor, uint, error) {
 	panic("not implemented")
 }

@@ -3,7 +3,6 @@ package persistence
 import (
 	"context"
 
-	"lmm/api/service/auth/domain"
 	"lmm/api/service/auth/domain/model"
 	"lmm/api/service/auth/domain/repository"
 	"lmm/api/storage/db"
@@ -42,9 +41,6 @@ func (s *UserStorage) findUser(c context.Context, query string, args ...interfac
 
 	err := stmt.QueryRow(c, args...).Scan(&userName, &userPassword, &userToken, &userRole)
 	if err != nil {
-		if err == db.ErrNoRows {
-			return nil, domain.ErrNoSuchUser
-		}
 		return nil, err
 	}
 

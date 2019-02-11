@@ -91,6 +91,45 @@ func (ui *UI) AssignUserRole(c http.Context) {
 	}
 }
 
+// ChangeUserPassword handles PUT /v1/user/:user/password
+func (ui *UI) ChangeUserPassword(c http.Context) {
+	requestBody := changePasswordRequestBody{}
+	if err := c.Request().Bind(&requestBody); err != nil {
+		http.Log().Warn(c, err.Error())
+		http.BadRequest(c)
+		return
+	}
+
+	err := ui.appService.UserChangePassword(c, command.ChangePassword{
+		User:        c.Request().PathParam("user"),
+		OldPassword: requestBody.OldPassword,
+		NewPassword: requestBody.NewPassword,
+	})
+
+	originalError := errors.Cause(err)
+	switch originalError {
+	case nil:
+		http.NoContent(c)
+
+	case domain.ErrUserPassword:
+		c.String(http.StatusUnauthorized, domain.ErrUserPassword.Error())
+
+	case
+		domain.ErrUserPasswordEmpty,
+		domain.ErrUserPasswordTooShort,
+		domain.ErrUserPasswordTooWeak,
+		domain.ErrUserPasswordTooLong,
+		domain.ErrInvalidPassword:
+		c.String(http.StatusBadRequest, originalError.Error())
+
+	case domain.ErrNoSuchUser:
+		c.String(http.StatusNotFound, domain.ErrNoSuchUser.Error())
+
+	default:
+		http.Log().Panic(c, err.Error())
+	}
+}
+
 // ViewAllUsers handles GET /v1/users
 func (ui *UI) ViewAllUsers(c http.Context) {
 	userName := c.Request().Header.Get("X-LMM-ID")

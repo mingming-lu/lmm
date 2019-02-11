@@ -68,8 +68,7 @@ export default {
           this.callback()
         })
         .catch(e => {
-          console.log(e)
-          alert('Failed to login')
+          alert(e.response.data)
         })
     }
   }

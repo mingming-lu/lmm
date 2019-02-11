@@ -11,6 +11,11 @@ type assignRoleRequestBody struct {
 	Role string `json:"role"`
 }
 
+type changePasswordRequestBody struct {
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
+}
+
 type userView struct {
 	Name           string `json:"name"`
 	Role           string `json:"role"`
