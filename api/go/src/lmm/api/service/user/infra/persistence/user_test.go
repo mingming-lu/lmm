@@ -20,8 +20,9 @@ func TestSaveUser(tt *testing.T) {
 	builder := factory.NewFactory(&service.BcryptService{})
 
 	username := "U" + stringutil.ReplaceAll(uuid.New().String(), "-", "")[:8]
+	email := "admin@lmm.local"
 	password := "notweakpassword123!?"
-	user, err := builder.NewUser(username, password)
+	user, err := builder.NewUser(username, email, password)
 
 	if err != nil {
 		tt.Fatal(err)
@@ -34,15 +35,17 @@ func TestSaveUser(tt *testing.T) {
 
 		var (
 			nameFound     string
+			emailFound    string
 			passwordFound string
 			tokenFound    string
 		)
 		t.NoError(
 			dbEngine.QueryRow(c,
-				`select name, password, token from user where name = ?`, username,
-			).Scan(&nameFound, &passwordFound, &tokenFound),
+				`select name, email, password, token from user where name = ?`, username,
+			).Scan(&nameFound, &emailFound, &passwordFound, &tokenFound),
 		)
 		t.Is(username, nameFound)
+		t.Is(email, emailFound)
 		t.NoError(bcrypt.CompareHashAndPassword([]byte(passwordFound), []byte(password)))
 	})
 

@@ -17,6 +17,7 @@ import (
 type User struct {
 	id                int64
 	name              string
+	email             string
 	rawPassword       string
 	encryptedPassword string
 	rawToken          string
@@ -38,6 +39,7 @@ func NewAdmin(db db.DB) User {
 // NewUser creates a user for testing
 func NewUser(db db.DB) User {
 	username := "U" + uuid.New().String()[:8]
+	email := username + "@lmm.local"
 	rawPassword := uuid.New().String()
 
 	password, err := model.NewPassword(rawPassword)
@@ -52,19 +54,19 @@ func NewUser(db db.DB) User {
 
 	user, err := model.NewUser(
 		username,
+		email,
 		string(b),
 		stringutil.ReplaceAll(uuid.New().String(), "-", ""),
 		model.Ordinary,
+		clock.Now(),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	now := clock.Now()
-
 	res, err := db.Exec(context.TODO(),
-		`insert into user (name, password, token, role, created_at) values (?, ?, ?, ?, ?)`,
-		user.Name(), user.Password(), user.Token(), user.Role().Name(), now,
+		`insert into user (name, email, password, token, role, created_at) values (?, ?, ?, ?, ?, ?)`,
+		user.Name(), user.Email(), user.Password(), user.Token(), user.Role().Name(), user.RegisteredAt(),
 	)
 	if err != nil {
 		panic(err)
@@ -78,12 +80,13 @@ func NewUser(db db.DB) User {
 	return User{
 		id:                id,
 		name:              username,
+		email:             email,
 		rawPassword:       rawPassword,
 		encryptedPassword: user.Password(),
 		rawToken:          user.Token(),
 		accessToken:       EncodeToken(user.Token()).Hashed(),
 		role:              user.Role(),
-		createdAt:         now,
+		createdAt:         user.RegisteredAt(),
 	}
 }
 
@@ -93,6 +96,10 @@ func (u User) ID() int64 {
 
 func (u User) Name() string {
 	return u.name
+}
+
+func (u User) Email() string {
+	return u.email
 }
 
 func (u User) RawPassword() string {

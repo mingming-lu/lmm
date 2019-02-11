@@ -6,13 +6,16 @@ USE `lmm_test`;
 CREATE TABLE IF NOT EXISTS `user` (
 	`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(255) NOT NULL,
+	`email` VARCHAR(255) NOT NULL,
 	`password` VARCHAR(255) NOT NULL,
 	`token` VARCHAR(255) NOT NULL,
 	`role` VARCHAR(31) NOT NULL,
 	`created_at` DATETIME NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE `name` (`name`),
-	UNIQUE `token` (`token`)
+	UNIQUE `email` (`email`),
+	UNIQUE `token` (`token`),
+	INDEX `description` (`name`, `role`, `created_at`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS `user_role_change_history` (
