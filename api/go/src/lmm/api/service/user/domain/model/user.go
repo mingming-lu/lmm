@@ -16,6 +16,7 @@ var (
 	patternUserName = regexp.MustCompile(`^[a-zA-Z]{1}[0-9a-zA-Z_-]{2,17}$`)
 )
 
+// UserDescriptor describes user's basic infomation
 type UserDescriptor struct {
 	model.Entity
 	name         string
@@ -23,6 +24,7 @@ type UserDescriptor struct {
 	registeredAt time.Time
 }
 
+// NewUserDescriptor creates a new *UserDescriptor
 func NewUserDescriptor(name string, role Role, registeredAt time.Time) (*UserDescriptor, error) {
 	user := UserDescriptor{
 		role:         role,
@@ -34,6 +36,34 @@ func NewUserDescriptor(name string, role Role, registeredAt time.Time) (*UserDes
 	}
 
 	return &user, nil
+}
+
+// Name gets user's name
+func (user *UserDescriptor) Name() string {
+	return user.name
+}
+
+// Is compares if two use are the same
+func (user *UserDescriptor) Is(target *UserDescriptor) bool {
+	return user.Name() == target.Name()
+}
+
+// Role gets user's Role model
+func (user *UserDescriptor) Role() Role {
+	return user.role
+}
+
+// RegisteredAt gets user's register date
+func (user *UserDescriptor) RegisteredAt() time.Time {
+	return user.registeredAt
+}
+
+func (user *UserDescriptor) setName(name string) error {
+	if !patternUserName.MatchString(name) {
+		return domain.ErrInvalidUserName
+	}
+	user.name = name
+	return nil
 }
 
 // User domain model
@@ -68,20 +98,8 @@ func NewUser(name, password, token string, role Role) (*User, error) {
 	return &user, nil
 }
 
-// Name gets user's name
-func (user *UserDescriptor) Name() string {
-	return user.name
-}
-
-func (user *UserDescriptor) Is(target *UserDescriptor) bool {
-	return user.Name() == target.Name()
-}
-
-func (user *UserDescriptor) Role() Role {
-	return user.role
-}
-
-func (user *UserDescriptor) ChangeRole(role Role) error {
+// ChangeRole changes user's role
+func (user *User) ChangeRole(role Role) error {
 	switch role {
 	case Admin, Guest, Ordinary:
 		user.role = role
@@ -89,18 +107,6 @@ func (user *UserDescriptor) ChangeRole(role Role) error {
 	default:
 		return domain.ErrNoSuchRole
 	}
-}
-
-func (user *UserDescriptor) RegisteredAt() time.Time {
-	return user.registeredAt
-}
-
-func (user *UserDescriptor) setName(name string) error {
-	if !patternUserName.MatchString(name) {
-		return domain.ErrInvalidUserName
-	}
-	user.name = name
-	return nil
 }
 
 // Password gets user's encrypted password
