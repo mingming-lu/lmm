@@ -1,12 +1,12 @@
 package model
 
 import (
+	"net/mail"
 	"regexp"
 	"time"
 
 	"github.com/pkg/errors"
 
-	"lmm/api/clock"
 	"lmm/api/service/base/model"
 	"lmm/api/service/user/domain"
 	"lmm/api/util/uuidutil"
@@ -20,12 +20,13 @@ var (
 type UserDescriptor struct {
 	model.Entity
 	name         string
+	email        string
 	role         Role
 	registeredAt time.Time
 }
 
 // NewUserDescriptor creates a new *UserDescriptor
-func NewUserDescriptor(name string, role Role, registeredAt time.Time) (*UserDescriptor, error) {
+func NewUserDescriptor(name, email string, role Role, registeredAt time.Time) (*UserDescriptor, error) {
 	user := UserDescriptor{
 		role:         role,
 		registeredAt: registeredAt,
@@ -35,12 +36,21 @@ func NewUserDescriptor(name string, role Role, registeredAt time.Time) (*UserDes
 		return nil, err
 	}
 
+	if err := user.setEmail(email); err != nil {
+		return nil, err
+	}
+
 	return &user, nil
 }
 
 // Name gets user's name
 func (user *UserDescriptor) Name() string {
 	return user.name
+}
+
+// Email gets user's email address
+func (user *UserDescriptor) Email() string {
+	return user.email
 }
 
 // Is compares if two use are the same
@@ -66,6 +76,25 @@ func (user *UserDescriptor) setName(name string) error {
 	return nil
 }
 
+func (user *UserDescriptor) setRole(role Role) error {
+	switch role {
+	case Admin, Guest, Ordinary:
+		user.role = role
+		return nil
+	default:
+		return domain.ErrNoSuchRole
+	}
+}
+
+func (user *UserDescriptor) setEmail(address string) error {
+	addr, err := mail.ParseAddress(address)
+	if err != nil {
+		return errors.Wrap(domain.ErrInvalidEmail, err.Error())
+	}
+	user.email = addr.Address
+	return nil
+}
+
 // User domain model
 type User struct {
 	UserDescriptor
@@ -74,12 +103,13 @@ type User struct {
 }
 
 // NewUser creates a new user domain model
-func NewUser(name, password, token string, role Role) (*User, error) {
-	user := User{}
-
-	if err := user.setName(name); err != nil {
+func NewUser(name, email, password, token string, role Role, registeredDate time.Time) (*User, error) {
+	descriptor, err := NewUserDescriptor(name, email, role, registeredDate)
+	if err != nil {
 		return nil, err
 	}
+
+	user := User{UserDescriptor: *descriptor}
 
 	if err := user.setPassword(password); err != nil {
 		return nil, err
@@ -89,24 +119,7 @@ func NewUser(name, password, token string, role Role) (*User, error) {
 		return nil, err
 	}
 
-	if err := user.ChangeRole(role); err != nil {
-		return nil, err
-	}
-
-	user.registeredAt = clock.Now()
-
 	return &user, nil
-}
-
-// ChangeRole changes user's role
-func (user *User) ChangeRole(role Role) error {
-	switch role {
-	case Admin, Guest, Ordinary:
-		user.role = role
-		return nil
-	default:
-		return domain.ErrNoSuchRole
-	}
 }
 
 // Password gets user's encrypted password
@@ -139,6 +152,16 @@ func (user *User) setToken(token string) error {
 	}
 	user.token = token
 	return nil
+}
+
+// ChangeRole changes user's role
+func (user *User) ChangeRole(role Role) error {
+	return user.setRole(role)
+}
+
+// ChangeEmail changes user's email
+func (user *User) ChangeEmail(newEmailAddress string) error {
+	return user.setEmail(newEmailAddress)
 }
 
 // Is compares if two users are the same
