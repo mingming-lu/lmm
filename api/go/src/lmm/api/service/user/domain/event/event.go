@@ -1,17 +1,17 @@
 package event
 
 import (
-	"lmm/api/event"
-
 	"context"
+
+	"lmm/api/messaging"
 )
 
 func PublishUserRoleChanged(c context.Context, operator, user, targetRole string) error {
-	return event.SyncBus().Publish(c, NewUserRoleChangedEvent(
+	return messaging.SyncBus().Publish(c, NewUserRoleChangedEvent(
 		operator, user, targetRole,
 	))
 }
 
 func PublishUserPasswordChanged(c context.Context, username, newPassword string) error {
-	return event.SyncBus().Publish(c, NewUserPasswordChangedEvent(username, newPassword))
+	return messaging.SyncBus().Publish(c, NewUserPasswordChangedEvent(username, newPassword))
 }

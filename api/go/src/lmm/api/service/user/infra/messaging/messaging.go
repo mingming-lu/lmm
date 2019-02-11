@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"lmm/api/event"
+	"lmm/api/messaging"
 	"lmm/api/service/user/domain"
 	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/storage/db"
@@ -24,10 +24,10 @@ func NewSubscriber(db db.DB) *Subscriber {
 }
 
 // OnUserRoleChanged implements event handler to handle UserRoleChanged
-func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
+func (s *Subscriber) OnUserRoleChanged(c context.Context, e messaging.Event) error {
 	userRoleChanged, ok := e.(*userEvent.UserRoleChanged)
 	if !ok {
-		return errors.Wrap(event.ErrInvalidEvent, e.Topic())
+		return errors.Wrap(messaging.ErrInvalidEvent, e.Topic())
 	}
 
 	tx, err := s.db.Begin(c, &sql.TxOptions{
@@ -105,10 +105,10 @@ func (s *Subscriber) OnUserRoleChanged(c context.Context, e event.Event) error {
 }
 
 // OnUserPasswordChanged implements event handler to handle UserPasswordChanged
-func (s *Subscriber) OnUserPasswordChanged(c context.Context, e event.Event) error {
+func (s *Subscriber) OnUserPasswordChanged(c context.Context, e messaging.Event) error {
 	userPasswordChanged, ok := e.(*userEvent.UserPasswordChanged)
 	if !ok {
-		return errors.Wrap(event.ErrInvalidEvent, e.Topic())
+		return errors.Wrap(messaging.ErrInvalidEvent, e.Topic())
 	}
 
 	tx, err := s.db.Begin(c, &sql.TxOptions{

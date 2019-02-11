@@ -3,11 +3,14 @@ package pubsub
 import (
 	"time"
 
+	"lmm/api/messaging"
+
 	"cloud.google.com/go/pubsub"
 )
 
 // Event wraps gcp pubsub message and implementes lmm/api/messaging.Evnet
 type Event struct {
+	messaging.Event
 	topic string
 	msg   *pubsub.Message
 }
