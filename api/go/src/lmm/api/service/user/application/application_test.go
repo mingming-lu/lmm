@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"lmm/api/service/user/application/command"
 	"os"
 	"strings"
 
@@ -57,7 +58,11 @@ func TestRegisterNewUser(tt *testing.T) {
 	tt.Run("Success", func(tt *testing.T) {
 		t := testing.NewTester(tt)
 		username, password := "username", "~!@#$%^&*()-_=+{[}]|\\:;\"'<,>.?/"
-		nameGot, err := testAppService.RegisterNewUser(c, username, password)
+		nameGot, err := testAppService.RegisterNewUser(c, command.Register{
+			UserName:     username,
+			EmailAddress: username + "@lmm.local",
+			Password:     password,
+		})
 		t.NoError(err)
 		t.Is(username, nameGot)
 
@@ -76,39 +81,41 @@ func TestRegisterNewUser(tt *testing.T) {
 	tt.Run("Fail", func(tt *testing.T) {
 		cases := map[string]struct {
 			UserName string
+			Email    string
 			Password string
 			Err      error
 		}{
 			"UserNameTooShort": {
-				"ur", "password1234", domain.ErrInvalidUserName,
+				"ur", "ur@lmm.local", "password1234", domain.ErrInvalidUserName,
 			},
 			"UserNameStartsWithoutLetter": {
-				"1username", "password1234", domain.ErrInvalidUserName,
+				"1username", "1username@lmm.local", "password1234", domain.ErrInvalidUserName,
 			},
 			"EmptyPassword": {
-				"username", "", domain.ErrUserPasswordEmpty,
+				"username", "username@lmm.local", "", domain.ErrUserPasswordEmpty,
 			},
 			"PasswordIsTooShort": {
-				"username", "passwor", domain.ErrUserPasswordTooShort,
+				"username", "username@lmm.local", "passwor", domain.ErrUserPasswordTooShort,
 			},
 			"PasswordIsTooWeak": {
-				"username", "password", domain.ErrUserPasswordTooWeak,
+				"username", "username@lmm.local", "password", domain.ErrUserPasswordTooWeak,
 			},
 			"PasswordIsTooLong": {
-				"username", strings.Repeat("s", 251), domain.ErrUserPasswordTooLong,
+				"username", "username@lmm.local", strings.Repeat("s", 251), domain.ErrUserPasswordTooLong,
 			},
 			"DuplicateUserName": {
-				"username", "password1234", domain.ErrUserNameAlreadyUsed,
+				"username", "username@lmm.local", "password1234", domain.ErrUserNameAlreadyUsed,
 			},
 		}
 
 		for testName, testCase := range cases {
 			tt.Run(testName, func(tt *testing.T) {
 				t := testing.NewTester(tt)
-				nameGot, err := testAppService.RegisterNewUser(c,
-					testCase.UserName,
-					testCase.Password,
-				)
+				nameGot, err := testAppService.RegisterNewUser(c, command.Register{
+					UserName:     testCase.UserName,
+					EmailAddress: testCase.Email,
+					Password:     testCase.Password,
+				})
 				t.IsError(testCase.Err, errors.Cause(err), testName)
 				t.Is("", nameGot, testName)
 			})

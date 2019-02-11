@@ -34,8 +34,8 @@ func NewService(userRepository repository.UserRepository) *Service {
 }
 
 // RegisterNewUser registers new user
-func (s *Service) RegisterNewUser(c context.Context, name, password string) (string, error) {
-	user, err := s.factory.NewUser(name, password)
+func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (string, error) {
+	user, err := s.factory.NewUser(cmd.UserName, cmd.EmailAddress, cmd.Password)
 	if err != nil {
 		return "", err
 	}

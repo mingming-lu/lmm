@@ -1,5 +1,12 @@
 package command
 
+// Register command
+type Register struct {
+	UserName     string
+	EmailAddress string
+	Password     string
+}
+
 // AssignRole command
 type AssignRole struct {
 	OperatorUser string

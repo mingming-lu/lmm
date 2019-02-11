@@ -1,6 +1,7 @@
 package factory
 
 import (
+	"lmm/api/clock"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/service"
@@ -17,7 +18,7 @@ func NewFactory(encrypter service.EncryptService) *Factory {
 	}
 }
 
-func (f *Factory) NewUser(username, password string) (*model.User, error) {
+func (f *Factory) NewUser(username, email, password string) (*model.User, error) {
 	hashedPassword, err := f.NewPassword(password)
 	if err != nil {
 		return nil, err
@@ -25,7 +26,7 @@ func (f *Factory) NewUser(username, password string) (*model.User, error) {
 
 	token := uuidutil.NewUUID()
 
-	return model.NewUser(username, hashedPassword, token, model.Ordinary)
+	return model.NewUser(username, email, hashedPassword, token, model.Ordinary, clock.Now())
 }
 
 func (f *Factory) NewPassword(plainText string) (string, error) {

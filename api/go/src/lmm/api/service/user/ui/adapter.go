@@ -4,6 +4,7 @@ import "encoding/json"
 
 type signUpRequestBody struct {
 	Name     string `json:"name"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -24,7 +25,7 @@ type userView struct {
 
 type usersView struct {
 	Users  []userView  `json:"users"`
-	Page   json.Number `json:"page,number"`
+	Page   json.Number `json:"page"`
 	Count  json.Number `json:"count"`
 	Total  uint        `json:"total"`
 	SortBy string      `json:"sort_by"`
