@@ -56,13 +56,9 @@ CREATE TABLE IF NOT EXISTS user_password_change_history (
 		})
 
 		g.Go(func() error {
-			if _, err := mysql.Exec(c, `ALTER TABLE user drop KEY email`); err != nil {
-				return err
-			}
+			mysql.Exec(c, `ALTER TABLE user drop KEY email`)
 
-			if _, err := mysql.Exec(c, `ALTER TABLE user ADD UNIQUE KEY email (email);`); err != nil {
-				return err
-			}
+			mysql.Exec(c, `ALTER TABLE user ADD UNIQUE KEY email (email);`)
 
 			return nil
 		})
