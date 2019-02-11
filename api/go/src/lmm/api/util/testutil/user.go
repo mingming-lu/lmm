@@ -21,7 +21,7 @@ type User struct {
 	encryptedPassword string
 	rawToken          string
 	accessToken       string
-	role              string
+	role              model.Role
 	createdAt         time.Time
 }
 
@@ -82,7 +82,7 @@ func NewUser(db db.DB) User {
 		encryptedPassword: user.Password(),
 		rawToken:          user.Token(),
 		accessToken:       EncodeToken(user.Token()).Hashed(),
-		role:              user.Role().Name(),
+		role:              user.Role(),
 		createdAt:         now,
 	}
 }
@@ -111,7 +111,7 @@ func (u User) AccessToken() string {
 	return u.accessToken
 }
 
-func (u User) Role() string {
+func (u User) Role() model.Role {
 	return u.role
 }
 
