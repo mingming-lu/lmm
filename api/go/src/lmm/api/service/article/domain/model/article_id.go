@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strings"
 
-	"lmm/api/model"
 	"lmm/api/service/article/domain"
+	"lmm/api/service/base/model"
 )
 
 var (

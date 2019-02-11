@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"lmm/api/model"
+	"lmm/api/service/base/model"
 )
 
 // ArticleView model defines what should be shown on article page

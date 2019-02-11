@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 
 	"lmm/api/clock"
-	"lmm/api/model"
+	"lmm/api/service/base/model"
 	"lmm/api/service/user/domain"
 	"lmm/api/util/uuidutil"
 )
