@@ -1,6 +1,12 @@
 package messaging
 
-import "time"
+import (
+	"time"
+
+	"github.com/pkg/errors"
+)
+
+var ErrInvalidEvent = errors.New("invalid event")
 
 // Event definition
 type Event interface {

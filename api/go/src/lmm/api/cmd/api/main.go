@@ -7,9 +7,9 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"lmm/api/event"
 	"lmm/api/http"
 	"lmm/api/log"
+	"lmm/api/messaging"
 	"lmm/api/messaging/pubsub"
 	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
@@ -104,8 +104,8 @@ func main() {
 	userAppService := userApp.NewService(userRepo)
 	userUI := userUI.NewUI(userAppService)
 	userEventSubscriber := userMessaging.NewSubscriber(mysql)
-	event.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
-	event.SyncBus().Subscribe(&userEvent.UserPasswordChanged{}, userEventSubscriber.OnUserPasswordChanged)
+	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
+	messaging.SyncBus().Subscribe(&userEvent.UserPasswordChanged{}, userEventSubscriber.OnUserPasswordChanged)
 	router.GET("/v1/users", authUI.BearerAuth(userUI.ViewAllUsers))
 	router.POST("/v1/users", userUI.SignUp)
 	router.PUT("/v1/users/:user/role", authUI.BearerAuth(userUI.AssignUserRole))

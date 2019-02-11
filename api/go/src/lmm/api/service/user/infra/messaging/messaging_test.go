@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"lmm/api/event"
+	"lmm/api/messaging"
 	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/domain/model"
@@ -29,8 +29,8 @@ func TestMain(m *testing.M) {
 	encrypter = &service.BcryptService{}
 	builder = factory.NewFactory(encrypter)
 	testSubscriber = NewSubscriber(mysql)
-	event.SyncBus().Subscribe(&userEvent.UserPasswordChanged{}, testSubscriber.OnUserPasswordChanged)
-	event.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, testSubscriber.OnUserRoleChanged)
+	messaging.SyncBus().Subscribe(&userEvent.UserPasswordChanged{}, testSubscriber.OnUserPasswordChanged)
+	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, testSubscriber.OnUserRoleChanged)
 
 	code := m.Run()
 

@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"context"
+	"io"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/pkg/errors"
@@ -10,6 +11,9 @@ import (
 )
 
 type PubSubTopicPublisher struct {
+	messaging.Publisher
+	io.Writer
+
 	topic        *pubsub.Topic
 	writeContext func() context.Context
 }

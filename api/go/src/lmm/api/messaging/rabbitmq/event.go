@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"lmm/api/messaging"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -8,9 +9,12 @@ import (
 
 // Event defines rabbitmq event
 type Event struct {
+	messaging.Event
+
 	msg *amqp.Publishing
 }
 
+// NewEvent creates a new rabbitmq event
 func NewEvent(msg *amqp.Publishing) *Event {
 	return &Event{
 		msg: msg,
