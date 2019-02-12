@@ -31,7 +31,7 @@ func Execute(c context.Context, name string) {
 		return
 	}
 	if err := cmd.Execute(c); err != nil {
-		log.Print("[error] failed to execute command ", `'`+name+`'`, err.Error())
+		log.Print("[error] failed to execute command ", `'`+name+`' `, err.Error())
 	} else {
 		log.Print("[success] executed command ", `'`+name+`'`)
 	}

@@ -5,6 +5,7 @@ services:
     image: golang:1.11.2
     volumes:
       - ./go:/go
+      - ./mysql/sql/init.sql:/sql/schema.sql
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
     working_dir: /go/src/lmm/api/
     environment:
