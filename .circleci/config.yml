@@ -7,7 +7,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - mod-{{ .Environment.COMMON_CACHE_KEY }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
+            - api-{{ checksum "api/go/src/lmm/api/go.mod" }}
       - run:
           name: Setup docker-compose
           command: |
@@ -33,6 +33,6 @@ jobs:
             cd api
             make cli env=test commands="hello-world"
       - save_cache:
-          key: mod-{{ .Environment.COMMON_CACHE_KEY }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
+          key: api-{{ checksum "api/go/src/lmm/api/go.mod" }}
           paths:
             - api/go/pkd/mod/cache
