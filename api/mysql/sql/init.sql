@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 	UNIQUE `email` (`email`),
 	UNIQUE `token` (`token`),
 	INDEX `description` (`name`, `role`, `created_at`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `user_role_change_history` (
 	`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `user_role_change_history` (
 	`changed_at` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `changed_at` (`changed_at`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `user_password_change_history` (
 	`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `user_password_change_history` (
 	`changed_at` DATETIME NOT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `user_change_history` (`user`, `changed_at`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `article` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `article` (
 	UNIQUE `uid` (`uid`),
 	UNIQUE `alias_uid` (`alias_uid`),
 	INDEX `created_at` (`created_at`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `article_tag` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
 	UNIQUE `tag_id` (`article`, `sort`),
 	INDEX `name` (`name`),
 	INDEX `article_tag` (`article`, `sort`, `name`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `asset` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `asset` (
 	PRIMARY KEY (`id`),
 	UNIQUE `name` (`name`),
 	INDEX `created_at` (`created_at`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `image_alt` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -80,4 +80,4 @@ CREATE TABLE IF NOT EXISTS `image_alt` (
 	`name` VARCHAR(255) NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE `name` (`asset`, `name`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8;
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;

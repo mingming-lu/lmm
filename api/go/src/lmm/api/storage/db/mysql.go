@@ -42,6 +42,7 @@ func DefaultMySQL() DB {
 	c.Options.Add("parseTime", "true")
 	c.Options.Add("autocommit", "true")
 	c.Options.Add("tx_isolation", "'READ-COMMITTED'")
+	c.Options.Add("charset", "utf8mb4")
 
 	mysql := NewMySQL(c)
 	mysql.SetConnMaxLifetime(time.Hour)
