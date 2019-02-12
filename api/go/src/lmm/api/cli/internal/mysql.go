@@ -40,6 +40,7 @@ func MySQLSchemaDDL(c context.Context, deploy bool) error {
 		return err
 	}
 
+	dst.WriteByte('\n') // ensure ends with '\n' (for beautifully printing)
 	stmts := strings.Split(dst.String(), "\n")
 
 	if deploy {
@@ -47,7 +48,6 @@ func MySQLSchemaDDL(c context.Context, deploy bool) error {
 	}
 
 	io.Copy(os.Stdout, dst)
-	log.Println()
 	return nil
 }
 
