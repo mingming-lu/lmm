@@ -107,7 +107,13 @@ func (s *Service) mappingOrder(orderBy, order string) (repository.DescribeAllOrd
 	}
 }
 
+// UserChangePassword supports a application to chagne user's password
 func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePassword) error {
+	hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)
+	if err != nil {
+		return err
+	}
+
 	user, err := s.userRepository.FindByName(c, cmd.User)
 	if err != nil {
 		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
@@ -115,11 +121,6 @@ func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePasswo
 
 	if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
 		return domain.ErrUserPassword
-	}
-
-	hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)
-	if err != nil {
-		return err
 	}
 
 	if err := user.ChangePassword(hashedPassword); err != nil {
