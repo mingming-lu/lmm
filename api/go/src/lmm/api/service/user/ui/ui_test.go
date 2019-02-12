@@ -12,7 +12,8 @@ import (
 	authUI "lmm/api/service/auth/ui"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
-	userEvent "lmm/api/service/user/domain/event"
+	"lmm/api/service/user/domain/event"
+	userMessaging "lmm/api/service/user/infra/messaging"
 	"lmm/api/service/user/infra/persistence"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
@@ -39,10 +40,14 @@ func TestMain(m *testing.M) {
 	ui := NewUI(appService)
 	router = http.NewRouter()
 
-	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, messaging.NopEventHandler)
+	userEventSubscriber := userMessaging.NewSubscriber(mysql)
+
+	messaging.SyncBus().Subscribe(&event.UserRoleChanged{}, messaging.NopEventHandler)
+	messaging.SyncBus().Subscribe(&event.UserPasswordChanged{}, userEventSubscriber.OnUserPasswordChanged)
 
 	router.POST("/v1/users", ui.SignUp)
 	router.PUT("/v1/users/:user/role", authUI.BearerAuth(ui.AssignUserRole))
+	router.PUT("/v1/users/:user/password", ui.ChangeUserPassword)
 	router.GET("/v1/users", authUI.BearerAuth(ui.ViewAllUsers))
 
 	code := m.Run()
