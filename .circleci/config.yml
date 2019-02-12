@@ -7,7 +7,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - api-{{ checksum "api/go/src/lmm/api/go.mod" }}
+            - api-{{ checksum ".circleci/config.yml" }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
       - run:
           name: Setup docker-compose
           command: |
@@ -23,7 +23,7 @@ jobs:
             make install
             make build
       - save_cache:
-          key: api-{{ checksum "api/go/src/lmm/api/go.mod" }}
+          key: api-{{ checksum ".circleci/config.yml" }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
           paths:
             - api/go/pkd/mod/cache
       - run:
