@@ -47,6 +47,7 @@ func MySQLSchemaDDL(c context.Context, deploy bool) error {
 	}
 
 	io.Copy(os.Stdout, dst)
+	log.Println()
 	return nil
 }
 
