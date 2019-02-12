@@ -5,6 +5,9 @@ jobs:
       image: circleci/classic:edge
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - mod-{{ .Environment.COMMON_CACHE_KEY }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
       - run:
           name: Setup docker-compose
           command: |
@@ -29,3 +32,7 @@ jobs:
           command: |
             cd api
             make cli env=test commands="hello-world"
+      - save_cache:
+          key: mod-{{ .Environment.COMMON_CACHE_KEY }}-{{ checksum "api/go/src/lmm/api/go.mod" }}
+          paths:
+            - api/go/pkd/mod/cache
