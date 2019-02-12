@@ -22,6 +22,10 @@ jobs:
             echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
             make install
             make build
+      - save_cache:
+          key: api-{{ checksum "api/go/src/lmm/api/go.mod" }}
+          paths:
+            - api/go/pkd/mod/cache
       - run:
           name: Test API
           command: |
@@ -32,7 +36,3 @@ jobs:
           command: |
             cd api
             make cli env=test commands="hello-world"
-      - save_cache:
-          key: api-{{ checksum "api/go/src/lmm/api/go.mod" }}
-          paths:
-            - api/go/pkd/mod/cache
