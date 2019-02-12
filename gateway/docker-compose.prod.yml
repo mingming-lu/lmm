@@ -3,3 +3,4 @@ services:
   nginx:
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+    restart: always
