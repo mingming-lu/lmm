@@ -3,12 +3,14 @@ module lmm/api
 require (
 	cloud.google.com/go v0.33.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/google/uuid v1.0.0
 	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
 	github.com/julienschmidt/httprouter v0.0.0-20180715161854-348b672cd90d
 	github.com/pkg/errors v0.8.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/schemalex/schemalex v0.0.9
 	github.com/streadway/amqp v0.0.0-20180806233856-70e15c650864
 	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/stretchr/testify v1.2.2

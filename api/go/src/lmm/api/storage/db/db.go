@@ -30,7 +30,7 @@ type Config struct {
 
 // DSN converts c to dsn string
 // See examples for MySQL: https://github.com/go-sql-driver/mysql
-func (c *Config) DSN() string {
+func (c Config) DSN() string {
 	return fmt.Sprintf("%s:%s@%s(%s:%s)/%s?%s",
 		c.User, c.Password, c.Protocol, c.Host, c.Port, c.Database, c.Options.Encode())
 }

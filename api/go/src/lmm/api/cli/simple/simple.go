@@ -2,11 +2,10 @@ package simple
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"lmm/api/cli"
-	"lmm/api/storage/db"
+	"lmm/api/cli/internal"
 )
 
 // NewCommand creates a cli.Command implement
@@ -23,28 +22,11 @@ func init() {
 		return nil
 	}))
 
-	cli.Register("setCharacterSetTo-utf8mb4", NewCommand(func(c context.Context) error {
-		mysql := db.DefaultMySQL()
-		defer mysql.Close()
+	cli.Register("MySQL-Schema-DDL-Dry-Run", NewCommand(func(c context.Context) error {
+		return internal.MySQLSchemaDDL(c, false)
+	}))
 
-		rows, err := mysql.Query(c, "SHOW TABLES")
-		if err != nil {
-			return err
-		}
-		defer rows.Close()
-
-		var table string
-
-		for rows.Next() {
-			if err := rows.Scan(&table); err != nil {
-				return err
-			}
-			_, err := mysql.Exec(c, fmt.Sprintf("ALTER TABLE %s CONVERT TO CHARACTER SET utf8mb4;", table))
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
+	cli.Register("MySQL-Schema-DDL-Deploy", NewCommand(func(c context.Context) error {
+		return internal.MySQLSchemaDDL(c, true)
 	}))
 }
