@@ -60,8 +60,9 @@ CREATE TABLE IF NOT EXISTS `article_tag` (
 	`name` VARCHAR(255) NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE `tag_id` (`article`, `sort`),
-	INDEX `tag_name` (`article`, `sort`, `name`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;
+	INDEX `name` (`name`),
+	INDEX `article_tag` (`article`, `sort`, `name`)
+) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4;;
 
 CREATE TABLE IF NOT EXISTS `asset` (
 	`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
