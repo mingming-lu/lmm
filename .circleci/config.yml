@@ -29,3 +29,5 @@ jobs:
           command: |
             cd api
             make cli env=test commands="hello-world"
+            make cli env=test commands="MySQL-Schema-DDL-Dry-Run"
+            make cli env=test commands="MySQL-Schema-DDL-Deploy"
