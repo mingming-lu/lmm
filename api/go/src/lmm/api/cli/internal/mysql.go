@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 
@@ -43,7 +43,7 @@ func MySQLSchemaDDL(c context.Context, deploy bool) error {
 	dst.WriteByte('\n') // ensure ends with '\n' (for beautifully printing)
 
 	if deploy {
-		return deployMySQLSchemaDDL(c, strings.Split(dst.String(), "\n"))
+		return deployMySQLSchemaDDL(c, strings.Split(dst.String(), ";"))
 	}
 
 	io.Copy(os.Stdout, dst)
@@ -62,10 +62,11 @@ func deployMySQLSchemaDDL(c context.Context, stmts []string) error {
 	}
 
 	for _, stmt := range stmts {
-		if strings.TrimSpace(stmt) == "" {
+		stmt = strings.TrimSpace(stmt)
+		if stmt == "" {
 			continue
 		}
-		log.Println(stmt)
+		fmt.Println(stmt)
 		if _, err := tx.Exec(c, stmt); err != nil {
 			return db.RollbackWithError(tx, err)
 		}
