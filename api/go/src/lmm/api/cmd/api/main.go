@@ -14,7 +14,7 @@ import (
 	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
 	"lmm/api/storage/db"
-	"lmm/api/storage/uploader"
+	"lmm/api/storage/file"
 
 	// user
 	userApp "lmm/api/service/user/application"
@@ -71,9 +71,8 @@ func main() {
 	mysql := db.DefaultMySQL()
 	defer mysql.Close()
 
-	// localUploader := uploader.NewLocalImageUploader()
 	rabbitMQClient := rabbitmq.DefaultClient()
-	rabbitMQUploader := uploader.NewRabbitMQAssetUploader(rabbitMQClient)
+	rabbitMQUploader := file.NewRabbitMQAssetUploader(rabbitMQClient)
 	defer rabbitMQUploader.Close() // would close rabbitMQClient too
 
 	router := http.NewRouter()

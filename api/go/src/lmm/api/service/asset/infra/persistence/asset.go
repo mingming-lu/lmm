@@ -9,17 +9,17 @@ import (
 	"lmm/api/clock"
 	"lmm/api/service/asset/domain/model"
 	"lmm/api/storage/db"
-	"lmm/api/storage/uploader"
+	"lmm/api/storage/file"
 )
 
 // AssetStorage s a AssetRepository implementation
 type AssetStorage struct {
 	db       db.DB
-	uploader uploader.Uploader
+	uploader file.Uploader
 }
 
 // NewAssetStorage creates new AssetStorage
-func NewAssetStorage(db db.DB, uploader uploader.Uploader) *AssetStorage {
+func NewAssetStorage(db db.DB, uploader file.Uploader) *AssetStorage {
 	return &AssetStorage{db: db, uploader: uploader}
 }
 
@@ -122,7 +122,7 @@ func (s *AssetStorage) Save(c context.Context, asset *model.Asset) error {
 	if err := s.uploader.Upload(c,
 		asset.Name(),
 		asset.Data(),
-		uploader.ImageUploaderConfig{
+		file.ImageUploaderConfig{
 			Type: asset.Type().String(),
 		},
 	); err != nil {
