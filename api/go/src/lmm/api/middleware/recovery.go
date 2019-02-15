@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"runtime/debug"
 	"strings"
 
 	"go.uber.org/zap"
@@ -26,6 +27,7 @@ func Recovery(next http.Handler) http.Handler {
 
 				fields := []zap.Field{
 					zap.String("request_id", c.Request().RequestID()),
+					zap.ByteString("stack_trace", debug.Stack()),
 					zap.Any("what", recovered),
 				}
 				zap.L().Error("unexpected error", fields...)
