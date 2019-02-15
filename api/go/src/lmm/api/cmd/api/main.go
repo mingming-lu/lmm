@@ -14,7 +14,7 @@ import (
 	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
 	"lmm/api/storage/db"
-	"lmm/api/storage/uploader"
+	"lmm/api/storage/file"
 
 	// user
 	userApp "lmm/api/service/user/application"
@@ -36,6 +36,7 @@ import (
 
 	// asset
 	assetDomainService "lmm/api/service/asset/domain/service"
+	assetCache "lmm/api/service/asset/infra/cache"
 	assetStorage "lmm/api/service/asset/infra/persistence"
 	assetService "lmm/api/service/asset/infra/service"
 	asset "lmm/api/service/asset/ui"
@@ -71,9 +72,8 @@ func main() {
 	mysql := db.DefaultMySQL()
 	defer mysql.Close()
 
-	// localUploader := uploader.NewLocalImageUploader()
 	rabbitMQClient := rabbitmq.DefaultClient()
-	rabbitMQUploader := uploader.NewRabbitMQAssetUploader(rabbitMQClient)
+	rabbitMQUploader := file.NewRabbitMQAssetUploader(rabbitMQClient)
 	defer rabbitMQUploader.Close() // would close rabbitMQClient too
 
 	router := http.NewRouter()
@@ -127,7 +127,8 @@ func main() {
 	assetRepo := assetStorage.NewAssetStorage(mysql, rabbitMQUploader)
 	imageService := assetService.NewImageService(mysql)
 	imageEncoder := &assetDomainService.NopImageEncoder{}
-	asset := asset.New(assetFinder, assetRepo, imageService, imageEncoder, assetService.NewUserAdapter(mysql))
+	assetCache := assetCache.NewRedisCache()
+	asset := asset.New(assetFinder, assetRepo, assetCache, imageService, imageEncoder, assetService.NewUserAdapter(mysql))
 	router.POST("/v1/assets/images", authUI.BearerAuth(asset.UploadImage))
 	router.GET("/v1/assets/images", asset.ListImages)
 	router.POST("/v1/assets/photos", authUI.BearerAuth(asset.UploadPhoto))
