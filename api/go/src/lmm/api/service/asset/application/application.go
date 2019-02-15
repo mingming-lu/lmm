@@ -12,6 +12,7 @@ import (
 	"lmm/api/service/asset/domain/model"
 	"lmm/api/service/asset/domain/repository"
 	"lmm/api/service/asset/domain/service"
+	"lmm/api/service/asset/infra/cache"
 	"lmm/api/util/stringutil"
 )
 
@@ -27,6 +28,7 @@ type Service struct {
 	imageService    service.ImageService
 	imageEncoder    service.ImageEncoder
 	assetFinder     service.AssetFinder
+	cacheService    CacheService
 }
 
 // NewService creates a new image application service
@@ -43,6 +45,7 @@ func NewService(
 		imageService:    imageService,
 		imageEncoder:    imageEncoder,
 		uploaderService: uploaderService,
+		cacheService:    cache.NewRedisCache(),
 	}
 }
 
@@ -94,7 +97,18 @@ func (app *Service) ListPhotos(c context.Context, pageStr, perPageStr string) (*
 		return nil, err
 	}
 
-	return app.assetFinder.FindAllPhotos(c, page, perPage)
+	if photos, ok := app.cacheService.FetchPhotos(c, page, perPage); ok {
+		return photos, nil
+	}
+
+	photos, err := app.assetFinder.FindAllPhotos(c, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	app.cacheService.StorePhotos(c, page, perPage, photos.List())
+
+	return photos, nil
 }
 
 func (app *Service) parseLimitAndCursorOrDefault(pageStr, perPageStr string) (uint, uint, error) {
