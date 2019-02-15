@@ -1,9 +1,12 @@
 package cache
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 
 	"github.com/gomodule/redigo/redis"
+	"github.com/pkg/errors"
 
 	"lmm/api/http"
 	"lmm/api/service/asset/domain/model"
@@ -26,6 +29,48 @@ func NewRedisCache() *RedisCache {
 	}
 }
 
+type redisPhotoModel struct {
+	ID         uint
+	Name       string
+	Alternates []string
+}
+
+func serialize(c context.Context, photos ...*model.PhotoDescriptor) ([][]byte, error) {
+	data := make([][]byte, len(photos))
+
+	for i := range photos {
+		buffer := &bytes.Buffer{}
+		model := redisPhotoModel{
+			ID:         photos[i].ID(),
+			Name:       photos[i].Name(),
+			Alternates: photos[i].AlternateTexts(),
+		}
+		if err := gob.NewEncoder(buffer).Encode(model); err != nil {
+			return nil, errors.Wrapf(err, "%#v", model)
+		}
+		data[i] = buffer.Bytes()
+	}
+
+	return data, nil
+}
+
+func deserialize(c context.Context, data [][]byte) ([]*model.PhotoDescriptor, error) {
+	photos := make([]*model.PhotoDescriptor, len(data))
+
+	for i := range data {
+		photo := redisPhotoModel{}
+		if err := gob.NewDecoder(bytes.NewReader(data[i])).Decode(&photo); err != nil {
+			return nil, errors.Wrapf(err, "%s", string(data[i]))
+		}
+		photos[i] = model.NewPhotoDescriptor(photo.ID, photo.Name)
+		for _, alt := range photo.Alternates {
+			photos[i].AddAlternateText(alt)
+		}
+	}
+
+	return photos, nil
+}
+
 func (cache *RedisCache) FetchPhotos(c context.Context, page, perPage uint) (*model.PhotoCollection, bool) {
 	conn, err := cache.redisClient.GetContext(c)
 	if err != nil {
@@ -34,13 +79,14 @@ func (cache *RedisCache) FetchPhotos(c context.Context, page, perPage uint) (*mo
 	}
 	defer conn.Close()
 
-	photos := make([]*model.PhotoDescriptor, 0)
-
 	begin := (page - 1) * perPage
 	end := begin + perPage
 	values, err := redis.Values(conn.Do("ZRANGE", photosListRedisKey, begin, end+1))
 	if err != nil {
 		http.Log().Warn(c, err.Error())
+		return nil, false
+	}
+	if len(values) == 0 {
 		return nil, false
 	}
 
@@ -50,7 +96,14 @@ func (cache *RedisCache) FetchPhotos(c context.Context, page, perPage uint) (*mo
 		hasNextPage = true
 	}
 
-	if err := redis.ScanSlice(values, &photos); err != nil {
+	models := make([][]byte, len(values))
+	if err := redis.ScanSlice(values, &models); err != nil {
+		http.Log().Warn(c, err.Error())
+		return nil, false
+	}
+
+	photos, err := deserialize(c, models)
+	if err != nil {
 		http.Log().Warn(c, err.Error())
 		return nil, false
 	}
@@ -59,6 +112,10 @@ func (cache *RedisCache) FetchPhotos(c context.Context, page, perPage uint) (*mo
 }
 
 func (cache *RedisCache) StorePhotos(c context.Context, page, perPage uint, photos []*model.PhotoDescriptor) error {
+	data, err := serialize(c, photos...)
+	if err != nil {
+		return err
+	}
 	conn, err := cache.redisClient.GetContext(c)
 	if err != nil {
 		return err
@@ -68,7 +125,7 @@ func (cache *RedisCache) StorePhotos(c context.Context, page, perPage uint, phot
 
 	args := make([]interface{}, len(photos)*2)
 
-	for i, photo := range photos {
+	for i, photo := range data {
 		baseIdx := 2 * i
 		args[baseIdx] = begin + uint(i)
 		args[baseIdx+1] = photo
