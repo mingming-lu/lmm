@@ -2,15 +2,28 @@ package cache
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
+
+	"lmm/api/util/stringutil"
 )
 
-const (
-	redisServer           = "lmm-api-redis:6379"
-	redisConnFetchTimeout = 10 * time.Second
+var (
+	redisServer           string
+	redisConnFetchTimeout time.Duration
 )
+
+func init() {
+	redisServer = os.Getenv("REDIS_SERVER")
+
+	second, err := stringutil.ParseUint(os.Getenv("REDIS_CONN_TIMEOUT_SECOND"))
+	if err != nil {
+		panic(err)
+	}
+	redisConnFetchTimeout = time.Duration(second) * time.Second
+}
 
 // RedisClient is a Redis client using redigo
 type RedisClient struct {

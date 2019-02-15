@@ -37,6 +37,7 @@ type UI struct {
 func New(
 	assetFinder service.AssetFinder,
 	assetRepository repository.AssetRepository,
+	cacheService application.CacheService,
 	imageService service.ImageService,
 	imageEncoder service.ImageEncoder,
 	userAdapter service.UploaderService,
@@ -44,6 +45,7 @@ func New(
 	appService := application.NewService(
 		assetFinder,
 		assetRepository,
+		cacheService,
 		imageService,
 		imageEncoder,
 		userAdapter,

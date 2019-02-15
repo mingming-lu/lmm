@@ -13,7 +13,6 @@ import (
 	"lmm/api/service/asset/domain/model"
 	"lmm/api/service/asset/domain/repository"
 	"lmm/api/service/asset/domain/service"
-	"lmm/api/service/asset/infra/cache"
 	"lmm/api/util/stringutil"
 )
 
@@ -36,6 +35,7 @@ type Service struct {
 func NewService(
 	assetFinder service.AssetFinder,
 	assetRepository repository.AssetRepository,
+	cacheService CacheService,
 	imageService service.ImageService,
 	imageEncoder service.ImageEncoder,
 	uploaderService service.UploaderService,
@@ -43,10 +43,10 @@ func NewService(
 	return &Service{
 		assetFinder:     assetFinder,
 		assetRepository: assetRepository,
+		cacheService:    cacheService,
 		imageService:    imageService,
 		imageEncoder:    imageEncoder,
 		uploaderService: uploaderService,
-		cacheService:    cache.NewRedisCache(),
 	}
 }
 
