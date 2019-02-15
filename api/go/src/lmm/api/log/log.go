@@ -24,7 +24,7 @@ func Init(logWriter io.Writer) func() {
 		TimeKey:       "ts",
 		StacktraceKey: "trace",
 		CallerKey:     "caller",
-		EncodeCaller:  zapcore.ShortCallerEncoder,
+		EncodeCaller:  zapcore.FullCallerEncoder,
 		EncodeLevel:   zapcore.LowercaseLevelEncoder,
 		EncodeTime:    zapcore.ISO8601TimeEncoder,
 		LineEnding:    zapcore.DefaultLineEnding,
