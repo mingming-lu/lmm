@@ -9,6 +9,7 @@ import (
 type CacheService interface {
 	FetchPhotos(c context.Context, page, perPage uint) (*model.PhotoCollection, bool)
 	StorePhotos(c context.Context, page, perPage uint, photos []*model.PhotoDescriptor) error
+	ClearPhotos(c context.Context) error
 }
 
 type NopCacheService struct {

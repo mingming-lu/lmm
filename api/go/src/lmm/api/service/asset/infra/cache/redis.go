@@ -130,8 +130,21 @@ func (cache *RedisCache) StorePhotos(c context.Context, page, perPage uint, phot
 		args[baseIdx] = begin + uint(i)
 		args[baseIdx+1] = photo
 	}
+	args = append([]interface{}{photosListRedisKey}, args...)
 
-	if _, err := conn.Do("ZADD", photosListRedisKey, args); err != nil {
+	if _, err := conn.Do("ZADD", args...); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cache *RedisCache) ClearPhotos(c context.Context) error {
+	conn, err := cache.redisClient.GetContext(c)
+	if err != nil {
+		return err
+	}
+
+	if _, err := conn.Do("DEL", photosListRedisKey); err != nil {
 		return err
 	}
 	return nil
