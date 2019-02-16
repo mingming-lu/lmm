@@ -35,7 +35,6 @@ services:
     image: redis:5.0.3-alpine3.9
     volumes:
       - ./redis/redis.conf:/etc/redis/redis.conf
-      - ./redis/log/redis.log:/var/log/redis.log
     command: redis-server /etc/redis/redis.conf
     sysctls:
       net.core.somaxconn: 511
