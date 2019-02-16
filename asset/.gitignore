@@ -1,3 +1,6 @@
+
 static
 
 go/pkg
+go/bin
+go/src/github.com

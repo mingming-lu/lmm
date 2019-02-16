@@ -1,7 +1,6 @@
 version: "3.7"
 services:
   manager:
-    container_name: lmm-manager
     image: node:lts-alpine
     volumes:
       - .:/manager
