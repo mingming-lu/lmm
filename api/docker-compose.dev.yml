@@ -3,7 +3,7 @@ services:
   api:
     env_file:
       - ./.env/dev.env
-    command: go run cmd/api/main.go
+    command: api
     environment:
       APP_HOST: https://www.lmm.local
       MYSQL_HOST: mysql
