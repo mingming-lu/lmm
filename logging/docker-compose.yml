@@ -6,11 +6,11 @@ services:
     volumes:
       - ./go:/go
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
-    working_dir: /go/src/lmm/logging/pubsub
+    working_dir: /go/src/lmm/logging
     environment:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
-    command: go run sub.go
+    command: pubsub
     networks:
       - lmm
 
