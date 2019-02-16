@@ -65,3 +65,8 @@ stop-gateway:
 restart:
 	make stop
 	make start
+
+go-build:
+	cd api && make build
+	cd asset && make build
+	cd logging && make build
