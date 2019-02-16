@@ -1,7 +1,6 @@
 version: "3.7"
 services:
   app:
-    container_name: lmm-app
     image: node:lts-alpine
     volumes:
       - .:/app

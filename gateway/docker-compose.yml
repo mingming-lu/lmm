@@ -1,7 +1,6 @@
 version: "3.7"
 services:
   nginx:
-    container_name: lmm-gateway-nginx
     image: nginx:1.14.1-alpine
     restart: on-failure
     volumes:
