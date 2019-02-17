@@ -70,3 +70,6 @@ go-build:
 	cd api && make build
 	cd asset && make build
 	cd logging && make build
+
+scale-api:
+	docker-compose -f api/docker-compose.yml -f api/docker-compose.${env}.yml up -d --scale api=${n}
