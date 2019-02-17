@@ -38,7 +38,7 @@ export default {
     }
   },
   asyncData({$axios}) {
-    return $axios.get('/v1/articles?count=100')
+    return $axios.get('/v1/articles?perPage=100')
     .then(res => {
       return {
         articles:      res.data.articles,
