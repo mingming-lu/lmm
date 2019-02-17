@@ -79,7 +79,7 @@ class Config:
             for upstream in self:
                 f.write(f'upstream {upstream.name()} {{\n')
                 for server in upstream:
-                    f.write(f'    server {server};\n')
+                    f.write(f'    server {server} fail_timeout=2s;\n')
                 f.write('}\n\n')
 
     def upstream(self, name):
