@@ -4,4 +4,4 @@ services:
     build: ./python
     volumes:
       - ./../:/project
-    working_dir: /project
+    working_dir: /project/cli/python
