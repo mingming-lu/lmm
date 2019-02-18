@@ -1,2 +1,6 @@
-script:
-	docker-compose run --rm script sh
+all:
+
+.PHONY: python
+python:
+	docker-compose build python
+	docker-compose run --rm python

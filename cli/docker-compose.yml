@@ -1,7 +1,7 @@
 version: "3.7"
 services:
-  script:
-    image: python:3.7.2-alpine3.9
+  python:
+    build: ./python
     volumes:
       - ./../:/project
     working_dir: /project
