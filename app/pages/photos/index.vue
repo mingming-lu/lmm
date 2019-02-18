@@ -3,32 +3,59 @@
     <div v-if="wideMode" class="content">
       <div class="left">
         <div :class="{container: wideMode}">
-          <img
+          <a
             v-for="photo in left"
             :key="photo.name"
-            :src="url(photo.name)"
-            :alt="photo.alts.join(' ')"
+            :href="load_image_full(photo.name)"
+          >
+            <img
+              sizes="(min-width: 800px) 50vw, 100vw"
+              :src="load_image_full(photo.name)"
+              :srcset="`${load_image_1280(photo.name)} 1280w,
+                        ${load_image_960(photo.name)} 960w,
+                        ${load_image_640(photo.name)} 640w,
+                        ${load_image_320(photo.name)} 320w`"
+              :alt="photo.alts.join(' ')"
             >
+          </a>
         </div>
       </div>
       <div class="right">
         <div :class="{container: wideMode}">
-          <img
+          <a
             v-for="photo in right"
             :key="photo.name"
-            :src="url(photo.name)"
-            :alt="photo.alts.join(' ')"
-            >
+            :href="load_image_full(photo.name)"
+          >
+            <img
+              :src="load_image_full(photo.name)"
+              sizes="(min-width: 800px) 50vw, 100vw"
+              :srcset="`${load_image_1280(photo.name)} 1280w,
+                        ${load_image_960(photo.name)} 960w,
+                        ${load_image_640(photo.name)} 640w,
+                        ${load_image_320(photo.name)} 320w`"
+              :alt="photo.alts.join(' ')"
+              >
+          </a>
         </div>
       </div>
     </div>
     <div v-else>
-      <div v-for="photo in photos" :key="photo.name">
+      <a
+        v-for="photo in photos"
+        :key="photo.name"
+        :href="load_image_full(photo.name)"
+      >
         <img
-          :src="url(photo.name)"
+          :src="load_image_full(photo.name)"
+          sizes="(min-width: 800px) 50vw, 100vw"
+          :srcset="`${load_image_1280(photo.name)} 1280w,
+                    ${load_image_960(photo.name)} 960w,
+                    ${load_image_640(photo.name)} 640w,
+                    ${load_image_320(photo.name)} 320w`"
           :alt="photo.alts.join(' ')"
           >
-      </div>
+      </a>
     </div>
 
     <div v-if="!isPageLoaded" class="center">
@@ -140,9 +167,20 @@ export default {
           console.log(e)
         })
     },
-    url: name => {
-      // TODO, create a plugin to convert name to imageURL
+    load_image_full(name) {
       return `${process.env.ASSET_URL}/photos/${name}`
+    },
+    load_image_320(name) {
+      return this.load_image_full(`320w/${name}`)
+    },
+    load_image_640(name) {
+      return this.load_image_full(`640w/${name}`)
+    },
+    load_image_960(name) {
+      return this.load_image_full(`960w/${name}`)
+    },
+    load_image_1280(name) {
+      return this.load_image_full(`1280w/${name}`)
     },
     calcIsWideMode() {
       this.wideMode = window.innerWidth >= 800
