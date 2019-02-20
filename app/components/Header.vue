@@ -1,5 +1,5 @@
 <template>
-  <header class="shadow">
+  <header v-if="isMounted" class="shadow">
     <nav
       v-if="wideMode"
       class="top-nav">
@@ -72,6 +72,7 @@ export default {
       drawerShown: false,
       wideMode: false,
       moderateWideMode: false,
+      isMounted: false,
       items: [
         {
           link: '/',
@@ -117,6 +118,7 @@ export default {
     this.calcDrawerNavBarHeight()
     this.calcIsWideMode()
     this.determineCurrentRouterName()
+    this.isMounted = true
   },
   beforeDestroy() {
     if (process.browser) {
