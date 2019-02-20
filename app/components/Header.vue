@@ -14,11 +14,12 @@
 
       <div :class="{narrowTopNav: moderateWideMode}">
         <nuxt-link
-          v-for="item in items"
-          v-if="item.wideMode"
+          v-for="item in items.slice(1)"
           :key="item.name"
           :to="item.link"
-          class="nav-item">
+          class="nav-item"
+          @click.native="navigate(item.name)"
+          >
           {{ item.name }}
         </nuxt-link>
       </div>
@@ -154,7 +155,9 @@ export default {
     },
     navigate(name) {
       this.currentRouterName = name
-      this.toggleDrawer()
+      if (!this.wideMode) {
+        this.toggleDrawer()
+      }
     }
   }
 }
