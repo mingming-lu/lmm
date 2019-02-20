@@ -1,6 +1,19 @@
 <template>
-  <div class="background-image-1" />
+  <div v-if="isMounted" class="background-image-1" />
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      isMounted: false
+    }
+  },
+  mounted() {
+    this.isMounted = true
+  }
+}
+</script>
 
 <style lang="scss" scoped>
 @import '~/assets/scss/styles.scss';

@@ -1,5 +1,5 @@
 <template>
-  <header class="shadow">
+  <header v-if="isMounted" class="shadow">
     <nav
       v-if="wideMode"
       class="top-nav">
@@ -14,11 +14,12 @@
 
       <div :class="{narrowTopNav: moderateWideMode}">
         <nuxt-link
-          v-for="item in items"
-          v-if="item.wideMode"
+          v-for="item in items.slice(1)"
           :key="item.name"
           :to="item.link"
-          class="nav-item">
+          class="nav-item"
+          @click.native="navigate(item.name)"
+          >
           {{ item.name }}
         </nuxt-link>
       </div>
@@ -71,6 +72,7 @@ export default {
       drawerShown: false,
       wideMode: false,
       moderateWideMode: false,
+      isMounted: false,
       items: [
         {
           link: '/',
@@ -116,6 +118,7 @@ export default {
     this.calcDrawerNavBarHeight()
     this.calcIsWideMode()
     this.determineCurrentRouterName()
+    this.isMounted = true
   },
   beforeDestroy() {
     if (process.browser) {
@@ -154,7 +157,9 @@ export default {
     },
     navigate(name) {
       this.currentRouterName = name
-      this.toggleDrawer()
+      if (!this.wideMode) {
+        this.toggleDrawer()
+      }
     }
   }
 }

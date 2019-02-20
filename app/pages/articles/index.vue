@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div v-if="isMounted" class="container">
     <!-- Articles -->
     <div
       :class="{ 'desktop': !isMobile, 'mobile': isMobile }"
@@ -181,10 +181,16 @@ export default {
       }
     })
   },
+  data () {
+    return {
+      isMounted: false
+    }
+  },
   watchQuery: ['page', 'perPage', 'tag'],
   mounted() {
     window.addEventListener('resize', this.calcIsMobile)
     this.calcIsMobile()
+    this.isMounted = true
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.calcIsMobile)

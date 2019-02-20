@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div v-if="isMounted" class="container">
     <!-- Article text -->
     <div class="article" :class="{ 'left': !isMobile, 'mobile': isMobile }">
       <div :class="{container: !isMobile}">
@@ -75,12 +75,18 @@ export default {
       }
     })
   },
+  data () {
+    return {
+      isMounted: false
+    }
+  },
   mounted () {
     window.addEventListener('resize', this.calcIsMobile)
     window.addEventListener('scroll', this.calcProgress)
     this.markBodyAndExtractSubtitles()
     this.calcIsMobile()
     this.calcProgress()
+    this.isMounted = true
   },
   watch: {
     body: function () {

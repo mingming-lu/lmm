@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div v-if="isMounted" class="container">
     <div v-if="wideMode" class="content">
       <div class="left">
         <div :class="{container: wideMode}">
@@ -133,10 +133,16 @@ export default {
         console.log(e)
       })
   },
+  data () {
+    return {
+      isMounted: false
+    }
+  },
   watchQuery: ['page'],
   mounted() {
     window.addEventListener('resize', this.calcIsWideMode)
     this.calcIsWideMode()
+    this.isMounted = true
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.calcIsWideMode)
