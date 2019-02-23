@@ -192,6 +192,9 @@ export default {
     this.calcIsMobile()
     this.isMounted = true
   },
+  updated() {
+    this.isMounted = true
+  },
   beforeDestroy() {
     window.removeEventListener('resize', this.calcIsMobile)
   },
