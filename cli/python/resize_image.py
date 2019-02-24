@@ -8,7 +8,8 @@ from PIL import Image
 def resize_single_file(dst: str, src: str, width: int):
     with Image.open(src) as img:
         if img.size[0] < width:
-            print(f'skip image {src} since width ({img.size[0]}) is smaller than {width}')
+            print(f'skip resizing image {src} since width ({img.size[0]}) is smaller than {width}')
+            img.save(dst)
             return
         ratio = width / img.size[0]
         height = int(img.size[1] * ratio)
