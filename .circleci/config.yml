@@ -18,7 +18,6 @@ jobs:
             chmod -R 777 redis
             mkdir -p .env
             echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
-            make install
             make build
       - run:
           name: Test API
