@@ -1,11 +1,10 @@
 version: '3.7'
 services:
   rabbitmq:
-    image: rabbitmq:3.7-management
+    image: rabbitmq:3.7.12-alpine
     volumes:
       - ./rabbitmq/lib:/var/lib/rabbitmq
       - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-    command: sh -c "rabbitmq-plugins enable rabbitmq_management; rabbitmq-server"
     networks:
       - lmm
 
