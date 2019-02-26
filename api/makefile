@@ -9,10 +9,10 @@ start:
 build: build-api build-cli
 
 build-api:
-	docker-compose -f docker-compose.yml run --rm --no-deps api sh -c "cd cmd/api && go install -v"
+	docker-compose -f docker-compose.yml run --rm --no-deps api bash -c "cd cmd/api && go install -v"
 
 build-cli:
-	docker-compose -f docker-compose.yml run --rm --no-deps api sh -c "cd cmd/cli && go install -v"
+	docker-compose -f docker-compose.yml run --rm --no-deps api bash -c "cd cmd/cli && go install -v"
 
 # example:
 # > make cli env=dev commands="hello-world"

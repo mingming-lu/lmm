@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   api:
-    image: golang:1.11.5-alpine3.9
+    image: golang:1.11.5
     volumes:
       - ./go:/go
       - ./mysql/sql/init.sql:/sql/schema.sql
@@ -10,7 +10,6 @@ services:
     environment:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
-      CGO_ENABLED: 0
       HTTP_TIMEOUT_SECOND: 10
     depends_on:
       - mysql
