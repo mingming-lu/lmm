@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   asset:
-    image: golang:1.11.5-alpine3.9
+    image: golang:1.11.5
     working_dir: /go/src/lmm/asset
     volumes:
       - ./go:/go
@@ -11,11 +11,10 @@ services:
     environment:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
-      CGO_ENABLED: 0
     networks:
       - lmm
   subscriber:
-    image: golang:1.11.5-alpine3.9
+    image: golang:1.11.5
     working_dir: /go/src/lmm/asset
     volumes:
       - ./go/:/go/
@@ -25,7 +24,6 @@ services:
     environment:
       TZ: Asia/Tokyo
       GO111MODULE: 'on'
-      CGO_ENABLED: 0
     networks:
       - lmm
 

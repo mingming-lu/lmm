@@ -1,7 +1,7 @@
 all: dev
 
 build:
-	docker-compose -f docker-compose.yml run --rm --no-deps pubsub sh -c "cd cmd/pubsub && go install -v"
+	docker-compose -f docker-compose.yml run --rm --no-deps pubsub bash -c "cd cmd/pubsub && go install -v"
 
 dev:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
