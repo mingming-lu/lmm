@@ -17,7 +17,7 @@ services:
     networks:
       - lmm-api
   mysql:
-    image: mysql:5.7
+    image: mysql:5.7.25
     volumes:
       - ./mysql/lib:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
