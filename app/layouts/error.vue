@@ -1,10 +1,10 @@
 <template>
   <div class="center container">
-    <p>{{statusCode}} {{message}}</p>
+    <p>{{ statusCode }} {{ message }}</p>
     <nuxt-link
       to="/"
       class="link"
-      >
+    >
       Home page
     </nuxt-link>
   </div>
@@ -15,13 +15,13 @@ export default {
   props: {
     statusCode: {
       type: Number,
-      default: 404,
+      default: 404
     },
     message: {
       type: String,
-      default: 'Page Not Found',
-    },
-  },
+      default: 'Page Not Found'
+    }
+  }
 }
 </script>
 
@@ -30,7 +30,7 @@ export default {
 .center {
   position: relative;
 }
-.link{
+.link {
   text-decoration: underline;
 }
 </style>

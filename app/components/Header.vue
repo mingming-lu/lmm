@@ -1,5 +1,7 @@
 <template>
-  <header v-if="isMounted" class="shadow">
+  <header 
+    v-if="isMounted" 
+    class="shadow">
     <nav
       v-if="wideMode"
       class="top-nav">
@@ -19,7 +21,7 @@
           :to="item.link"
           class="nav-item"
           @click.native="navigate(item.name)"
-          >
+        >
           {{ item.name }}
         </nuxt-link>
       </div>
@@ -53,7 +55,7 @@
             :class="{'drawer-item-active': currentRouterName === item.name}"
             class="link"
             @click.native="navigate(item.name)">
-            <p><i :class="item.icon"></i>
+            <p><i :class="item.icon"/>
               {{ item.name }}
             </p>
           </nuxt-link>
@@ -78,31 +80,31 @@ export default {
           link: '/',
           name: 'Home',
           icon: 'fas fa-home',
-          wideMode: false,
+          wideMode: false
         },
         {
           link: '/articles',
           name: 'Articles',
           icon: 'fas fa-pencil-alt',
-          wideMode: true,
+          wideMode: true
         },
         {
           link: '/photos',
           name: 'Photos',
           icon: 'fas fa-camera-retro',
-          wideMode: true,
+          wideMode: true
         },
         {
           link: '/projects',
           name: 'Projects',
           icon: 'fas fa-project-diagram',
-          wideMode: true,
+          wideMode: true
         },
         {
           link: '/reviews',
           name: 'Reviews',
           icon: 'fas fa-star-half-alt',
-          wideMode: true,
+          wideMode: true
         }
       ]
     }

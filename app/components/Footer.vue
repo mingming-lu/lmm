@@ -3,7 +3,7 @@
     <a
       href="https://github.com/akinaru-lu"
       target="_blank">
-      <i class="fab fa-github link"></i>
+      <i class="fab fa-github link"/>
     </a>
     <a
       href="https://www.linkedin.com/in/lumingming/"

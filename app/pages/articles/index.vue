@@ -1,5 +1,7 @@
 <template>
-  <div v-if="isMounted" class="container">
+  <div 
+    v-if="isMounted" 
+    class="container">
     <!-- Articles -->
     <div
       :class="{ 'desktop': !isMobile, 'mobile': isMobile }"
@@ -17,7 +19,7 @@
                     class="link">{{ article.title }}</nuxt-link>
                 </p>
                 <p class="post-at">
-                  <i class="far fa-clock"></i>
+                  <i class="far fa-clock"/>
                   {{ formatted(article.post_at) }}
                 </p>
               </td>
@@ -33,13 +35,13 @@
       <div
         v-if="articles.length !== 0"
         class="container pagination"
-        >
+      >
         <nuxt-link
           v-if="!isMobile"
           :to="prevPage"
           :class="{disabled: !Boolean(prevPage)}"
           class="navigation link prev"
-          >
+        >
           &#10094; Prev
         </nuxt-link>
         <nuxt-link
@@ -48,7 +50,7 @@
           :to="item === page ? $route.fullPath : `${$route.path}?page=${item}&perPage=${perPage}`"
           :class="{active: item === page }"
           class="link page"
-          >
+        >
           {{ item }}
         </nuxt-link>
         <nuxt-link
@@ -56,14 +58,14 @@
           :to="nextPage"
           :class="{disabled: !Boolean(nextPage) }"
           class="navigation link next"
-          >
+        >
           Next &#10095;
         </nuxt-link>
       </div>
       <div
         v-else
         class="center"
-        >
+      >
         <div class="center">
           <p class="hint">No more articles.</p>
         </div>
@@ -71,7 +73,7 @@
           v-if="page > 1"
           class="link hint"
           to="/articles"
-          >
+        >
           Go to first page
         </nuxt-link>
       </div>
@@ -82,15 +84,15 @@
       class="nav">
       <!-- Tags -->
       <div class="tags container">
-        <h3><i class="fas fa-hashtag"></i>Tags</h3>
+        <h3><i class="fas fa-hashtag"/>Tags</h3>
         <p>
           <nuxt-link
-            class="link tag"
-            :class="{active: tag.name === $route.query.tag}"
             v-for="tag in tags"
+            :class="{active: tag.name === $route.query.tag}"
             :key="tag.name"
             :to="buildLinkWithTagQuery(tag.name)"
-            >
+            class="link tag"
+          >
             {{ tag.name }}
           </nuxt-link>
         </p>
@@ -106,7 +108,7 @@ import LdsEllipsis from '~/components/loadings/LdsEllipsis'
 import {
   buildPageNumbers,
   buildURLEncodedString,
-  formattedDateFromTimeStamp,
+  formattedDateFromTimeStamp
 } from '~/assets/js/utils'
 
 const apiPath = '/v1/articles'
@@ -115,7 +117,7 @@ const articleFetcher = axiosClient => {
   return {
     fetch: uri => {
       return axiosClient.get(uri)
-    },
+    }
   }
 }
 
@@ -126,7 +128,7 @@ const buildLinks = (obj, path) => {
     })
     .map(kv => {
       return {
-        rel:  kv[0],
+        rel: kv[0],
         href: kv[1].replace(apiPath, path)
       }
     })
@@ -136,52 +138,58 @@ export default {
   components: {
     LdsEllipsis
   },
-  head () {
+  head() {
     return {
       title: 'Articles',
-      link:  this.links,
+      link: this.links
     }
   },
-  asyncData({$axios, query, route}) {
+  asyncData({ $axios, query, route }) {
     const q = buildURLEncodedString({
-      flavor:  true,
-      page:    Boolean(query.page)    ? query.page    : 1,
+      flavor: true,
+      page: Boolean(query.page) ? query.page : 1,
       perPage: Boolean(query.perPage) ? query.perPage : 5,
-      tag:     Boolean(query.tag)     ? query.tag     : undefined,
+      tag: Boolean(query.tag) ? query.tag : undefined
     })
     const uri = `${apiPath}?${q}`
-    return axios.all([
-      $axios.get(uri),
-      $axios.get(`/v1/articleTags`)
-    ]).then(([articlesRes, tagsRes]) => {
-      const articles = articlesRes.data
-      const page = articles.page
-      const perPage = articles.perPage
-      const total = articles.total
-      return {
-        isMobile:     false,
-        isPageLoaded: true,
-        currentURI:   uri,
-        articles:     articles.articles,
-        tags:         tagsRes.data,
-        page:         page,
-        perPage:      perPage,
-        pager:        {
-          items: buildPageNumbers(page, Math.ceil(total / perPage), 5),
-        },
-        total:        articles.total,
-        prevPage:     articles.prevPage ? articles.prevPage.replace(apiPath, route.path) : '',
-        nextPage:     articles.nextPage ? articles.nextPage.replace(apiPath, route.path) : '',
-        links:        buildLinks({
-          first: articles.firstPage,
-          prev:  articles.prevPage,
-          next:  articles.nextPage,
-          last:  articles.lastPage,
-        }, route.path),
-      }
-    })
+    return axios
+      .all([$axios.get(uri), $axios.get(`/v1/articleTags`)])
+      .then(([articlesRes, tagsRes]) => {
+        const articles = articlesRes.data
+        const page = articles.page
+        const perPage = articles.perPage
+        const total = articles.total
+        return {
+          isMobile: false,
+          isPageLoaded: true,
+          currentURI: uri,
+          articles: articles.articles,
+          tags: tagsRes.data,
+          page: page,
+          perPage: perPage,
+          pager: {
+            items: buildPageNumbers(page, Math.ceil(total / perPage), 5)
+          },
+          total: articles.total,
+          prevPage: articles.prevPage
+            ? articles.prevPage.replace(apiPath, route.path)
+            : '',
+          nextPage: articles.nextPage
+            ? articles.nextPage.replace(apiPath, route.path)
+            : '',
+          links: buildLinks(
+            {
+              first: articles.firstPage,
+              prev: articles.prevPage,
+              next: articles.nextPage,
+              last: articles.lastPage
+            },
+            route.path
+          )
+        }
+      })
   },
-  data () {
+  data() {
     return {
       isMounted: false
     }
@@ -210,7 +218,7 @@ export default {
     },
     calcIsMobile() {
       this.isMobile = window.innerWidth <= 768
-    },
+    }
   }
 }
 </script>
