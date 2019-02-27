@@ -2,9 +2,9 @@ export {
   buildURLEncodedQueryString,
   formattedDate,
   formattedDateFromTimeStamp,
-  formattedDateFromString,
+  formattedDateFromString
 }
-  
+
 const formattedDateFromTimeStamp = timestamp => {
   let date = new Date(timestamp * 1e3)
   return formattedDate(date)

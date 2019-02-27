@@ -1,6 +1,10 @@
 <template>
-  <div v-if="isMounted" class="container">
-    <div v-if="wideMode" class="content">
+  <div 
+    v-if="isMounted" 
+    class="container">
+    <div 
+      v-if="wideMode" 
+      class="content">
       <div class="left">
         <div :class="{container: wideMode}">
           <a
@@ -9,13 +13,13 @@
             :href="load_image_full(photo.name)"
           >
             <img
-              sizes="(min-width: 800px) 50vw, 100vw"
               :src="load_image_full(photo.name)"
               :srcset="`${load_image_1280(photo.name)} 1280w,
                         ${load_image_960(photo.name)} 960w,
                         ${load_image_640(photo.name)} 640w,
                         ${load_image_320(photo.name)} 320w`"
               :alt="photo.alts.join(' ')"
+              sizes="(min-width: 800px) 50vw, 100vw"
             >
           </a>
         </div>
@@ -29,13 +33,13 @@
           >
             <img
               :src="load_image_full(photo.name)"
-              sizes="(min-width: 800px) 50vw, 100vw"
               :srcset="`${load_image_1280(photo.name)} 1280w,
                         ${load_image_960(photo.name)} 960w,
                         ${load_image_640(photo.name)} 640w,
                         ${load_image_320(photo.name)} 320w`"
               :alt="photo.alts.join(' ')"
-              >
+              sizes="(min-width: 800px) 50vw, 100vw"
+            >
           </a>
         </div>
       </div>
@@ -48,26 +52,34 @@
       >
         <img
           :src="load_image_full(photo.name)"
-          sizes="(min-width: 800px) 50vw, 100vw"
           :srcset="`${load_image_1280(photo.name)} 1280w,
                     ${load_image_960(photo.name)} 960w,
                     ${load_image_640(photo.name)} 640w,
                     ${load_image_320(photo.name)} 320w`"
           :alt="photo.alts.join(' ')"
-          >
+          sizes="(min-width: 800px) 50vw, 100vw"
+        >
       </a>
     </div>
 
-    <div v-if="!isPageLoaded" class="center">
+    <div 
+      v-if="!isPageLoaded" 
+      class="center">
       <LdsEllipsis class="fade-in" />
     </div>
 
-    <div v-if="hasNext && isPageLoaded" class="center">
+    <div 
+      v-if="hasNext && isPageLoaded" 
+      class="center">
       <br>
-      <button class="more" @click.prevent="fetchMorePhotos()">See more&hellip;</button>
+      <button 
+        class="more" 
+        @click.prevent="fetchMorePhotos()">See more&hellip;</button>
     </div>
 
-    <div v-if="!hasNext && isPageLoaded" class="center">
+    <div 
+      v-if="!hasNext && isPageLoaded" 
+      class="center">
       <p class="hint">No more photos.</p>
     </div>
 
@@ -93,7 +105,7 @@ const buildLinks = (obj, path) => {
     })
     .map(kv => {
       return {
-        rel:  kv[0],
+        rel: kv[0],
         href: kv[1].replace(apiPath, path)
       }
     })
@@ -106,34 +118,39 @@ export default {
   head() {
     return {
       title: 'Photos',
-      link:  this.links,
+      link: this.links
     }
   },
-  asyncData({$axios, query, route}) {
+  asyncData({ $axios, query, route }) {
     const page = Boolean(query.page) ? query.page : 1
 
     return photoFetcher($axios)
       .fetch(page)
       .then(res => {
-        const next = res.data.hasNextPage ? `${apiPath}?page=${Number(page) + 1}` : undefined
+        const next = res.data.hasNextPage
+          ? `${apiPath}?page=${Number(page) + 1}`
+          : undefined
         return {
-          photos:       res.data.photos,
-          left:         res.data.photos.filter((item, index) => index % 2 === 0),
-          right:        res.data.photos.filter((item, index) => index % 2 === 1),
-          page:         page,
-          hasNext:      res.data.hasNextPage,
+          photos: res.data.photos,
+          left: res.data.photos.filter((item, index) => index % 2 === 0),
+          right: res.data.photos.filter((item, index) => index % 2 === 1),
+          page: page,
+          hasNext: res.data.hasNextPage,
           isPageLoaded: true,
-          wideMode:     false,
-          links:        buildLinks({
-            next: next,
-          }, route.path),
+          wideMode: false,
+          links: buildLinks(
+            {
+              next: next
+            },
+            route.path
+          )
         }
       })
       .catch(e => {
         console.log(e)
       })
   },
-  data () {
+  data() {
     return {
       isMounted: false
     }
@@ -167,7 +184,7 @@ export default {
             this.page = nextPage
             next = `${apiPath}?page=${nextPage}`
           }
-          this.links = buildLinks({next: next}, this.$route.path)
+          this.links = buildLinks({ next: next }, this.$route.path)
         })
         .catch(e => {
           console.log(e)

@@ -21,7 +21,7 @@ export default {
   data() {
     return {
       headerHeight: 0,
-      footerHeight: 0,
+      footerHeight: 0
     }
   },
   mounted() {

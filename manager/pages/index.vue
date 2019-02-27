@@ -20,12 +20,12 @@
 
 <script>
 export default {
-  head () {
+  head() {
     return {
       title: 'Index'
     }
   },
-  data () {
+  data() {
     return {
       indices: [
         {
@@ -46,8 +46,8 @@ export default {
         {
           to: '/users',
           name: 'Users',
-          description: 'View all users',
-        },
+          description: 'View all users'
+        }
       ]
     }
   }

@@ -1,5 +1,7 @@
 <template>
-  <div v-if="isMounted" class="background-image-1" />
+  <div 
+    v-if="isMounted" 
+    class="background-image-1" />
 </template>
 
 <script>

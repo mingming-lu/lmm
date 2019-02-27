@@ -1,8 +1,13 @@
 <template>
   <v-container grid-list-xl>
-    <v-layout :row="row" :column="!row">
+    <v-layout 
+      :row="row" 
+      :column="!row">
       <v-flex xs6>
-        <v-text-field label="title" required v-model="articleTitle"/>
+        <v-text-field 
+          v-model="articleTitle" 
+          label="title" 
+          required/>
         <v-combobox
           v-model="articleTags"
           :items="tags"
@@ -11,7 +16,9 @@
           clearable
           multiple
         >
-          <template slot="selection" slot-scope="data">
+          <template 
+            slot="selection" 
+            slot-scope="data">
             <v-chip
               close
               @input="removeTag(data.item)"
@@ -20,11 +27,18 @@
             </v-chip>
           </template>
         </v-combobox>
-        <v-textarea label="body" auto-grow required v-model="articleBody"/>
+        <v-textarea 
+          v-model="articleBody" 
+          label="body" 
+          auto-grow 
+          required/>
       </v-flex>
       <v-flex xs6>
         <v-subheader>Article Body Preview</v-subheader>
-        <div class="mx-3 preview" v-hljs v-html="marked(articleBody)"></div>
+        <div 
+          v-hljs 
+          class="mx-3 preview" 
+          v-html="marked(articleBody)"/>
       </v-flex>
     </v-layout>
     <v-btn
@@ -45,28 +59,26 @@
 import Markdownit from 'markdown-it'
 
 const marker = new Markdownit({
-  html:        true,
+  html: true,
   typographer: true
 })
 
 export default {
   head() {
     return {
-      title: 'Post an article',
+      title: 'Post an article'
     }
   },
   asyncData({ $axios }) {
-    return $axios
-      .get('/v1/articleTags')
-      .then(res => {
-        return {
-          articleTitle:   '',
-          articleBody:    '',
-          articleTags:    [],
-          tags:           res.data.map(tag => tag.name),
-          row:            false,
-        }
-      })
+    return $axios.get('/v1/articleTags').then(res => {
+      return {
+        articleTitle: '',
+        articleBody: '',
+        articleTags: [],
+        tags: res.data.map(tag => tag.name),
+        row: false
+      }
+    })
   },
   mounted() {
     this.onResize()
@@ -88,20 +100,26 @@ export default {
     },
     postArticle() {
       this.$axios
-        .post('/v1/articles', {
-          title: this.articleTitle,
-          body:  this.articleBody,
-          tags:  this.articleTags,
-        }, {
-          headers: {
-            Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`,
+        .post(
+          '/v1/articles',
+          {
+            title: this.articleTitle,
+            body: this.articleBody,
+            tags: this.articleTags
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${window.localStorage.getItem(
+                'accessToken'
+              )}`
+            }
           }
-        })
+        )
         .then(res => {
           alert(`Article posted\nmessage: ${JSON.stringify(res.data)}`)
           this.$router.push('/articles')
         })
-    },
+    }
   }
 }
 </script>
@@ -111,6 +129,6 @@ export default {
   font-size: 16px; /* adjust to v-textarea */
 }
 .preview /deep/ pre code {
-  font-family: Monaco, "Courier", monospace;
+  font-family: Monaco, 'Courier', monospace;
 }
 </style>

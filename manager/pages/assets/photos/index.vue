@@ -1,16 +1,21 @@
 <template>
   <v-layout>
     <input
-      accept="image/*"
       ref="photoPicker"
+      accept="image/*"
       style="display: none"
       type="file"
       @change="onPhotoPicked"
     >
     <v-flex xs12>
       <v-card v-if="photos.length">
-        <v-container grid-list-sm fluid>
-          <v-layout row wrap align-center>
+        <v-container 
+          grid-list-sm 
+          fluid>
+          <v-layout 
+            row 
+            wrap 
+            align-center>
             <v-flex
               v-for="photo in photos"
               :key="photo.name"
@@ -18,10 +23,9 @@
             >
               <nuxt-link :to="`/assets/photos/${photo.name}`">
                 <v-img
-                  class="img"
                   :src="wrapAssetURL(photo.name)"
-                >
-                </v-img>
+                  class="img"
+                />
               </nuxt-link>
             </v-flex>
           </v-layout>
@@ -43,8 +47,7 @@
 </template>
 
 <script>
-
-const fetcher= axios => {
+const fetcher = axios => {
   return {
     fetch: page => {
       return axios.get('/v1/assets/photos?perPage=100')
@@ -59,10 +62,11 @@ export default {
     }
   },
   asyncData({ $axios }) {
-    return fetcher($axios).fetch(1)
+    return fetcher($axios)
+      .fetch(1)
       .then(res => {
         return {
-          photos:      res.data.photos,
+          photos: res.data.photos,
           hasNextPage: res.data.hasNextPage
         }
       })
@@ -80,20 +84,23 @@ export default {
         return
       }
 
-      let formData = new FormData();
-      formData.append("photo", photo);
+      let formData = new FormData()
+      formData.append('photo', photo)
       this.$axios
         .post('/v1/assets/photos', formData, {
           headers: {
-            'Authorization': `Bearer ${window.localStorage.getItem('accessToken')}`,
-            'Content-Type':  'multipart/form-data',
+            Authorization: `Bearer ${window.localStorage.getItem(
+              'accessToken'
+            )}`,
+            'Content-Type': 'multipart/form-data'
           }
         })
         .then(res => {
           alert(`Uploaded\nmessage: ${res.data}`)
-          fetcher(this.$axios).fetch(1)
+          fetcher(this.$axios)
+            .fetch(1)
             .then(res => {
-              this.photos      = res.data.photos
+              this.photos = res.data.photos
               this.hasNextPage = res.data.hasNextPage
             })
         })

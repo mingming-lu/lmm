@@ -17,14 +17,17 @@
         counter
         @click:append="showPassword = !showPassword"
       />
-      <v-btn color="accent" type="submit" @click.prevent="login">Login</v-btn>
+      <v-btn 
+        color="accent" 
+        type="submit" 
+        @click.prevent="login">Login</v-btn>
     </v-form>
   </v-layout>
 </template>
 
 <script>
 export default {
-  asyncData({query, redirect}) {
+  asyncData({ query, redirect }) {
     return {
       callback: () => {
         const location = query.redirect ? query.redirect : '/'
@@ -36,13 +39,13 @@ export default {
       showPassword: false,
       rules: {
         username: {
-          min:      v => v.length >= 3  || 'Min 3 characters',
-          max:      v => v.length <= 18 || 'Max 18 characters',
+          min: v => v.length >= 3 || 'Min 3 characters',
+          max: v => v.length <= 18 || 'Max 18 characters',
           required: v => !!v || 'Required.'
         },
         password: {
-          min:      v => v.length >= 8   || 'Min 8 characters',
-          max:      v => v.length <= 250 || 'Max 250 characters',
+          min: v => v.length >= 8 || 'Min 8 characters',
+          max: v => v.length <= 250 || 'Max 250 characters',
           required: v => !!v || 'Required.'
         }
       }
@@ -52,19 +55,30 @@ export default {
   methods: {
     login() {
       this.$axios
-        .post('/v1/auth/login', {
-          grantType: 'basicAuth',
-        }, {
-          headers: {
-            Authorization: 'Basic ' + btoa(JSON.stringify({
-              username: this.username,
-              password: this.password
-            }))
+        .post(
+          '/v1/auth/login',
+          {
+            grantType: 'basicAuth'
+          },
+          {
+            headers: {
+              Authorization:
+                'Basic ' +
+                btoa(
+                  JSON.stringify({
+                    username: this.username,
+                    password: this.password
+                  })
+                )
+            }
           }
-        })
+        )
         .then(res => {
           window.localStorage.setItem('accessToken', res.data.accessToken)
-          this.$store.commit('setAccessToken', window.localStorage.getItem('accessToken'))
+          this.$store.commit(
+            'setAccessToken',
+            window.localStorage.getItem('accessToken')
+          )
           this.callback()
         })
         .catch(e => {

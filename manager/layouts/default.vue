@@ -56,20 +56,28 @@ export default {
       items: [
         { icon: 'home', title: 'Home', to: '/' },
         { icon: 'create', title: 'Articles', to: '/articles' },
-        { icon: 'photo_library', title: 'Assets (Images)', to: '/assets/images' },
-        { icon: 'photo_camera', title: 'Assets (Photos)', to: '/assets/photos' },
+        {
+          icon: 'photo_library',
+          title: 'Assets (Images)',
+          to: '/assets/images'
+        },
+        {
+          icon: 'photo_camera',
+          title: 'Assets (Photos)',
+          to: '/assets/photos'
+        },
         { icon: 'people', title: 'Users', to: '/users' },
-        { icon: 'exit_to_app', title: 'Logout', to: '/logout'},
+        { icon: 'exit_to_app', title: 'Logout', to: '/logout' }
       ],
       miniVariant: true,
-      title: 'Manager',
+      title: 'Manager'
     }
   },
-  mounted () {
-    window.addEventListener('resize', this.onResize, {passive: true})
+  mounted() {
+    window.addEventListener('resize', this.onResize, { passive: true })
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.onResize, {passive: true})
+    window.removeEventListener('resize', this.onResize, { passive: true })
   },
   methods: {
     logout() {

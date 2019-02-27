@@ -1,25 +1,29 @@
 <template>
   <v-layout>
     <input
-      accept="image/*"
       ref="imagePicker"
+      accept="image/*"
       style="display: none"
       type="file"
       @change="onPhotoPicked"
     >
     <v-flex xs12>
       <v-card v-if="images.length">
-        <v-container grid-list-sm fluid>
-          <v-layout row wrap>
+        <v-container 
+          grid-list-sm 
+          fluid>
+          <v-layout 
+            row 
+            wrap>
             <v-flex
               v-for="image in images"
               :key="image.name"
               xs4
             >
               <v-img
+                :src="wrapAssetURL(image.name)"
                 class="img"
                 @click="copyURLToClipboard(image.name)"
-                :src="wrapAssetURL(image.name)"
               >
                 <v-layout
                   slot="placeholder"
@@ -58,8 +62,7 @@
 </template>
 
 <script>
-
-const fetcher= axios => {
+const fetcher = axios => {
   return {
     fetch: page => {
       return axios.get('/v1/assets/images?perPage=100')
@@ -74,23 +77,24 @@ export default {
     }
   },
   asyncData({ $axios }) {
-    return fetcher($axios).fetch(1)
+    return fetcher($axios)
+      .fetch(1)
       .then(res => {
         return {
-          images:      res.data.images,
+          images: res.data.images,
           hasNextPage: res.data.hasNextPage
         }
       })
   },
   data() {
     return {
-      copied: false,
+      copied: false
     }
   },
   methods: {
     fallbackCopyURLToClipboard(name) {
       const url = this.wrapAssetURL(name)
-      const textArea = document.createElement("textarea");
+      const textArea = document.createElement('textarea')
       textArea.value = url
       textArea.style = 'display: none'
       document.body.appendChild(textArea)
@@ -98,18 +102,21 @@ export default {
       if (document.execCommand('copy') === true) {
         this.copied = true
       }
-      document.body.removeChild(textArea);
+      document.body.removeChild(textArea)
     },
     copyURLToClipboard(name) {
       if (!navigator.clipboard) {
         return this.fallbackCopyURLToClipboard(name)
       }
       const url = this.wrapAssetURL(name)
-      navigator.clipboard.writeText(url).then(() => {
-        this.copied = true
-      }, err => {
-        console.log(err)
-      })
+      navigator.clipboard.writeText(url).then(
+        () => {
+          this.copied = true
+        },
+        err => {
+          console.log(err)
+        }
+      )
     },
     pickOnePhoto() {
       this.$refs.imagePicker.click()
@@ -123,20 +130,23 @@ export default {
         return
       }
 
-      let formData = new FormData();
-      formData.append("image", image);
+      let formData = new FormData()
+      formData.append('image', image)
       this.$axios
         .post('/v1/assets/images', formData, {
           headers: {
-            'Authorization': `Bearer ${window.localStorage.getItem('accessToken')}`,
-            'Content-Type':  'multipart/form-data',
+            Authorization: `Bearer ${window.localStorage.getItem(
+              'accessToken'
+            )}`,
+            'Content-Type': 'multipart/form-data'
           }
         })
         .then(res => {
           alert(`Uploaded\nmessage: ${res.data}`)
-          fetcher(this.$axios).fetch(1)
+          fetcher(this.$axios)
+            .fetch(1)
             .then(res => {
-              this.images      = res.data.images
+              this.images = res.data.images
               this.hasNextPage = res.data.hasNextPage
             })
         })

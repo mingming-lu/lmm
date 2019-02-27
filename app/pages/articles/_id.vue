@@ -1,29 +1,41 @@
 <template>
-  <div v-if="isMounted" class="container">
+  <div 
+    v-if="isMounted" 
+    class="container">
     <!-- Article text -->
-    <div class="article" :class="{ 'left': !isMobile, 'mobile': isMobile }">
+    <div 
+      :class="{ 'left': !isMobile, 'mobile': isMobile }" 
+      class="article">
       <div :class="{container: !isMobile}">
         <p class="title">{{ title }}</p>
         <div class="info">
-          <span><i class="far fa-clock"></i><span>{{ postAt }}</span></span>
+          <span><i class="far fa-clock"/><span>{{ postAt }}</span></span>
         </div>
-        <div ref="body" class="marked text" v-html="body" v-hljs></div>
-        <p v-if="postAt !== lastEditedAt" class="info text-right">Edited at {{ lastEditedAt }}</p>
+        <div 
+          v-hljs 
+          ref="body" 
+          class="marked text" 
+          v-html="body"/>
+        <p 
+          v-if="postAt !== lastEditedAt" 
+          class="info text-right">Edited at {{ lastEditedAt }}</p>
       </div>
     </div>
 
     <div class="nav">
       <!-- Article tags -->
-      <div v-if="!isMobile" class="tags">
+      <div 
+        v-if="!isMobile" 
+        class="tags">
         <div :class="{container: !isMobile}">
-          <h3><i class="fas fa-hashtag"></i>Tags</h3>
+          <h3><i class="fas fa-hashtag"/>Tags</h3>
           <p>
             <nuxt-link
-              class="link tag"
               v-for="tag in tags"
               :key="tag.id"
               :to="buildLinkWithTagQuery(tag.name)"
-              >
+              class="link tag"
+            >
               {{ tag.name }}
             </nuxt-link>
           </p>
@@ -31,13 +43,22 @@
       </div>
 
       <!-- Article chapters -->
-      <div v-if="!isMobile" class="chapters">
+      <div 
+        v-if="!isMobile" 
+        class="chapters">
         <div :class="{container: !isMobile}">
-          <h3><i class="far fa-bookmark"></i>Chapters</h3>
-          <div ref="progress" class="progress-bar"/>
-          <p v-for="subtitle in subtitles" :key="subtitle.name">
-            <nuxt-link :to="subtitle.link" @click.native="jumpToHash(subtitle.link)" class="link chapter-item">
-              <div v-html="subtitle.name"></div>
+          <h3><i class="far fa-bookmark"/>Chapters</h3>
+          <div 
+            ref="progress" 
+            class="progress-bar"/>
+          <p 
+            v-for="subtitle in subtitles" 
+            :key="subtitle.name">
+            <nuxt-link 
+              :to="subtitle.link" 
+              class="link chapter-item" 
+              @click.native="jumpToHash(subtitle.link)">
+              <div v-html="subtitle.name"/>
             </nuxt-link>
           </p>
         </div>
@@ -49,38 +70,42 @@
 <script>
 import axios from 'axios'
 import Markdownit from 'markdown-it'
-import {
-  formattedDateFromTimeStamp,
-} from '~/assets/js/utils'
+import { formattedDateFromTimeStamp } from '~/assets/js/utils'
 export default {
-  validate ({ params }) {
+  validate({ params }) {
     return /^[\d\w-]{8,80}$/.test(params.id)
   },
-  head () {
+  head() {
     return {
       title: this.title
     }
   },
-  asyncData({$axios, params}) {
-    return $axios.get(`v1/articles/${params.id}`)
-    .then(res => {
+  asyncData({ $axios, params }) {
+    return $axios.get(`v1/articles/${params.id}`).then(res => {
       return {
-        isMobile:     true,
-        title:        res.data.title,
-        subtitles:    [],
-        body:         res.data.body,
-        tags:         res.data.tags,
-        postAt:       formattedDateFromTimeStamp(res.data.post_at),
-        lastEditedAt: formattedDateFromTimeStamp(res.data.last_edited_at),
+        isMobile: true,
+        title: res.data.title,
+        subtitles: [],
+        body: res.data.body,
+        tags: res.data.tags,
+        postAt: formattedDateFromTimeStamp(res.data.post_at),
+        lastEditedAt: formattedDateFromTimeStamp(res.data.last_edited_at)
       }
     })
   },
-  data () {
+  data() {
     return {
       isMounted: false
     }
   },
-  mounted () {
+  watch: {
+    body: function() {
+      this.$nextTick(() => {
+        this.calcProgress()
+      })
+    }
+  },
+  mounted() {
     window.addEventListener('resize', this.calcIsMobile)
     window.addEventListener('scroll', this.calcProgress)
     this.markBodyAndExtractSubtitles()
@@ -88,14 +113,7 @@ export default {
     this.calcProgress()
     this.isMounted = true
   },
-  watch: {
-    body: function () {
-      this.$nextTick(() => {
-        this.calcProgress()
-      })
-    }
-  },
-  beforeDestroy () {
+  beforeDestroy() {
     window.removeEventListener('resize', this.calcIsMobile)
     window.removeEventListener('scroll', this.calcProgress)
   },
@@ -106,12 +124,12 @@ export default {
         typographer: true
       })
 
-      const body     = md.render(this.body)
-      const results  = this.extractSubtitles(body, this.$route.path)
-      this.body      = results[0]
+      const body = md.render(this.body)
+      const results = this.extractSubtitles(body, this.$route.path)
+      this.body = results[0]
       this.subtitles = results[1]
     },
-    extractSubtitles: (text) => {
+    extractSubtitles: text => {
       let lines = text.split('\n')
       let subtitles = []
 
@@ -133,21 +151,22 @@ export default {
       })
       return [lines.join('\n'), subtitles]
     },
-    calcProgress () {
+    calcProgress() {
       if (this.$refs.progress) {
         let el = this.$refs.body
-        let progress = ((window.scrollY + window.innerHeight) - el.offsetTop) / (el.offsetHeight)
+        let progress =
+          (window.scrollY + window.innerHeight - el.offsetTop) / el.offsetHeight
         progress = progress > 1 ? 100 : progress * 100
         this.$refs.progress.style.width = progress + '%'
       }
     },
-    calcIsMobile () {
+    calcIsMobile() {
       this.isMobile = window.innerWidth <= 768
     },
     buildLinkWithTagQuery(tagName) {
       return `/articles?tag=${encodeURIComponent(tagName)}`
     },
-    jumpToHash: (hash) => {
+    jumpToHash: hash => {
       location.href = hash
       window.scrollTo(0, document.getElementById(hash.slice(1)).offsetTop - 64)
 
@@ -262,7 +281,7 @@ i {
     white-space: pre-wrap;
     border-left: 5px solid $color_accent;
     opacity: 0.6;
-    content: '  '; 
+    content: '  ';
   }
 }
 .marked /deep/ h4 {
@@ -285,7 +304,7 @@ i {
 }
 .marked /deep/ code {
   background-color: #f1f1f1 !important;
-  font-family: Monaco, "Courier", monospace;
+  font-family: Monaco, 'Courier', monospace;
   font-size: 0.88em;
 }
 .marked /deep/ pre {

@@ -4,7 +4,7 @@ export {
   formattedDate,
   formattedDateFromTimeStamp,
   formattedDateFromString,
-  range,
+  range
 }
 
 const formattedDateFromTimeStamp = timestamp => {

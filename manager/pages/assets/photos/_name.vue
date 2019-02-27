@@ -17,7 +17,9 @@
       chips
       multiple
     >
-      <template slot="selection" slot-scope="data">
+      <template 
+        slot="selection" 
+        slot-scope="data">
         <v-chip
           close
           @input="removeAlt(data.item)"
@@ -29,13 +31,12 @@
     <v-img
       :src="photoSrcOf(name)"
       :alt="alts.join(' ')"
-      >
-    </v-img>
+    />
     <v-snackbar
       v-model="committed"
+      :timeout="2000"
       bottom
       color="success"
-      :timeout="2000"
     >
       Committed
     </v-snackbar>
@@ -43,32 +44,32 @@
 </template>
 
 <script>
-
-const photoFetcher = (httpClient) => {
+const photoFetcher = httpClient => {
   return {
-    fetch: (name) => {
+    fetch: name => {
       return httpClient.get(`/v1/assets/photos/${name}`, {
         headers: {
-          Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`,
-        },
+          Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`
+        }
       })
-    },
+    }
   }
 }
 
 export default {
   asyncData({ $axios, params }) {
-    return photoFetcher($axios).fetch(params.name)
+    return photoFetcher($axios)
+      .fetch(params.name)
       .then(res => {
         return {
           name: res.data.name,
-          alts: res.data.alts,
+          alts: res.data.alts
         }
       })
   },
   data() {
     return {
-      committed: false,
+      committed: false
     }
   },
   methods: {
@@ -80,18 +81,29 @@ export default {
       this.alts = [...this.alts]
     },
     commit() {
-      this.$axios.put(`/v1/assets/photos/${this.name}/alts`, {
-        names: this.alts.map(alt => { return alt }),
-      }, {
-        headers: {
-          Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`,
-        },
-      }).then(res => {
-        this.committed = true
-      }).catch(err => {
-        alert(err)
-      })
-    },
+      this.$axios
+        .put(
+          `/v1/assets/photos/${this.name}/alts`,
+          {
+            names: this.alts.map(alt => {
+              return alt
+            })
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${window.localStorage.getItem(
+                'accessToken'
+              )}`
+            }
+          }
+        )
+        .then(res => {
+          this.committed = true
+        })
+        .catch(err => {
+          alert(err)
+        })
+    }
   }
 }
 </script>
