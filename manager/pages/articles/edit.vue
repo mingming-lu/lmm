@@ -1,9 +1,17 @@
 <template>
   <v-container grid-list-xl>
-    <v-layout :row="row" :column="!row">
+    <v-layout 
+      :row="row" 
+      :column="!row">
       <v-flex xs6>
-        <v-text-field label="title" required v-model="articleTitle"/>
-        <v-text-field label="alias id" required v-model="newArticleID"/>
+        <v-text-field 
+          v-model="articleTitle" 
+          label="title" 
+          required/>
+        <v-text-field 
+          v-model="newArticleID" 
+          label="alias id" 
+          required/>
         <v-combobox
           v-model="articleTags"
           :items="tags"
@@ -12,7 +20,9 @@
           clearable
           multiple
         >
-          <template slot="selection" slot-scope="data">
+          <template 
+            slot="selection" 
+            slot-scope="data">
             <v-chip
               close
               @input="removeTag(data.item)"
@@ -21,11 +31,18 @@
             </v-chip>
           </template>
         </v-combobox>
-        <v-textarea label="body" auto-grow required v-model="articleBody"/>
+        <v-textarea 
+          v-model="articleBody" 
+          label="body" 
+          auto-grow 
+          required/>
       </v-flex>
       <v-flex xs6>
         <v-subheader>Article Body Preview</v-subheader>
-        <div class="mx-3 preview" v-hljs v-html="marked(articleBody)"></div>
+        <div 
+          v-hljs 
+          class="mx-3 preview" 
+          v-html="marked(articleBody)"/>
       </v-flex>
     </v-layout>
     <v-btn
@@ -51,16 +68,19 @@ const fetcher = axiosClient => {
       return Promise.all([
         axiosClient.get(`/v1/articles/${articleID}`),
         axiosClient.get(`/v1/articleTags`)
-      ])
-      .then(([article, tags]) => {
+      ]).then(([article, tags]) => {
         return {
-          articleID:    article.data.id,
+          articleID: article.data.id,
           newArticleID: article.data.id,
           articleTitle: article.data.title,
-          articleBody:  article.data.body,
-          articleTags:  article.data.tags.map(tag => { return tag.name }),
-          tags:         tags.data.map(tag => { return tag.name }),
-          row:          false,
+          articleBody: article.data.body,
+          articleTags: article.data.tags.map(tag => {
+            return tag.name
+          }),
+          tags: tags.data.map(tag => {
+            return tag.name
+          }),
+          row: false
         }
       })
     }
@@ -68,20 +88,20 @@ const fetcher = axiosClient => {
 }
 
 const marker = new Markdownit({
-  html:        true,
+  html: true,
   typographer: true
 })
 
 export default {
   head() {
     return {
-      title: 'Edit an article',
+      title: 'Edit an article'
     }
   },
-  validate({query}) {
+  validate({ query }) {
     return /^[\d\w-]{8,80}$/.test(query.articleID)
   },
-  asyncData({$axios, query}) {
+  asyncData({ $axios, query }) {
     return fetcher($axios).fetch(query.articleID)
   },
   mounted() {
@@ -102,18 +122,24 @@ export default {
     },
     updateArticle() {
       this.$axios
-        .put(`/v1/articles/${this.articleID}`, {
-          alias_id: this.newArticleID,
-          title:    this.articleTitle,
-          body:     this.articleBody,
-          tags:     this.articleTags,
-        }, {
-          headers: {
-            Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`,
+        .put(
+          `/v1/articles/${this.articleID}`,
+          {
+            alias_id: this.newArticleID,
+            title: this.articleTitle,
+            body: this.articleBody,
+            tags: this.articleTags
           },
-        })
+          {
+            headers: {
+              Authorization: `Bearer ${window.localStorage.getItem(
+                'accessToken'
+              )}`
+            }
+          }
+        )
         .then(res => {
-          alert("success")
+          alert('success')
           this.$router.replace({ path: `/articles` })
         })
         .catch(e => {
@@ -132,6 +158,6 @@ export default {
   font-size: 16px; /* adjust to v-textarea */
 }
 .preview /deep/ pre code {
-  font-family: Monaco, "Courier", monospace;
+  font-family: Monaco, 'Courier', monospace;
 }
 </style>

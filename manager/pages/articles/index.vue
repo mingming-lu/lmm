@@ -32,16 +32,15 @@
 
 <script>
 export default {
-  head () {
+  head() {
     return {
       title: 'Articles list'
     }
   },
-  asyncData({$axios}) {
-    return $axios.get('/v1/articles?perPage=100')
-    .then(res => {
+  asyncData({ $axios }) {
+    return $axios.get('/v1/articles?perPage=100').then(res => {
       return {
-        articles:      res.data.articles,
+        articles: res.data.articles,
         has_next_page: res.data.has_next_page
       }
     })
