@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   pubsub:
-    image: golang:1.11.5
+    image: golang:1.12.0
     volumes:
       - ./go:/go
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json

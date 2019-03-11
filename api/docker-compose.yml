@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   api:
-    image: golang:1.11.5
+    image: golang:1.12.0
     volumes:
       - ./go:/go
       - ./mysql/sql/init.sql:/sql/schema.sql
