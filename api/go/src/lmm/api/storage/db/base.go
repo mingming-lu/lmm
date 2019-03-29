@@ -49,8 +49,8 @@ func open(driver string, config Config) DB {
 		db, err = tryToOpenDB(driver, config.DSN())
 		if err != nil {
 			fmt.Printf(
-				"retry connecting to MySQL... error: %s, host: %s, port: %s, db: %s.",
-				err.Error(), config.Host, config.Port, config.Database,
+				"retry connecting to MySQL... error: %s, addr: %s, db: %s.",
+				err.Error(), config.Address, config.Database,
 			)
 			<-time.After(5 * time.Second)
 		}

@@ -4,10 +4,11 @@ services:
     env_file:
       - ./.env/test.env
     environment:
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_NAME: lmm_test
+      MYSQL_PROTOCOL: unix
+      MYSQL_ADDR: /var/run/mysqld/mysqld.sock
+      MYSQL_DBNAME: lmm_test
       MYSQL_USER: root
+      MYSQL_CONNECTION_RETRY: 10
       REDIS_SERVER: redis:6379
       REDIS_CONN_TIMEOUT_SECOND: 3
       HTTP_TIMEOUT_SECOND: 1

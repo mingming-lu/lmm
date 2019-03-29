@@ -5,6 +5,7 @@ services:
     volumes:
       - ./go:/go
       - ./mysql/sql/init.sql:/sql/schema.sql
+      - ./mysql/mysqld:/var/run/mysqld
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
     working_dir: /go/src/lmm/api/
     environment:
@@ -21,6 +22,7 @@ services:
     volumes:
       - ./mysql/lib:/var/lib/mysql
       - ./mysql/log:/var/log/mysql
+      - ./mysql/mysqld:/var/run/mysqld
       - ./mysql/my.cnf:/etc/mysql/my.cnf
       - ./mysql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:

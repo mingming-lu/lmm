@@ -6,10 +6,13 @@ services:
     command: api
     environment:
       APP_HOST: https://www.lmm.local
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_NAME: lmm
+
+      MYSQL_PROTOCOL: unix
+      MYSQL_ADDR: /var/run/mysqld/mysqld.sock
+      MYSQL_DBNAME: lmm
       MYSQL_USER: root
+      MYSQL_CONNECTION_RETRY: 3
+
       RABBIT_HOST: rabbitmq
       RABBIT_PORT: 5672
       RABBIT_USER: guest

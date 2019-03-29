@@ -17,22 +17,26 @@ type Rows = sql.Rows
 
 // Config defines config of database
 type Config struct {
-	Protocol string
-	Host     string
-	Port     string
+	// auhthorization
 	User     string
 	Password string
+
+	// base dsn
+	Protocol string
+	Address  string
 	Database string
 	Options  url.Values // dsn query parameters
+
 	// Retry defines retry time if connection fails, 0 for no retry, < 0 for infinite retries
 	Retry int
 }
 
 // DSN converts c to dsn string
+// A DSN in its fullest form: username:password@protocol(address)/dbname?param=value
 // See examples for MySQL: https://github.com/go-sql-driver/mysql
 func (c Config) DSN() string {
-	return fmt.Sprintf("%s:%s@%s(%s:%s)/%s?%s",
-		c.User, c.Password, c.Protocol, c.Host, c.Port, c.Database, c.Options.Encode())
+	return fmt.Sprintf("%s:%s@%s(%s)/%s?%s",
+		c.User, c.Password, c.Protocol, c.Address, c.Database, c.Options.Encode())
 }
 
 // DB is a database abstraction

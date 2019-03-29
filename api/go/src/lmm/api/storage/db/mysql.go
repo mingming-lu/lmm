@@ -3,6 +3,7 @@ package db
 import (
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -16,10 +17,15 @@ func DefaultMySQLConfig() Config {
 	c := Config{
 		User:     os.Getenv("MYSQL_USER"),
 		Password: os.Getenv("MYSQL_PASS"),
-		Host:     os.Getenv("MYSQL_HOST"),
-		Port:     os.Getenv("MYSQL_PORT"),
-		Database: os.Getenv("MYSQL_NAME"),
-		Retry:    -1,
+		Address:  os.Getenv("MYSQL_ADDR"),
+		Protocol: os.Getenv("MYSQL_PROTOCOL"),
+		Database: os.Getenv("MYSQL_DBNAME"),
+		Retry: func() int {
+			if i, err := strconv.Atoi(os.Getenv("MYSQL_CONNECTION_RETRY")); err == nil {
+				return i
+			}
+			return 1
+		}(),
 	}
 
 	if c.User == "" {
@@ -30,12 +36,8 @@ func DefaultMySQLConfig() Config {
 		c.Protocol = "tcp"
 	}
 
-	if c.Host == "" {
-		c.Host = "127.0.0.1"
-	}
-
-	if c.Port == "" {
-		c.Port = "3306"
+	if c.Address == "" {
+		c.Address = "127.0.0.1:3306"
 	}
 
 	c.Options = url.Values{}
