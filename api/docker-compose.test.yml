@@ -15,8 +15,11 @@ services:
     working_dir: /go/src/lmm/api
     command: bash -c "go test ./... -count 1 -cover -v"
   mysql:
+    user: ${UID}:${GID}
     volumes:
       - ./mysql/sql/init_test.sql:/mysql/sql/init_test.sql
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     command: --init-file /mysql/sql/init_test.sql
+  redis:
+    user: ${UID}:${GID}
