@@ -201,6 +201,7 @@ export default {
     this.isMounted = true
   },
   updated() {
+    this.calcIsMobile()
     this.isMounted = true
   },
   beforeDestroy() {
@@ -217,7 +218,10 @@ export default {
       return formattedDateFromTimeStamp(dtString)
     },
     calcIsMobile() {
-      this.isMobile = window.innerWidth <= 768
+      const newState = window.innerWidth <= 768
+      if (this.isMobile !== newState) {
+        this.isMobile = newState
+      }
     }
   }
 }
