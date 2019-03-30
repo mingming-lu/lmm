@@ -80,18 +80,26 @@ export default {
       title: this.title
     }
   },
-  asyncData({ $axios, params }) {
-    return $axios.get(`v1/articles/${params.id}`).then(res => {
-      return {
-        isMobile: true,
-        title: res.data.title,
-        subtitles: [],
-        body: res.data.body,
-        tags: res.data.tags,
-        postAt: formattedDateFromTimeStamp(res.data.post_at),
-        lastEditedAt: formattedDateFromTimeStamp(res.data.last_edited_at)
-      }
-    })
+  asyncData({ $axios, error, params }) {
+    return $axios
+      .get(`v1/articles/${params.id}`)
+      .then(res => {
+        return {
+          isMobile: true,
+          title: res.data.title,
+          subtitles: [],
+          body: res.data.body,
+          tags: res.data.tags,
+          postAt: formattedDateFromTimeStamp(res.data.post_at),
+          lastEditedAt: formattedDateFromTimeStamp(res.data.last_edited_at)
+        }
+      })
+      .catch(e => {
+        error({
+          statusCode: e.response.status,
+          message: e.response.data
+        })
+      })
   },
   data() {
     return {
