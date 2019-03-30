@@ -121,7 +121,7 @@ export default {
       link: this.links
     }
   },
-  asyncData({ $axios, query, route }) {
+  asyncData({ $axios, error, query, route }) {
     const page = Boolean(query.page) ? query.page : 1
 
     return photoFetcher($axios)
@@ -147,7 +147,10 @@ export default {
         }
       })
       .catch(e => {
-        console.log(e)
+        error({
+          statusCode: e.response.status,
+          message: e.response.data
+        })
       })
   },
   data() {

@@ -144,7 +144,7 @@ export default {
       link: this.links
     }
   },
-  asyncData({ $axios, query, route }) {
+  asyncData({ $axios, error, query, route }) {
     const q = buildURLEncodedString({
       flavor: true,
       page: Boolean(query.page) ? query.page : 1,
@@ -187,6 +187,12 @@ export default {
             route.path
           )
         }
+      })
+      .catch(e => {
+        error({
+          statusCode: e.response.status,
+          message: e.response.data
+        })
       })
   },
   data() {

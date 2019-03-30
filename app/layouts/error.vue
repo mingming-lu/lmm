@@ -1,6 +1,7 @@
 <template>
   <div class="center container">
-    <p>{{ statusCode }} {{ message }}</p>
+    <p>{{ errorMessage }}</p>
+    <br>
     <nuxt-link
       to="/"
       class="link"
@@ -13,13 +14,19 @@
 <script>
 export default {
   props: {
-    statusCode: {
-      type: Number,
-      default: 404
-    },
-    message: {
-      type: String,
-      default: 'Page Not Found'
+    error: {
+      type: Object,
+      default: () => {
+        return {
+          statusCode: 404,
+          message: 'Page Not Found'
+        }
+      }
+    }
+  },
+  computed: {
+    errorMessage() {
+      return `${this.error.statusCode} ${this.error.message}`
     }
   }
 }
