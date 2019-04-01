@@ -1,33 +1,60 @@
-version: 2
+version: 2.1
+
 jobs:
-  build:
-    machine:
-      image: circleci/classic:edge
+  api:
+    docker:
+      - image: circleci/golang:1.12.0
+        environment:
+          GO111MODULE: 'on'
+          MYSQL_HOST: localhost
+          MYSQL_PORT: 3306
+          MYSQL_NAME: lmm_test
+          MYSQL_USER: root
+          REDIS_SERVER: localhost:6379
+          REDIS_CONN_TIMEOUT_SECOND: 3
+          HTTP_TIMEOUT_SECOND: 3
+
+      - image: circleci/mysql:5.7.25
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 1
+
+      - image: circleci/redis:5.0.3-alpine3.9
+
     steps:
       - checkout
+
+      - restore_cache:
+          key: &api-go-mod api-go-mod-{{ checksum ".circleci/config.yml" }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+          paths: /go/pkg
+
       - run:
-          name: Setup docker-compose
+          name: Setup API Go
           command: |
-            pip install --upgrade pip
-            pip install docker-compose
+            cd api/go/src/lmm/api
+            go mod download
+            go install -v lmm/api/cmd/api
+            go install -v lmm/api/cmd/cli
+
       - run:
-          name: Setup API
+          name: Setup API MySQL
           command: |
-            cd api
-            chmod -R 777 mysql
-            chmod -R 777 redis
-            mkdir -p .env
-            echo LMM_API_TOKEN_KEY=$(uuidgen | sed -e 's/-//g') > .env/test.env
-            make build
+            sudo apt install -y mysql-client || true
+            cat api/mysql/sql/init_test.sql | mysql -h localhost --protocol TCP -uroot
+
       - run:
-          name: Test API
+          name: API Go Test
           command: |
-            cd api
-            make test
-      - run:
-          name: Test API CLI
-          command: |
-            cd api
-            make cli env=test commands="hello-world"
-            make cli env=test commands="MySQL-Schema-DDL-Dry-Run"
-            make cli env=test commands="MySQL-Schema-DDL-Deploy"
+            export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
+
+            cd api/go/src/lmm/api
+            go test ./... -count 1 -cover -v
+
+      - save_cache:
+          key: *api-go-mod
+          paths: /go/pkg
+
+workflows:
+  version: 2.1
+  test:
+    jobs:
+      - api
