@@ -1,6 +1,7 @@
 version: 2.1
+
 jobs:
-  build:
+  api:
     docker:
       - image: circleci/golang:1.12.0
         environment:
@@ -52,3 +53,9 @@ jobs:
       - save_cache:
           key: *api-go-mod
           paths: api/go/pkg
+
+workflows:
+  version: 2.1
+  test:
+    jobs:
+      - api
