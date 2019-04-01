@@ -37,6 +37,7 @@ jobs:
             cat api/mysql/sql/init_test.sql | mysql -h localhost --protocol TCP -uroot
       - run:
           command: |
+            export GOPATH=$(pwd)/api/go
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
