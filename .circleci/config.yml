@@ -30,8 +30,6 @@ jobs:
       - run:
           name: Setup API Go
           command: |
-            export GOPATH=$(pwd)/api/go
-
             cd api/go/src/lmm/api
             go mod download
             go install -v lmm/api/cmd/api
@@ -46,7 +44,6 @@ jobs:
       - run:
           name: API Go Test
           command: |
-            export GOPATH=$(pwd)/api/go
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
 
             cd api/go/src/lmm/api
