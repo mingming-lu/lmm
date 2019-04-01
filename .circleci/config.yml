@@ -6,6 +6,7 @@ jobs:
       - image: circleci/golang:1.12.0
         environment:
           GO111MODULE: 'on'
+          GOPATH: ~/lmm/api/go
           MYSQL_HOST: localhost
           MYSQL_PORT: 3306
           MYSQL_NAME: lmm_test
@@ -20,6 +21,8 @@ jobs:
 
       - image: circleci/redis:5.0.3-alpine3.9
 
+    working_directory: ~/lmm
+
     steps:
       - checkout
 
@@ -30,9 +33,6 @@ jobs:
       - run:
           name: Setup API Go
           command: |
-            export GOPATH=$(pwd)/api/go >> $BASH_ENV
-            export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g') >> $BASH_ENV
-
             cd api/go/src/lmm/api
             go mod download
             go install -v lmm/api/cmd/api
@@ -47,6 +47,8 @@ jobs:
       - run:
           name: API Go Test
           command: |
+            export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
+
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
 
