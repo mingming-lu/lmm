@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: golang:1.12.0
+      - image: circleci/golang:1.12.0
         environment:
           GO111MODULE: 'on'
           MYSQL_HOST: localhost
@@ -13,11 +13,11 @@ jobs:
           REDIS_CONN_TIMEOUT_SECOND: 3
           HTTP_TIMEOUT_SECOND: 3
 
-      - image: mysql:5.7.25
+      - image: circleci/mysql:5.7.25
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: 1
 
-      - image: redis:5.0.3-alpine3.9
+      - image: circleci/redis:5.0.3-alpine3.9
 
     steps:
       - checkout
@@ -38,9 +38,7 @@ jobs:
       - run:
           name: Setup API MySQL
           command: |
-            apt-get update -y
-            apt-get dist-upgrade -y
-            apt-get install -y mysql-client
+            sudo apt install -y mysql-client || true
             cat api/mysql/sql/init_test.sql | mysql -h localhost --protocol TCP -uroot
 
       - run:
