@@ -12,35 +12,45 @@ jobs:
           REDIS_SERVER: localhost:6379
           REDIS_CONN_TIMEOUT_SECOND: 3
           HTTP_TIMEOUT_SECOND: 3
+
       - image: mysql:5.7.25
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: 1
+
       - image: redis:5.0.3-alpine3.9
+
     steps:
       - checkout
+
       - restore_cache:
           key: &api-go-mod api-go-mod-{{ checksum ".circleci/config.yml" }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
           paths: api/go/pkg
+
       - run:
-          name: Build API
+          name: Setup API Go
           command: |
             export GOPATH=$(pwd)/api/go
             cd api/go/src/lmm/api
             go mod download
             go install -v lmm/api/cmd/api
             go install -v lmm/api/cmd/cli
+
       - run:
+          name: Setup API MySQL
           command: |
             apt-get update -y
             apt-get dist-upgrade -y
             apt-get install -y mysql-client
             cat api/mysql/sql/init_test.sql | mysql -h localhost --protocol TCP -uroot
+
       - run:
+          name: API Go Test
           command: |
             export GOPATH=$(pwd)/api/go
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
+
       - save_cache:
           key: *api-go-mod
           paths: api/go/pkg
