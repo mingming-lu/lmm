@@ -25,7 +25,7 @@ jobs:
 
       - restore_cache:
           key: &api-go-mod api-go-mod-{{ checksum ".circleci/config.yml" }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-          paths: api/go/pkg
+          paths: /go/pkg
 
       - run:
           name: Setup API Go
@@ -51,7 +51,7 @@ jobs:
 
       - save_cache:
           key: *api-go-mod
-          paths: api/go/pkg
+          paths: /go/pkg
 
 workflows:
   version: 2.1
