@@ -20,6 +20,7 @@
                         ${load_image_320(photo.name)} 320w`"
               :alt="photo.alts.join(' ')"
               sizes="(min-width: 800px) 50vw, 100vw"
+              @error="load_image_fallback($event, photo.name)"
             >
           </a>
         </div>
@@ -39,6 +40,7 @@
                         ${load_image_320(photo.name)} 320w`"
               :alt="photo.alts.join(' ')"
               sizes="(min-width: 800px) 50vw, 100vw"
+              @error="load_image_fallback($event, photo.name)"
             >
           </a>
         </div>
@@ -58,6 +60,7 @@
                     ${load_image_320(photo.name)} 320w`"
           :alt="photo.alts.join(' ')"
           sizes="(min-width: 800px) 50vw, 100vw"
+          @error="load_image_fallback($event, photo.name)"
         >
       </a>
     </div>
@@ -207,6 +210,9 @@ export default {
     },
     load_image_1280(name) {
       return this.load_image_full(`1280w/${name}`)
+    },
+    load_image_fallback(event, name) {
+      event.target.srcset = this.load_image_full(name)
     },
     calcIsWideMode() {
       this.wideMode = window.innerWidth >= 800
