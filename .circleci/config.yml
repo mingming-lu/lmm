@@ -51,7 +51,7 @@ jobs:
             go test ./... -count 1 -cover -v
 
       - save_cache:
-          key: *api-go-mod
+          key: *api-go-mod-cache-key
           paths: *api-go-mod-cache-path
 
 workflows:
