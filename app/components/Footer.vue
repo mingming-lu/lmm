@@ -10,7 +10,7 @@
       target="_blank">
       <i class="fab fa-linkedin-in link"/>
     </a>
-    <p>&copy; 2018
+    <p>&copy; 2018-{{ (new Date).getFullYear() }}
       <nuxt-link
         to="/#author"
         class="link">
