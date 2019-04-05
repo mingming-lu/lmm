@@ -24,7 +24,7 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: &api-go-mod-cache-key api-go-mod-{{ checksum ".circleci/config.yml" }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+          key: &api-go-mod-cache-key api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
           paths: &api-go-mod-cache-path /go/pkg
 
       - run:
