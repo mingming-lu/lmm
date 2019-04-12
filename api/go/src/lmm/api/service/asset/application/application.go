@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 
-	"lmm/api/http"
 	"lmm/api/service/asset/application/command"
 	"lmm/api/service/asset/domain"
 	"lmm/api/service/asset/domain/model"
@@ -28,14 +27,12 @@ type Service struct {
 	imageService    service.ImageService
 	imageEncoder    service.ImageEncoder
 	assetFinder     service.AssetFinder
-	cacheService    CacheService
 }
 
 // NewService creates a new image application service
 func NewService(
 	assetFinder service.AssetFinder,
 	assetRepository repository.AssetRepository,
-	cacheService CacheService,
 	imageService service.ImageService,
 	imageEncoder service.ImageEncoder,
 	uploaderService service.UploaderService,
@@ -43,7 +40,6 @@ func NewService(
 	return &Service{
 		assetFinder:     assetFinder,
 		assetRepository: assetRepository,
-		cacheService:    cacheService,
 		imageService:    imageService,
 		imageEncoder:    imageEncoder,
 		uploaderService: uploaderService,
@@ -67,9 +63,6 @@ func (app *Service) UploadAsset(c context.Context, cmd *command.UploadAsset) err
 		return errors.Wrap(domain.ErrUnsupportedAssetType, t.String())
 	}
 
-	if err := app.cacheService.ClearPhotos(c); err != nil {
-		http.Log().Warn(c, err.Error())
-	}
 	return nil
 }
 
@@ -105,10 +98,6 @@ func (app *Service) ListPhotos(c context.Context, pageStr, perPageStr string) (*
 		return nil, err
 	}
 
-	if photos, ok := app.cacheService.FetchPhotos(c, page, perPage); ok {
-		return photos, nil
-	}
-
 	photos, err := app.assetFinder.FindAllPhotos(c, page, perPage*perPage+1)
 	if err != nil {
 		return nil, err
@@ -116,10 +105,6 @@ func (app *Service) ListPhotos(c context.Context, pageStr, perPageStr string) (*
 
 	if len(photos.List()) == 0 {
 		return photos, nil
-	}
-
-	if err := app.cacheService.StorePhotos(c, page, perPage, photos.List()); err != nil {
-		http.Log().Warn(c, err.Error())
 	}
 
 	hasNextPage := len(photos.List()) > int(perPage)
@@ -163,10 +148,6 @@ func (app *Service) SetPhotoAlternateTexts(c context.Context, cmd *command.SetIm
 
 	if err := app.imageService.SetAlt(c, asset, alts); err != nil {
 		return err
-	}
-
-	if err := app.cacheService.ClearPhotos(c); err != nil {
-		http.Log().Warn(c, err.Error())
 	}
 
 	return nil
