@@ -2,7 +2,6 @@ package ui
 
 import (
 	"context"
-	"lmm/api/service/asset/application"
 	"net/http"
 	"os"
 
@@ -48,7 +47,6 @@ func NewHandler(db db.DB) Handler {
 	assetUI := New(
 		service.NewAssetFetcher(db),
 		persistence.NewAssetStorage(db, &NopUploader{}),
-		application.NopCacheService(),
 		service.NewImageService(db),
 		&domainService.NopImageEncoder{},
 		service.NewUserAdapter(db),

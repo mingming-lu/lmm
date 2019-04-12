@@ -14,8 +14,6 @@ services:
       RABBIT_PORT: 5672
       RABBIT_USER: guest
       RABBIT_PASS: guest
-      REDIS_SERVER: redis:6379
-      REDIS_CONN_TIMEOUT_SECOND: 3
       HTTP_TIMEOUT_SECOND: 3
     networks:
       - lmm
