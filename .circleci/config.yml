@@ -48,19 +48,16 @@ jobs:
           paths: *api-go-mod-cache-path
 
   api_test:
+    <<: *golang112
     docker:
-      - image: circleci/golang:1.12.0
-        environment:
-          GO111MODULE: 'on'
-          MYSQL_HOST: localhost
-          MYSQL_PORT: 3306
-          MYSQL_NAME: lmm_test
-          MYSQL_USER: root
-          HTTP_TIMEOUT_SECOND: 3
-
       - image: circleci/mysql:5.7.25
-        environment:
-          MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    environment:
+      MYSQL_HOST: localhost
+      MYSQL_PORT: 3306
+      MYSQL_NAME: lmm_test
+      MYSQL_USER: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      HTTP_TIMEOUT_SECOND: 3
 
     steps:
       - *restore_repo
