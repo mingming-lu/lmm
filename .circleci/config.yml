@@ -83,6 +83,13 @@ jobs:
           key: *api_go_mod_cache_key
           paths: *api_go_mod_cache_path
 
+  node_setup:
+    <<: *default
+    steps:
+      - *restore_repo
+      - checkout
+      - run: docker build -t circleci/node-alpine .circleci/docker/node/10.15.1-alpine
+
   app_setup:
     <<: *node10
     steps:
@@ -172,6 +179,9 @@ workflows:
     jobs:
       - checkout_code
       - api_setup:
+          requires:
+            - checkout_code
+      - node_setup:
           requires:
             - checkout_code
       - app_setup:
