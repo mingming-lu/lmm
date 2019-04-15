@@ -4,7 +4,14 @@ references:
   default: &default
     docker:
       - image: docker:17.05.0-ce-git
-    working_directory: /home/circleci/project
+        environment:
+          GO111MODULE: 'on'
+    working_directory: &cwd /home/circleci/project
+
+  golang112: &golang112
+    docker:
+      - image: circleci/golang:1.12.0
+    working_directory: *cwd
 
   restore_repo: &restore_repo
     restore_cache:
@@ -22,6 +29,23 @@ jobs:
       - save_cache:
           key: *repo_cache_key
           paths: ".git"
+
+  api_setup:
+    <<: *golang112
+    steps:
+      - *restore_repo
+      - checkout
+      - restore_cache: &restore_api_go_mod
+          key: &api-go-mod-cache-key api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+          paths: &api-go-mod-cache-path /go/pkg
+      - run:
+          name: api go mod download
+          command: |
+            cd api/go/src/lmm/api
+            go mod download
+      - save_cache:
+          key: *api-go-mod-cache-key
+          paths: *api-go-mod-cache-path
 
   api:
     docker:
@@ -82,6 +106,10 @@ workflows:
   test:
     jobs:
       - checkout_code
+      - api_setup:
+          requires:
+            - checkout_code
       - api:
           requires:
             - checkout_code
+            - api_setup
