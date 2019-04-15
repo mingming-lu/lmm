@@ -56,15 +56,11 @@ jobs:
           MYSQL_PORT: 3306
           MYSQL_NAME: lmm_test
           MYSQL_USER: root
-          REDIS_SERVER: localhost:6379
-          REDIS_CONN_TIMEOUT_SECOND: 3
           HTTP_TIMEOUT_SECOND: 3
 
       - image: circleci/mysql:5.7.25
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: 1
-
-      - image: circleci/redis:5.0.3-alpine3.9
 
     steps:
       - *restore_repo
