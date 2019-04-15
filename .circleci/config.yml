@@ -1,6 +1,10 @@
 version: 2.1
 
 references:
+  default: &default
+    docker:
+      - image: docker:17.05.0-ce-git
+
   restore_repo: &restore_repo
     restore_cache:
       keys:
@@ -9,6 +13,15 @@ references:
         - repo-
 
 jobs:
+  checkout_code:
+    <<: *default
+    steps:
+      - *restore_repo
+      - checkout
+      - save_cache:
+          key: *repo_cache_key
+          paths: ".git"
+
   api:
     docker:
       - image: circleci/golang:1.12.0
@@ -31,9 +44,6 @@ jobs:
     steps:
       - *restore_repo
       - checkout
-      - save_cache:
-          key: *repo_cache_key
-          paths: "."
 
       - restore_cache:
           key: &api-go-mod-cache-key api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
@@ -70,4 +80,7 @@ workflows:
   version: 2.1
   test:
     jobs:
-      - api
+      - checkout_code
+      - api:
+          requires:
+            - checkout_code
