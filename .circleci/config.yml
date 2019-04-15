@@ -82,6 +82,11 @@ jobs:
       - *restore_repo
       - checkout
       - restore_cache: *restore_api_go_mod
+      - run:
+          name: install api
+          command:
+            cd api/go/src/lmm/api
+            go install -v lmm/api/cmd/api
 
   api_cli_build:
     <<: *golang112
@@ -89,6 +94,11 @@ jobs:
       - *restore_repo
       - checkout
       - restore_cache: *restore_api_go_mod
+      - run:
+          name: install api
+          command:
+            cd api/go/src/lmm/api
+            go install -v lmm/api/cmd/cli
 
 workflows:
   version: 2.1
