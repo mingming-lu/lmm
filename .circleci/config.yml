@@ -67,11 +67,6 @@ jobs:
       - checkout
       - restore_cache: *restore_api_go_mod
       - run:
-          name: Setup API Go
-          command: |
-            go install -v lmm/api/cmd/api
-            go install -v lmm/api/cmd/cli
-      - run:
           name: Setup API MySQL
           command: |
             dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
