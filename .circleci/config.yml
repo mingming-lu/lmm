@@ -13,6 +13,11 @@ references:
           GO111MODULE: 'on'
     working_directory: *cwd
 
+  node10: &node10
+    docker:
+      - image: node:10.15.1-alpine
+    working_directory: *cwd
+
   restore_repo: &restore_repo
     restore_cache:
       keys:
@@ -21,13 +26,22 @@ references:
         - repo-
 
   restore_api_go_mod: &restore_api_go_mod
-      restore_cache:
-        keys:
-          - &api_go_mod_cache_key api_go_mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-          - api_go_mod-{{ checksum "api/go/src/lmm/api/go.mod" }}
-          - api_go_mod-
-        paths: &api_go_mod_cache_path
-          - /go/pkg
+    restore_cache:
+      keys:
+        - &api_go_mod_cache_key api_go_mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+        - api_go_mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-
+        - api_go_mod-
+      paths: &api_go_mod_cache_path
+        - /go/pkg
+
+  restore_app_node_modules: &restore_app_node_modules
+    restore_cache:
+      keys:
+        - &app_node_modules_cache_key app_node_modules-{{ checksum "app/package.json" }}-{{ checksum "app/package-lock.json" }}
+        - app_node_modules-{{ checksum "app/package.json" }}-
+        - app_node_modules-
+      paths: &app_node_modules_path
+        - app/node_modules
 
   only_master:
     filters: &only_master
@@ -65,6 +79,15 @@ jobs:
     steps:
       - *restore_repo
       - checkout
+      - *restore_app_node_modules
+      - run:
+          name: npm install
+          command: |
+            cd app
+            npm install
+      - save_cache:
+          key: *app_node_modules_cache_key
+          paths: *app_node_modules_path
 
   api_test:
     docker:
@@ -125,6 +148,9 @@ workflows:
     jobs:
       - checkout_code
       - api_setup:
+          requires:
+            - checkout_code
+      - app_setup:
           requires:
             - checkout_code
       - api_test:
