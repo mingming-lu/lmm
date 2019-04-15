@@ -124,7 +124,7 @@ jobs:
       - run:
           name: build node alpine for circleci
           command: |
-            docker build -t circleci/node-alpine .circleci/docker/node/10.15.1-alpine
+            docker build -t circleci/node-alpine .circleci/docker/node/alpine
       - *save_node_alpine_image
       - save_cache:
           key: *node_alpine_image_cache_key
