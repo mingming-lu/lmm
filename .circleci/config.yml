@@ -4,7 +4,7 @@ references:
   default: &default
     docker:
       - image: docker:17.05.0-ce-git
-    working_directory: ~/lmm
+    working_directory: /home/circleci/project
 
   restore_repo: &restore_repo
     restore_cache:
