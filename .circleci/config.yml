@@ -43,6 +43,15 @@ references:
       paths: &app_node_modules_path
         - app/node_modules
 
+  restore_manager_node_modules: &restore_manager_node_modules
+    restore_cache:
+      keys:
+        - &manager_node_modules_cache_key manager_node_modules-{{ checksum "manager/package.json" }}-{{ checksum "manager/package-lock.json" }}
+        - manager_node_modules-{{ checksum "manager/package.json" }}-
+        - manager_node_modules-
+      paths: &manager_node_modules_path
+        - manager/node_modules
+
   only_master:
     filters: &only_master
       branches:
@@ -88,6 +97,21 @@ jobs:
       - save_cache:
           key: *app_node_modules_cache_key
           paths: *app_node_modules_path
+
+  manager_setup:
+    <<: *node10
+    steps:
+      - *restore_repo
+      - checkout
+      - *restore_manager_node_modules
+      - run:
+          name: npm install
+          command: |
+            cd manager
+            npm install
+      - save_cache:
+          key: *manager_node_modules_cache_key
+          paths: *manager_node_modules_path
 
   api_test:
     docker:
@@ -151,6 +175,9 @@ workflows:
           requires:
             - checkout_code
       - app_setup:
+          requires:
+            - checkout_code
+      - manager_setup:
           requires:
             - checkout_code
       - api_test:
