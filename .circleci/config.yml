@@ -1,5 +1,13 @@
 version: 2.1
 
+references:
+  restore_repo: &restore_repo
+    restore_cache:
+      keys:
+        - &repo_cache_key repo-{{ .Branch }}-{{ .Revision }}
+        - repo-{{ .Branch }}-
+        - repo-
+
 jobs:
   api:
     docker:
@@ -21,7 +29,11 @@ jobs:
       - image: circleci/redis:5.0.3-alpine3.9
 
     steps:
+      - *restore_repo
       - checkout
+      - save_cache:
+          key: *repo_cache_key
+          path: "."
 
       - restore_cache:
           key: &api-go-mod-cache-key api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
