@@ -47,7 +47,7 @@ jobs:
           key: *api-go-mod-cache-key
           paths: *api-go-mod-cache-path
 
-  api:
+  api_test:
     docker:
       - image: circleci/golang:1.12.0
         environment:
@@ -87,7 +87,7 @@ workflows:
       - api_setup:
           requires:
             - checkout_code
-      - api:
+      - api_test:
           requires:
             - checkout_code
             - api_setup
