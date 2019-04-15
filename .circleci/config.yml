@@ -193,7 +193,7 @@ jobs:
       - *restore_api_go_mod
       - run:
           name: install api
-          command:
+          command: |
             cd api/go/src/lmm/api
             go install -v lmm/api/cmd/api
 
@@ -205,7 +205,7 @@ jobs:
       - *restore_api_go_mod
       - run:
           name: install api
-          command:
+          command: |
             cd api/go/src/lmm/api
             go install -v lmm/api/cmd/cli
 
