@@ -33,7 +33,7 @@ jobs:
       - checkout
       - save_cache:
           key: *repo_cache_key
-          path: "."
+          paths: "."
 
       - restore_cache:
           key: &api-go-mod-cache-key api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
