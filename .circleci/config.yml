@@ -4,13 +4,13 @@ references:
   default: &default
     docker:
       - image: docker:17.05.0-ce-git
-        environment:
-          GO111MODULE: 'on'
     working_directory: &cwd /home/circleci/project
 
   golang112: &golang112
     docker:
-      - image: circleci/golang:1.12.0
+      - image: &golang112_image circleci/golang:1.12.0
+        environment:
+          GO111MODULE: 'on'
     working_directory: *cwd
 
   restore_repo: &restore_repo
@@ -48,8 +48,8 @@ jobs:
           paths: *api-go-mod-cache-path
 
   api_test:
-    <<: *golang112
     docker:
+      - image: *golang112_image
       - image: circleci/mysql:5.7.25
     environment:
       MYSQL_HOST: localhost
@@ -75,6 +75,15 @@ jobs:
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
+
+  api_build:
+    <<: *golang112
+    steps:
+      - *restore_repo
+      - checkout
+      - restore_cache: *restore_api_go_mod
+
+  api_cli_build:
 
 workflows:
   version: 2.1
