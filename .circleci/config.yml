@@ -131,34 +131,30 @@ jobs:
           paths: *node_alpine_image_cache_path
 
   app_setup:
-    <<: *node10
+    <<: *default
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - *restore_repo
       - checkout
-      - *restore_app_node_modules
+      - *restore_node_alpine_image
+      - *load_node_alpine_image
       - run:
-          name: npm install
-          command: |
-            cd app
-            npm install
-      - save_cache:
-          key: *app_node_modules_cache_key
-          paths: *app_node_modules_path
+          name: dummy docker run
+          command: docker run --rm circleci/node-alpine || true
 
   manager_setup:
-    <<: *node10
+    <<: *default
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - *restore_repo
       - checkout
-      - *restore_manager_node_modules
+      - *restore_node_alpine_image
+      - *load_node_alpine_image
       - run:
-          name: npm install
-          command: |
-            cd manager
-            npm install
-      - save_cache:
-          key: *manager_node_modules_cache_key
-          paths: *manager_node_modules_path
+          name: dummy docker run
+          command: docker run --rm circleci/node-alpine || true
 
   api_test:
     docker:
@@ -227,9 +223,11 @@ workflows:
       - app_setup:
           requires:
             - checkout_code
+            - node_setup
       - manager_setup:
           requires:
             - checkout_code
+            - node_setup
       - api_test:
           requires:
             - checkout_code
