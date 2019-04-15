@@ -1,6 +1,8 @@
 version: 2.1
 
 references:
+  docker_cache: &docker_cache /caches
+
   default: &default
     docker:
       - image: docker:17.05.0-ce-git
@@ -24,6 +26,31 @@ references:
         - &repo_cache_key repo-{{ .Branch }}-{{ .Revision }}
         - repo-{{ .Branch }}-
         - repo-
+
+  restore_node_alpine_image: &restore_node_alpine_image
+    restore_cache:
+      keys:
+        - &node_alpine_image_cache_key node_alpine-{{ checksum ".circleci/docker/node/alpine/Dockerfile" }}
+        - node_alpine-
+      paths:
+        - &node_alpine_image_cache_path /caches/node_alpine.tar
+
+  save_node_alpine_image: &save_node_alpine_image
+    run:
+      name: save node alpine image
+      environment:
+        CACHE_PATH: *docker_cache
+      command: |
+        mkdir -p $CACHE_PATH
+        docker save -o $CACHE_PATH/node_alpine.tar circleci/node-alpine
+
+  load_node_alpine_image: &load_node_alpine_image
+    run:
+      name: load node alpine image
+      environment:
+        CACHE_PATH: *docker_cache
+      command: |
+        docker load -i $CACHE_PATH/app.tar
 
   restore_api_go_mod: &restore_api_go_mod
     restore_cache:
@@ -86,10 +113,17 @@ jobs:
   node_setup:
     <<: *default
     steps:
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
       - *restore_repo
       - checkout
-      - run: docker build -t circleci/node-alpine .circleci/docker/node/10.15.1-alpine
+      - *restore_node_alpine_image
+      - *load_node_alpine_image
+      - run:
+          name: build node alpine for circleci
+          command: |
+            docker build -t circleci/node-alpine .circleci/docker/node/10.15.1-alpine
+      - *save_node_alpine_image
 
   app_setup:
     <<: *node10
