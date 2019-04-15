@@ -86,6 +86,7 @@ jobs:
   node_setup:
     <<: *default
     steps:
+      - setup_remote_docker
       - *restore_repo
       - checkout
       - run: docker build -t circleci/node-alpine .circleci/docker/node/10.15.1-alpine
