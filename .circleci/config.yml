@@ -69,37 +69,24 @@ jobs:
     steps:
       - *restore_repo
       - checkout
-
-      - restore_cache:
-          key: &api-go-mod-cache-key api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-          paths: &api-go-mod-cache-path /go/pkg
-
+      - restore_cache: *restore_api_go_mod
       - run:
           name: Setup API Go
           command: |
-            cd api/go/src/lmm/api
-            go mod download
             go install -v lmm/api/cmd/api
             go install -v lmm/api/cmd/cli
-
       - run:
           name: Setup API MySQL
           command: |
             dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
             sudo apt install -y mysql-client || true
             cat api/mysql/sql/init_test.sql | mysql -h localhost --protocol TCP -uroot
-
       - run:
           name: API Go Test
           command: |
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
-
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
-
-      - save_cache:
-          key: *api-go-mod-cache-key
-          paths: *api-go-mod-cache-path
 
 workflows:
   version: 2.1
