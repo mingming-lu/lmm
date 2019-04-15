@@ -20,6 +20,15 @@ references:
         - repo-{{ .Branch }}-
         - repo-
 
+  restore_api_go_mod: &restore_api_go_mod
+      restore_cache: &restore_api_go_mod
+        keys:
+          - &api_go_mod_cache_key api_go_mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+          - api_go_mod-{{ checksum "api/go/src/lmm/api/go.mod" }}
+          - api_go_mod-
+        paths: &api_go_mod_cache_path
+          - /go/pkg
+
   only_master:
     filters: &only_master
       branches:
@@ -42,16 +51,16 @@ jobs:
       - *restore_repo
       - checkout
       - restore_cache: &restore_api_go_mod
-          key: &api-go-mod-cache-key api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-          paths: &api-go-mod-cache-path /go/pkg
+          key: &api_go_mod_cache_key api-go-mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+          paths: &api_go_mod_cache_path /go/pkg
       - run:
           name: api go mod download
           command: |
             cd api/go/src/lmm/api
             go mod download
       - save_cache:
-          key: *api-go-mod-cache-key
-          paths: *api-go-mod-cache-path
+          key: *api_go_mod_cache_key
+          paths: *api_go_mod_cache_path
 
   api_test:
     docker:
