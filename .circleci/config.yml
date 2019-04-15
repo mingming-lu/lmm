@@ -20,6 +20,12 @@ references:
         - repo-{{ .Branch }}-
         - repo-
 
+  only_master:
+    filters: &only_master
+      branches:
+        only:
+          - master
+
 jobs:
   checkout_code:
     <<: *default
@@ -116,7 +122,9 @@ workflows:
           requires:
             - checkout_code
             - api_test
+          filters: *only_master
       - api_cli_build:
           requires:
             - checkout_code
             - api_test
+          filters: *only_master
