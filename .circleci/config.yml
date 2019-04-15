@@ -84,6 +84,11 @@ jobs:
       - restore_cache: *restore_api_go_mod
 
   api_cli_build:
+    <<: *golang112
+    steps:
+      - *restore_repo
+      - checkout
+      - restore_cache: *restore_api_go_mod
 
 workflows:
   version: 2.1
@@ -97,3 +102,11 @@ workflows:
           requires:
             - checkout_code
             - api_setup
+      - api_build:
+          requires:
+            - checkout_code
+            - api_test
+      - api_cli_build:
+          requires:
+            - checkout_code
+            - api_test
