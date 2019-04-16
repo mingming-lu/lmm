@@ -1,175 +1,11 @@
 version: 2.1
 
-references:
-  docker_cache: &docker_cache /caches
-  node_alpine_cache: &node_alpine_cache node_alpine.tar
-
-  workspace_root: &workspace_root /tmp/workspace
-
-  attach_workspace: &attach_workspace
-    attach_workspace:
-      at: *workspace_root
-
-  default: &default
-    docker:
-      - image: docker:17.05.0-ce-git
-    working_directory: &cwd /home/circleci/project
-
-  golang112: &golang112
-    docker:
-      - image: &golang112_image circleci/golang:1.12.0
-        environment:
-          GO111MODULE: 'on'
-          GOPATH: /tmp/workspace/go
-    working_directory: *cwd
-
-  restore_repo: &restore_repo
-    restore_cache:
-      keys:
-        - &repo_cache_key v1-repo-{{ .Branch }}-{{ .Revision }}
-        - v1-repo-v1-{{ .Branch }}-
-        - v1-repo-
-
-  restore_node_alpine_image: &restore_node_alpine_image
-    restore_cache:
-      keys:
-        - &node_alpine_image_cache_key node_alpine-{{ checksum ".circleci/docker/node/alpine/Dockerfile" }}
-        - node_alpine-
-      paths:
-        - &node_alpine_image_cache_path /caches/node_alpine.tar
-
-  save_node_alpine_image: &save_node_alpine_image
-    run:
-      name: save node alpine image
-      environment:
-        CACHE_PATH: *docker_cache
-        CACHE_FILE: *node_alpine_cache
-      command: |
-        mkdir -p $CACHE_PATH
-        docker save -o $CACHE_PATH/$CACHE_FILE circleci/node-alpine
-
-  load_node_alpine_image: &load_node_alpine_image
-    run:
-      name: load node alpine image
-      environment:
-        CACHE_PATH: *docker_cache
-        CACHE_FILE: *node_alpine_cache
-      command: |
-        docker load -i $CACHE_PATH/$CACHE_FILE
-
-  restore_api_go_mod: &restore_api_go_mod
-    restore_cache:
-      keys:
-        - &api_go_mod_cache_key api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-        - api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-
-        - api_go_mod-v1-
-      paths: &api_go_mod_cache_path
-        - /go/pkg/mod
-
-  restore_app_node_modules: &restore_app_node_modules
-    restore_cache:
-      keys:
-        - &app_node_modules_cache_key app_node_modules-{{ checksum "app/package.json" }}-{{ checksum "app/package-lock.json" }}
-        - app_node_modules-{{ checksum "app/package.json" }}-
-        - app_node_modules-
-      paths: &app_node_modules_path
-        - app/node_modules
-
-  restore_manager_node_modules: &restore_manager_node_modules
-    restore_cache:
-      keys:
-        - &manager_node_modules_cache_key manager_node_modules-{{ checksum "manager/package.json" }}-{{ checksum "manager/package-lock.json" }}
-        - manager_node_modules-{{ checksum "manager/package.json" }}-
-        - manager_node_modules-
-      paths: &manager_node_modules_path
-        - manager/node_modules
-
-  only_master: &only_master
-    filters:
-      branches:
-        only:
-          - master
-
 jobs:
-  checkout_code:
-    <<: *default
-    steps:
-      - *restore_repo
-      - checkout
-      - save_cache:
-          key: *repo_cache_key
-          paths: "."
-
-  api_setup:
+  api:
     docker:
-      - image: *golang112_image
-    steps:
-      - *restore_repo
-      - *restore_api_go_mod
-      - run:
-          name: api go mod download
-          command: |
-            cd api/go/src/lmm/api
-            go mod download
-      - save_cache:
-          key: *api_go_mod_cache_key
-          paths: *api_go_mod_cache_path
-      - run:
-          name: move to workspace
-          command: |
-            mkdir -p /tmp/workspace/go/pkg
-            mv /go/pkg/mod /tmp/workspace/go/pkg/.
-      - persist_to_workspace:
-          root: *workspace_root
-          paths:
-            - go/pkg/mod
-
-  node_setup:
-    <<: *default
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - *restore_repo
-      - *restore_node_alpine_image
-      - run:
-          name: build node alpine for circleci
-          command: |
-            docker build -t circleci/node-alpine .circleci/docker/node/alpine
-      - *save_node_alpine_image
-      - save_cache:
-          key: *node_alpine_image_cache_key
-          paths: *node_alpine_image_cache_path
-
-  app_setup:
-    <<: *default
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - *restore_repo
-      - *restore_node_alpine_image
-      - *load_node_alpine_image
-      - run:
-          name: dummy docker run
-          command: docker run --rm circleci/node-alpine || true
-
-  manager_setup:
-    <<: *default
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - *restore_repo
-      - *restore_node_alpine_image
-      - *load_node_alpine_image
-      - run:
-          name: dummy docker run
-          command: docker run --rm circleci/node-alpine || true
-
-  api_test:
-    docker:
-      - image: *golang112_image
+      - image: circleci/golang:1.12.0
       - image: circleci/mysql:5.7.25
     environment:
-      GOPATH: /tmp/workspace/go
       MYSQL_HOST: localhost
       MYSQL_PORT: 3306
       MYSQL_NAME: lmm_test
@@ -178,8 +14,24 @@ jobs:
       HTTP_TIMEOUT_SECOND: 3
 
     steps:
-      - *restore_repo
-      - *attach_workspace
+      - checkout
+      - restore_cache:
+          keys:
+            - &api_go_mod_cache_key api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+            - api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-
+            - api_go_mod-v1-
+          paths:
+            - &api_go_mod_cache_path /go/pkg/mod
+      - run:
+          name: go mod download
+          command: |
+            cd api/go/src/lmm/api
+            go mod download
+      - save_cache:
+          keys:
+            - *api_go_mod_cache_key
+          paths:
+            - *api_go_mod_cache_path
       - run:
           name: Setup API MySQL
           command: |
@@ -193,58 +45,8 @@ jobs:
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
 
-  api_build:
-    <<: *golang112
-    steps:
-      - *restore_repo
-      - *attach_workspace
-      - run:
-          name: install api
-          command: |
-            cd api/go/src/lmm/api
-            go install -v lmm/api/cmd/api
-
-  api_cli_build:
-    <<: *golang112
-    steps:
-      - *restore_repo
-      - *attach_workspace
-      - run:
-          name: install api
-          command: |
-            cd api/go/src/lmm/api
-            go install -v lmm/api/cmd/cli
-
 workflows:
   version: 2.1
   test:
     jobs:
-      - checkout_code
-      - api_setup:
-          requires:
-            - checkout_code
-      - node_setup:
-          requires:
-            - checkout_code
-      - app_setup:
-          requires:
-            - checkout_code
-            - node_setup
-      - manager_setup:
-          requires:
-            - checkout_code
-            - node_setup
-      - api_test:
-          requires:
-            - checkout_code
-            - api_setup
-      - api_build:
-          <<: *only_master
-          requires:
-            - checkout_code
-            - api_test
-      - api_cli_build:
-          <<: *only_master
-          requires:
-            - checkout_code
-            - api_test
+      - api
