@@ -53,11 +53,11 @@ references:
   restore_api_go_mod: &restore_api_go_mod
     restore_cache:
       keys:
-        - &api_go_mod_cache_key api_go_mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-        - api_go_mod-{{ checksum "api/go/src/lmm/api/go.mod" }}-
-        - api_go_mod-
+        - &api_go_mod_cache_key api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+        - api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-
+        - api_go_mod-v1
       paths: &api_go_mod_cache_path
-        - /go/pkg
+        - /go/pkg/mod
 
   restore_app_node_modules: &restore_app_node_modules
     restore_cache:
