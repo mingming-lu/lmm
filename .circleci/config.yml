@@ -77,8 +77,8 @@ references:
       paths: &manager_node_modules_path
         - manager/node_modules
 
-  only_master:
-    filters: &only_master
+  only_master: &only_master
+    filters:
       branches:
         only:
           - master
@@ -221,12 +221,12 @@ workflows:
             - checkout_code
             - api_setup
       - api_build:
+          <<: *only_master
           requires:
             - checkout_code
             - api_test
-          filters: *only_master
       - api_cli_build:
+          <<: *only_master
           requires:
             - checkout_code
             - api_test
-          filters: *only_master
