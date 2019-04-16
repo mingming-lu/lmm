@@ -91,7 +91,7 @@ jobs:
       - checkout
       - save_cache:
           key: *repo_cache_key
-          paths: ".git"
+          paths: "."
 
   api_setup:
     <<: *golang112
