@@ -28,8 +28,7 @@ jobs:
             cd api/go/src/lmm/api
             go mod download
       - save_cache:
-          key:
-            - *api_go_mod_cache_key
+          key: *api_go_mod_cache_key
           paths:
             - *api_go_mod_cache_path
       - run:
