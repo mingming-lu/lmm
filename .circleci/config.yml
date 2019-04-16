@@ -97,7 +97,6 @@ jobs:
     <<: *golang112
     steps:
       - *restore_repo
-      - checkout
       - *restore_api_go_mod
       - run:
           name: api go mod download
@@ -114,7 +113,6 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - *restore_repo
-      - checkout
       - *restore_node_alpine_image
       - run:
           name: build node alpine for circleci
@@ -131,7 +129,6 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - *restore_repo
-      - checkout
       - *restore_node_alpine_image
       - *load_node_alpine_image
       - run:
@@ -144,7 +141,6 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - *restore_repo
-      - checkout
       - *restore_node_alpine_image
       - *load_node_alpine_image
       - run:
@@ -165,7 +161,6 @@ jobs:
 
     steps:
       - *restore_repo
-      - checkout
       - *restore_api_go_mod
       - run:
           name: Setup API MySQL
@@ -184,7 +179,6 @@ jobs:
     <<: *golang112
     steps:
       - *restore_repo
-      - checkout
       - *restore_api_go_mod
       - run:
           name: install api
@@ -196,7 +190,6 @@ jobs:
     <<: *golang112
     steps:
       - *restore_repo
-      - checkout
       - *restore_api_go_mod
       - run:
           name: install api
