@@ -19,9 +19,9 @@ references:
   restore_repo: &restore_repo
     restore_cache:
       keys:
-        - &repo_cache_key repo-{{ .Branch }}-{{ .Revision }}
-        - repo-{{ .Branch }}-
-        - repo-
+        - &repo_cache_key v1-repo-{{ .Branch }}-{{ .Revision }}
+        - v1-repo-v1-{{ .Branch }}-
+        - v1-repo-
 
   restore_node_alpine_image: &restore_node_alpine_image
     restore_cache:
