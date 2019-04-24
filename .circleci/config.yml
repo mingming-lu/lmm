@@ -1,8 +1,7 @@
 version: 2.1
 
 references:
-  manager_master_branch: &manager_master_branch /^master\/manager$/
-  manager_branches: &manager_branches /^manager\/.*/
+  manager_release_branch: &manager_release_branch /^manager-release$/
 
 jobs:
   api:
@@ -91,9 +90,9 @@ workflows:
   version: 2.1
   test_build_deploy:
     jobs:
-      - api:
+      - api
+      - manager_build_and_deploy:
           filters:
             branches:
-              ignore:
-                - *manager_branches
-      - manager_build_and_deploy
+              only:
+                - *manager_release_branch
