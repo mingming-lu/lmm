@@ -50,7 +50,7 @@ jobs:
 
   manager_build_and_deploy:
     docker:
-      - image: circleci/node:lts
+      - image: circleci/node:10.15.1-jessie
     steps:
       - checkout
       - restore_cache:
