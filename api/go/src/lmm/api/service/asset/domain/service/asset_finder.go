@@ -8,6 +8,6 @@ import (
 
 // AssetFinder provides interface to find assets
 type AssetFinder interface {
-	FindAllImages(c context.Context, limit, cursor uint) (*model.ImageCollection, error)
-	FindAllPhotos(c context.Context, limit, cursor uint) (*model.PhotoCollection, error)
+	FindAllImages(context.Context, uint, uint) (*model.ImageCollection, error)
+	FindAllPhotos(context.Context, uint, uint) (*model.PhotoCollection, error)
 }
