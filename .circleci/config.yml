@@ -1,7 +1,7 @@
 version: 2.1
 
 references:
-  app_release_branches: &app_release_branches /^app-release\/.*/
+  app_release_branches: &app_release_branches /^app-release$/
   manager_release_branch: &manager_release_branch /^manager-release$/
 
   google_cloud_sdk: &google_cloud_sdk
