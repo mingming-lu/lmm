@@ -98,7 +98,7 @@ func (app *Service) ListPhotos(c context.Context, pageStr, perPageStr string) (*
 		return nil, err
 	}
 
-	photos, err := app.assetFinder.FindAllPhotos(c, page, perPage*perPage+1)
+	photos, err := app.assetFinder.FindAllPhotos(c, page, perPage)
 	if err != nil {
 		return nil, err
 	}
