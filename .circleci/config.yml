@@ -79,8 +79,8 @@ jobs:
             CONTAINER_NAME=$(docker create -it << parameters.node_image >> npm --prefix /<< parameters.service_name >> run build)
             docker cp << parameters.service_name >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/manager/dist << parameters.service_name >>/.
-            docker cp $CONTAINER_NAME:/manager/.nuxt << parameters.service_name >>/.
+            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/dist << parameters.service_name >>/.
+            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/.nuxt << parameters.service_name >>/.
             docker container rm -f $CONTAINER_NAME
       - run:
           name: setup gcloud env
