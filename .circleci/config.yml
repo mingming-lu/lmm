@@ -4,6 +4,10 @@ references:
   app_release_branches: &app_release_branches /^app\/.*/
   manager_release_branch: &manager_release_branch /^manager-release$/
 
+  google_cloud_sdk: &google_cloud_sdk
+    docker:
+      - image: google/cloud-sdk
+
 jobs:
   api:
     docker:
@@ -48,47 +52,14 @@ jobs:
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
 
-  app_build_and_deploy:
-    docker:
-      - image: google/cloud-sdk
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: npm install
-          command: |
-            CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /app install)
-            docker cp app $CONTAINER_NAME:/.
-            docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/app/node_modules app/.
-            docker container rm -f $CONTAINER_NAME
-      - run:
-          name: nuxt build
-          command: |
-            CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /app run build)
-            docker cp app $CONTAINER_NAME:/.
-            docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/app/dist app/.
-            docker cp $CONTAINER_NAME:/app/.nuxt app/.
-            docker container rm -f $CONTAINER_NAME
-      - run:
-          name: setup gcloud env
-          command: |
-            echo $GCLOUD_SERVICE_KEY | base64 --decode > $GCP_KEY_FILE
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-            gcloud auth activate-service-account --key-file $GCP_KEY_FILE
-      - run:
-          name: deploy
-          command: |
-            cd app
-            gcloud app deploy -q app.yaml
-
-  manager_build_and_deploy:
-    docker:
-      - image: google/cloud-sdk
+  gae_node_build_and_deploy:
+    <<: *google_cloud_sdk
+    parameters:
+      node_image:
+        type: string
+      service_name:
+        type: string
     environment:
-      NODE_IMAGE: node:10.15.1-alpine
       GCP_KEY_FILE: cloud/gcp/credentials/service_account.json
     steps:
       - checkout
@@ -97,19 +68,19 @@ jobs:
       - run:
           name: npm install
           command: |
-            CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /manager install)
-            docker cp manager $CONTAINER_NAME:/.
+            CONTAINER_NAME=$(docker create -it << parameters.node_image >> npm --prefix /<< parameters.service_name >> install)
+            docker cp << parameters.service_name >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/manager/node_modules manager/.
+            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/node_modules << parameters.service_name >>/.
             docker container rm -f $CONTAINER_NAME
       - run:
           name: nuxt build
           command: |
-            CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /manager run build)
-            docker cp manager $CONTAINER_NAME:/.
+            CONTAINER_NAME=$(docker create -it << parameters.node_image >> npm --prefix /<< parameters.service_name >> run build)
+            docker cp << parameters.service_name >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/manager/dist manager/.
-            docker cp $CONTAINER_NAME:/manager/.nuxt manager/.
+            docker cp $CONTAINER_NAME:/manager/dist << parameters.service_name >>/.
+            docker cp $CONTAINER_NAME:/manager/.nuxt << parameters.service_name >>/.
             docker container rm -f $CONTAINER_NAME
       - run:
           name: setup gcloud env
@@ -120,20 +91,24 @@ jobs:
       - run:
           name: deploy
           command: |
-            cd manager
-            gcloud app deploy -q manager.yaml
+            cd << parameters.service_name >>
+            gcloud app deploy -q << parameters.service_name >>.yaml
 
 workflows:
   version: 2.1
   test_build_deploy:
     jobs:
       - api
-      - app_build_and_deploy:
+      - gae_node_build_and_deploy:
+          node_image: node:10.15.1-alpine
+          service_name: app
           filters:
             branches:
               only:
                 - *app_release_branches
-      - manager_build_and_deploy:
+      - gae_node_build_and_deploy:
+          node_image: node:10.15.1-alpine
+          service_name: manager
           filters:
             branches:
               only:
