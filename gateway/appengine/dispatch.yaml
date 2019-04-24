@@ -1,0 +1,9 @@
+dispatch:
+  - url: "lumingming.net/*"
+    service: default
+
+  - url: "www.lumingming.net/*"
+    service: default
+
+  - url: "manager.lumingming.net/*"
+    service: manager
