@@ -53,6 +53,7 @@ jobs:
       - image: google/cloud-sdk
     environment:
       NODE_IMAGE: node:10.15.1-alpine
+      GCP_KEY_FILE: cloud/gcp/credentials/service_account.json
     steps:
       - checkout
       - setup_remote_docker:
@@ -75,9 +76,16 @@ jobs:
             docker cp $CONTAINER_NAME:/manager/.nuxt manager/.
             docker container rm -f $CONTAINER_NAME
       - run:
+          name: setup gcloud env
+          command: |
+            echo $GCLOUD_SERVICE_KEY | base64 --decode > $GCP_KEY_FILE
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud auth activate-service-account --key-file $GCP_KEY_FILE
+      - run:
           name: deploy
           command: |
-            echo "TODO"
+            cd manager
+            gcloud app deploy -q manager.yaml
 
 workflows:
   version: 2.1
