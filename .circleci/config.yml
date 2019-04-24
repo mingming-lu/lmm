@@ -1,5 +1,9 @@
 version: 2.1
 
+references:
+  manager_master_branch: &manager_master_branch /^master\/manager$/
+  manager_branches: &manager_branches /^manager\/.*/
+
 jobs:
   api:
     docker:
@@ -44,8 +48,42 @@ jobs:
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
 
+  manager_build_and_deploy:
+    docker:
+      - image: circleci/node:lts
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - &manager_node_modules_cache_key manager_node_modules-v1-{{ .arch }}-{{ checksum "manager/package.json" }}-{{ checksum "manager/package-lock.json" }}
+            - manager_node_modules-v1-{{ .arch }}-{{ checksum "manager/package.json" }}-
+            - manager_node_modules-v1-{{ .arch }}-
+            - manager_node_modules-v1-
+      - run:
+          name: npm install
+          command: |
+            cd manager
+            npm install
+      - save_cache:
+          key: *manager_node_modules_cache_key
+          paths:
+            - node_modules
+      - run:
+          name: nuxt build
+          command: |
+            npm run build
+      - run:
+          name: deploy
+          command: |
+            echo "TODO"
+
 workflows:
   version: 2.1
-  test:
+  test_build_deploy:
     jobs:
-      - api
+      - api:
+          filters:
+            branches:
+              ignore:
+                - *manager_branches
+      - manager_build_and_deploy
