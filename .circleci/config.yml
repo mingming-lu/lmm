@@ -101,7 +101,12 @@ workflows:
   version: 2.1
   test_build_deploy:
     jobs:
-      - api
+      - api:
+          filters:
+            branches:
+              ignore:
+                - *app_release_branches
+                - *manager_release_branch
       - gae_node_build_and_deploy_nuxt:
           node_image: node:10.15.1-alpine
           service_name: app
