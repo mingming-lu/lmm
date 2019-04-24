@@ -1,5 +1,8 @@
 version: 2.1
 
+references:
+  app_release_branches: &app_release_branches /^app\/.*/
+
 jobs:
   api:
     docker:
@@ -44,8 +47,49 @@ jobs:
             cd api/go/src/lmm/api
             go test ./... -count 1 -cover -v
 
+  app_build_and_deploy:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+    - setup_remote_docker:
+        docker_layer_caching: true
+    - run:
+        name: npm install
+        command: |
+          CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /app install)
+          docker cp app $CONTAINER_NAME:/.
+          docker start -i $CONTAINER_NAME
+          docker cp $CONTAINER_NAME:/app/node_modules app/.
+          docker container rm -f $CONTAINER_NAME
+    - run:
+        name: nuxt build
+        command: |
+          CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /app run build)
+          docker cp app $CONTAINER_NAME:/.
+          docker start -i $CONTAINER_NAME
+          docker cp $CONTAINER_NAME:/app/dist app/.
+          docker cp $CONTAINER_NAME:/app/.nuxt app/.
+          docker container rm -f $CONTAINER_NAME
+    - run:
+        name: setup gcloud env
+        command: |
+          echo $GCLOUD_SERVICE_KEY | base64 --decode > $GCP_KEY_FILE
+          gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+          gcloud auth activate-service-account --key-file $GCP_KEY_FILE
+    - run:
+        name: deploy
+        command: |
+          cd app
+          gcloud app deploy -q app.yaml
+
 workflows:
   version: 2.1
   test:
     jobs:
       - api
+      - app_build_and_deploy:
+          filters:
+            branches:
+              only:
+                - *app_release_branches
