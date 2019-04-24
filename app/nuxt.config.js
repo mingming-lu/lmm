@@ -82,8 +82,8 @@ module.exports = {
   ** Server confiuration
   */
   server: {
-    host: process.env.SERVER_HOST,
-    port: process.env.SERVER_PORT
+    host: process.env.HOST || '0.0.0.0',
+    port: process.env.PORT
   },
 
   /*

@@ -3,8 +3,8 @@ services:
   app:
     command: npm --prefix /app run dev
     environment:
-      SERVER_HOST: '0.0.0.0'
-      SERVER_PORT: 8001
+      HOST: '0.0.0.0'
+      PORT: 8001
       API_HOST: api.lmm.local
       API_URL: https://nginx
       API_URL_BROWSER: https://api.lmm.local
