@@ -70,6 +70,7 @@ jobs:
       - run:
           name: nuxt build
           command: |
+            cd manager
             npm run build
       - run:
           name: deploy
