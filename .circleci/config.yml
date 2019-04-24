@@ -55,9 +55,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - &manager_node_modules_cache_key manager_node_modules-v1-{{ .arch }}-{{ checksum "manager/package.json" }}-{{ checksum "manager/package-lock.json" }}
-            - manager_node_modules-v1-{{ .arch }}-{{ checksum "manager/package.json" }}-
-            - manager_node_modules-v1-{{ .arch }}-
+            - &manager_node_modules_cache_key manager_node_modules-v1-{{ arch }}-{{ checksum "manager/package.json" }}
+            - manager_node_modules-v1-{{ arch }}-
             - manager_node_modules-v1-
       - run:
           name: npm install
