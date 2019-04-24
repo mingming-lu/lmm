@@ -51,29 +51,29 @@ jobs:
   manager_build_and_deploy:
     docker:
       - image: google/cloud-sdk
+    environment:
+      NODE_IMAGE: node:10.15.1-alpine
     steps:
       - checkout
       - setup_remote_docker:
           docker_layer_caching: true
-      - restore_cache:
-          keys:
-            - &manager_node_modules_cache_key manager_node_modules-v1-{{ arch }}-{{ checksum "manager/package.json" }}
-            - manager_node_modules-v1-{{ arch }}-
-            - manager_node_modules-v1-
       - run:
           name: npm install
           command: |
-            cd manager
-            npm install
-      - save_cache:
-          key: *manager_node_modules_cache_key
-          paths:
-            - manager/node_modules
+            CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /manager install)
+            docker cp manager $CONTAINER_NAME:/.
+            docker run -it $CONTAINER_NAME
+            docker cp $CONTAINER_NAME:/manager/node_modules manager/.
+            docker container rm -f $CONTAINER_NAME
       - run:
           name: nuxt build
           command: |
-            cd manager
-            npm run build
+            CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /manager run build)
+            docker cp manager $CONTAINER_NAME:/.
+            docker run -it $CONTAINER_NAME
+            docker cp $CONTAINER_NAME:/manager/dist manager/.
+            docker cp $CONTAINER_NAME:/manager/.nuxt manager/.
+            docker container rm -f $CONTAINER_NAME
       - run:
           name: deploy
           command: |
