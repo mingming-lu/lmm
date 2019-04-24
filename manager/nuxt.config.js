@@ -23,7 +23,7 @@ module.exports = {
   /*
   ** Customize the progress-bar color
   */
-  loading: { color: colors.default.blue.darken3 },
+  loading: { color: colors.blue.darken3 },
 
   /*
   ** Global CSS
@@ -90,8 +90,8 @@ module.exports = {
   ** Server configuration
   */
   server: {
-    host: process.env.SERVER_HOST,
-    port: process.env.SERVER_PORT
+    host: process.env.HOST,
+    port: process.env.PORT
   },
 
   /*
