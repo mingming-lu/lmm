@@ -16,6 +16,7 @@
     "@nuxtjs/axios": "^5.4.1",
     "cross-env": "^5.2.0",
     "highlight.js": "^9.15.6",
+    "markdown-it": "^8.4.2",
     "nuxt": "^2.6.2"
   },
   "devDependencies": {
@@ -25,7 +26,6 @@
     "eslint-loader": "^2.1.2",
     "eslint-plugin-prettier": "2.6.2",
     "eslint-plugin-vue": "^4.0.0",
-    "markdown-it": "^8.4.2",
     "node-sass": "^4.11.0",
     "nodemon": "^1.18.11",
     "prettier": "1.14.3",
