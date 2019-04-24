@@ -62,7 +62,7 @@ jobs:
           command: |
             CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /manager install)
             docker cp manager $CONTAINER_NAME:/.
-            docker run -it $CONTAINER_NAME
+            docker start -it $CONTAINER_NAME
             docker cp $CONTAINER_NAME:/manager/node_modules manager/.
             docker container rm -f $CONTAINER_NAME
       - run:
@@ -70,7 +70,7 @@ jobs:
           command: |
             CONTAINER_NAME=$(docker create -it $NODE_IMAGE npm --prefix /manager run build)
             docker cp manager $CONTAINER_NAME:/.
-            docker run -it $CONTAINER_NAME
+            docker start -it $CONTAINER_NAME
             docker cp $CONTAINER_NAME:/manager/dist manager/.
             docker cp $CONTAINER_NAME:/manager/.nuxt manager/.
             docker container rm -f $CONTAINER_NAME
