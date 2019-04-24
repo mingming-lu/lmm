@@ -4,8 +4,8 @@ services:
     command: npm --prefix /app start
     environment:
       TZ: Asia/Tokyo
-      SERVER_HOST: '0.0.0.0'
-      SERVER_PORT: 8001
+      HOST: '0.0.0.0'
+      PORT: 8001
       API_URL: https://api.lumingming.net
       API_URL_BROWSER: https://api.lumingming.net
       ASSET_URL: https://asset.lumingming.net
