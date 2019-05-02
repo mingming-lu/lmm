@@ -59,7 +59,7 @@ jobs:
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             cd api/go/src/lmm/api
             mkdir -p /tmp/test-results
-            gotestsum --junitfile /tmp/test-results/api-tests.xml
+            gotestsum --format standard-verbose --junitfile /tmp/test-results/api-tests.xml
       - store_test_results:
           path: /tmp/test-results
 
