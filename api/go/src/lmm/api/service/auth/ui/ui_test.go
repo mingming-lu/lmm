@@ -5,7 +5,7 @@ import (
 
 	"lmm/api/http"
 	"lmm/api/service/auth/application"
-	"lmm/api/service/auth/infra/persistence"
+	"lmm/api/service/auth/infra/persistence/mysql"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
 
@@ -19,7 +19,7 @@ var (
 
 func TestMain(m *testing.M) {
 	dbEngine = db.DefaultMySQL()
-	repo := persistence.NewUserStorage(dbEngine)
+	repo := mysql.NewUserStorage(dbEngine)
 	app := application.NewService(repo)
 	ui := NewUI(app)
 	router = http.NewRouter()

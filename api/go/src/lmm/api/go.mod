@@ -5,7 +5,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/go-sql-driver/mysql v1.4.0
-	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/google/uuid v1.0.0
 	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
 	github.com/julienschmidt/httprouter v0.0.0-20180715161854-348b672cd90d
@@ -21,6 +20,7 @@ require (
 	go.uber.org/zap v1.9.1
 	golang.org/x/crypto v0.0.0-20180927165925-5295e8364332
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f
+	golang.org/x/xerrors v0.0.0-20190410155217-1f06c39b4373
 	google.golang.org/api v0.0.0-20181127174356-0a71a4356c3f
 	google.golang.org/genproto v0.0.0-20181127195345-31ac5d88444a // indirect
 )
