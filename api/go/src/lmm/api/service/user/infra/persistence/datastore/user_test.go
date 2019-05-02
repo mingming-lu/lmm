@@ -6,8 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
-
 	"cloud.google.com/go/datastore"
 
 	"lmm/api/service/user/domain"
@@ -31,19 +29,7 @@ func TestUserStore(tt *testing.T) {
 
 	tt.Run("Save", func(tt *testing.T) {
 		tt.Run("Serialize", func(tt *testing.T) {
-			t := testing.NewTester(tt)
-
-			username := "username"
-			password := "password"
-			email := "username@example.com"
-			role := service.RoleAdapter("admin")
-			token := uuid.New().String()
-			registedAt := time.Now()
-
-			user, err := model.NewUser(username, email, password, token, role, registedAt)
-			if !t.NoError(err) {
-				t.Fatalf("internal error: %v", err)
-			}
+			user := newUser()
 
 			tt.Run("Success", func(tt *testing.T) {
 				t := testing.NewTester(tt)
@@ -61,17 +47,7 @@ func TestUserStore(tt *testing.T) {
 		tt.Run("Concurrently", func(tt *testing.T) {
 			t := testing.NewTester(tt)
 
-			username := "u" + uuidutil.NewUUID()[:8]
-			password := "password"
-			email := "username@example.com"
-			role := service.RoleAdapter("admin")
-			token := uuid.New().String()
-			registedAt := time.Now()
-
-			user, err := model.NewUser(username, email, password, token, role, registedAt)
-			if !t.NoError(err) {
-				t.Fatalf("internal error: %v", err)
-			}
+			user := newUser()
 
 			errorCounter := struct {
 				count int
@@ -98,4 +74,21 @@ func TestUserStore(tt *testing.T) {
 			t.Is(conum-1, errorCounter.count)
 		})
 	})
+}
+
+func newUser() *model.User {
+	username := "u" + uuidutil.NewUUID()[:8]
+	password := uuidutil.NewUUID()
+	email := username + "@example.com"
+	role := service.RoleAdapter("admin")
+	token := uuidutil.NewUUID()
+	registedAt := time.Now()
+
+	user, err := model.NewUser(username, email, password, token, role, registedAt)
+
+	if err != nil {
+		panic("internal error: " + err.Error())
+	}
+
+	return user
 }
