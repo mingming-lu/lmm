@@ -14,7 +14,7 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/event"
 	userMessaging "lmm/api/service/user/infra/messaging"
-	"lmm/api/service/user/infra/persistence"
+	userStorage "lmm/api/service/user/infra/persistence/mysql"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
 	"lmm/api/util/stringutil"
@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 	authAppService := authApp.NewService(authRepo)
 	authUI := authUI.NewUI(authAppService)
 
-	userRepo := persistence.NewUserStorage(mysql)
+	userRepo := userStorage.NewUserStorage(mysql)
 	appService := application.NewService(userRepo)
 	ui := NewUI(appService)
 	router = http.NewRouter()

@@ -20,7 +20,7 @@ import (
 	userApp "lmm/api/service/user/application"
 	userEvent "lmm/api/service/user/domain/event"
 	userMessaging "lmm/api/service/user/infra/messaging"
-	userStorage "lmm/api/service/user/infra/persistence"
+	userStorage "lmm/api/service/user/infra/persistence/mysql"
 	userUI "lmm/api/service/user/ui"
 
 	// auth
