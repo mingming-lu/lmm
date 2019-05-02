@@ -13,6 +13,7 @@ services:
       HTTP_TIMEOUT_SECOND: 10
     depends_on:
       - mysql
+      - datastore
     networks:
       - lmm-api
   mysql:
@@ -24,6 +25,12 @@ services:
       - ./mysql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     environment:
       TZ: Asia/Tokyo
+    networks:
+      - lmm-api
+  datastore:
+    image: google/cloud-sdk
+    command: |
+      gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081
     networks:
       - lmm-api
 
