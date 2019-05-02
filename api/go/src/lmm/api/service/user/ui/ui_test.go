@@ -8,7 +8,7 @@ import (
 	"lmm/api/http"
 	"lmm/api/messaging"
 	authApp "lmm/api/service/auth/application"
-	authStorage "lmm/api/service/auth/infra/persistence"
+	authStorage "lmm/api/service/auth/infra/persistence/mysql"
 	authUI "lmm/api/service/auth/ui"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"

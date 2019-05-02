@@ -25,7 +25,7 @@ import (
 
 	// auth
 	authApp "lmm/api/service/auth/application"
-	authStorage "lmm/api/service/auth/infra/persistence"
+	authStorage "lmm/api/service/auth/infra/persistence/mysql"
 	authUI "lmm/api/service/auth/ui"
 
 	// article

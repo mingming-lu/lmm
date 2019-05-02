@@ -9,7 +9,7 @@ import (
 	"lmm/api/service/article/infra/persistence"
 	"lmm/api/service/article/infra/service"
 	authApp "lmm/api/service/auth/application"
-	authStorage "lmm/api/service/auth/infra/persistence"
+	authStorage "lmm/api/service/auth/infra/persistence/mysql"
 	authUI "lmm/api/service/auth/ui"
 	"lmm/api/storage/db"
 	"lmm/api/testing"
