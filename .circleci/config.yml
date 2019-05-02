@@ -12,15 +12,21 @@ jobs:
   api:
     docker:
       - image: circleci/golang:1.12.0
+        environment:
+          DATASTORE_EMULATOR_HOST: datastore:8081
+          HTTP_TIMEOUT_SECOND: 3
+          MYSQL_HOST: localhost
+          MYSQL_PORT: 3306
+          MYSQL_NAME: lmm_test
+          MYSQL_USER: root
       - image: circleci/mysql:5.7.25
-    environment:
-      MYSQL_HOST: localhost
-      MYSQL_PORT: 3306
-      MYSQL_NAME: lmm_test
-      MYSQL_USER: root
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
-      HTTP_TIMEOUT_SECOND: 3
-
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      - image: google/cloud-sdk
+        name: datastore
+        environment:
+          PROJECT_ID: lumingming
+        command: gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081
     steps:
       - checkout
       - restore_cache:
@@ -45,6 +51,7 @@ jobs:
             dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
             sudo apt install -y mysql-client || true
             cat api/mysql/sql/init_test.sql | mysql -h localhost --protocol TCP -uroot
+      - run: dockerize -wait tcp://datastore:8081 -timeout 30s
       - run:
           name: API Go Test
           command: |
