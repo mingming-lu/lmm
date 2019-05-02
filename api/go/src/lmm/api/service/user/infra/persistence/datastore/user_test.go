@@ -4,10 +4,10 @@ import (
 	"context"
 	"os"
 	"sync"
-	"time"
 
 	"cloud.google.com/go/datastore"
 
+	"lmm/api/clock"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/service"
@@ -42,6 +42,19 @@ func TestUserStore(tt *testing.T) {
 
 				t.IsError(domain.ErrUserNameAlreadyUsed, repo.Save(ctx, user))
 			})
+
+			tt.Run("FindByName", func(tt *testing.T) {
+				t := testing.NewTester(tt)
+
+				found, err := repo.FindByName(ctx, user.Name())
+				t.NoError(err)
+				t.Is(user.Name(), found.Name())
+				t.Is(user.Email(), found.Email())
+				t.Is(user.Role(), found.Role())
+				t.Is(user.Password(), found.Password())
+				t.Is(user.Token(), found.Token())
+				t.Is(user.RegisteredAt(), found.RegisteredAt().UTC())
+			})
 		})
 
 		tt.Run("Concurrently", func(tt *testing.T) {
@@ -72,6 +85,32 @@ func TestUserStore(tt *testing.T) {
 			errorCounter.Wait()
 
 			t.Is(conum-1, errorCounter.count)
+
+			tt.Run("FindByName", func(tt *testing.T) {
+				t := testing.NewTester(tt)
+
+				found, err := repo.FindByName(ctx, user.Name())
+				t.NoError(err)
+				t.NoError(err)
+				t.Is(user.Name(), found.Name())
+				t.Is(user.Email(), found.Email())
+				t.Is(user.Role(), found.Role())
+				t.Is(user.Password(), found.Password())
+				t.Is(user.Token(), found.Token())
+				t.Is(user.RegisteredAt(), found.RegisteredAt().UTC())
+			})
+		})
+	})
+
+	tt.Run("FindByName", func(tt *testing.T) {
+		user := newUser()
+
+		tt.Run("NotFound", func(tt *testing.T) {
+			t := testing.NewTester(tt)
+
+			found, err := repo.FindByName(ctx, user.Name())
+			t.IsError(domain.ErrNoSuchUser, err)
+			t.Nil(found)
 		})
 	})
 }
@@ -82,7 +121,7 @@ func newUser() *model.User {
 	email := username + "@example.com"
 	role := service.RoleAdapter("admin")
 	token := uuidutil.NewUUID()
-	registedAt := time.Now()
+	registedAt := clock.Now()
 
 	user, err := model.NewUser(username, email, password, token, role, registedAt)
 
