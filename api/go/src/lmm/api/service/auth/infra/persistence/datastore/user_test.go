@@ -17,7 +17,7 @@ func TestUserStore(tt *testing.T) {
 
 	ctx := context.Background()
 
-	client, err := datastore.NewClient(ctx, os.Getenv("GCLOUD_PROJECT_ID"))
+	client, err := datastore.NewClient(ctx, os.Getenv("DATASTORE_PROJECT_ID"))
 	if !t.NoError(err) {
 		t.Fatalf(`failed to setup datastore: "%s"`, err.Error())
 	}

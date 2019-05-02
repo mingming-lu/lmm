@@ -14,6 +14,7 @@ jobs:
       - image: circleci/golang:1.12.0
         environment:
           DATASTORE_EMULATOR_HOST: datastore:8081
+          DATASTORE_PROJECT_ID: lumingming
           HTTP_TIMEOUT_SECOND: 3
           MYSQL_HOST: localhost
           MYSQL_PORT: 3306

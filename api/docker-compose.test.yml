@@ -9,7 +9,7 @@ services:
       MYSQL_NAME: lmm_test
       MYSQL_USER: root
       DATASTORE_EMULATOR_HOST: datastore:8081
-      GCLOUD_PROJECT_ID: lmm
+      DATASTORE_PROJECT_ID: lmm
       HTTP_TIMEOUT_SECOND: 1
     working_dir: /go/src/lmm/api
     command: bash -c "go test ./... -count 1 -cover -v"
