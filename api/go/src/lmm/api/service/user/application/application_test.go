@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"lmm/api/service/user/application/command"
 	"os"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 
+	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
