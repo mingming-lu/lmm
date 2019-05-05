@@ -64,7 +64,11 @@ func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
 		return domain.ErrNoSuchRole
 	}
 
-	return service.AssignUserRole(c, operator, user, role)
+	if err := operator.AssignRole(user, role); err != nil {
+		return err
+	}
+
+	return event.PublishUserRoleChanged(c, operator.Name(), user.Name(), role.Name())
 }
 
 const maxCount uint = 100

@@ -154,11 +154,6 @@ func (user *User) setToken(token string) error {
 	return nil
 }
 
-// ChangeRole changes user's role
-func (user *User) ChangeRole(role Role) error {
-	return user.setRole(role)
-}
-
 // ChangeEmail changes user's email
 func (user *User) ChangeEmail(newEmailAddress string) error {
 	return user.setEmail(newEmailAddress)
@@ -167,4 +162,22 @@ func (user *User) ChangeEmail(newEmailAddress string) error {
 // Is compares if two users are the same
 func (user *User) Is(other *User) bool {
 	return user.UserDescriptor.Is(&other.UserDescriptor)
+}
+
+// AssignRole allows user assign target role
+func (user *User) AssignRole(target *User, role Role) error {
+	if target.Is(user) {
+		return domain.ErrCannotAssignSelfRole
+	}
+
+	perm := PermissionAssignToRole(role)
+	if perm == NoPermission {
+		return errors.Wrap(domain.ErrNoSuchRole, role.Name())
+	}
+
+	if !user.Role().HasPermission(perm) {
+		return domain.ErrNoPermission
+	}
+
+	return target.setRole(role)
 }
