@@ -1,4 +1,4 @@
-package datastore
+package persistence
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
+	transaction "lmm/api/transaction/datastore"
 )
 
 const userKind = "user"
@@ -32,39 +33,36 @@ func NewUserStore(client *datastore.Client) repository.UserRepository {
 }
 
 func (s *userStore) Save(c context.Context, userModel *model.User) error {
+	tx, err := transaction.FromContext(c)
+	if err != nil {
+		return err
+	}
+
 	id := datastore.NameKey(userKind, userModel.Name(), nil)
 
-	_, err := s.datastore.RunInTransaction(c, func(tx *datastore.Transaction) error {
-		usr := new(user)
-
-		if err := tx.Get(id, usr); err != datastore.ErrNoSuchEntity {
-			if err == nil {
-				return domain.ErrUserNameAlreadyUsed
-			}
-			return err
-		}
-
-		_, err := tx.Put(id, &user{
-			Name:      userModel.Name(),
-			Email:     userModel.Email(),
-			Password:  userModel.Password(),
-			Token:     userModel.Token(),
-			Role:      userModel.Role().Name(),
-			CreatedAt: userModel.RegisteredAt(),
-		})
-
+	if _, err := tx.Mutate(datastore.NewUpsert(id, &user{
+		Name:      userModel.Name(),
+		Email:     userModel.Email(),
+		Password:  userModel.Password(),
+		Token:     userModel.Token(),
+		Role:      userModel.Role().Name(),
+		CreatedAt: userModel.RegisteredAt(),
+	})); err != nil {
 		return err
-	})
+	}
 
-	return err
+	return nil
 }
 
 func (s *userStore) FindByName(c context.Context, username string) (*model.User, error) {
-	id := datastore.NameKey(userKind, username, nil)
+	tx, err := transaction.FromContext(c)
+	if err != nil {
+		return nil, err
+	}
 
 	usr := new(user)
 
-	if err := s.datastore.Get(c, id, usr); err != nil {
+	if err := tx.Get(datastore.NameKey(userKind, username, nil), usr); err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return nil, domain.ErrNoSuchUser
 		}
