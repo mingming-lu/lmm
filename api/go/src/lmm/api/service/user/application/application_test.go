@@ -14,6 +14,7 @@ import (
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
 	"lmm/api/testing"
+	"lmm/api/transaction"
 	"lmm/api/util/uuidutil"
 )
 
@@ -47,7 +48,10 @@ func (repo *InmemoryUserRepository) DescribeAll(context.Context, repository.Desc
 }
 
 func TestMain(m *testing.M) {
-	testAppService = NewService(&InmemoryUserRepository{memory: make([]*model.User, 0)})
+	testAppService = NewService(
+		&transaction.NopTxManager{},
+		&InmemoryUserRepository{memory: make([]*model.User, 0)},
+	)
 	code := m.Run()
 	os.Exit(code)
 }
@@ -58,13 +62,12 @@ func TestRegisterNewUser(tt *testing.T) {
 	tt.Run("Success", func(tt *testing.T) {
 		t := testing.NewTester(tt)
 		username, password := "username", "~!@#$%^&*()-_=+{[}]|\\:;\"'<,>.?/"
-		nameGot, err := testAppService.RegisterNewUser(c, command.Register{
+		err := testAppService.RegisterNewUser(c, command.Register{
 			UserName:     username,
 			EmailAddress: username + "@lmm.local",
 			Password:     password,
 		})
 		t.NoError(err)
-		t.Is(username, nameGot)
 
 		user, err := testAppService.userRepository.FindByName(c, "username")
 		t.NoError(err)
@@ -111,13 +114,12 @@ func TestRegisterNewUser(tt *testing.T) {
 		for testName, testCase := range cases {
 			tt.Run(testName, func(tt *testing.T) {
 				t := testing.NewTester(tt)
-				nameGot, err := testAppService.RegisterNewUser(c, command.Register{
+				err := testAppService.RegisterNewUser(c, command.Register{
 					UserName:     testCase.UserName,
 					EmailAddress: testCase.Email,
 					Password:     testCase.Password,
 				})
 				t.IsError(testCase.Err, errors.Cause(err), testName)
-				t.Is("", nameGot, testName)
 			})
 		}
 	})

@@ -1,49 +1,51 @@
 package ui
 
 import (
+	"context"
 	"io"
+	"log"
 	"os"
 	"strings"
 
 	"lmm/api/http"
-	"lmm/api/messaging"
 	authApp "lmm/api/service/auth/application"
-	authStorage "lmm/api/service/auth/infra/persistence/mysql"
+	authStore "lmm/api/service/auth/infra/persistence/datastore"
 	authUI "lmm/api/service/auth/ui"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/event"
-	userMessaging "lmm/api/service/user/infra/messaging"
-	userStorage "lmm/api/service/user/infra/persistence/mysql"
-	"lmm/api/storage/db"
+	userStore "lmm/api/service/user/infra/persistence"
 	"lmm/api/testing"
+	transaction "lmm/api/transaction/datastore"
 	"lmm/api/util/stringutil"
 
+	"cloud.google.com/go/datastore"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 )
 
 var (
-	mysql  db.DB
+	ui     *UI
 	router *http.Router
 )
 
 func TestMain(m *testing.M) {
-	mysql = db.DefaultMySQL()
+	ctx := context.Background()
 
-	authRepo := authStorage.NewUserStorage(mysql)
+	client, err := datastore.NewClient(ctx, os.Getenv("DATASTORE_PROJECT_ID"))
+	if err != nil {
+		log.Fatalf(`failed to setup datastore: "%s"`, err.Error())
+	}
+
+	txManager := transaction.NewTransactionManager(client)
+
+	authRepo := authStore.NewUserStore(client)
 	authAppService := authApp.NewService(authRepo)
 	authUI := authUI.NewUI(authAppService)
 
-	userRepo := userStorage.NewUserStorage(mysql)
-	appService := application.NewService(userRepo)
-	ui := NewUI(appService)
+	userRepo := userStore.NewUserStore(client)
+	appService := application.NewService(txManager, userRepo)
+	ui = NewUI(appService)
 	router = http.NewRouter()
-
-	userEventSubscriber := userMessaging.NewSubscriber(mysql)
-
-	messaging.SyncBus().Subscribe(&event.UserRoleChanged{}, messaging.NopEventHandler)
-	messaging.SyncBus().Subscribe(&event.UserPasswordChanged{}, userEventSubscriber.OnUserPasswordChanged)
 
 	router.POST("/v1/users", ui.SignUp)
 	router.PUT("/v1/users/:user/role", authUI.BearerAuth(ui.AssignUserRole))
@@ -51,10 +53,6 @@ func TestMain(m *testing.M) {
 	router.GET("/v1/users", authUI.BearerAuth(ui.ViewAllUsers))
 
 	code := m.Run()
-
-	if err := mysql.Close(); err != nil {
-		panic(err)
-	}
 
 	os.Exit(code)
 }

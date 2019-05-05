@@ -6,11 +6,11 @@ import (
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
 	"lmm/api/service/user/domain/service"
+	"lmm/api/transaction"
 	"lmm/api/util/stringutil"
 
 	"github.com/pkg/errors"
@@ -21,54 +21,64 @@ type Service struct {
 	encrypter      service.EncryptService
 	factory        *factory.Factory
 	userRepository repository.UserRepository
+	txManager      transaction.Manager
 }
 
 // NewService creates a new Service pointer
-func NewService(userRepository repository.UserRepository) *Service {
+func NewService(txManager transaction.Manager, userRepository repository.UserRepository) *Service {
 	encrypter := &service.BcryptService{}
 	return &Service{
 		encrypter:      encrypter,
 		factory:        factory.NewFactory(encrypter),
 		userRepository: userRepository,
+		txManager:      txManager,
 	}
 }
 
 // RegisterNewUser registers new user
-func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (string, error) {
-	user, err := s.factory.NewUser(cmd.UserName, cmd.EmailAddress, cmd.Password)
-	if err != nil {
-		return "", err
-	}
+func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) error {
+	return s.txManager.RunInTransaction(c, func(c context.Context) error {
+		user, err := s.factory.NewUser(cmd.UserName, cmd.EmailAddress, cmd.Password)
+		if err != nil {
+			return err
+		}
 
-	if err := s.userRepository.Save(c, user); err != nil {
-		return "", err
-	}
+		if _, err := s.userRepository.FindByName(c, cmd.UserName); err == nil {
+			return domain.ErrUserNameAlreadyUsed
+		}
 
-	return user.Name(), nil
+		if err := s.userRepository.Save(c, user); err != nil {
+			return err
+		}
+
+		return nil
+	})
 }
 
 // AssignRole handles command which operator assign user to role
 func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
-	operator, err := s.userRepository.FindByName(c, cmd.OperatorUser)
-	if err != nil {
-		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	}
+	return s.txManager.RunInTransaction(c, func(c context.Context) error {
+		operator, err := s.userRepository.FindByName(c, cmd.OperatorUser)
+		if err != nil {
+			return errors.Wrap(domain.ErrNoSuchUser, err.Error())
+		}
 
-	user, err := s.userRepository.FindByName(c, cmd.TargetUser)
-	if err != nil {
-		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	}
+		user, err := s.userRepository.FindByName(c, cmd.TargetUser)
+		if err != nil {
+			return errors.Wrap(domain.ErrNoSuchUser, err.Error())
+		}
 
-	role := model.NewRole(cmd.TargetRole)
-	if role == model.Guest {
-		return domain.ErrNoSuchRole
-	}
+		role := model.NewRole(cmd.TargetRole)
+		if role == model.Guest {
+			return domain.ErrNoSuchRole
+		}
 
-	if err := operator.AssignRole(user, role); err != nil {
-		return err
-	}
+		if err := operator.AssignRole(user, role); err != nil {
+			return err
+		}
 
-	return event.PublishUserRoleChanged(c, operator.Name(), user.Name(), role.Name())
+		return s.userRepository.Save(c, user)
+	})
 }
 
 const maxCount uint = 100
@@ -121,18 +131,24 @@ func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePasswo
 		return err
 	}
 
-	user, err := s.userRepository.FindByName(c, cmd.User)
-	if err != nil {
-		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	}
+	return s.txManager.RunInTransaction(c, func(c context.Context) error {
+		user, err := s.userRepository.FindByName(c, cmd.User)
+		if err != nil {
+			return errors.Wrap(domain.ErrNoSuchUser, err.Error())
+		}
 
-	if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
-		return domain.ErrUserPassword
-	}
+		if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
+			return domain.ErrUserPassword
+		}
 
-	if err := user.ChangePassword(hashedPassword); err != nil {
-		return err
-	}
+		if err := user.ChangePassword(hashedPassword); err != nil {
+			return err
+		}
 
-	return event.PublishUserPasswordChanged(c, user.Name(), user.Password())
+		if err := user.ChangeToken(s.factory.NewToken()); err != nil {
+			return err
+		}
+
+		return s.userRepository.Save(c, user)
+	})
 }

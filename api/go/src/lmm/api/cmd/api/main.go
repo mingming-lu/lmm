@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"cloud.google.com/go/datastore"
 	_ "github.com/go-sql-driver/mysql"
 
 	"lmm/api/http"
@@ -15,17 +16,18 @@ import (
 	"lmm/api/middleware"
 	"lmm/api/storage/db"
 	"lmm/api/storage/file"
+	transaction "lmm/api/transaction/datastore"
 
 	// user
 	userApp "lmm/api/service/user/application"
 	userEvent "lmm/api/service/user/domain/event"
 	userMessaging "lmm/api/service/user/infra/messaging"
-	userStorage "lmm/api/service/user/infra/persistence/mysql"
+	userStore "lmm/api/service/user/infra/persistence"
 	userUI "lmm/api/service/user/ui"
 
 	// auth
 	authApp "lmm/api/service/auth/application"
-	authStorage "lmm/api/service/auth/infra/persistence/mysql"
+	authStore "lmm/api/service/auth/infra/persistence/datastore"
 	authUI "lmm/api/service/auth/ui"
 
 	// article
@@ -92,15 +94,23 @@ func main() {
 	// request id
 	router.Use(middleware.WithRequestID)
 
+	client, err := datastore.NewClient(context.TODO(), os.Getenv("PROJECT_ID"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, `failed to setup datastore: "%s"`, err.Error())
+		os.Exit(1)
+	}
+
+	txManager := transaction.NewTransactionManager(client)
+
 	// auth
-	authRepo := authStorage.NewUserStorage(mysql)
+	authRepo := authStore.NewUserStore(client)
 	authAppService := authApp.NewService(authRepo)
 	authUI := authUI.NewUI(authAppService)
 	router.POST("/v1/auth/login", authUI.Login)
 
 	// user
-	userRepo := userStorage.NewUserStorage(mysql)
-	userAppService := userApp.NewService(userRepo)
+	userRepo := userStore.NewUserStore(client)
+	userAppService := userApp.NewService(txManager, userRepo)
 	userUI := userUI.NewUI(userAppService)
 	userEventSubscriber := userMessaging.NewSubscriber(mysql)
 	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
