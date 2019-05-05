@@ -115,10 +115,10 @@ func main() {
 	userEventSubscriber := userMessaging.NewSubscriber(mysql)
 	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
 	messaging.SyncBus().Subscribe(&userEvent.UserPasswordChanged{}, userEventSubscriber.OnUserPasswordChanged)
-	router.GET("/v1/users", authUI.BearerAuth(userUI.ViewAllUsers))
+	// router.GET("/v1/users", authUI.BearerAuth(userUI.ViewAllUsers))
 	router.POST("/v1/users", userUI.SignUp)
-	router.PUT("/v1/users/:user/role", authUI.BearerAuth(userUI.AssignUserRole))
-	router.PUT("/v1/users/:user/password", userUI.ChangeUserPassword)
+	// router.PUT("/v1/users/:user/role", authUI.BearerAuth(userUI.AssignUserRole))
+	// router.PUT("/v1/users/:user/password", userUI.ChangeUserPassword)
 
 	// article
 	authorAdapter := authorService.NewAuthorAdapter(mysql)
