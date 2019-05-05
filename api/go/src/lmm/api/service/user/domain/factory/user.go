@@ -24,7 +24,7 @@ func (f *Factory) NewUser(username, email, password string) (*model.User, error)
 		return nil, err
 	}
 
-	token := uuidutil.NewUUID()
+	token := f.NewToken()
 
 	return model.NewUser(username, email, hashedPassword, token, model.Ordinary, clock.Now())
 }
@@ -45,4 +45,8 @@ func (f *Factory) NewPassword(plainText string) (string, error) {
 	}
 
 	return hashedPassword, nil
+}
+
+func (f *Factory) NewToken() string {
+	return uuidutil.NewUUID()
 }

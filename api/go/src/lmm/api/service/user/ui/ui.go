@@ -28,7 +28,7 @@ func (ui *UI) SignUp(c http.Context) {
 	reqBody := signUpRequestBody{}
 	c.Request().Bind(&reqBody)
 
-	_, err := ui.appService.RegisterNewUser(c, command.Register{
+	err := ui.appService.RegisterNewUser(c, command.Register{
 		UserName:     reqBody.Name,
 		EmailAddress: reqBody.Email,
 		Password:     reqBody.Password,

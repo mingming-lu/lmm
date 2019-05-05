@@ -154,6 +154,10 @@ func (user *User) setToken(token string) error {
 	return nil
 }
 
+func (user *User) ChangeToken(newToken string) error {
+	return user.setToken(newToken)
+}
+
 // ChangeEmail changes user's email
 func (user *User) ChangeEmail(newEmailAddress string) error {
 	return user.setEmail(newEmailAddress)
