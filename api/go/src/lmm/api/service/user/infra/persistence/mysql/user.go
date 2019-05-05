@@ -11,7 +11,6 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
-	"lmm/api/service/user/domain/service"
 	"lmm/api/storage/db"
 	"lmm/api/util/mysqlutil"
 )
@@ -60,7 +59,7 @@ func (s *UserStorage) FindByName(c context.Context, username string) (*model.Use
 		return nil, err
 	}
 
-	role := service.RoleAdapter(rawRole)
+	role := model.NewRole(rawRole)
 
 	return model.NewUser(name, email, password, token, role, registeredAt)
 }
@@ -105,7 +104,7 @@ func (s *UserStorage) DescribeAll(c context.Context, options repository.Describe
 		if err := rows.Scan(&username, &emailaddr, &rolename, &createdAt); err != nil {
 			return nil, 0, db.RollbackWithError(tx, err)
 		}
-		role := service.RoleAdapter(rolename)
+		role := model.NewRole(rolename)
 		user, err := model.NewUserDescriptor(username, emailaddr, role, createdAt)
 		if err != nil {
 			return nil, 0, db.RollbackWithError(tx, err)

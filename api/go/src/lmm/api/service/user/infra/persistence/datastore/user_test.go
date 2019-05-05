@@ -10,7 +10,6 @@ import (
 	"lmm/api/clock"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/service"
 	"lmm/api/testing"
 	"lmm/api/util/uuidutil"
 )
@@ -119,7 +118,7 @@ func newUser() *model.User {
 	username := "u" + uuidutil.NewUUID()[:8]
 	password := uuidutil.NewUUID()
 	email := username + "@example.com"
-	role := service.RoleAdapter("admin")
+	role := model.Admin
 	token := uuidutil.NewUUID()
 	registedAt := clock.Now()
 

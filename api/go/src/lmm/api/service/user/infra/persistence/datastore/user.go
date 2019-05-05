@@ -9,7 +9,6 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/domain/repository"
-	"lmm/api/service/user/domain/service"
 )
 
 const userKind = "user"
@@ -77,7 +76,7 @@ func (s *userStore) FindByName(c context.Context, username string) (*model.User,
 		usr.Email,
 		usr.Password,
 		usr.Token,
-		service.RoleAdapter(usr.Role),
+		model.NewRole(usr.Role),
 		usr.CreatedAt,
 	)
 }

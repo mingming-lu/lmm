@@ -1,13 +1,10 @@
-package service
+package model
 
 import (
-	"context"
-
 	"lmm/api/clock"
 	"lmm/api/messaging"
 	"lmm/api/service/user/domain"
-	userEvent "lmm/api/service/user/domain/event"
-	"lmm/api/service/user/domain/model"
+	"lmm/api/service/user/domain/event"
 	"lmm/api/testing"
 
 	"github.com/google/uuid"
@@ -16,9 +13,9 @@ import (
 
 func TestAssignUserRole(tt *testing.T) {
 	type TestCase struct {
-		operator    *model.User
-		targetUser  *model.User
-		targetRole  model.Role
+		operator    *User
+		targetUser  *User
+		targetRole  Role
 		expectedErr error
 	}
 
@@ -26,85 +23,85 @@ func TestAssignUserRole(tt *testing.T) {
 		"AdminAssginAdminToAdmin": TestCase{
 			operator:    newAdmin(),
 			targetUser:  newAdmin(),
-			targetRole:  model.Admin,
+			targetRole:  Admin,
 			expectedErr: nil,
 		},
 		"AdminAssginAdminToOrdinary": TestCase{
 			operator:    newAdmin(),
 			targetUser:  newAdmin(),
-			targetRole:  model.Ordinary,
+			targetRole:  Ordinary,
 			expectedErr: nil,
 		},
 		"AdminAssginOrdinaryToAdmin": TestCase{
 			operator:    newAdmin(),
 			targetUser:  newOrdinary(),
-			targetRole:  model.Admin,
+			targetRole:  Admin,
 			expectedErr: nil,
 		},
 		"AdminAssignOrdinaryToOrdinary": TestCase{
 			operator:    newAdmin(),
 			targetUser:  newOrdinary(),
-			targetRole:  model.Ordinary,
+			targetRole:  Ordinary,
 			expectedErr: nil,
 		},
 		"OrdinaryAssignAdminToAdmin": TestCase{
 			operator:    newOrdinary(),
 			targetUser:  newAdmin(),
-			targetRole:  model.Admin,
+			targetRole:  Admin,
 			expectedErr: domain.ErrNoPermission,
 		},
 		"OrdinaryAssignAdminToOrdinary": TestCase{
 			operator:    newOrdinary(),
 			targetUser:  newAdmin(),
-			targetRole:  model.Ordinary,
+			targetRole:  Ordinary,
 			expectedErr: domain.ErrNoPermission,
 		},
 		"OrdinaryAssignOrdinaryToAdmin": TestCase{
 			operator:    newOrdinary(),
 			targetUser:  newOrdinary(),
-			targetRole:  model.Admin,
+			targetRole:  Admin,
 			expectedErr: domain.ErrNoPermission,
 		},
 		"OrdinaryAssignOrdinaryToOrdinary": TestCase{
 			operator:    newOrdinary(),
 			targetUser:  newOrdinary(),
-			targetRole:  model.Ordinary,
+			targetRole:  Ordinary,
 			expectedErr: domain.ErrNoPermission,
 		},
 		"InvalidPermission": TestCase{
 			operator:    newAdmin(),
 			targetUser:  newOrdinary(),
-			targetRole:  model.Role{},
+			targetRole:  Role{},
 			expectedErr: domain.ErrNoSuchRole,
 		},
 	}
 
-	c := context.Background()
 	for testname, testcase := range cases {
 		tt.Run(testname, func(tt *testing.T) {
 			t := testing.NewTester(tt)
-			err := AssignUserRole(c, testcase.operator, testcase.targetUser, testcase.targetRole)
+
+			err := testcase.operator.AssignRole(testcase.targetUser, testcase.targetRole)
 
 			t.Is(testcase.expectedErr, errors.Cause(err))
 		})
 	}
 }
 
-func newAdmin() *model.User {
-	return newUserWithRole(model.Admin)
+func newAdmin() *User {
+	return newUserWithRole(Admin)
 }
 
-func newOrdinary() *model.User {
-	return newUserWithRole(model.Ordinary)
+func newOrdinary() *User {
+	return newUserWithRole(Ordinary)
 }
 
-func newUserWithRole(role model.Role) *model.User {
+func newUserWithRole(role Role) *User {
 	randomUserName := "u" + uuid.New().String()[:7]
 	email := randomUserName + "@lmm.local"
 	password := uuid.New().String()
 	token := uuid.New().String()
 
-	user, err := model.NewUser(randomUserName, email, password, token, role, clock.Now())
+	user, err := NewUser(randomUserName, email, password, token, role, clock.Now())
 	if err != nil {
 		panic(err)
 	}
@@ -113,5 +110,5 @@ func newUserWithRole(role model.Role) *model.User {
 }
 
 func init() {
-	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, messaging.NopEventHandler)
+	messaging.SyncBus().Subscribe(&event.UserRoleChanged{}, messaging.NopEventHandler)
 }
