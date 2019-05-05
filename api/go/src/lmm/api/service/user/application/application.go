@@ -59,7 +59,10 @@ func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
 		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
 	}
 
-	role := service.RoleAdapter(cmd.TargetRole)
+	role := model.NewRole(cmd.TargetRole)
+	if role == model.Guest {
+		return domain.ErrNoSuchRole
+	}
 
 	return service.AssignUserRole(c, operator, user, role)
 }

@@ -1,9 +1,23 @@
 package model
 
+import "strings"
+
 // Role is user' role
 type Role struct {
 	name      string
 	permssion Permission
+}
+
+// NewRole creates a role by given name
+func NewRole(name string) Role {
+	switch strings.ToLower(name) {
+	case "admin":
+		return Admin
+	case "ordinary":
+		return Ordinary
+	default:
+		return Guest
+	}
 }
 
 // Name returns r's name
