@@ -27,7 +27,7 @@ func TestUserStore(tt *testing.T) {
 	token := uuid.New().String()
 	role := "admin"
 
-	key, err := client.Put(ctx, datastore.IncompleteKey(userKind, nil), &user{
+	key, err := client.Put(ctx, datastore.NameKey(userKind, username, nil), &user{
 		Name:     username,
 		Password: password,
 		Token:    token,

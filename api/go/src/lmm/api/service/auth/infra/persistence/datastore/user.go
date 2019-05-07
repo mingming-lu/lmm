@@ -30,11 +30,13 @@ func NewUserStore(client *datastore.Client) repository.UserRepository {
 }
 
 func (s *userStore) FindByName(ctx context.Context, name string) (*model.User, error) {
-	user, err := s.findByQuery(ctx, datastore.NewQuery(userKind).Filter("name =", name))
-	if err != nil {
-		return nil, xerrors.Errorf(`cannot find user named "%s": %w`, name, err)
+	user := new(user)
+
+	if err := s.datastore.Get(ctx, datastore.NameKey(userKind, name, nil), user); err != nil {
+		return nil, err
 	}
-	return user, nil
+
+	return model.NewUser(user.Name, user.Password, user.Token, user.Role), nil
 }
 
 func (s *userStore) FindByToken(ctx context.Context, token *model.Token) (*model.User, error) {
