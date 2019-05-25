@@ -139,6 +139,7 @@ func (s *UserDataStore) FindByName(tx transaction.Transaction, username string) 
 	}
 
 	return model.NewUser(
+		model.UserID(user.ID.ID),
 		user.Name,
 		user.Email,
 		user.Password,
