@@ -3,9 +3,6 @@ services:
   api:
     env_file:
       - ./.env/dev.env
-    depends_on:
-      - datastore
-      - mysql
     command: api
     environment:
       APP_HOST: https://www.lmm.local
@@ -26,15 +23,12 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
   datastore:
-    image: google/cloud-sdk
     environment:
-      TZ: Asia/Tokyo
       PROJECT_ID: lmm
     networks:
       - lmm-api
     command: |
       gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081
-
 
 networks:
   lmm:

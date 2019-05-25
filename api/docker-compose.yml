@@ -12,6 +12,7 @@ services:
       GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
     depends_on:
+      - datastore
       - mysql
     networks:
       - lmm-api
@@ -22,6 +23,12 @@ services:
       - ./mysql/log:/var/log/mysql
       - ./mysql/my.cnf:/etc/mysql/my.cnf
       - ./mysql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      TZ: Asia/Tokyo
+    networks:
+      - lmm-api
+  datastore:
+    image: google/cloud-sdk:247.0.0
     environment:
       TZ: Asia/Tokyo
     networks:
