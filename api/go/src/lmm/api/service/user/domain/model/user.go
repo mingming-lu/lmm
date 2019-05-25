@@ -30,8 +30,9 @@ type UserDescriptor struct {
 }
 
 // NewUserDescriptor creates a new *UserDescriptor
-func NewUserDescriptor(name, email string, role Role, registeredAt time.Time) (*UserDescriptor, error) {
+func NewUserDescriptor(id UserID, name, email string, role Role, registeredAt time.Time) (*UserDescriptor, error) {
 	user := UserDescriptor{
+		id:           id,
 		role:         role,
 		registeredAt: registeredAt,
 	}
@@ -111,8 +112,8 @@ type User struct {
 }
 
 // NewUser creates a new user domain model
-func NewUser(name, email, password, token string, role Role, registeredDate time.Time) (*User, error) {
-	descriptor, err := NewUserDescriptor(name, email, role, registeredDate)
+func NewUser(id UserID, name, email, password, token string, role Role, registeredDate time.Time) (*User, error) {
+	descriptor, err := NewUserDescriptor(id, name, email, role, registeredDate)
 	if err != nil {
 		return nil, err
 	}

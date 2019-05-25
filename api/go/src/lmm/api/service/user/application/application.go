@@ -28,7 +28,7 @@ func NewService(txManager transaction.Manager, userRepository repository.UserRep
 	encrypter := &service.BcryptService{}
 	return &Service{
 		encrypter:          encrypter,
-		factory:            factory.NewFactory(encrypter),
+		factory:            factory.NewFactory(encrypter, userRepository),
 		userRepository:     userRepository,
 		transactionManager: txManager,
 	}
@@ -44,7 +44,7 @@ func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (stri
 			return errors.Wrap(err, "error occurred when checking user name duplication")
 		}
 
-		user, err := s.factory.NewUser(cmd.UserName, cmd.EmailAddress, cmd.Password)
+		user, err := s.factory.NewUser(tx, cmd.UserName, cmd.EmailAddress, cmd.Password)
 		if err != nil {
 			return errors.Wrap(err, "invalid user")
 		}

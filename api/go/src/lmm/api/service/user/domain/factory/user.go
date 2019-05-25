@@ -2,23 +2,27 @@ package factory
 
 import (
 	"lmm/api/clock"
+	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
+	"lmm/api/service/user/domain/repository"
 	"lmm/api/service/user/domain/service"
 	"lmm/api/util/uuidutil"
 )
 
 type Factory struct {
-	encrypter service.EncryptService
+	encrypter      service.EncryptService
+	userRepository repository.UserRepository
 }
 
-func NewFactory(encrypter service.EncryptService) *Factory {
+func NewFactory(encrypter service.EncryptService, userRepository repository.UserRepository) *Factory {
 	return &Factory{
-		encrypter: encrypter,
+		encrypter:      encrypter,
+		userRepository: userRepository,
 	}
 }
 
-func (f *Factory) NewUser(username, email, password string) (*model.User, error) {
+func (f *Factory) NewUser(tx transaction.Transaction, username, email, password string) (*model.User, error) {
 	hashedPassword, err := f.NewPassword(password)
 	if err != nil {
 		return nil, err
@@ -26,7 +30,12 @@ func (f *Factory) NewUser(username, email, password string) (*model.User, error)
 
 	token := uuidutil.NewUUID()
 
-	return model.NewUser(username, email, hashedPassword, token, model.Ordinary, clock.Now())
+	newID, err := f.userRepository.NextID(tx)
+	if err != nil {
+		return nil, err
+	}
+
+	return model.NewUser(newID, username, email, hashedPassword, token, model.Ordinary, clock.Now())
 }
 
 func (f *Factory) NewPassword(plainText string) (string, error) {
