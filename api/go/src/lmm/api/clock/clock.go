@@ -2,22 +2,22 @@ package clock
 
 import "time"
 
-var defaultClock clock
+var DefaultClock Clock
 
 type Clock interface {
 	Now() time.Time
 }
 
-type clock func() time.Time
+type clock struct{}
 
 func (c clock) Now() time.Time {
-	return c().Truncate(1 * time.Second)
+	return time.Now().Truncate(1 * time.Second).UTC()
 }
 
 func Now() time.Time {
-	return defaultClock.Now().UTC()
+	return DefaultClock.Now()
 }
 
 func init() {
-	defaultClock = time.Now
+	DefaultClock = &clock{}
 }
