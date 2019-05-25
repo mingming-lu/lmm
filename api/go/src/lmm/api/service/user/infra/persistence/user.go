@@ -68,6 +68,13 @@ func (s *UserDataStore) RunInTransaction(c context.Context, f func(tx transactio
 		return err
 	}
 
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			tx.Rollback()
+			panic(recovered)
+		}
+	}()
+
 	if err := f(tx); err != nil {
 		if err2 := tx.Rollback(); err2 != nil {
 			return errors.Wrap(err2, err.Error())
