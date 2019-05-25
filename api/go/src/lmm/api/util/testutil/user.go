@@ -53,6 +53,7 @@ func NewUser(db db.DB) User {
 	}
 
 	user, err := model.NewUser(
+		0, // auto-generate allocate new id by datastore
 		username,
 		email,
 		string(b),
