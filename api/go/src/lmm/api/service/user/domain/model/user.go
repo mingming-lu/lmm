@@ -22,6 +22,7 @@ type UserID int64
 // UserDescriptor describes user's basic infomation
 type UserDescriptor struct {
 	model.Entity
+	id           UserID
 	name         string
 	email        string
 	role         Role
@@ -44,6 +45,10 @@ func NewUserDescriptor(name, email string, role Role, registeredAt time.Time) (*
 	}
 
 	return &user, nil
+}
+
+func (user *UserDescriptor) ID() UserID {
+	return user.id
 }
 
 // Name gets user's name

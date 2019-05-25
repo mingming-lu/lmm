@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"cloud.google.com/go/datastore"
 	_ "github.com/go-sql-driver/mysql"
 
 	"lmm/api/http"
@@ -71,6 +72,12 @@ func main() {
 	mysql := db.DefaultMySQL()
 	defer mysql.Close()
 
+	datastoreClient, err := datastore.NewClient(context.TODO(), "lmm")
+	if err != nil {
+		panic(err)
+	}
+	defer datastoreClient.Close()
+
 	rabbitMQClient := rabbitmq.DefaultClient()
 	rabbitMQUploader := file.NewRabbitMQAssetUploader(rabbitMQClient)
 	defer rabbitMQUploader.Close() // would close rabbitMQClient too
@@ -99,8 +106,8 @@ func main() {
 	router.POST("/v1/auth/login", authUI.Login)
 
 	// user
-	userRepo := userStorage.NewUserStorage(mysql)
-	userAppService := userApp.NewService(userRepo)
+	userRepo := userStorage.NewUserDataStore(datastoreClient)
+	userAppService := userApp.NewService(userRepo, userRepo)
 	userUI := userUI.NewUI(userAppService)
 	userEventSubscriber := userMessaging.NewSubscriber(mysql)
 	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
