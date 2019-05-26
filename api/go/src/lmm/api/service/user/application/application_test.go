@@ -7,11 +7,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/crypto/bcrypt"
-
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/domain"
@@ -19,6 +14,11 @@ import (
 	"lmm/api/service/user/domain/repository"
 	"lmm/api/service/user/infra/service"
 	"lmm/api/util/uuidutil"
+
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 
 type InmemoryUserRepository struct {
 	sync.RWMutex
-	memory []*model.User
+	memory map[model.UserID]*model.User
 }
 
 func (repo *InmemoryUserRepository) NextID(tx transaction.Transaction) (model.UserID, error) {
@@ -41,10 +41,7 @@ func (repo *InmemoryUserRepository) Save(tx transaction.Transaction, user *model
 	repo.Lock()
 	defer repo.Unlock()
 
-	if user, _ := repo.FindByName(tx, user.Name()); user != nil {
-		return domain.ErrUserNameAlreadyUsed
-	}
-	repo.memory = append(repo.memory, user)
+	repo.memory[user.ID()] = user
 	return nil
 }
 
@@ -79,16 +76,16 @@ func (repo *InmemoryUserRepository) RunInTransaction(c context.Context, f func(t
 }
 
 func TestMain(m *testing.M) {
-	repo := &InmemoryUserRepository{memory: make([]*model.User, 0)}
+	repo := &InmemoryUserRepository{memory: make(map[model.UserID]*model.User)}
 	testAppService = NewService(&service.BcryptService{}, repo, repo)
 	code := m.Run()
 	os.Exit(code)
 }
 
-func TestRegisterNewUser(tt *testing.T) {
+func TestRegisterNewUser(t *testing.T) {
 	c := context.Background()
 
-	tt.Run("Success", func(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
 		username, password := "username", "~!@#$%^&*()-_=+{[}]|\\:;\"'<,>.?/"
 		userID, err := testAppService.RegisterNewUser(c, command.Register{
 			UserName:     username,
@@ -110,7 +107,7 @@ func TestRegisterNewUser(tt *testing.T) {
 		})
 	})
 
-	tt.Run("Fail", func(t *testing.T) {
+	t.Run("Fail", func(t *testing.T) {
 		cases := map[string]struct {
 			UserName string
 			Email    string
@@ -141,7 +138,7 @@ func TestRegisterNewUser(tt *testing.T) {
 		}
 
 		for testName, testCase := range cases {
-			tt.Run(testName, func(tt *testing.T) {
+			t.Run(testName, func(t *testing.T) {
 				userIDGot, err := testAppService.RegisterNewUser(c, command.Register{
 					UserName:     testCase.UserName,
 					EmailAddress: testCase.Email,

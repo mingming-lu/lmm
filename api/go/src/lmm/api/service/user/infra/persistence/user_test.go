@@ -46,7 +46,8 @@ func (c testClock) Now() time.Time {
 }
 
 func TestUserDataStore(t *testing.T) {
-	c := context.Background()
+	c, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
 	clock.DefaultClock = &testClock{}
 
