@@ -13,7 +13,13 @@ jobs:
     docker:
       - image: circleci/golang:1.12.0
       - image: circleci/mysql:5.7.25
+      - image: google/cloud-sdk:247.0.0
+        name: datastore
+        command: gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081
     environment:
+      DATASTORE_EMULATOR_HOST: datastore:8081
+      DATASTORE_PROJECT_ID: lmm-test
+      PROJECT_ID: lmm-test
       MYSQL_HOST: localhost
       MYSQL_PORT: 3306
       MYSQL_NAME: lmm_test
