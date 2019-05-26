@@ -22,6 +22,7 @@ import (
 	userEvent "lmm/api/service/user/domain/event"
 	userMessaging "lmm/api/service/user/infra/messaging"
 	userStorage "lmm/api/service/user/infra/persistence"
+	userUtil "lmm/api/service/user/infra/service"
 	userUI "lmm/api/service/user/ui"
 
 	// auth
@@ -107,7 +108,7 @@ func main() {
 
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
-	userAppService := userApp.NewService(userRepo, userRepo)
+	userAppService := userApp.NewService(&userUtil.BcryptService{}, userRepo, userRepo)
 	userUI := userUI.NewUI(userAppService)
 	userEventSubscriber := userMessaging.NewSubscriber(mysql)
 	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)

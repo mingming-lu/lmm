@@ -19,18 +19,21 @@ import (
 type Service struct {
 	encrypter          service.EncryptService
 	factory            *factory.Factory
-	userRepository     repository.UserRepository
 	transactionManager transaction.Manager
+	userRepository     repository.UserRepository
 }
 
 // NewService creates a new Service pointer
-func NewService(txManager transaction.Manager, userRepository repository.UserRepository) *Service {
-	encrypter := &service.BcryptService{}
+func NewService(
+	encrypter service.EncryptService,
+	txManager transaction.Manager,
+	userRepository repository.UserRepository,
+) *Service {
 	return &Service{
 		encrypter:          encrypter,
 		factory:            factory.NewFactory(encrypter, userRepository),
-		userRepository:     userRepository,
 		transactionManager: txManager,
+		userRepository:     userRepository,
 	}
 }
 
