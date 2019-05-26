@@ -38,8 +38,10 @@ func NewService(
 }
 
 // RegisterNewUser registers new user
-func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (string, error) {
-	return "TODO", s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (int64, error) {
+	var userID int64
+
+	err := s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		if user, err := s.userRepository.FindByName(tx, cmd.UserName); err != domain.ErrNoSuchUser {
 			if user != nil {
 				return domain.ErrUserNameAlreadyUsed
@@ -56,8 +58,16 @@ func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (stri
 			return errors.Wrap(err, "failed to save user")
 		}
 
+		userID = int64(user.ID())
+
 		return nil
 	}, nil)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return userID, nil
 }
 
 // AssignRole handles command which operator assign user to role

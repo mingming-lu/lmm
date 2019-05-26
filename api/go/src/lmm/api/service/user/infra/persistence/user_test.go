@@ -10,7 +10,7 @@ import (
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/service"
+	"lmm/api/service/user/infra/service"
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
