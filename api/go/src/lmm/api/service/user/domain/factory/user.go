@@ -28,7 +28,7 @@ func (f *Factory) NewUser(tx transaction.Transaction, username, email, password 
 		return nil, err
 	}
 
-	token := uuidutil.NewUUID()
+	token := f.NewToken()
 
 	newID, err := f.userRepository.NextID(tx)
 	if err != nil {
@@ -54,4 +54,8 @@ func (f *Factory) NewPassword(plainText string) (string, error) {
 	}
 
 	return hashedPassword, nil
+}
+
+func (f *Factory) NewToken() string {
+	return uuidutil.NewUUID()
 }

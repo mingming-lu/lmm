@@ -2,6 +2,7 @@ package ui
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"lmm/api/http"
 	"lmm/api/service/user/application"
@@ -28,7 +29,7 @@ func (ui *UI) SignUp(c http.Context) {
 	reqBody := signUpRequestBody{}
 	c.Request().Bind(&reqBody)
 
-	_, err := ui.appService.RegisterNewUser(c, command.Register{
+	userID, err := ui.appService.RegisterNewUser(c, command.Register{
 		UserName:     reqBody.Name,
 		EmailAddress: reqBody.Email,
 		Password:     reqBody.Password,
@@ -37,6 +38,7 @@ func (ui *UI) SignUp(c http.Context) {
 	originalError := errors.Cause(err)
 	switch originalError {
 	case nil:
+		c.Header("Location", fmt.Sprintf("users/%d", userID))
 		c.String(http.StatusCreated, "success")
 
 	case

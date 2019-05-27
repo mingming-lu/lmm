@@ -150,3 +150,41 @@ func TestRegisterNewUser(t *testing.T) {
 		}
 	})
 }
+
+func TestUserChangePassword(t *testing.T) {
+	c := context.Background()
+
+	username, password := "U"+uuidutil.NewUUID()[:8], "U$ErP@ssw0rD"
+	userID, err := testAppService.RegisterNewUser(c, command.Register{
+		UserName:     username,
+		EmailAddress: username + "@lmm.local",
+		Password:     password,
+	})
+	if !assert.NoError(t, err) || !assert.NotZero(t, userID) {
+		t.Fatal("failed to create new user")
+	}
+
+	userBeforePasswordChanging, err := testAppService.userRepository.FindByName(nil, username)
+	if !assert.NoError(t, err) {
+		t.Fatal(err)
+	}
+
+	// record value since it's changed by pointer
+	oldToken := userBeforePasswordChanging.Token()
+
+	newPassword := uuidutil.NewUUID() + uuidutil.NewUUID()
+
+	assert.NoError(t, testAppService.UserChangePassword(c, command.ChangePassword{
+		User:        username,
+		OldPassword: password,
+		NewPassword: newPassword,
+	}))
+
+	userAfterPasswordChanging, err := testAppService.userRepository.FindByName(nil, username)
+	if !assert.NoError(t, err) {
+		t.Fatal(err)
+	}
+
+	assert.True(t, testAppService.encrypter.Verify(newPassword, userAfterPasswordChanging.Password()))
+	assert.NotEqual(t, oldToken, userAfterPasswordChanging.Token())
+}

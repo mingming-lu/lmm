@@ -163,6 +163,10 @@ func (user *User) setToken(token string) error {
 	return nil
 }
 
+func (user *User) ChangeToken(newToken string) error {
+	return user.setToken(newToken)
+}
+
 // ChangeRole changes user's role
 func (user *User) ChangeRole(role Role) error {
 	return user.setRole(role)

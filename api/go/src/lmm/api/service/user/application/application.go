@@ -150,29 +150,33 @@ func (s *Service) mappingOrder(orderBy, order string) (repository.DescribeAllOrd
 
 // UserChangePassword supports a application to chagne user's password
 func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePassword) error {
-	return errors.New("not implemented")
-	// tx, err := s.transactionManager.Begin(c, nil)
-	// if err != nil {
-	// 	return nil, 0, err
-	// }
+	hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)
+	if err != nil {
+		return errors.Wrap(err, "invalid password")
+	}
 
-	// hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)
-	// if err != nil {
-	// 	return err
-	// }
+	return s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		user, err := s.userRepository.FindByName(tx, cmd.User)
+		if err != nil {
+			return errors.Wrap(domain.ErrNoSuchUser, err.Error())
+		}
 
-	// user, err := s.userRepository.FindByName(c, cmd.User)
-	// if err != nil {
-	// 	return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	// }
+		if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
+			return domain.ErrUserPassword
+		}
 
-	// if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
-	// 	return domain.ErrUserPassword
-	// }
+		if err := user.ChangePassword(hashedPassword); err != nil {
+			return errors.Wrap(err, "failed to change password")
+		}
 
-	// if err := user.ChangePassword(hashedPassword); err != nil {
-	// 	return err
-	// }
+		if err := user.ChangeToken(s.factory.NewToken()); err != nil {
+			return errors.Wrap(err, "failed to change token")
+		}
 
-	// return event.PublishUserPasswordChanged(c, user.Name(), user.Password())
+		if err := s.userRepository.Save(tx, user); err != nil {
+			return errors.Wrap(err, "failed to save user after password and token changed")
+		}
+
+		return nil
+	}, nil)
 }
