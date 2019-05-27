@@ -39,6 +39,7 @@ func TestMain(m *testing.M) {
 
 	router = http.NewRouter()
 	router.POST("/v1/users", ui.SignUp)
+	router.PUT("/v1/users/:user/password", ui.ChangeUserPassword)
 
 	exitCode := m.Run()
 	os.Exit(exitCode)
@@ -116,6 +117,103 @@ func TestPostV1Users(t *testing.T) {
 	})
 }
 
+func TestPutV1UsersPassword(t *testing.T) {
+	username := "U" + uuidutil.NewUUID()[:8]
+	password := uuidutil.NewUUID() + uuidutil.NewUUID()
+	email := username + "@lmm.local"
+
+	res := postV1Users(signUpRequestBody{
+		Name:     username,
+		Password: password,
+		Email:    email,
+	})
+
+	if !assert.Equal(t, 201, res.Code) {
+		t.Fatal("failed to create new user: " + res.Body.String())
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		res := putV1UsersPassword(username, changePasswordRequestBody{
+			OldPassword: password,
+			NewPassword: uuidutil.NewUUID() + uuidutil.NewUUID(),
+		})
+
+		assert.Equal(t, 204, res.Code)
+	})
+
+	t.Run("Failure", func(t *testing.T) {
+		type Case struct {
+			UserName    string
+			OldPassword string
+			NewPassword string
+			StatusCode  int
+			ResBody     string
+		}
+
+		cases := map[string]Case{
+			"NoSuchUser": Case{
+				UserName:    username + "a",
+				OldPassword: password,
+				NewPassword: "MayBe@ValidPassword",
+				StatusCode:  http.StatusNotFound,
+				ResBody:     domain.ErrNoSuchUser.Error(),
+			},
+			"WrongPassword": Case{
+				UserName:    username,
+				OldPassword: password + "aa",
+				NewPassword: "MayBe@ValidPassword",
+				StatusCode:  http.StatusUnauthorized,
+				ResBody:     domain.ErrUserPassword.Error(),
+			},
+			"EmptyOldPassword": Case{
+				UserName:    username,
+				NewPassword: "MayBe@ValidPassword",
+				StatusCode:  http.StatusUnauthorized,
+				ResBody:     domain.ErrUserPassword.Error(),
+			},
+			"EmptyNewPassword": Case{
+				UserName:    username,
+				OldPassword: password,
+				StatusCode:  http.StatusBadRequest,
+				ResBody:     domain.ErrUserPasswordEmpty.Error(),
+			},
+			"NewPasswordTooShort": Case{
+				UserName:    username,
+				OldPassword: password,
+				NewPassword: "short",
+				StatusCode:  http.StatusBadRequest,
+				ResBody:     domain.ErrUserPasswordTooShort.Error(),
+			},
+			"NewPasswordTooWeak": Case{
+				UserName:    username,
+				OldPassword: password,
+				NewPassword: "123456789",
+				StatusCode:  http.StatusBadRequest,
+				ResBody:     domain.ErrUserPasswordTooWeak.Error(),
+			},
+			"NewPasswordTooLong": Case{
+				UserName:    username,
+				OldPassword: password,
+				NewPassword: strings.Repeat("a", 251),
+				StatusCode:  http.StatusBadRequest,
+				ResBody:     domain.ErrUserPasswordTooLong.Error(),
+			},
+		}
+
+		for testname, testcase := range cases {
+			t.Run(testname, func(t *testing.T) {
+				res := putV1UsersPassword(testcase.UserName, changePasswordRequestBody{
+					OldPassword: testcase.OldPassword,
+					NewPassword: testcase.NewPassword,
+				})
+
+				assert.Equal(t, testcase.StatusCode, res.Code)
+				assert.Equal(t, testcase.ResBody, res.Body.String())
+			})
+		}
+	})
+}
+
 func postV1Users(body signUpRequestBody) *httptest.ResponseRecorder {
 	b, err := json.Marshal(body)
 	if err != nil {
@@ -123,6 +221,20 @@ func postV1Users(body signUpRequestBody) *httptest.ResponseRecorder {
 	}
 
 	req := httptest.NewRequest("POST", "/v1/users", bytes.NewReader(b))
+	res := httptest.NewRecorder()
+
+	router.ServeHTTP(res, req)
+
+	return res
+}
+
+func putV1UsersPassword(username string, body changePasswordRequestBody) *httptest.ResponseRecorder {
+	b, err := json.Marshal(body)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to decode to json"))
+	}
+
+	req := httptest.NewRequest("PUT", "/v1/users/"+username+"/password", bytes.NewReader(b))
 	res := httptest.NewRecorder()
 
 	router.ServeHTTP(res, req)
