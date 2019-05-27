@@ -72,61 +72,13 @@ func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (int6
 
 // AssignRole handles command which operator assign user to role
 func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
-	return errors.New("not implemented")
-	// return s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
-	// 	operator, err := s.userRepository.FindByName(tx, cmd.OperatorUser)
-	// 	if err != nil {
-	// 		tx.Rollback()
-	// 		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	// 	}
-
-	// 	user, err := s.userRepository.FindByName(tx, cmd.TargetUser)
-	// 	if err != nil {
-	// 		tx.Rollback()
-	// 		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	// 	}
-
-	// 	role := service.RoleAdapter(cmd.TargetRole)
-
-	// 	return service.AssignUserRole(c, operator, user, role)
-	// }, nil)
+	panic("not implemented")
 }
 
 const maxCount uint = 100
 
 func (s *Service) ViewAllUsersByOptions(c context.Context, query query.ViewAllUsers) ([]*model.UserDescriptor, uint, error) {
 	panic("not implemented")
-	// page, err := stringutil.ParseUint(query.Page)
-	// if err != nil || page == 0 {
-	// 	return nil, 0, errors.Wrap(domain.ErrInvalidPage, query.Page)
-	// }
-
-	// count, err := stringutil.ParseUint(query.Count)
-	// if err != nil || count > maxCount {
-	// 	return nil, 0, errors.Wrap(domain.ErrInvalidCount, query.Count)
-	// }
-
-	// order, err := s.mappingOrder(query.OrderBy, query.Order)
-	// if err != nil {
-	// 	return nil, 0, errors.Wrap(domain.ErrInvalidViewOrder, query.Order)
-	// }
-
-	// tx, err := s.transactionManager.Begin(c, nil)
-	// if err != nil {
-	// 	return nil, 0, err
-	// }
-
-	// users, i, err := s.userRepository.DescribeAll(tx, repository.DescribeAllOptions{
-	// 	Page:  page,
-	// 	Count: count,
-	// 	Order: order,
-	// })
-	// if err != nil {
-	// 	tx.Rollback()
-	// 	return nil, 0, err
-	// }
-
-	// return users, i, nil
 }
 
 func (s *Service) mappingOrder(orderBy, order string) (repository.DescribeAllOrder, error) {
