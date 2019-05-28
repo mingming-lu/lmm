@@ -8,6 +8,11 @@ type signUpRequestBody struct {
 	Password string `json:"password"`
 }
 
+type basicAuth struct {
+	UserName string `json:"username"`
+	Password string `json:"password"`
+}
+
 type assignRoleRequestBody struct {
 	Role string `json:"role"`
 }

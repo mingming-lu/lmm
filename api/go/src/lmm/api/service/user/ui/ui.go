@@ -1,10 +1,14 @@
 package ui
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"regexp"
 
 	"lmm/api/http"
+	authUtil "lmm/api/pkg/auth"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
@@ -56,6 +60,47 @@ func (ui *UI) SignUp(c http.Context) {
 
 	default:
 		http.Log().Panic(c, err.Error())
+	}
+}
+
+// BasicAuth middleware
+func (ui *UI) BasicAuth(next http.Handler) http.Handler {
+	pattern := regexp.MustCompile(`^Basic +(.+)$`)
+
+	return func(c http.Context) {
+		authHeader := c.Request().Header.Get("Authorization")
+
+		matched := pattern.FindStringSubmatch(authHeader)
+		if len(matched) != 2 {
+			next(c)
+			return
+		}
+
+		b, err := base64.URLEncoding.DecodeString(matched[1])
+		if err != nil {
+			next(c)
+			return
+		}
+
+		auth := basicAuth{}
+		if err := json.NewDecoder(bytes.NewReader(b)).Decode(&auth); err != nil {
+			next(c)
+			return
+		}
+
+		user, err := ui.appService.BasicAuth(c, command.Login{
+			UserName: auth.UserName,
+			Password: auth.Password,
+		})
+
+		ctx := authUtil.NewContext(c.Request().Context(), &authUtil.Auth{
+			ID:    int64(user.ID()),
+			Name:  user.Name(),
+			Role:  user.Role().Name(),
+			Token: user.Token(),
+		})
+
+		next(c.With(ctx))
 	}
 }
 

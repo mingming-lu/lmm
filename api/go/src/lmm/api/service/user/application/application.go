@@ -70,6 +70,34 @@ func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (int6
 	return userID, nil
 }
 
+// BasicAuth authenticate user by basic auth
+func (s *Service) BasicAuth(c context.Context, cmd command.Login) (user *model.User, err error) {
+	err = s.transactionManager.RunInTransaction(c,
+		func(tx transaction.Transaction) error {
+			user, err = s.login(tx, cmd.UserName, cmd.Password)
+			if err != nil {
+				return errors.Wrap(err, "failed to login")
+			}
+			return nil
+		},
+		&transaction.Option{ReadOnly: true},
+	)
+	return
+}
+
+func (s *Service) login(tx transaction.Transaction, username, password string) (*model.User, error) {
+	user, err := s.userRepository.FindByName(tx, username)
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrNoSuchUser, err.Error())
+	}
+
+	if !s.encrypter.Verify(password, user.Password()) {
+		return nil, domain.ErrUserPassword
+	}
+
+	return user, nil
+}
+
 // AssignRole handles command which operator assign user to role
 func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
 	panic("not implemented")
@@ -108,13 +136,9 @@ func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePasswo
 	}
 
 	return s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
-		user, err := s.userRepository.FindByName(tx, cmd.User)
+		user, err := s.login(tx, cmd.User, cmd.OldPassword)
 		if err != nil {
-			return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-		}
-
-		if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
-			return domain.ErrUserPassword
+			return errors.Wrap(err, "failed to login")
 		}
 
 		if err := user.ChangePassword(hashedPassword); err != nil {

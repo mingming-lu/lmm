@@ -3,16 +3,20 @@ package ui
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"net/http/httptest"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 
 	"lmm/api/http"
+	authUtil "lmm/api/pkg/auth"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
+	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/infra/persistence"
 	"lmm/api/service/user/infra/service"
 	"lmm/api/util/uuidutil"
@@ -128,7 +132,7 @@ func TestPutV1UsersPassword(t *testing.T) {
 		Email:    email,
 	})
 
-	if !assert.Equal(t, 201, res.Code) {
+	if !assert.Equal(t, http.StatusCreated, res.Code) {
 		t.Fatal("failed to create new user: " + res.Body.String())
 	}
 
@@ -211,6 +215,68 @@ func TestPutV1UsersPassword(t *testing.T) {
 				assert.Equal(t, testcase.ResBody, res.Body.String())
 			})
 		}
+	})
+}
+
+func TestBasicAuth(t *testing.T) {
+	username := "U" + uuidutil.NewUUID()[:8]
+	password := uuidutil.NewUUID() + uuidutil.NewUUID()
+	email := username + "@lmm.local"
+
+	postUserRes := postV1Users(signUpRequestBody{
+		Name:     username,
+		Password: password,
+		Email:    email,
+	})
+
+	if !assert.Equal(t, http.StatusCreated, postUserRes.Code) {
+		t.Fatal("failed to create user: ", postUserRes.Body.String())
+	}
+
+	location := postUserRes.Header().Get("Location")
+	matched := regexp.MustCompile(`users/(\d+)`).FindStringSubmatch(location)
+	userIDStr := matched[1]
+
+	router := http.NewRouter()
+	router.GET("/", ui.BasicAuth(func(c http.Context) {
+		auth, ok := authUtil.FromContext(c)
+		if !ok {
+			http.Unauthorized(c)
+			return
+		}
+		t.Run("FromContext", func(t *testing.T) {
+			assert.Equal(t, userIDStr, strconv.FormatInt(auth.ID, 10))
+			assert.Equal(t, username, auth.Name)
+			assert.Equal(t, model.Ordinary.Name(), auth.Role)
+			assert.NotEmpty(t, auth.Token)
+		})
+		c.String(http.StatusOK, "OK")
+	}))
+
+	t.Run("Authorized", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/", nil)
+		buf := new(bytes.Buffer)
+		if !assert.NoError(t, json.NewEncoder(buf).Encode(basicAuth{
+			UserName: username,
+			Password: password,
+		})) {
+			t.Fatal("unexpected failure of json encoding")
+		}
+		req.Header.Set("Authorization", "Basic "+base64.URLEncoding.EncodeToString(buf.Bytes()))
+
+		res := httptest.NewRecorder()
+
+		router.ServeHTTP(res, req)
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, "OK", res.Body.String())
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/", nil)
+		res := httptest.NewRecorder()
+		router.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusUnauthorized, res.Code)
 	})
 }
 
