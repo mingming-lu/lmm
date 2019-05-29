@@ -19,6 +19,7 @@ import (
 type Service struct {
 	encrypter          service.EncryptService
 	factory            *factory.Factory
+	tokenService       model.TokenService
 	transactionManager transaction.Manager
 	userRepository     repository.UserRepository
 }
@@ -26,12 +27,14 @@ type Service struct {
 // NewService creates a new Service pointer
 func NewService(
 	encrypter service.EncryptService,
+	tokenService model.TokenService,
 	txManager transaction.Manager,
 	userRepository repository.UserRepository,
 ) *Service {
 	return &Service{
 		encrypter:          encrypter,
 		factory:            factory.NewFactory(encrypter, userRepository),
+		tokenService:       tokenService,
 		transactionManager: txManager,
 		userRepository:     userRepository,
 	}
@@ -82,6 +85,32 @@ func (s *Service) BasicAuth(c context.Context, cmd command.Login) (user *model.U
 		},
 		&transaction.Option{ReadOnly: true},
 	)
+	return
+}
+
+// RefreshAccessToken refreshes a valid oldAccessToken into a valid newAccessToken
+func (s *Service) RefreshAccessToken(c context.Context, hashed string) (newAccessToken *model.AccessToken, err error) {
+	token, err := s.tokenService.Decrypt(hashed)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid access token")
+	}
+
+	if token.Expired() {
+		return nil, errors.New("access token expired")
+	}
+
+	err = s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		user, err := s.userRepository.FindByToken(tx, token.Raw())
+		if err != nil {
+			return err
+		}
+		newAccessToken, err = s.tokenService.Encrypt(user.Token())
+		if err != nil {
+			panic(errors.Wrap(err, "internal error"))
+		}
+		return nil
+	}, &transaction.Option{ReadOnly: true})
+
 	return
 }
 

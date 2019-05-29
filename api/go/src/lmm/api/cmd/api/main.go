@@ -108,7 +108,7 @@ func main() {
 
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
-	userAppService := userApp.NewService(&userUtil.BcryptService{}, userRepo, userRepo)
+	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
 	userUI := userUI.NewUI(userAppService)
 	userEventSubscriber := userMessaging.NewSubscriber(mysql)
 	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
@@ -117,6 +117,7 @@ func main() {
 	router.POST("/v1/users", userUI.SignUp)
 	router.PUT("/v1/users/:user/role", authUI.BearerAuth(userUI.AssignUserRole))
 	router.PUT("/v1/users/:user/password", userUI.ChangeUserPassword)
+	router.POST("/v1/auth/token", userUI.Token)
 
 	// article
 	authorAdapter := authorService.NewAuthorAdapter(mysql)

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"lmm/api/http"
 	authUtil "lmm/api/pkg/auth"
@@ -102,6 +103,46 @@ func (ui *UI) BasicAuth(next http.Handler) http.Handler {
 
 		next(c.With(ctx))
 	}
+}
+
+var bearerAuthPattern = regexp.MustCompile(`^Bearer +(.+)$`)
+
+// Token handles /v1/auth/token
+func (ui *UI) Token(c http.Context) {
+	authHeader := c.Request().Header.Get("Authorization")
+
+	if strings.HasPrefix(authHeader, "Basic ") {
+		ui.BasicAuth(func(c http.Context) {
+			auth, ok := authUtil.FromContext(c)
+			if !ok {
+				http.Unauthorized(c)
+				return
+			}
+			c.JSON(http.StatusOK, accessTokenView{
+				AccessToken: auth.Token,
+			})
+		})(c)
+		return
+
+	} else if strings.HasPrefix(authHeader, "Bearer ") {
+		matched := bearerAuthPattern.FindStringSubmatch(authHeader)
+		if len(matched) != 2 {
+			http.Unauthorized(c)
+			return
+		}
+
+		token, err := ui.appService.RefreshAccessToken(c, matched[1])
+		if err != nil {
+			http.Unauthorized(c)
+			return
+		}
+		c.JSON(http.StatusOK, accessTokenView{
+			AccessToken: token.Hashed(),
+		})
+		return
+	}
+
+	http.Unauthorized(c)
 }
 
 // AssignUserRole handles PUT /v1/users/:user/role

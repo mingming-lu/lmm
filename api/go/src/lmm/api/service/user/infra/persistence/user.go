@@ -155,3 +155,7 @@ func (s *UserDataStore) FindByName(tx transaction.Transaction, username string) 
 		user.RegisteredAt,
 	)
 }
+
+func (repo *UserDataStore) FindByToken(tx transaction.Transaction, token string) (*model.User, error) {
+	panic("not implemented")
+}

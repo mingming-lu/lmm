@@ -22,6 +22,10 @@ type changePasswordRequestBody struct {
 	NewPassword string `json:"new_password"`
 }
 
+type accessTokenView struct {
+	AccessToken string `json:"access_token"`
+}
+
 type userView struct {
 	Name           string `json:"name"`
 	Role           string `json:"role"`

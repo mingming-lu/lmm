@@ -11,6 +11,7 @@ type UserRepository interface {
 	NextID(tx transaction.Transaction) (model.UserID, error)
 	Save(tx transaction.Transaction, user *model.User) error
 	FindByName(tx transaction.Transaction, username string) (*model.User, error)
+	FindByToken(tx transaction.Transaction, token string) (*model.User, error)
 	// DescribeAll(tx transaction.Transaction, options DescribeAllOptions) ([]*model.UserDescriptor, uint, error)
 }
 
