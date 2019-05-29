@@ -25,11 +25,6 @@ import (
 	userUtil "lmm/api/service/user/infra/service"
 	userUI "lmm/api/service/user/ui"
 
-	// auth
-	authApp "lmm/api/service/auth/application"
-	authStorage "lmm/api/service/auth/infra/persistence"
-	authUI "lmm/api/service/auth/ui"
-
 	// article
 	articleFetcher "lmm/api/service/article/infra/fetcher"
 	articleStorage "lmm/api/service/article/infra/persistence"
@@ -100,12 +95,6 @@ func main() {
 	// request id
 	router.Use(middleware.WithRequestID)
 
-	// auth
-	authRepo := authStorage.NewUserStorage(mysql)
-	authAppService := authApp.NewService(authRepo)
-	authUI := authUI.NewUI(authAppService)
-	router.POST("/v1/auth/login", authUI.Login)
-
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
 	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
@@ -113,9 +102,7 @@ func main() {
 	userEventSubscriber := userMessaging.NewSubscriber(mysql)
 	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
 	messaging.SyncBus().Subscribe(&userEvent.UserPasswordChanged{}, userEventSubscriber.OnUserPasswordChanged)
-	router.GET("/v1/users", authUI.BearerAuth(userUI.ViewAllUsers))
 	router.POST("/v1/users", userUI.SignUp)
-	router.PUT("/v1/users/:user/role", authUI.BearerAuth(userUI.AssignUserRole))
 	router.PUT("/v1/users/:user/password", userUI.ChangeUserPassword)
 	router.POST("/v1/auth/token", userUI.Token)
 
