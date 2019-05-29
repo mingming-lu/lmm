@@ -40,11 +40,12 @@ func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.Li
 
 // ArticleByID finds article by given id
 func (app *ArticleQueryService) ArticleByID(c context.Context, rawID string) (*model.ArticleView, error) {
-	articleID, err := model.NewArticleID(rawID)
-	if err != nil {
-		return nil, err
-	}
-	return app.articleFinder.FindByID(c, articleID)
+	panic("TODO")
+	// articleID, err := model.NewArticleID(rawID)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// return app.articleFinder.FindByID(c, articleID)
 }
 
 // AllArticleTags gets all article tags

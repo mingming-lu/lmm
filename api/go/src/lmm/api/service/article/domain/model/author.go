@@ -1,19 +1,16 @@
 package model
 
-import "lmm/api/service/base/model"
-
 // Author is the model of article author
 type Author struct {
-	model.Entity
-	name string
+	id int64
 }
 
 // NewAuthor returns a new author
-func NewAuthor(name string) *Author {
-	return &Author{name: name}
+func NewAuthor(id int64) *Author {
+	return &Author{id: id}
 }
 
-// Name returns the name of the author
-func (a *Author) Name() string {
-	return a.name
+// ID returns author id
+func (a *Author) ID() int64 {
+	return a.id
 }

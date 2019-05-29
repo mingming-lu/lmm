@@ -48,7 +48,7 @@ func (a *Article) Content() *Content {
 
 // EditContent changes article's content and update lastModified if text differs
 func (a *Article) EditContent(content *Content) {
-	if !a.content.Text().Equals(content.Text()) {
+	if a.content.Text() != content.Text() {
 		a.lastModified = clock.Now()
 	}
 	a.content = content
