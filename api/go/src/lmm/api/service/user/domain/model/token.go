@@ -22,6 +22,7 @@ func (token AccessToken) Expired() bool {
 
 func NewAccessToken(raw, hashed string, expire time.Time) *AccessToken {
 	return &AccessToken{
+		raw:    raw,
 		hashed: hashed,
 		expire: expire,
 	}
