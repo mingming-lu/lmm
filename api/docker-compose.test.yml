@@ -11,9 +11,9 @@ services:
       MYSQL_USER: root
       DATASTORE_EMULATOR_HOST: datastore:8081
       DATASTORE_PROJECT_ID: lmm-test
-      HTTP_TIMEOUT_SECOND: 1
+      HTTP_TIMEOUT_SECOND: 3
     working_dir: /go/src/lmm/api
-    command: bash -c "go test ./... -count 1 -cover -v"
+    command: gotestsum
   mysql:
     volumes:
       - ./mysql/sql/init_test.sql:/mysql/sql/init_test.sql
