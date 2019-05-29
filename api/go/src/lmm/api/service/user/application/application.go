@@ -102,6 +102,35 @@ func (s *Service) BasicAuth(c context.Context, cmd command.Login) (auth *authUti
 	return
 }
 
+// BearerAuth authenticate user by bearer auth
+func (s *Service) BearerAuth(c context.Context, hashed string) (auth *authUtil.Auth, err error) {
+	token, err := s.tokenService.Decrypt(hashed)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid access token")
+	}
+
+	if token.Expired() {
+		return nil, errors.New("access token expired")
+	}
+
+	err = s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		user, err := s.userRepository.FindByToken(tx, token.Raw())
+		if err != nil {
+			return errors.Wrap(err, "failed to find user by token")
+		}
+
+		auth = &authUtil.Auth{
+			ID:    int64(user.ID()),
+			Name:  user.Name(),
+			Role:  user.Role().Name(),
+			Token: user.Token(), // note that this is the raw token instead of the hashed one
+		}
+
+		return nil
+	}, &transaction.Option{ReadOnly: true})
+	return
+}
+
 // RefreshAccessToken refreshes a valid oldAccessToken into a valid newAccessToken
 func (s *Service) RefreshAccessToken(c context.Context, hashed string) (newAccessToken *model.AccessToken, err error) {
 	token, err := s.tokenService.Decrypt(hashed)

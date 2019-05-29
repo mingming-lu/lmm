@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"lmm/api/service/auth/domain"
+	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
 	"lmm/api/util/stringutil"
 

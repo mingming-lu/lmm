@@ -93,6 +93,33 @@ func (ui *UI) BasicAuth(next http.Handler) http.Handler {
 			UserName: basicauth.UserName,
 			Password: basicauth.Password,
 		})
+		if err != nil {
+			next(c)
+			return
+		}
+
+		ctx := authUtil.NewContext(c.Request().Context(), auth)
+
+		next(c.With(ctx))
+	}
+}
+
+// BearerAuth is a middleware of bearer auth
+func (ui *UI) BearerAuth(next http.Handler) http.Handler {
+	return func(c http.Context) {
+		authHeader := c.Request().Header.Get("Authorization")
+
+		matched := bearerAuthPattern.FindStringSubmatch(authHeader)
+		if len(matched) != 2 {
+			next(c)
+			return
+		}
+
+		auth, err := ui.appService.BearerAuth(c, matched[1])
+		if err != nil {
+			next(c)
+			return
+		}
 
 		ctx := authUtil.NewContext(c.Request().Context(), auth)
 
