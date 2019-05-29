@@ -83,23 +83,18 @@ func (ui *UI) BasicAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		auth := basicAuth{}
-		if err := json.NewDecoder(bytes.NewReader(b)).Decode(&auth); err != nil {
+		basicauth := basicAuth{}
+		if err := json.NewDecoder(bytes.NewReader(b)).Decode(&basicauth); err != nil {
 			next(c)
 			return
 		}
 
-		user, err := ui.appService.BasicAuth(c, command.Login{
-			UserName: auth.UserName,
-			Password: auth.Password,
+		auth, err := ui.appService.BasicAuth(c, command.Login{
+			UserName: basicauth.UserName,
+			Password: basicauth.Password,
 		})
 
-		ctx := authUtil.NewContext(c.Request().Context(), &authUtil.Auth{
-			ID:    int64(user.ID()),
-			Name:  user.Name(),
-			Role:  user.Role().Name(),
-			Token: user.Token(),
-		})
+		ctx := authUtil.NewContext(c.Request().Context(), auth)
 
 		next(c.With(ctx))
 	}
@@ -133,6 +128,7 @@ func (ui *UI) Token(c http.Context) {
 
 		token, err := ui.appService.RefreshAccessToken(c, matched[1])
 		if err != nil {
+			http.Log().Warn(c, err.Error())
 			http.Unauthorized(c)
 			return
 		}

@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 
+	authUtil "lmm/api/pkg/auth"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
@@ -74,13 +75,26 @@ func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (int6
 }
 
 // BasicAuth authenticate user by basic auth
-func (s *Service) BasicAuth(c context.Context, cmd command.Login) (user *model.User, err error) {
+func (s *Service) BasicAuth(c context.Context, cmd command.Login) (auth *authUtil.Auth, err error) {
 	err = s.transactionManager.RunInTransaction(c,
 		func(tx transaction.Transaction) error {
-			user, err = s.login(tx, cmd.UserName, cmd.Password)
+			user, err := s.login(tx, cmd.UserName, cmd.Password)
 			if err != nil {
 				return errors.Wrap(err, "failed to login")
 			}
+
+			accessToken, err := s.tokenService.Encrypt(user.Token())
+			if err != nil {
+				return errors.Wrap(err, "internal error: faile to encrypt user token")
+			}
+
+			auth = &authUtil.Auth{
+				ID:    int64(user.ID()),
+				Name:  user.Name(),
+				Role:  user.Role().Name(),
+				Token: accessToken.Hashed(),
+			}
+
 			return nil
 		},
 		&transaction.Option{ReadOnly: true},
