@@ -126,4 +126,30 @@ func TestUserDataStore(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("FindByToken", func(t *testing.T) {
+		t.Run("Found", func(t *testing.T) {
+			userDataStore.RunInTransaction(c, func(tx transaction.Transaction) error {
+				userFound, err := userDataStore.FindByToken(tx, user.Token())
+				if !assert.NoError(t, err) {
+					t.Fatal(err)
+				}
+
+				assert.EqualValues(t, user, userFound)
+				return nil
+			}, nil)
+
+			t.Run("ReadOnly", func(t *testing.T) {
+				userDataStore.RunInTransaction(c, func(tx transaction.Transaction) error {
+					userFound, err := userDataStore.FindByToken(tx, user.Token())
+					if !assert.NoError(t, err) {
+						t.Fatal(err)
+					}
+
+					assert.EqualValues(t, user, userFound)
+					return nil
+				}, &transaction.Option{ReadOnly: true})
+			})
+		})
+	})
 }

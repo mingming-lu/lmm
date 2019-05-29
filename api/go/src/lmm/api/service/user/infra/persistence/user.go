@@ -124,13 +124,12 @@ func (s *UserDataStore) Save(tx transaction.Transaction, model *model.User) erro
 	return errors.Wrap(err, "faile to save user to datastore")
 }
 
-// FindByName implementation
-func (s *UserDataStore) FindByName(tx transaction.Transaction, username string) (*model.User, error) {
-	q := datastore.NewQuery(userKind).KeysOnly().Filter("Name =", username).Limit(1)
+func (s *UserDataStore) findByFilter(tx transaction.Transaction, filter, value string) (*model.User, error) {
+	q := datastore.NewQuery(userKind).KeysOnly().Filter(filter, value).Limit(1)
 
 	keys, err := s.source.GetAll(tx, q, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get key from user name: %s", username)
+		return nil, errors.Wrap(domain.ErrNoSuchUser, err.Error())
 	}
 
 	if len(keys) == 0 {
@@ -142,7 +141,7 @@ func (s *UserDataStore) FindByName(tx transaction.Transaction, username string) 
 		if err == datastore.ErrNoSuchEntity {
 			return nil, domain.ErrNoSuchUser
 		}
-		return nil, errors.Wrapf(err, "unexpected error when find user named %s", username)
+		return nil, errors.Wrap(err, "internal error: failed to get user by key")
 	}
 
 	return model.NewUser(
@@ -156,6 +155,12 @@ func (s *UserDataStore) FindByName(tx transaction.Transaction, username string) 
 	)
 }
 
-func (repo *UserDataStore) FindByToken(tx transaction.Transaction, token string) (*model.User, error) {
-	panic("not implemented")
+// FindByName implementation
+func (s *UserDataStore) FindByName(tx transaction.Transaction, username string) (*model.User, error) {
+	return s.findByFilter(tx, "Name =", username)
+}
+
+// FindByToken implementation
+func (s *UserDataStore) FindByToken(tx transaction.Transaction, token string) (*model.User, error) {
+	return s.findByFilter(tx, "Token =", token)
 }

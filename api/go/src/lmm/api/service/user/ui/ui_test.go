@@ -38,7 +38,7 @@ func TestMain(m *testing.M) {
 	}
 
 	userRepo := persistence.NewUserDataStore(dataStore)
-	userAppService := application.NewService(&service.BcryptService{}, userRepo, userRepo)
+	userAppService := application.NewService(&service.BcryptService{}, &service.CFBTokenService{}, userRepo, userRepo)
 	ui = NewUI(userAppService)
 
 	router = http.NewRouter()

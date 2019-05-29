@@ -57,6 +57,18 @@ func (repo *InmemoryUserRepository) FindByName(tx transaction.Transaction, usern
 	return nil, domain.ErrNoSuchUser
 }
 
+func (repo *InmemoryUserRepository) FindByToken(tx transaction.Transaction, token string) (*model.User, error) {
+	repo.RLock()
+	defer repo.RUnlock()
+
+	for _, user := range repo.memory {
+		if user.Token() == token {
+			return user, nil
+		}
+	}
+	return nil, domain.ErrNoSuchUser
+}
+
 func (repo *InmemoryUserRepository) DescribeAll(context.Context, repository.DescribeAllOptions) ([]*model.UserDescriptor, uint, error) {
 	panic("not implemented")
 }
@@ -77,7 +89,7 @@ func (repo *InmemoryUserRepository) RunInTransaction(c context.Context, f func(t
 
 func TestMain(m *testing.M) {
 	repo := &InmemoryUserRepository{memory: make(map[model.UserID]*model.User)}
-	testAppService = NewService(&service.BcryptService{}, repo, repo)
+	testAppService = NewService(&service.BcryptService{}, &service.CFBTokenService{}, repo, repo)
 	code := m.Run()
 	os.Exit(code)
 }
