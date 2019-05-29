@@ -1,241 +1,87 @@
 package persistence
 
 import (
-	"context"
-	"crypto/sha256"
-	"database/sql"
-	"fmt"
+	dsUtil "lmm/api/pkg/datastore"
+	"lmm/api/pkg/transaction"
+	"lmm/api/service/article/domain/model"
+	"lmm/api/service/article/domain/repository"
 	"time"
 
-	"github.com/google/uuid"
-
-	"lmm/api/service/article/domain"
-	"lmm/api/service/article/domain/model"
-	"lmm/api/service/article/domain/service"
-	"lmm/api/storage/db"
+	"cloud.google.com/go/datastore"
+	"github.com/pkg/errors"
 )
 
-// ArticleStorage is a implementation of ArticleRepository
-type ArticleStorage struct {
-	db            db.DB
-	authorService service.AuthorService
+var testArticleRepo repository.ArticleRepository = &ArticleDataStore{}
+
+type ArticleDataStore struct {
+	dataStore *datastore.Client
 }
 
-// NewArticleStorage constructs a new article repository with concrete struct
-func NewArticleStorage(db db.DB, authorService service.AuthorService) *ArticleStorage {
-	return &ArticleStorage{db: db, authorService: authorService}
+func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*model.ArticleID, error) {
+	key := datastore.IncompleteKey(dsUtil.ArticleKind, datastore.IDKey(dsUtil.UserKind, authorID, nil))
+	keys, err := s.dataStore.AllocateIDs(tx, []*datastore.Key{key})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to allocate new article key")
+	}
+
+	return model.NewArticleID(keys[0].ID), nil
 }
 
-// NextID generate a random string
-func (s *ArticleStorage) NextID(c context.Context) string {
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(uuid.New().String())))
+type article struct {
+	ID           *datastore.Key `datastore:"__key__"`
+	Title        string         `datastore:"Title"`
+	Body         string         `datastore:"Body"`
+	CreatedAt    time.Time      `datastore:"Created_at"`
+	LastModified time.Time      `datastore:"LastModified"`
 }
 
-// Save persist a article domain model
-func (s *ArticleStorage) Save(c context.Context, article *model.Article) error {
-	tx, err := s.db.Begin(c, nil)
-	if err != nil {
-		return err
-	}
-
-	findUserID := tx.Prepare(c, `
-		select id from user where name = ?
-	`)
-	if err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-
-	saveArticle := tx.Prepare(c, `
-		insert into article (uid, alias_uid, user, title, body, created_at, updated_at)
-		values (?, ?, ?, ?, ?, ?, ?)
-		on duplicate key update id = LAST_INSERT_ID(id), alias_uid = ?, title = ?, body = ?, updated_at = ?
-	`)
-	if err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-
-	deleteTags := tx.Prepare(c, `
-		delete at from article_tag at left join article a on a.id = at.article where at.article = ?
-	`)
-	if err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-
-	saveTags := tx.Prepare(c, `
-		insert into article_tag (article, sort, name) values (?, ?, ?)
-	`)
-	if err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-
-	var userID int
-
-	if err := findUserID.QueryRow(c, article.Author().Name()).Scan(&userID); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-
-	res, err := saveArticle.Exec(c,
-		article.ID().Raw(),
-		article.ID().String(),
-		userID,
-		article.Content().Text().Title(),
-		article.Content().Text().Body(),
-		article.LastModified(),
-		article.LastModified(),
-		article.ID().String(),
-		article.Content().Text().Title(),
-		article.Content().Text().Body(),
-		article.LastModified(),
-	)
-	if err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-
-	lastID, err := res.LastInsertId()
-	if err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-
-	if _, err := deleteTags.Exec(c, lastID); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
-	}
-
-	for _, tag := range article.Content().Tags() {
-		if _, err := saveTags.Exec(c, lastID, tag.ID().Order(), tag.Name()); err != nil {
-			if err := tx.Rollback(); err != nil {
-				return err
-			}
-			return err
-		}
-	}
-
-	return tx.Commit()
+type tag struct {
+	Name string `datastore:"Name"`
 }
 
-// Remove is not implemented
-func (s *ArticleStorage) Remove(c context.Context, article *model.Article) error {
+// Save saves article into datastore
+func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article) error {
+	userKey := datastore.IDKey(dsUtil.UserKind, model.Author().ID(), nil)
+	articleKey := datastore.IDKey(dsUtil.ArticleKind, int64(*model.ID()), userKey)
+
+	dstx := dsUtil.MustTransaction(tx)
+
+	// save article
+	if _, err := dstx.Mutate(datastore.NewUpsert(articleKey, "TODO")); err != nil {
+		return errors.Wrap(err, "failed to put article into datastore")
+	}
+
+	// get all tag keys by article
+	q := datastore.NewQuery(dsUtil.ArticleTagKind).Ancestor(articleKey).KeysOnly().Transaction(dstx)
+	tagKeys, err := s.dataStore.GetAll(tx, q, nil)
+	if err != nil {
+		return errors.Wrap(err, "failed to get article's tags")
+	}
+
+	// delete all tags
+	if err := dstx.DeleteMulti(tagKeys); err != nil {
+		return errors.Wrap(err, "failed to clear article tags")
+	}
+
+	tagKeys = tagKeys[:0]
+	tags := make([]*tag, len(model.Content().Tags()), len(model.Content().Tags()))
+	for i, tag := range model.Content().Tags() {
+		tagKeys = append(tagKeys, datastore.IncompleteKey(dsUtil.ArticleTagKind, articleKey))
+		tags[i].Name = tag
+	}
+
+	// save all tags
+	if _, err := dstx.PutMulti(tagKeys, tags); err != nil {
+		return errors.Wrap(err, "failed to put tags into datastore")
+	}
+
+	return nil
+}
+
+func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.ArticleID) (*model.Article, error) {
 	panic("not implemented")
 }
 
-// FindByID returns a article domain model by given id if exists
-func (s *ArticleStorage) FindByID(c context.Context, id *model.ArticleID) (*model.Article, error) {
-	tx, err := s.db.Begin(c, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	stmt := tx.Prepare(c, `
-		select id, uid, alias_uid, user, title, body,updated_at from article where alias_uid = ? or uid = ? for update
-	`)
-	defer stmt.Close()
-
-	article, err := s.articleModelFromRow(c, stmt.QueryRow(c, id.String(), id.Raw()))
-	if err != nil {
-		return nil, db.RollbackWithError(tx, err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
-
-	return article, nil
-}
-
-func (s *ArticleStorage) articleModelFromRow(c context.Context, row *sql.Row) (*model.Article, error) {
-	var (
-		id             int
-		rawArticleID   string
-		aliasArticleID string
-		userID         int
-		title          string
-		body           string
-		lastModified   time.Time
-	)
-	if err := row.Scan(&id, &rawArticleID, &aliasArticleID, &userID, &title, &body, &lastModified); err != nil {
-		if err == db.ErrNoRows {
-			return nil, domain.ErrNoSuchArticle
-		}
-		return nil, err
-	}
-	findUserName := s.db.Prepare(c, `select name from user where id = ?`)
-	defer findUserName.Close()
-
-	var userName string
-	if err := findUserName.QueryRow(c, userID).Scan(&userName); err != nil {
-		return nil, err
-	}
-
-	author, err := s.authorService.AuthorFromUserName(c, userName)
-	if err != nil {
-		return nil, err
-	}
-	articleID, err := model.NewArticleID(rawArticleID)
-	if err != nil {
-		return nil, err
-	}
-	text, err := model.NewText(title, body)
-	if err != nil {
-		return nil, err
-	}
-
-	stmt := s.db.Prepare(c, "select sort, name from article_tag where article = ?")
-	defer stmt.Close()
-
-	rows, err := stmt.Query(c, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var (
-		order uint
-		name  string
-	)
-
-	tags := make([]*model.Tag, 0)
-	for rows.Next() {
-		if err := rows.Scan(&order, &name); err != nil {
-			return nil, err
-		}
-		tag, err := model.NewTag(articleID, order, name)
-		if err != nil {
-			return nil, err
-		}
-		tags = append(tags, tag)
-	}
-
-	content, err := model.NewContent(text, tags)
-	if err != nil {
-		return nil, err
-	}
-
-	article := model.NewArticle(articleID, author, content, &lastModified)
-	if err := article.ID().SetAlias(aliasArticleID); err != nil {
-		return nil, err
-	}
-	return article, nil
+func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleID) error {
+	panic("not implemented")
 }
