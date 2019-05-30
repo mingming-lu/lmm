@@ -17,19 +17,20 @@ type ArticleCommandService struct {
 }
 
 // NewArticleCommandService is a constructor of ArticleCommandService
-func NewArticleCommandService(articleRepository repository.ArticleRepository) *ArticleCommandService {
+func NewArticleCommandService(articleRepository repository.ArticleRepository, transactionManager transaction.Manager) *ArticleCommandService {
 	return &ArticleCommandService{
-		articleRepository: articleRepository,
+		articleRepository:  articleRepository,
+		transactionManager: transactionManager,
 	}
 }
 
 // PostNewArticle is used for posting a new article
-func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.PostArticle) (article *model.ArticleID, err error) {
+func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.PostArticle) (id model.ArticleID, err error) {
 	author := model.NewAuthor(cmd.AuthorID)
 
 	text, err := model.NewText(cmd.Title, cmd.Body)
 	if err != nil {
-		return nil, err
+		return -1, err
 	}
 
 	content := model.NewContent(text, nil)
@@ -37,12 +38,12 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.
 	err = app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		now := clock.Now()
 
-		articleID, err := app.articleRepository.NextID(tx, cmd.AuthorID)
+		id, err = app.articleRepository.NextID(tx, cmd.AuthorID)
 		if err != nil {
 			return err
 		}
 
-		article := model.NewArticle(articleID, author, content, now, now)
+		article := model.NewArticle(id, author, content, now, now)
 
 		return app.articleRepository.Save(tx, article)
 	}, nil)

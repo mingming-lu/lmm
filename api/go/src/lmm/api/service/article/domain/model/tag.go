@@ -52,3 +52,18 @@ func validateTagName(s string) (string, error) {
 	}
 	return name, nil
 }
+
+// TagView is a model used to view tag
+type TagView struct {
+	name string
+}
+
+// NewTagView creates a new TagView
+func NewTagView(name string) *TagView {
+	return &TagView{name: name}
+}
+
+// Name returns tag name
+func (v *TagView) Name() string {
+	return v.name
+}

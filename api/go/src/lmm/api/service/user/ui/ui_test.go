@@ -46,6 +46,9 @@ func TestMain(m *testing.M) {
 	router.PUT("/v1/users/:user/password", ui.ChangeUserPassword)
 
 	exitCode := m.Run()
+
+	dataStore.Close()
+
 	os.Exit(exitCode)
 }
 

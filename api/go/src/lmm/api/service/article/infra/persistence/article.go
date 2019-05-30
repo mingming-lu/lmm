@@ -1,18 +1,16 @@
 package persistence
 
 import (
+	"lmm/api/service/article/domain/viewer"
 	"time"
 
 	dsUtil "lmm/api/pkg/datastore"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/service/article/domain/repository"
 
 	"cloud.google.com/go/datastore"
 	"github.com/pkg/errors"
 )
-
-var testArticleRepo repository.ArticleRepository = &ArticleDataStore{}
 
 type ArticleDataStore struct {
 	dataStore *datastore.Client
@@ -98,4 +96,34 @@ func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.Articl
 
 func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleID) error {
 	panic("not implemented")
+}
+
+func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, id model.ArticleID) (*model.ArticleView, error) {
+	panic("TODO")
+}
+
+func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, page, count uint, filter *viewer.ArticlesFilter) (*model.ArticleListView, error) {
+	panic("TODO")
+}
+
+func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.TagView, error) {
+	q := datastore.NewQuery(dsUtil.ArticleTagKind).KeysOnly().Order("Name")
+
+	keys, err := s.dataStore.GetAll(dsUtil.MustContext(tx), q, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get all tag keys")
+	}
+
+	var tags []tag
+
+	if err := dsUtil.MustTransaction(tx).GetMulti(keys, &tags); err != nil {
+		return nil, errors.Wrap(err, "failed to get tags from keys")
+	}
+
+	items := make([]*model.TagView, len(tags), len(tags))
+	for i, tag := range tags {
+		items[i] = model.NewTagView(tag.Name)
+	}
+
+	return items, nil
 }

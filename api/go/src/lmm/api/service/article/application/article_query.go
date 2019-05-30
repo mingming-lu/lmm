@@ -2,23 +2,25 @@ package application
 
 import (
 	"context"
+	"lmm/api/pkg/transaction"
 
 	"github.com/pkg/errors"
 
 	"lmm/api/service/article/application/query"
-	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
+	"lmm/api/service/article/domain/viewer"
 	"lmm/api/util/stringutil"
 )
 
 // ArticleQueryService is a query side application
 type ArticleQueryService struct {
-	articleFinder finder.ArticleFinder
+	viewer    viewer.ArticleViewer
+	txManager transaction.Manager
 }
 
 // NewArticleQueryService is a constructor of ArticleQueryService
-func NewArticleQueryService(articleFinder finder.ArticleFinder) *ArticleQueryService {
-	return &ArticleQueryService{articleFinder: articleFinder}
+func NewArticleQueryService(viewer viewer.ArticleViewer, txManager transaction.Manager) *ArticleQueryService {
+	return &ArticleQueryService{viewer: viewer, txManager: txManager}
 }
 
 // ListArticlesByPage is used for listing articles on article index page
@@ -33,9 +35,7 @@ func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.Li
 		return nil, errors.Wrap(ErrInvalidPage, err.Error())
 	}
 
-	return app.articleFinder.ListByPage(c, count, page, finder.ArticleFilter{
-		Tag: q.Tag,
-	})
+	return nil, errors.New("not implemented")
 }
 
 // ArticleByID finds article by given id
@@ -49,6 +49,14 @@ func (app *ArticleQueryService) ArticleByID(c context.Context, rawID string) (*m
 }
 
 // AllArticleTags gets all article tags
-func (app *ArticleQueryService) AllArticleTags(c context.Context) (model.TagListView, error) {
-	return app.articleFinder.ListAllTags(c)
+func (app *ArticleQueryService) AllArticleTags(c context.Context) (tags []*model.TagView, err error) {
+	err = app.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		tags, err = app.viewer.ViewAllTags(tx)
+		if err != nil {
+			return errors.Wrap(err, "unexpect error when fetch all tags")
+		}
+		return err
+	}, &transaction.Option{ReadOnly: true})
+
+	return
 }

@@ -7,12 +7,18 @@ import (
 	"lmm/api/clock"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/domain/model"
+	"lmm/api/service/article/domain/repository"
+	"lmm/api/service/article/domain/viewer"
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
+
+var testArticleRepo repository.ArticleRepository = &ArticleDataStore{}
+
+var testArticleFinder viewer.ArticleViewer = &ArticleDataStore{}
 
 func TestArticleDataStore(t *testing.T) {
 	ctx := context.Background()
