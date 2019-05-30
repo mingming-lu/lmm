@@ -1,11 +1,12 @@
 package persistence
 
 import (
+	"time"
+
 	dsUtil "lmm/api/pkg/datastore"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
-	"time"
 
 	"cloud.google.com/go/datastore"
 	"github.com/pkg/errors"
@@ -15,6 +16,14 @@ var testArticleRepo repository.ArticleRepository = &ArticleDataStore{}
 
 type ArticleDataStore struct {
 	dataStore *datastore.Client
+	transaction.Manager
+}
+
+func NewArticleDataStore(dataStore *datastore.Client) *ArticleDataStore {
+	return &ArticleDataStore{
+		dataStore: dataStore,
+		Manager:   dsUtil.NewTransactionManager(dataStore),
+	}
 }
 
 func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*model.ArticleID, error) {
