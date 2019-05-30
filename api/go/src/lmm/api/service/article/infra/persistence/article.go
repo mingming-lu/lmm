@@ -26,14 +26,14 @@ func NewArticleDataStore(dataStore *datastore.Client) *ArticleDataStore {
 	}
 }
 
-func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*model.ArticleID, error) {
+func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (model.ArticleID, error) {
 	key := datastore.IncompleteKey(dsUtil.ArticleKind, datastore.IDKey(dsUtil.UserKind, authorID, nil))
 	keys, err := s.dataStore.AllocateIDs(tx, []*datastore.Key{key})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to allocate new article key")
+		return -1, errors.Wrap(err, "failed to allocate new article key")
 	}
 
-	return model.NewArticleID(keys[0].ID), nil
+	return model.ArticleID(keys[0].ID), nil
 }
 
 type article struct {
@@ -51,7 +51,7 @@ type tag struct {
 // Save saves article into datastore
 func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article) error {
 	userKey := datastore.IDKey(dsUtil.UserKind, model.Author().ID(), nil)
-	articleKey := datastore.IDKey(dsUtil.ArticleKind, int64(*model.ID()), userKey)
+	articleKey := datastore.IDKey(dsUtil.ArticleKind, int64(model.ID()), userKey)
 
 	dstx := dsUtil.MustTransaction(tx)
 

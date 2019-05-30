@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 
+	"lmm/api/clock"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/application/command"
 	"lmm/api/service/article/domain/model"
@@ -34,12 +35,14 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.
 	content := model.NewContent(text, nil)
 
 	err = app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		now := clock.Now()
+
 		articleID, err := app.articleRepository.NextID(tx, cmd.AuthorID)
 		if err != nil {
 			return err
 		}
 
-		article := model.NewArticle(articleID, author, content, nil)
+		article := model.NewArticle(articleID, author, content, now, now)
 
 		return app.articleRepository.Save(tx, article)
 	}, nil)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"lmm/api/clock"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/util/uuidutil"
@@ -27,7 +28,7 @@ func TestArticleDataStore(t *testing.T) {
 		articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
 			articleID, err := articleDataStore.NextID(tx, 1)
 			assert.NoError(t, err)
-			assert.NotZero(t, int64(*articleID))
+			assert.NotZero(t, int64(articleID))
 
 			return nil
 		}, nil)
@@ -40,14 +41,15 @@ func TestArticleDataStore(t *testing.T) {
 			articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
 				articleID, err := articleDataStore.NextID(tx, 1)
 				assert.NoError(t, err)
-				assert.NotZero(t, int64(*articleID))
+				assert.NotZero(t, int64(articleID))
 
 				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
 				if err != nil {
 					t.Fatal(errors.Wrap(err, "internal error"))
 				}
 
-				article = model.NewArticle(articleID, model.NewAuthor(1), model.NewContent(text, []string{}), nil)
+				now := clock.Now()
+				article = model.NewArticle(articleID, model.NewAuthor(1), model.NewContent(text, []string{}), now, now)
 				if !assert.NoError(t, articleDataStore.Save(tx, article)) || !assert.NotNil(t, article) {
 					t.Fatal("failed to save article")
 				}

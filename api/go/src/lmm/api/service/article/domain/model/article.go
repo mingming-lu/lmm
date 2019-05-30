@@ -7,10 +7,12 @@ import (
 	"lmm/api/service/base/model"
 )
 
+type ArticleID int64
+
 // Article is an aggregate root model
 type Article struct {
 	model.Entity
-	id           *ArticleID
+	id           ArticleID
 	author       *Author
 	content      *Content
 	createdAt    time.Time
@@ -18,22 +20,19 @@ type Article struct {
 }
 
 // NewArticle is a article constructor
-func NewArticle(articleID *ArticleID, author *Author, content *Content, lastModified *time.Time) *Article {
+func NewArticle(articleID ArticleID, author *Author, content *Content, createdAt, lastModified time.Time) *Article {
 	article := &Article{
-		id:      articleID,
-		author:  author,
-		content: content,
-	}
-	if lastModified == nil {
-		article.lastModified = clock.Now()
-	} else {
-		article.lastModified = *lastModified
+		id:           articleID,
+		author:       author,
+		content:      content,
+		createdAt:    createdAt,
+		lastModified: lastModified,
 	}
 	return article
 }
 
 // ID returns the id of the article
-func (a *Article) ID() *ArticleID {
+func (a *Article) ID() ArticleID {
 	return a.id
 }
 
