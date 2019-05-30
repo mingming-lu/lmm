@@ -13,6 +13,7 @@ type Article struct {
 	id           *ArticleID
 	author       *Author
 	content      *Content
+	createdAt    time.Time
 	lastModified time.Time
 }
 
@@ -52,6 +53,11 @@ func (a *Article) EditContent(content *Content) {
 		a.lastModified = clock.Now()
 	}
 	a.content = content
+}
+
+// CreatedAt time
+func (a *Article) CreatedAt() time.Time {
+	return a.createdAt
 }
 
 // LastModified time

@@ -56,7 +56,12 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 	dstx := dsUtil.MustTransaction(tx)
 
 	// save article
-	if _, err := dstx.Mutate(datastore.NewUpsert(articleKey, "TODO")); err != nil {
+	if _, err := dstx.Mutate(datastore.NewUpsert(articleKey, &article{
+		Title:        model.Content().Text().Title(),
+		Body:         model.Content().Text().Body(),
+		CreatedAt:    model.CreatedAt(),
+		LastModified: model.LastModified(),
+	})); err != nil {
 		return errors.Wrap(err, "failed to put article into datastore")
 	}
 
@@ -74,9 +79,9 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 
 	tagKeys = tagKeys[:0]
 	tags := make([]*tag, len(model.Content().Tags()), len(model.Content().Tags()))
-	for i, tag := range model.Content().Tags() {
+	for i, name := range model.Content().Tags() {
 		tagKeys = append(tagKeys, datastore.IncompleteKey(dsUtil.ArticleTagKind, articleKey))
-		tags[i].Name = tag
+		tags[i] = &tag{Name: name}
 	}
 
 	// save all tags

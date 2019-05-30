@@ -34,20 +34,38 @@ func TestArticleDataStore(t *testing.T) {
 	})
 
 	t.Run("Save", func(t *testing.T) {
-		articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
-			articleID, err := articleDataStore.NextID(tx, 1)
-			assert.NoError(t, err)
-			assert.NotZero(t, int64(*articleID))
+		var article *model.Article
 
-			text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
-			if err != nil {
-				t.Fatal(errors.Wrap(err, "internal error"))
-			}
+		t.Run("Insert", func(t *testing.T) {
+			articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+				articleID, err := articleDataStore.NextID(tx, 1)
+				assert.NoError(t, err)
+				assert.NotZero(t, int64(*articleID))
 
-			article := model.NewArticle(articleID, model.NewAuthor(1), model.NewContent(text, []string{}), nil)
-			assert.NoError(t, articleDataStore.Save(tx, article))
+				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
+				if err != nil {
+					t.Fatal(errors.Wrap(err, "internal error"))
+				}
 
-			return nil
-		}, nil)
+				article = model.NewArticle(articleID, model.NewAuthor(1), model.NewContent(text, []string{}), nil)
+				if !assert.NoError(t, articleDataStore.Save(tx, article)) || !assert.NotNil(t, article) {
+					t.Fatal("failed to save article")
+				}
+
+				return nil
+			}, nil)
+		})
+
+		t.Run("Update", func(t *testing.T) {
+			assert.NoError(t, articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
+				if err != nil {
+					t.Fatal(errors.Wrap(err, "internal error"))
+				}
+				article.EditContent(model.NewContent(text, []string{"tag1", "tag2"}))
+
+				return articleDataStore.Save(tx, article)
+			}, nil))
+		})
 	})
 }
