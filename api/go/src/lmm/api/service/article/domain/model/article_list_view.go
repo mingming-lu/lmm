@@ -1,10 +1,7 @@
 package model
 
-import "lmm/api/service/base/model"
-
 // ArticleListView is the model used to view article list
 type ArticleListView struct {
-	model.ValueObject
 	items       []*ArticleListViewItem
 	page        uint
 	perPage     uint

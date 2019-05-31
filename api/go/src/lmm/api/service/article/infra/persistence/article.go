@@ -149,8 +149,43 @@ func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, linkName stri
 	return s.FindByID(tx, model.NewArticleID(k.ID, k.Parent.ID))
 }
 
+type articleItem struct {
+	ID        *datastore.Key `datastore:"__key__"`
+	LinkName  string         `datastore:"LinkName"`
+	Title     string         `datastore:"Title"`
+	CreatedAt int64          `datastore:"CreatedAt"`
+}
+
 func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, page, count uint, filter *viewer.ArticlesFilter) (*model.ArticleListView, error) {
-	panic("TODO")
+	counting := datastore.NewQuery(dsUtil.ArticleKind)
+	paging := datastore.NewQuery(dsUtil.ArticleKind).Project("__key__", "LinkName", "Title", "CreatedAt").Order("CreatedAt").Offset(int((page - 1) * count)).Limit(int(count) + 1)
+
+	total, err := s.dataStore.Count(tx, counting)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get totle number of articles")
+	}
+
+	var entities []*articleItem
+	if _, err := s.dataStore.GetAll(tx, paging, &entities); err != nil {
+		return nil, errors.Wrap(err, "internal error")
+	}
+
+	hasNextPage := false
+	if len(entities) > int(count) {
+		hasNextPage = true
+		entities = entities[:int(count)]
+	}
+
+	items := make([]*model.ArticleListViewItem, len(entities), len(entities))
+	for i, entity := range entities {
+		item, err := model.NewArticleListViewItem(entity.ID.ID, entity.LinkName, entity.Title, time.Unix(entity.CreatedAt, 0))
+		if err != nil {
+			return nil, errors.Wrap(err, "internal error")
+		}
+		items[i] = item
+	}
+
+	return model.NewArticleListView(items, page, count, uint(total), hasNextPage), nil
 }
 
 func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.TagView, error) {

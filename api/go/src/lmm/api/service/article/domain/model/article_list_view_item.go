@@ -2,32 +2,33 @@ package model
 
 import (
 	"time"
-
-	"lmm/api/service/base/model"
 )
 
 // ArticleListViewItem is the item struct of AriticleListView
 type ArticleListViewItem struct {
-	model.ValueObject
-	id     *ArticleID
-	title  string
-	postAt time.Time
+	id       int64
+	linkName string
+	title    string
+	postAt   time.Time
 }
 
 // NewArticleListViewItem creates a new item ArticleListViewItem
-func NewArticleListViewItem(rawArticleID string, title string, postAt time.Time) (*ArticleListViewItem, error) {
-	panic("TODO")
-	// articleID, err := NewArticleID(rawArticleID)
-	// if err != nil {
-	// 	return nil, errors.Wrap(err, rawArticleID)
-	// }
-
-	// return &ArticleListViewItem{id: articleID, title: title, postAt: postAt}, nil
+func NewArticleListViewItem(id int64, linkName, title string, postAt time.Time) (*ArticleListViewItem, error) {
+	return &ArticleListViewItem{
+		id:       id,
+		linkName: linkName,
+		title:    title,
+		postAt:   postAt,
+	}, nil
 }
 
 // ID returns article's id
-func (i *ArticleListViewItem) ID() *ArticleID {
+func (i *ArticleListViewItem) ID() int64 {
 	return i.id
+}
+
+func (i *ArticleListViewItem) LinkName() string {
+	return i.linkName
 }
 
 // Title gets article's title

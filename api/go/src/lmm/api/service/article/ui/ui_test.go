@@ -207,7 +207,7 @@ func TestPutArticles(t *testing.T) {
 	}{
 		"Success": {
 			ArticleID:     articleID,
-			ReqLinkName:   "awesome-link-name",
+			ReqLinkName:   uuid.New().String(),
 			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       []string{"foo", "bar"},
