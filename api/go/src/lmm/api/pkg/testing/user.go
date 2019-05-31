@@ -2,8 +2,13 @@ package testing
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"regexp"
 	"time"
 
+	"lmm/api/http"
+	"lmm/api/pkg/auth"
 	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/infra/service"
 	"lmm/api/util/uuidutil"
@@ -21,13 +26,19 @@ var (
 
 // User used for testing
 type User struct {
-	ID             int64     `datastore:"-"`
-	Name           string    `datastore:"Name"`
-	RawPassword    string    `datastore:"Password"`
-	HashedPassword string    `datastore:"-"`
-	RawToken       string    `datastore:"Token"`
-	AccessToken    string    `datastore:"-"`
-	RegisteredAt   time.Time `datastore:"RegisteredAt"`
+	Key            *datastore.Key `datastore:"__key__"`
+	Name           string         `datastore:"Name"`
+	Role           string         `datastore:"Role"`
+	RawPassword    string         `datastore:"Password"`
+	HashedPassword string         `datastore:"-"`
+	RawToken       string         `datastore:"Token"`
+	AccessToken    string         `datastore:"-"`
+	RegisteredAt   time.Time      `datastore:"RegisteredAt"`
+}
+
+// ID is a shortcut for user.Key.ID
+func (user *User) ID() int64 {
+	return user.Key.ID
 }
 
 // NewUser create a new user
@@ -48,6 +59,7 @@ func NewUser(ctx context.Context, dataStore *datastore.Client) *User {
 
 	user := &User{
 		Name:           username,
+		Role:           "Ordinary",
 		RawPassword:    password,
 		HashedPassword: hashedPassword,
 		RawToken:       token,
