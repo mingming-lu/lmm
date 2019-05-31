@@ -182,7 +182,7 @@ func (ui *UI) buildListArticleQueryFromContext(c http.Context) query.ListArticle
 func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAdapter {
 	items := make([]articleListItem, len(view.Items()), len(view.Items()))
 	for i, item := range view.Items() {
-		items[i].ID = fmt.Sprintf("%s", item.ID())
+		items[i].ID = fmt.Sprintf("%d", item.ID())
 		items[i].Title = item.Title()
 		items[i].PostAt = item.PostAt().Unix()
 	}
@@ -246,7 +246,7 @@ func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
 		tags[i].Name = tag
 	}
 	return &articleViewResponse{
-		ID:           fmt.Sprintf("%s", view.ID()),
+		ID:           fmt.Sprintf("%d", view.ID()),
 		Title:        view.Content().Text().Title(),
 		Body:         view.Content().Text().Body(),
 		PostAt:       view.PostAt().Unix(),
