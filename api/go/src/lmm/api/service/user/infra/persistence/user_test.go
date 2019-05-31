@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"lmm/api/clock"
+	_ "lmm/api/clock/testing"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/factory"
@@ -39,17 +39,9 @@ func mustRandomUser(userDataStore *UserDataStore) *model.User {
 	return user
 }
 
-type testClock struct{}
-
-func (c testClock) Now() time.Time {
-	return time.Now().Truncate(1 * time.Second)
-}
-
 func TestUserDataStore(t *testing.T) {
 	c, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
-	clock.DefaultClock = &testClock{}
 
 	dataStore, err := datastore.NewClient(c, "")
 	if err != nil {
