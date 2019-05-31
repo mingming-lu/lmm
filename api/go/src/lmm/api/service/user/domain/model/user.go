@@ -16,6 +16,9 @@ var (
 	patternUserName = regexp.MustCompile(`^[a-zA-Z]{1}[0-9a-zA-Z_-]{2,17}$`)
 )
 
+// UserID type
+type UserID int64
+
 // UserDescriptor describes user's basic infomation
 type UserDescriptor struct {
 	model.Entity
