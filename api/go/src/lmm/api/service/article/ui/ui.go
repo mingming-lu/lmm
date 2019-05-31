@@ -207,7 +207,7 @@ func (ui *UI) articleListViewToJSONV2(c http.Context, view *model.ArticleListVie
 		Total:    view.Total(),
 	}
 
-	last := uint(math.Ceil(
+	last := int(math.Ceil(
 		float64(adapterV2.Total) / float64(adapterV2.PerPage),
 	))
 
@@ -227,8 +227,9 @@ func (ui *UI) articleListViewToJSONV2(c http.Context, view *model.ArticleListVie
 	return adapterV2
 }
 
-func buildURI(base string, page, perPage uint) *string {
-	return stringutil.Pointer(fmt.Sprintf("%s?page=%d&perPage=%d", base, page, perPage))
+func buildURI(path string, page, perPage int) *string {
+	uri := fmt.Sprintf("%s?page=%d&perPage=%d", path, page, perPage)
+	return &uri
 }
 
 // GetArticle handles GET /v1/articles/:articleID

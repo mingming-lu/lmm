@@ -8,7 +8,7 @@ import (
 // ArticleViewer defines an interface to query side
 type ArticleViewer interface {
 	ViewArticle(tx transaction.Transaction, linkName string) (*model.Article, error)
-	ViewArticles(tx transaction.Transaction, count, page uint, filter *ArticlesFilter) (*model.ArticleListView, error)
+	ViewArticles(tx transaction.Transaction, count, page int, filter *ArticlesFilter) (*model.ArticleListView, error)
 	ViewAllTags(tx transaction.Transaction) ([]*model.TagView, error)
 }
 

@@ -156,9 +156,9 @@ type articleItem struct {
 	CreatedAt int64          `datastore:"CreatedAt"`
 }
 
-func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, page, count uint, filter *viewer.ArticlesFilter) (*model.ArticleListView, error) {
+func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page int, filter *viewer.ArticlesFilter) (*model.ArticleListView, error) {
 	counting := datastore.NewQuery(dsUtil.ArticleKind)
-	paging := datastore.NewQuery(dsUtil.ArticleKind).Project("__key__", "LinkName", "Title", "CreatedAt").Order("CreatedAt").Offset(int((page - 1) * count)).Limit(int(count) + 1)
+	paging := datastore.NewQuery(dsUtil.ArticleKind).Project("__key__", "LinkName", "Title", "CreatedAt").Order("-CreatedAt").Limit(count + 1).Offset((page - 1) * count)
 
 	total, err := s.dataStore.Count(tx, counting)
 	if err != nil {

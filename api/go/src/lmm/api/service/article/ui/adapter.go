@@ -14,9 +14,9 @@ type articleListAdapter struct {
 
 type articleListAdapterV2 struct {
 	Articles  []articleListItem `json:"articles"`
-	Page      uint              `json:"page"`
-	PerPage   uint              `json:"perPage"`
-	Total     uint              `json:"total"`
+	Page      int               `json:"page"`
+	PerPage   int               `json:"perPage"`
+	Total     int               `json:"total"`
 	PrevPage  *string           `json:"prevPage"`
 	NextPage  *string           `json:"nextPage"`
 	FirstPage *string           `json:"firstPage"`
