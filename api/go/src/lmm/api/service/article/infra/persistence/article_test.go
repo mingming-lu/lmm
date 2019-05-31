@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"lmm/api/service/article/domain"
 	"testing"
 
 	"lmm/api/clock"
@@ -14,6 +15,7 @@ import (
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -81,12 +83,13 @@ func TestArticleDataStore(t *testing.T) {
 		})
 
 		t.Run("Update", func(t *testing.T) {
+			newLinkName := uuid.New().String()
 			assert.NoError(t, articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
 				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
 				if err != nil {
 					t.Fatal(errors.Wrap(err, "internal error"))
 				}
-				article.ChangeLinkName("new-link-name-of-this-article")
+				article.ChangeLinkName(newLinkName)
 				article.EditContent(model.NewContent(text, []string{"tag1", "tag2"}))
 
 				return articleDataStore.Save(tx, article)
@@ -104,6 +107,31 @@ func TestArticleDataStore(t *testing.T) {
 					return nil
 				}, nil)
 			})
+
+			t.Run("ViewArticle", func(t *testing.T) {
+				articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+					articleFound, err := articleDataStore.ViewArticle(tx, newLinkName)
+					if !assert.NoError(t, err) {
+						t.Fatal(err.Error())
+					}
+
+					assert.EqualValues(t, article, articleFound)
+
+					return nil
+				}, &transaction.Option{ReadOnly: true})
+			})
+		})
+	})
+
+	t.Run("ViewArticle", func(t *testing.T) {
+		t.Run("NotFound", func(t *testing.T) {
+			articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+				articleFound, err := articleDataStore.ViewArticle(tx, uuid.New().String())
+				assert.Error(t, domain.ErrNoSuchArticle, err)
+				assert.Nil(t, articleFound)
+
+				return nil
+			}, &transaction.Option{ReadOnly: true})
 		})
 	})
 }

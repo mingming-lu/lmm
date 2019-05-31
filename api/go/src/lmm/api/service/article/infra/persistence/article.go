@@ -25,6 +25,12 @@ func NewArticleDataStore(dataStore *datastore.Client) *ArticleDataStore {
 	}
 }
 
+func (s *ArticleDataStore) buildArticleKey(articleID, authorID int64) *datastore.Key {
+	userKey := datastore.IDKey(dsUtil.UserKind, authorID, nil)
+
+	return datastore.IDKey(dsUtil.ArticleKind, articleID, userKey)
+}
+
 func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*model.ArticleID, error) {
 	key := datastore.IncompleteKey(dsUtil.ArticleKind, datastore.IDKey(dsUtil.UserKind, authorID, nil))
 	keys, err := s.dataStore.AllocateIDs(tx, []*datastore.Key{key})
@@ -50,8 +56,7 @@ type tag struct {
 
 // Save saves article into datastore
 func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article) error {
-	userKey := datastore.IDKey(dsUtil.UserKind, model.ID().AuthorID(), nil)
-	articleKey := datastore.IDKey(dsUtil.ArticleKind, model.ID().ID(), userKey)
+	articleKey := s.buildArticleKey(model.ID().ID(), model.ID().AuthorID())
 
 	dstx := dsUtil.MustTransaction(tx)
 
@@ -94,8 +99,7 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 }
 
 func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.ArticleID) (*model.Article, error) {
-	userKey := datastore.IDKey(dsUtil.UserKind, id.AuthorID(), nil)
-	articleKey := datastore.IDKey(dsUtil.ArticleKind, id.ID(), userKey)
+	articleKey := s.buildArticleKey(id.ID(), id.AuthorID())
 
 	dsTx := dsUtil.MustTransaction(tx)
 	data := article{}
@@ -129,8 +133,20 @@ func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleI
 	panic("not implemented")
 }
 
-func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, id model.ArticleID) (*model.ArticleView, error) {
-	panic("TODO")
+func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, linkName string) (*model.Article, error) {
+	q := datastore.NewQuery(dsUtil.ArticleKind).KeysOnly().Filter("LinkName =", linkName).Limit(1)
+
+	keys, err := s.dataStore.GetAll(tx, q, nil)
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrNoSuchArticle, err.Error())
+	}
+	if len(keys) == 0 {
+		return nil, domain.ErrNoSuchArticle
+	}
+
+	k := keys[0]
+
+	return s.FindByID(tx, model.NewArticleID(k.ID, k.Parent.ID))
 }
 
 func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, page, count uint, filter *viewer.ArticlesFilter) (*model.ArticleListView, error) {

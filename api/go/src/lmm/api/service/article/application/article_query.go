@@ -2,10 +2,10 @@ package application
 
 import (
 	"context"
-	"lmm/api/pkg/transaction"
 
 	"github.com/pkg/errors"
 
+	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/application/query"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/viewer"
@@ -38,14 +38,13 @@ func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.Li
 	return nil, errors.New("not implemented")
 }
 
-// ArticleByID finds article by given id
-func (app *ArticleQueryService) ArticleByID(c context.Context, rawID string) (*model.ArticleView, error) {
-	panic("TODO")
-	// articleID, err := model.NewArticleID(rawID)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return app.articleFinder.FindByID(c, articleID)
+func (app *ArticleQueryService) ArticleByLinkName(c context.Context, linkName string) (article *model.Article, err error) {
+	err = app.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		article, err = app.viewer.ViewArticle(tx, linkName)
+		return err
+	}, &transaction.Option{ReadOnly: true})
+
+	return
 }
 
 // AllArticleTags gets all article tags

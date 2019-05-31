@@ -233,7 +233,7 @@ func buildURI(base string, page, perPage uint) *string {
 
 // GetArticle handles GET /v1/articles/:articleID
 func (ui *UI) GetArticle(c http.Context) {
-	view, err := ui.appService.Query().ArticleByID(c,
+	view, err := ui.appService.Query().ArticleByLinkName(c,
 		c.Request().PathParam("articleID"),
 	)
 	switch errors.Cause(err) {
@@ -246,17 +246,17 @@ func (ui *UI) GetArticle(c http.Context) {
 	}
 }
 
-func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
-	tags := make([]articleViewTag, len(view.Content().Tags()), len(view.Content().Tags()))
-	for i, tag := range view.Content().Tags() {
+func (ui *UI) articleViewToJSON(model *model.Article) *articleViewResponse {
+	tags := make([]articleViewTag, len(model.Content().Tags()), len(model.Content().Tags()))
+	for i, tag := range model.Content().Tags() {
 		tags[i].Name = tag
 	}
 	return &articleViewResponse{
-		ID:           fmt.Sprintf("%d", view.ID()),
-		Title:        view.Content().Text().Title(),
-		Body:         view.Content().Text().Body(),
-		PostAt:       view.PostAt().Unix(),
-		LastEditedAt: view.LastEditedAt().Unix(),
+		ID:           fmt.Sprintf("%d", model.ID().ID()),
+		Title:        model.Content().Text().Title(),
+		Body:         model.Content().Text().Body(),
+		PostAt:       model.CreatedAt().Unix(),
+		LastEditedAt: model.LastModified().Unix(),
 		Tags:         tags,
 	}
 }
