@@ -24,7 +24,7 @@ func NewArticleQueryService(viewer viewer.ArticleViewer, txManager transaction.M
 }
 
 // ListArticlesByPage is used for listing articles on article index page
-func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.ListArticleQuery) (*model.ArticleListView, error) {
+func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.ListArticleQuery) (articles *model.ArticleListView, err error) {
 	count, err := stringutil.ParseUint(q.Count)
 	if err != nil || count < 1 {
 		return nil, errors.Wrap(ErrInvalidCount, err.Error())
@@ -35,7 +35,13 @@ func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.Li
 		return nil, errors.Wrap(ErrInvalidPage, err.Error())
 	}
 
-	return nil, errors.New("not implemented")
+	err = app.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		articles, err = app.viewer.ViewArticles(tx, count, page, nil)
+
+		return err
+	}, &transaction.Option{ReadOnly: true})
+
+	return
 }
 
 func (app *ArticleQueryService) ArticleByLinkName(c context.Context, linkName string) (article *model.Article, err error) {

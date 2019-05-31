@@ -46,7 +46,7 @@ type article struct {
 	LinkName     string         `datastore:"LinkName"`
 	Title        string         `datastore:"Title"`
 	Body         string         `datastore:"Body"`
-	CreatedAt    time.Time      `datastore:"Created_at"`
+	CreatedAt    time.Time      `datastore:"CreatedAt"`
 	LastModified time.Time      `datastore:"LastModified"`
 }
 
@@ -162,7 +162,7 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, page, count 
 
 	total, err := s.dataStore.Count(tx, counting)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get totle number of articles")
+		return nil, errors.Wrap(err, "failed to get total number of articles")
 	}
 
 	var entities []*articleItem
@@ -196,9 +196,9 @@ func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.Tag
 		return nil, errors.Wrap(err, "failed to get all tag keys")
 	}
 
-	var tags []tag
+	tags := make([]tag, len(keys), len(keys))
 
-	if err := dsUtil.MustTransaction(tx).GetMulti(keys, &tags); err != nil {
+	if err := dsUtil.MustTransaction(tx).GetMulti(keys, tags); err != nil {
 		return nil, errors.Wrap(err, "failed to get tags from keys")
 	}
 
