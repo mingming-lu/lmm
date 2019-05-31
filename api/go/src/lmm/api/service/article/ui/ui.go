@@ -70,7 +70,7 @@ func (ui *UI) PostNewArticle(c http.Context) {
 	})
 	switch errors.Cause(err) {
 	case nil:
-		c.Header("Location", fmt.Sprintf("/v1/articles/%d", int64(articleID)))
+		c.Header("Location", fmt.Sprintf("/v1/articles/%d", articleID.ID()))
 		c.String(http.StatusCreated, "Success")
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
@@ -83,11 +83,17 @@ func (ui *UI) PostNewArticle(c http.Context) {
 	}
 }
 
-// EditArticle handles PUT /1/article/:articleID
-func (ui *UI) EditArticle(c http.Context) {
-	userName := c.Request().Header.Get("X-LMM-ID")
-	if userName == "" {
+// PutV1Articles handles PUT /v1/article/:articleID
+func (ui *UI) PutV1Articles(c http.Context) {
+	user, ok := auth.FromContext(c)
+	if !ok {
 		http.Unauthorized(c)
+		return
+	}
+
+	articleID, err := stringutil.ParseInt64(c.Request().PathParam("articleID"))
+	if err != nil {
+		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 		return
 	}
 
@@ -102,40 +108,39 @@ func (ui *UI) EditArticle(c http.Context) {
 		return
 	}
 
-	// err := ui.appService.Command().EditArticle(c,
-	// 	&command.EditArticle{
-	// 		UserName:        userName,
-	// 		TargetArticleID: c.Request().PathParam("articleID"),
-	// 		AliasArticleID:  article.AliasID,
-	// 		Title:           *article.Title,
-	// 		Body:            *article.Body,
-	// 		TagNames:        article.Tags,
-	// 	},
-	// )
-	// switch errors.Cause(err) {
-	// case nil:
-	// 	http.NoContent(c)
+	err = ui.appService.Command().EditArticle(c, command.EditArticle{
+		UserID:    user.ID,
+		ArticleID: articleID,
+		Title:     *article.Title,
+		Body:      *article.Body,
+		Tags:      article.Tags,
+	})
 
-	// case
-	// 	domain.ErrArticleTitleTooLong,
-	// 	domain.ErrEmptyArticleTitle,
-	// 	domain.ErrInvalidArticleTitle,
-	// 	domain.ErrInvalidAliasArticleID:
+	original := errors.Cause(err)
+	switch original {
+	case nil:
+		http.NoContent(c)
 
-	// 	c.String(http.StatusBadRequest, err.Error())
+	case
+		domain.ErrArticleTitleTooLong,
+		domain.ErrEmptyArticleTitle,
+		domain.ErrInvalidArticleTitle,
+		domain.ErrInvalidAliasArticleID:
 
-	// case domain.ErrNoSuchArticle, domain.ErrInvalidArticleID:
-	// 	c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
+		c.String(http.StatusBadRequest, original.Error())
 
-	// case domain.ErrNoSuchUser:
-	// 	http.Unauthorized(c)
+	case domain.ErrNoSuchArticle, domain.ErrInvalidArticleID:
+		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 
-	// case domain.ErrNotArticleAuthor:
-	// 	c.String(http.StatusForbidden, err.Error())
+	case domain.ErrNoSuchUser:
+		http.Unauthorized(c)
 
-	// default:
-	// 	http.Log().Panic(c, err.Error())
-	// }
+	case domain.ErrNotArticleAuthor:
+		c.String(http.StatusForbidden, original.Error())
+
+	default:
+		http.Log().Panic(c, err.Error())
+	}
 }
 
 func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {

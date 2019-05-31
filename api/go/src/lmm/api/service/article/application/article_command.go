@@ -8,6 +8,8 @@ import (
 	"lmm/api/service/article/application/command"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
+
+	"github.com/pkg/errors"
 )
 
 // ArticleCommandService is a command side application
@@ -25,15 +27,13 @@ func NewArticleCommandService(articleRepository repository.ArticleRepository, tr
 }
 
 // PostNewArticle is used for posting a new article
-func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.PostArticle) (id model.ArticleID, err error) {
-	author := model.NewAuthor(cmd.AuthorID)
-
+func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.PostArticle) (id *model.ArticleID, err error) {
 	text, err := model.NewText(cmd.Title, cmd.Body)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
-	content := model.NewContent(text, nil)
+	content := model.NewContent(text, cmd.Tags)
 
 	err = app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		now := clock.Now()
@@ -43,10 +43,33 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.
 			return err
 		}
 
-		article := model.NewArticle(id, author, content, now, now)
+		article := model.NewArticle(id, content, now, now)
 
 		return app.articleRepository.Save(tx, article)
 	}, nil)
 
 	return
+}
+
+// EditArticle command
+func (app *ArticleCommandService) EditArticle(c context.Context, cmd command.EditArticle) error {
+	articleID := model.NewArticleID(cmd.ArticleID, cmd.UserID)
+
+	text, err := model.NewText(cmd.Title, cmd.Body)
+	if err != nil {
+		return errors.Wrap(err, "invalid text")
+	}
+
+	content := model.NewContent(text, cmd.Tags)
+
+	return app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		article, err := app.articleRepository.FindByID(tx, articleID)
+		if err != nil {
+			return errors.Wrap(err, "article not found")
+		}
+
+		article.EditContent(content)
+
+		return app.articleRepository.Save(tx, article)
+	}, nil)
 }

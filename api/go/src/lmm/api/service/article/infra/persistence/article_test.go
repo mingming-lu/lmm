@@ -34,7 +34,8 @@ func TestArticleDataStore(t *testing.T) {
 		articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
 			articleID, err := articleDataStore.NextID(tx, 1)
 			assert.NoError(t, err)
-			assert.NotZero(t, int64(articleID))
+			assert.NotZero(t, articleID.ID())
+			assert.Equal(t, articleID.AuthorID(), int64(1))
 
 			return nil
 		}, nil)
@@ -47,7 +48,7 @@ func TestArticleDataStore(t *testing.T) {
 			articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
 				articleID, err := articleDataStore.NextID(tx, 1)
 				assert.NoError(t, err)
-				assert.NotZero(t, int64(articleID))
+				assert.NotZero(t, articleID.ID())
 
 				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
 				if err != nil {
@@ -55,7 +56,7 @@ func TestArticleDataStore(t *testing.T) {
 				}
 
 				now := clock.Now()
-				article = model.NewArticle(articleID, model.NewAuthor(1), model.NewContent(text, []string{}), now, now)
+				article = model.NewArticle(articleID, model.NewContent(text, []string{}), now, now)
 				if !assert.NoError(t, articleDataStore.Save(tx, article)) || !assert.NotNil(t, article) {
 					t.Fatal("failed to save article")
 				}

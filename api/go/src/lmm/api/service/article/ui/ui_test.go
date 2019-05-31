@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http/httptest"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -38,11 +39,11 @@ func TestMain(m *testing.M) {
 
 	router = http.NewRouter()
 
-	// TODO
 	repo := persistence.NewArticleDataStore(dataStore)
 	ui := NewUI(repo, repo, repo)
 
 	router.POST("/v1/articles", testUtil.BearerAuth(dataStore, ui.PostNewArticle))
+	router.PUT("/v1/articles/:articleID", testUtil.BearerAuth(dataStore, ui.PutV1Articles))
 
 	code := m.Run()
 
@@ -173,6 +174,165 @@ func TestPostV1Articles(t *testing.T) {
 	}
 }
 
+func TestPutArticles(t *testing.T) {
+	c := context.Background()
+
+	user := testUtil.NewUser(c, dataStore)
+
+	res := postV1Articles(
+		http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+		postArticleAdapter{
+			Title: stringutil.Pointer("title"),
+			Body:  stringutil.Pointer("body"),
+			Tags:  []string{"tag"},
+		},
+	)
+
+	if res.Code != http.StatusCreated {
+		t.Fatal("failed to create test article data")
+	}
+
+	groups := regexp.MustCompile(`^/v1/articles/(.+)$`).FindStringSubmatch(res.Header().Get("Location"))
+	articleID := groups[1]
+
+	cases := map[string]struct {
+		ArticleID     string
+		ReqAliasID    string
+		ReqTitle      *string
+		ReqBody       *string
+		ReqTags       []string
+		ReqHeaders    http.Header
+		ResStatusCode int
+		ResBody       string
+	}{
+		"Success": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       []string{"foo", "bar"},
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+			ResStatusCode: http.StatusNoContent,
+			ResBody:       "",
+		},
+		"NoTags": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+			ResStatusCode: http.StatusNoContent,
+			ResBody:       "",
+		},
+		"Unauthorized": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer("dummy"),
+			ReqBody:       stringutil.Pointer("dummy"),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    nil,
+			ResStatusCode: http.StatusUnauthorized,
+			ResBody:       http.StatusText(http.StatusUnauthorized),
+		},
+		"NotAuthor": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer("dummy"),
+			ReqBody:       stringutil.Pointer("dummy"),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testUtil.NewUser(c, dataStore).AccessToken}},
+			ResStatusCode: http.StatusNotFound,
+			ResBody:       domain.ErrNoSuchArticle.Error(),
+		},
+		"NotFound": {
+			ArticleID:     "notfound",
+			ReqTitle:      stringutil.Pointer("dummy"),
+			ReqBody:       stringutil.Pointer("dummy"),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testUtil.NewUser(c, dataStore).AccessToken}},
+			ResStatusCode: http.StatusNotFound,
+			ResBody:       domain.ErrNoSuchArticle.Error(),
+		},
+		"InvalidArticleID": {
+			ArticleID:     "!nv@lidchrcter$",
+			ReqTitle:      stringutil.Pointer("dummy"),
+			ReqBody:       stringutil.Pointer("dummy"),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testUtil.NewUser(c, dataStore).AccessToken}},
+			ResStatusCode: http.StatusNotFound,
+			ResBody:       domain.ErrNoSuchArticle.Error(),
+		},
+		"TitleRequired": {
+			ArticleID:     articleID,
+			ReqTitle:      nil,
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       errTitleRequired.Error(),
+		},
+		"BodyRequired": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:       nil,
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       errBodyRequired.Error(),
+		},
+		"TagsRequired": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       nil,
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       errTagsRequired.Error(),
+		},
+		"EmptyTitle": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer(""),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       domain.ErrEmptyArticleTitle.Error(),
+		},
+		"InvalidTitle": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer("!@#$"),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       domain.ErrInvalidArticleTitle.Error(),
+		},
+		"LongTitle": {
+			ArticleID:     articleID,
+			ReqTitle:      stringutil.Pointer(strings.Repeat("t", 141)),
+			ReqBody:       stringutil.Pointer(uuid.New().String()),
+			ReqTags:       make([]string, 0),
+			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
+			ResStatusCode: http.StatusBadRequest,
+			ResBody:       domain.ErrArticleTitleTooLong.Error(),
+		},
+	}
+
+	for testName, testCase := range cases {
+		t.Run(testName, func(t *testing.T) {
+			res := putV1Articles(
+				testCase.ArticleID,
+				testCase.ReqHeaders,
+				postArticleAdapter{
+					AliasID: testCase.ReqAliasID,
+					Title:   testCase.ReqTitle,
+					Body:    testCase.ReqBody,
+					Tags:    testCase.ReqTags,
+				},
+			)
+			assert.Equal(t, testCase.ResStatusCode, res.Code)
+			assert.Equal(t, testCase.ResBody, res.Body.String())
+		})
+	}
+}
+
 func postV1Articles(header http.Header, body postArticleAdapter) *httptest.ResponseRecorder {
 	b, err := json.Marshal(body)
 	if err != nil {
@@ -180,6 +340,25 @@ func postV1Articles(header http.Header, body postArticleAdapter) *httptest.Respo
 	}
 
 	req := httptest.NewRequest("POST", "/v1/articles", bytes.NewReader(b))
+	for key, values := range header {
+		for _, value := range values {
+			req.Header.Add(key, value)
+		}
+	}
+	res := httptest.NewRecorder()
+
+	router.ServeHTTP(res, req)
+
+	return res
+}
+
+func putV1Articles(articleID string, header http.Header, body postArticleAdapter) *httptest.ResponseRecorder {
+	b, err := json.Marshal(body)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to decode to json"))
+	}
+
+	req := httptest.NewRequest("PUT", "/v1/articles/"+articleID, bytes.NewReader(b))
 	for key, values := range header {
 		for _, value := range values {
 			req.Header.Add(key, value)

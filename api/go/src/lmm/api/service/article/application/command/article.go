@@ -10,10 +10,9 @@ type PostArticle struct {
 
 // EditArticle command
 type EditArticle struct {
-	UserName        string
-	TargetArticleID string
-	AliasArticleID  string
-	Title           string
-	Body            string
-	TagNames        []string
+	UserID    int64
+	ArticleID int64
+	Title     string
+	Body      string
+	Tags      []string
 }

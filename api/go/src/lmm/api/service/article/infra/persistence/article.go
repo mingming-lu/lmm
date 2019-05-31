@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/viewer"
 	"time"
 
@@ -24,14 +25,14 @@ func NewArticleDataStore(dataStore *datastore.Client) *ArticleDataStore {
 	}
 }
 
-func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (model.ArticleID, error) {
+func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*model.ArticleID, error) {
 	key := datastore.IncompleteKey(dsUtil.ArticleKind, datastore.IDKey(dsUtil.UserKind, authorID, nil))
 	keys, err := s.dataStore.AllocateIDs(tx, []*datastore.Key{key})
 	if err != nil {
-		return -1, errors.Wrap(err, "failed to allocate new article key")
+		return nil, errors.Wrap(err, "failed to allocate new article key")
 	}
 
-	return model.ArticleID(keys[0].ID), nil
+	return model.NewArticleID(keys[0].ID, authorID), nil
 }
 
 type article struct {
@@ -48,8 +49,8 @@ type tag struct {
 
 // Save saves article into datastore
 func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article) error {
-	userKey := datastore.IDKey(dsUtil.UserKind, model.Author().ID(), nil)
-	articleKey := datastore.IDKey(dsUtil.ArticleKind, int64(model.ID()), userKey)
+	userKey := datastore.IDKey(dsUtil.UserKind, model.ID().AuthorID(), nil)
+	articleKey := datastore.IDKey(dsUtil.ArticleKind, model.ID().ID(), userKey)
 
 	dstx := dsUtil.MustTransaction(tx)
 
@@ -91,7 +92,22 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 }
 
 func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.ArticleID) (*model.Article, error) {
-	panic("not implemented")
+	userKey := datastore.IDKey(dsUtil.UserKind, id.AuthorID(), nil)
+	articleKey := datastore.IDKey(dsUtil.ArticleKind, id.ID(), userKey)
+
+	data := article{}
+	if err := dsUtil.MustTransaction(tx).Get(articleKey, &data); err != nil {
+		return nil, errors.Wrap(domain.ErrNoSuchArticle, err.Error())
+	}
+
+	text, err := model.NewText(data.Title, data.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "internal error")
+	}
+
+	content := model.NewContent(text, nil)
+
+	return model.NewArticle(id, content, data.CreatedAt, data.LastModified), nil
 }
 
 func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleID) error {
