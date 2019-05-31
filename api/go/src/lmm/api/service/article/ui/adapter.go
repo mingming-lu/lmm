@@ -1,10 +1,10 @@
 package ui
 
 type postArticleAdapter struct {
-	AliasID string   `json:"alias_id"`
-	Title   *string  `json:"title"`
-	Body    *string  `json:"body"`
-	Tags    []string `json:"tags"`
+	LinkName *string  `json:"link_name"`
+	Title    *string  `json:"title"`
+	Body     *string  `json:"body"`
+	Tags     []string `json:"tags"`
 }
 
 type articleListAdapter struct {

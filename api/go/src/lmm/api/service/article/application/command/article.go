@@ -12,6 +12,7 @@ type PostArticle struct {
 type EditArticle struct {
 	UserID    int64
 	ArticleID int64
+	LinkName  string
 	Title     string
 	Body      string
 	Tags      []string

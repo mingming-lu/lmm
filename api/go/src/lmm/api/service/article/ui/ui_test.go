@@ -197,7 +197,7 @@ func TestPutArticles(t *testing.T) {
 
 	cases := map[string]struct {
 		ArticleID     string
-		ReqAliasID    string
+		ReqLinkName   string
 		ReqTitle      *string
 		ReqBody       *string
 		ReqTags       []string
@@ -207,6 +207,7 @@ func TestPutArticles(t *testing.T) {
 	}{
 		"Success": {
 			ArticleID:     articleID,
+			ReqLinkName:   "awesome-link-name",
 			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       []string{"foo", "bar"},
@@ -321,10 +322,10 @@ func TestPutArticles(t *testing.T) {
 				testCase.ArticleID,
 				testCase.ReqHeaders,
 				postArticleAdapter{
-					AliasID: testCase.ReqAliasID,
-					Title:   testCase.ReqTitle,
-					Body:    testCase.ReqBody,
-					Tags:    testCase.ReqTags,
+					LinkName: &testCase.ReqLinkName,
+					Title:    testCase.ReqTitle,
+					Body:     testCase.ReqBody,
+					Tags:     testCase.ReqTags,
 				},
 			)
 			assert.Equal(t, testCase.ResStatusCode, res.Code)

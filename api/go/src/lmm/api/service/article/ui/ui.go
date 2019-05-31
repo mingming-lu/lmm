@@ -111,6 +111,7 @@ func (ui *UI) PutV1Articles(c http.Context) {
 	err = ui.appService.Command().EditArticle(c, command.EditArticle{
 		UserID:    user.ID,
 		ArticleID: articleID,
+		LinkName:  *article.LinkName,
 		Title:     *article.Title,
 		Body:      *article.Body,
 		Tags:      article.Tags,

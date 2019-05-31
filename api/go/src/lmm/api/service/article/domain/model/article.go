@@ -28,15 +28,17 @@ func (id *ArticleID) AuthorID() int64 {
 type Article struct {
 	model.Entity
 	id           *ArticleID
+	linkName     string
 	content      *Content
 	createdAt    time.Time
 	lastModified time.Time
 }
 
 // NewArticle is a article constructor
-func NewArticle(articleID *ArticleID, content *Content, createdAt, lastModified time.Time) *Article {
+func NewArticle(articleID *ArticleID, linkName string, content *Content, createdAt, lastModified time.Time) *Article {
 	article := &Article{
 		id:           articleID,
+		linkName:     linkName,
 		content:      content,
 		createdAt:    createdAt,
 		lastModified: lastModified,
@@ -47,6 +49,19 @@ func NewArticle(articleID *ArticleID, content *Content, createdAt, lastModified 
 // ID returns the id of the article
 func (a *Article) ID() *ArticleID {
 	return a.id
+}
+
+// LinkName returns a's link name
+func (a *Article) LinkName() string {
+	return a.linkName
+}
+
+// ChangeLinkName changed a's LinkName to newLinkName
+// TODO: validate newLinkName
+func (a *Article) ChangeLinkName(newLinkName string) error {
+	a.linkName = newLinkName
+
+	return nil
 }
 
 // Content returns article's content

@@ -1,13 +1,13 @@
 package persistence
 
 import (
-	"lmm/api/service/article/domain"
-	"lmm/api/service/article/domain/viewer"
 	"time"
 
 	dsUtil "lmm/api/pkg/datastore"
 	"lmm/api/pkg/transaction"
+	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
+	"lmm/api/service/article/domain/viewer"
 
 	"cloud.google.com/go/datastore"
 	"github.com/pkg/errors"
@@ -37,6 +37,7 @@ func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*
 
 type article struct {
 	ID           *datastore.Key `datastore:"__key__"`
+	LinkName     string         `datastore:"LinkName"`
 	Title        string         `datastore:"Title"`
 	Body         string         `datastore:"Body"`
 	CreatedAt    time.Time      `datastore:"Created_at"`
@@ -56,6 +57,7 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 
 	// save article
 	if _, err := dstx.Mutate(datastore.NewUpsert(articleKey, &article{
+		LinkName:     model.LinkName(),
 		Title:        model.Content().Text().Title(),
 		Body:         model.Content().Text().Body(),
 		CreatedAt:    model.CreatedAt(),
@@ -120,7 +122,7 @@ func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.Articl
 		return ss
 	}())
 
-	return model.NewArticle(id, content, data.CreatedAt, data.LastModified), nil
+	return model.NewArticle(id, data.LinkName, content, data.CreatedAt, data.LastModified), nil
 }
 
 func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleID) error {

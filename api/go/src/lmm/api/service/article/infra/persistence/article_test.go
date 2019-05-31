@@ -10,6 +10,7 @@ import (
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/domain/viewer"
+	"lmm/api/util/stringutil"
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
@@ -57,7 +58,7 @@ func TestArticleDataStore(t *testing.T) {
 				}
 
 				now := clock.Now()
-				article = model.NewArticle(articleID, model.NewContent(text, []string{}), now, now)
+				article = model.NewArticle(articleID, stringutil.Int64ToStr(articleID.ID()), model.NewContent(text, []string{}), now, now)
 				if !assert.NoError(t, articleDataStore.Save(tx, article)) || !assert.NotNil(t, article) {
 					t.Fatal("failed to save article")
 				}
@@ -85,6 +86,7 @@ func TestArticleDataStore(t *testing.T) {
 				if err != nil {
 					t.Fatal(errors.Wrap(err, "internal error"))
 				}
+				article.ChangeLinkName("new-link-name-of-this-article")
 				article.EditContent(model.NewContent(text, []string{"tag1", "tag2"}))
 
 				return articleDataStore.Save(tx, article)
