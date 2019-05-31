@@ -2,142 +2,165 @@ package persistence
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
-	"github.com/pkg/errors"
-
-	"lmm/api/http"
+	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/repository"
 	"lmm/api/service/user/domain/service"
-	"lmm/api/storage/db"
-	"lmm/api/util/mysqlutil"
+
+	"cloud.google.com/go/datastore"
+	"github.com/pkg/errors"
 )
 
-// UserStorage implements user/domain/repository.UserRepository
-type UserStorage struct {
-	db db.DB
+type user struct {
+	ID           *datastore.Key `datastore:"__key__"`
+	Name         string         `datastore:"Name"`
+	Email        string         `datastore:"Email"`
+	Password     string         `datastore:"Password"`
+	Token        string         `datastore:"Token"`
+	Role         string         `datastore:"Role"`
+	RegisteredAt time.Time      `datastore:"RegisteredAt"`
 }
 
-// NewUserStorage returns a UserRepository
-func NewUserStorage(db db.DB) repository.UserRepository {
-	return &UserStorage{db: db}
+const (
+	userKind = "User"
+)
+
+// UserDataStore implements UserRepository
+type UserDataStore struct {
+	source *datastore.Client
 }
 
-// Save persists a user model
-func (s *UserStorage) Save(c context.Context, user *model.User) error {
-	stmt := s.db.Prepare(c, `
-		insert into user (name, email, password, token, role, created_at) values(?, ?, ?, ?, ?, ?)
-	`)
-	defer stmt.Close()
+func NewUserDataStore(source *datastore.Client) *UserDataStore {
+	return &UserDataStore{source: source}
+}
 
-	_, err := stmt.Exec(c, user.Name(), user.Email(), user.Password(), user.Token(), user.Role().Name(), user.RegisteredAt())
+type txImpl struct {
+	context.Context
+	*datastore.Transaction
+}
 
-	if key, _, ok := mysqlutil.CheckDuplicateKeyError(err); ok && key == "name" {
-		return errors.Wrap(domain.ErrUserNameAlreadyUsed, err.Error())
-	}
-
+func (tx *txImpl) Commit() error {
+	_, err := tx.Transaction.Commit()
 	return err
 }
 
-// FindByName implementation
-func (s *UserStorage) FindByName(c context.Context, username string) (*model.User, error) {
-	stmt := s.db.Prepare(c, `select name, email, password, token, role, created_at from user where name = ?`)
-	defer stmt.Close()
+func (s *UserDataStore) Begin(c context.Context, opts *transaction.Option) (transaction.Transaction, error) {
+	if opts != nil && opts.ReadOnly {
+		tx, err := s.source.NewTransaction(c, datastore.ReadOnly)
+		if err != nil {
+			return nil, err
+		}
+		return &txImpl{c, tx}, nil
+	}
 
-	var (
-		name         string
-		email        string
-		password     string
-		token        string
-		rawRole      string
-		registeredAt time.Time
-	)
-
-	if err := stmt.QueryRow(c, username).Scan(&name, &email, &password, &token, &rawRole, &registeredAt); err != nil {
+	tx, err := s.source.NewTransaction(c)
+	if err != nil {
 		return nil, err
 	}
-
-	role := service.RoleAdapter(rawRole)
-
-	return model.NewUser(name, email, password, token, role, registeredAt)
+	return &txImpl{c, tx}, nil
 }
 
-// DescribeAll implementation
-func (s *UserStorage) DescribeAll(c context.Context, options repository.DescribeAllOptions) ([]*model.UserDescriptor, uint, error) {
-	tx, err := s.db.Begin(c, &sql.TxOptions{
-		ReadOnly:  true,
-		Isolation: sql.LevelRepeatableRead,
+func (s *UserDataStore) RunInTransaction(c context.Context, f func(tx transaction.Transaction) error, opts *transaction.Option) error {
+	tx, err := s.Begin(c, opts)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			tx.Rollback()
+			panic(recovered)
+		}
+	}()
+
+	if err := f(tx); err != nil {
+		if err2 := tx.Rollback(); err2 != nil {
+			return errors.Wrap(err2, err.Error())
+		}
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func mustTx(t transaction.Transaction) *txImpl {
+	tx, ok := t.(*txImpl)
+	if !ok {
+		panic("not a *datastore.Transaction")
+	}
+	return tx
+}
+
+func (s *UserDataStore) NextID(tx transaction.Transaction) (model.UserID, error) {
+	keys, err := s.source.AllocateIDs(tx, []*datastore.Key{
+		datastore.IncompleteKey(userKind, nil),
 	})
+
 	if err != nil {
-		return nil, 0, err
+		return -1, errors.Wrap(err, "failed to allocate new id")
 	}
 
-	countUsers := tx.Prepare(c, `select count(*) from user`)
-	defer countUsers.Close()
+	return model.UserID(keys[0].ID), nil
+}
 
-	selectUsers := tx.Prepare(c,
-		`select name, email, role, created_at from user order by `+s.mappingOrder(options.Order)+` limit ? offset ?`)
-	defer selectUsers.Close()
+// Save implementation
+func (s *UserDataStore) Save(tx transaction.Transaction, model *model.User) error {
+	k := datastore.IDKey(userKind, int64(model.ID()), nil)
 
-	var totalUsers uint
-	if err := countUsers.QueryRow(c).Scan(&totalUsers); err != nil {
-		return nil, 0, db.RollbackWithError(tx, err)
-	}
-
-	rows, err := selectUsers.Query(c, options.Count, (options.Page-1)*options.Count)
-	if err != nil {
-		return nil, 0, db.RollbackWithError(tx, err)
-	}
-
-	users := make([]*model.UserDescriptor, 0)
-
-	var (
-		username  string
-		emailaddr string
-		rolename  string
-		createdAt time.Time
+	_, err := mustTx(tx).Mutate(
+		datastore.NewUpsert(k, &user{
+			ID:           k,
+			Name:         model.Name(),
+			Email:        model.Email(),
+			Password:     model.Password(),
+			Token:        model.Token(),
+			Role:         model.Role().Name(),
+			RegisteredAt: model.RegisteredAt(),
+		}),
 	)
 
-	for rows.Next() {
-		if err := rows.Scan(&username, &emailaddr, &rolename, &createdAt); err != nil {
-			return nil, 0, db.RollbackWithError(tx, err)
-		}
-		role := service.RoleAdapter(rolename)
-		user, err := model.NewUserDescriptor(username, emailaddr, role, createdAt)
-		if err != nil {
-			return nil, 0, db.RollbackWithError(tx, err)
-		}
-		users = append(users, user)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, 0, db.RollbackWithError(tx, err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		http.Log().Warn(c, err.Error())
-	}
-
-	return users, totalUsers, err
+	return errors.Wrap(err, "faile to save user to datastore")
 }
 
-func (s *UserStorage) mappingOrder(order repository.DescribeAllOrder) string {
-	switch order {
-	case repository.DescribeAllOrderByNameAsc:
-		return "name asc"
-	case repository.DescribeAllOrderByNameDesc:
-		return "name desc"
-	case repository.DescribeAllOrderByRoleAsc:
-		return "role asc, name asc"
-	case repository.DescribeAllOrderByRoleDesc:
-		return "role desc, name asc"
-	case repository.DescribeAllOrderByRegisteredDateAsc:
-		return "created_at asc, name asc"
-	case repository.DescribeAllOrderByRegisteredDateDesc:
-		return "created_at desc, name asc"
-	default:
-		panic("invalid order")
+func (s *UserDataStore) findByFilter(tx transaction.Transaction, filter, value string) (*model.User, error) {
+	q := datastore.NewQuery(userKind).KeysOnly().Filter(filter, value).Limit(1)
+
+	keys, err := s.source.GetAll(tx, q, nil)
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrNoSuchUser, err.Error())
 	}
+
+	if len(keys) == 0 {
+		return nil, domain.ErrNoSuchUser
+	}
+
+	var user user
+	if err := mustTx(tx).Get(keys[0], &user); err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			return nil, domain.ErrNoSuchUser
+		}
+		return nil, errors.Wrap(err, "internal error: failed to get user by key")
+	}
+
+	return model.NewUser(
+		model.UserID(user.ID.ID),
+		user.Name,
+		user.Email,
+		user.Password,
+		user.Token,
+		service.RoleAdapter(user.Role),
+		user.RegisteredAt,
+	)
+}
+
+// FindByName implementation
+func (s *UserDataStore) FindByName(tx transaction.Transaction, username string) (*model.User, error) {
+	return s.findByFilter(tx, "Name =", username)
+}
+
+// FindByToken implementation
+func (s *UserDataStore) FindByToken(tx transaction.Transaction, token string) (*model.User, error) {
+	return s.findByFilter(tx, "Token =", token)
 }

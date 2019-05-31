@@ -8,6 +8,11 @@ type signUpRequestBody struct {
 	Password string `json:"password"`
 }
 
+type basicAuth struct {
+	UserName string `json:"username"`
+	Password string `json:"password"`
+}
+
 type assignRoleRequestBody struct {
 	Role string `json:"role"`
 }
@@ -15,6 +20,10 @@ type assignRoleRequestBody struct {
 type changePasswordRequestBody struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
+}
+
+type accessTokenView struct {
+	AccessToken string `json:"access_token"`
 }
 
 type userView struct {

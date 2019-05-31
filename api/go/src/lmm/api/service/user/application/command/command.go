@@ -7,6 +7,12 @@ type Register struct {
 	Password     string
 }
 
+// Login command
+type Login struct {
+	UserName string
+	Password string
+}
+
 // AssignRole command
 type AssignRole struct {
 	OperatorUser string

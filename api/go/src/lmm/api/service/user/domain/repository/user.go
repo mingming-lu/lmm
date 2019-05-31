@@ -1,16 +1,18 @@
 package repository
 
 import (
-	"context"
+	"lmm/api/pkg/transaction"
 
 	"lmm/api/service/user/domain/model"
 )
 
 // UserRepository interface
 type UserRepository interface {
-	Save(c context.Context, user *model.User) error
-	FindByName(c context.Context, username string) (*model.User, error)
-	DescribeAll(c context.Context, options DescribeAllOptions) ([]*model.UserDescriptor, uint, error)
+	NextID(tx transaction.Transaction) (model.UserID, error)
+	Save(tx transaction.Transaction, user *model.User) error
+	FindByName(tx transaction.Transaction, username string) (*model.User, error)
+	FindByToken(tx transaction.Transaction, token string) (*model.User, error)
+	// DescribeAll(tx transaction.Transaction, options DescribeAllOptions) ([]*model.UserDescriptor, uint, error)
 }
 
 type DescribeAllOptions struct {

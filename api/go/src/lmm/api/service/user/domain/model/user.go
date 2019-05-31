@@ -22,6 +22,7 @@ type UserID int64
 // UserDescriptor describes user's basic infomation
 type UserDescriptor struct {
 	model.Entity
+	id           UserID
 	name         string
 	email        string
 	role         Role
@@ -29,8 +30,9 @@ type UserDescriptor struct {
 }
 
 // NewUserDescriptor creates a new *UserDescriptor
-func NewUserDescriptor(name, email string, role Role, registeredAt time.Time) (*UserDescriptor, error) {
+func NewUserDescriptor(id UserID, name, email string, role Role, registeredAt time.Time) (*UserDescriptor, error) {
 	user := UserDescriptor{
+		id:           id,
 		role:         role,
 		registeredAt: registeredAt,
 	}
@@ -44,6 +46,10 @@ func NewUserDescriptor(name, email string, role Role, registeredAt time.Time) (*
 	}
 
 	return &user, nil
+}
+
+func (user *UserDescriptor) ID() UserID {
+	return user.id
 }
 
 // Name gets user's name
@@ -106,8 +112,8 @@ type User struct {
 }
 
 // NewUser creates a new user domain model
-func NewUser(name, email, password, token string, role Role, registeredDate time.Time) (*User, error) {
-	descriptor, err := NewUserDescriptor(name, email, role, registeredDate)
+func NewUser(id UserID, name, email, password, token string, role Role, registeredDate time.Time) (*User, error) {
+	descriptor, err := NewUserDescriptor(id, name, email, role, registeredDate)
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +161,10 @@ func (user *User) setToken(token string) error {
 	}
 	user.token = token
 	return nil
+}
+
+func (user *User) ChangeToken(newToken string) error {
+	return user.setToken(newToken)
 }
 
 // ChangeRole changes user's role

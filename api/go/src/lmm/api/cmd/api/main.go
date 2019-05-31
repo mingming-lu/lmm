@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"cloud.google.com/go/datastore"
 	_ "github.com/go-sql-driver/mysql"
 
 	"lmm/api/http"
@@ -21,6 +22,7 @@ import (
 	userEvent "lmm/api/service/user/domain/event"
 	userMessaging "lmm/api/service/user/infra/messaging"
 	userStorage "lmm/api/service/user/infra/persistence"
+	userUtil "lmm/api/service/user/infra/service"
 	userUI "lmm/api/service/user/ui"
 
 	// auth
@@ -71,6 +73,12 @@ func main() {
 	mysql := db.DefaultMySQL()
 	defer mysql.Close()
 
+	datastoreClient, err := datastore.NewClient(context.TODO(), "lmm")
+	if err != nil {
+		panic(err)
+	}
+	defer datastoreClient.Close()
+
 	rabbitMQClient := rabbitmq.DefaultClient()
 	rabbitMQUploader := file.NewRabbitMQAssetUploader(rabbitMQClient)
 	defer rabbitMQUploader.Close() // would close rabbitMQClient too
@@ -99,8 +107,8 @@ func main() {
 	router.POST("/v1/auth/login", authUI.Login)
 
 	// user
-	userRepo := userStorage.NewUserStorage(mysql)
-	userAppService := userApp.NewService(userRepo)
+	userRepo := userStorage.NewUserDataStore(datastoreClient)
+	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
 	userUI := userUI.NewUI(userAppService)
 	userEventSubscriber := userMessaging.NewSubscriber(mysql)
 	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
@@ -109,6 +117,7 @@ func main() {
 	router.POST("/v1/users", userUI.SignUp)
 	router.PUT("/v1/users/:user/role", authUI.BearerAuth(userUI.AssignUserRole))
 	router.PUT("/v1/users/:user/password", userUI.ChangeUserPassword)
+	router.POST("/v1/auth/token", userUI.Token)
 
 	// article
 	authorAdapter := authorService.NewAuthorAdapter(mysql)
