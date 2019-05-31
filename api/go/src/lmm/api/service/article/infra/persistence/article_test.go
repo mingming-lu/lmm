@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"lmm/api/clock"
+	_ "lmm/api/clock/testing"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
@@ -63,6 +64,19 @@ func TestArticleDataStore(t *testing.T) {
 
 				return nil
 			}, nil)
+
+			t.Run("FindByID", func(t *testing.T) {
+				articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+					articleFound, err := articleDataStore.FindByID(tx, article.ID())
+					if !assert.NoError(t, err) {
+						t.Fatal(err.Error())
+					}
+
+					assert.EqualValues(t, article, articleFound)
+
+					return nil
+				}, nil)
+			})
 		})
 
 		t.Run("Update", func(t *testing.T) {
@@ -75,6 +89,19 @@ func TestArticleDataStore(t *testing.T) {
 
 				return articleDataStore.Save(tx, article)
 			}, nil))
+
+			t.Run("FindByID", func(t *testing.T) {
+				articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+					articleFound, err := articleDataStore.FindByID(tx, article.ID())
+					if !assert.NoError(t, err) {
+						t.Fatal(err.Error())
+					}
+
+					assert.EqualValues(t, article, articleFound)
+
+					return nil
+				}, nil)
+			})
 		})
 	})
 }

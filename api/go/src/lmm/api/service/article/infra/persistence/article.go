@@ -95,9 +95,16 @@ func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.Articl
 	userKey := datastore.IDKey(dsUtil.UserKind, id.AuthorID(), nil)
 	articleKey := datastore.IDKey(dsUtil.ArticleKind, id.ID(), userKey)
 
+	dsTx := dsUtil.MustTransaction(tx)
 	data := article{}
-	if err := dsUtil.MustTransaction(tx).Get(articleKey, &data); err != nil {
+	if err := dsTx.Get(articleKey, &data); err != nil {
 		return nil, errors.Wrap(domain.ErrNoSuchArticle, err.Error())
+	}
+
+	fetchTagsQuery := datastore.NewQuery(dsUtil.ArticleTagKind).Ancestor(articleKey).Transaction(dsTx)
+	var tags []*tag
+	if _, err := s.dataStore.GetAll(tx, fetchTagsQuery, &tags); err != nil {
+		return nil, errors.Wrap(err, "failed to get article tags")
 	}
 
 	text, err := model.NewText(data.Title, data.Body)
@@ -105,7 +112,13 @@ func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.Articl
 		return nil, errors.Wrap(err, "internal error")
 	}
 
-	content := model.NewContent(text, nil)
+	content := model.NewContent(text, func() []string {
+		ss := make([]string, len(tags), len(tags))
+		for i, tag := range tags {
+			ss[i] = tag.Name
+		}
+		return ss
+	}())
 
 	return model.NewArticle(id, content, data.CreatedAt, data.LastModified), nil
 }
