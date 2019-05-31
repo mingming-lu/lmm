@@ -11,6 +11,7 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"github.com/pkg/errors"
+	"google.golang.org/api/iterator"
 )
 
 type ArticleDataStore struct {
@@ -178,33 +179,32 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 
 	items := make([]*model.ArticleListViewItem, len(entities), len(entities))
 	for i, entity := range entities {
-		item, err := model.NewArticleListViewItem(entity.ID.ID, entity.LinkName, entity.Title, time.Unix(entity.CreatedAt, 0))
+		item, err := model.NewArticleListViewItem(entity.ID.ID, entity.LinkName, entity.Title, time.Unix(entity.CreatedAt/dsUtil.UnixFactor, 0))
 		if err != nil {
 			return nil, errors.Wrap(err, "internal error")
 		}
 		items[i] = item
 	}
 
-	return model.NewArticleListView(items, page, count, uint(total), hasNextPage), nil
+	return model.NewArticleListView(items, page, count, total, hasNextPage), nil
 }
 
 func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.TagView, error) {
-	q := datastore.NewQuery(dsUtil.ArticleTagKind).KeysOnly().Order("Name")
+	q := datastore.NewQuery(dsUtil.ArticleTagKind).Project("Name").Order("Name").Distinct()
 
-	keys, err := s.dataStore.GetAll(dsUtil.MustContext(tx), q, nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get all tag keys")
-	}
+	var t tag
+	items := make([]*model.TagView, 0)
 
-	tags := make([]tag, len(keys), len(keys))
-
-	if err := dsUtil.MustTransaction(tx).GetMulti(keys, tags); err != nil {
-		return nil, errors.Wrap(err, "failed to get tags from keys")
-	}
-
-	items := make([]*model.TagView, len(tags), len(tags))
-	for i, tag := range tags {
-		items[i] = model.NewTagView(tag.Name)
+	iter := s.dataStore.Run(tx, q)
+	for {
+		_, err := iter.Next(&t)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, errors.Wrap(err, "internal error: invalid tag")
+		}
+		items = append(items, model.NewTagView(t.Name))
 	}
 
 	return items, nil
