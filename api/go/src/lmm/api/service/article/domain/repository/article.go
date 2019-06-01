@@ -1,15 +1,15 @@
 package repository
 
 import (
-	"context"
+	"lmm/api/pkg/transaction"
 
 	"lmm/api/service/article/domain/model"
 )
 
 // ArticleRepository interface
 type ArticleRepository interface {
-	NextID(context.Context) string
-	Save(context.Context, *model.Article) error
-	Remove(context.Context, *model.Article) error
-	FindByID(context.Context, *model.ArticleID) (*model.Article, error)
+	NextID(tx transaction.Transaction, authorID int64) (*model.ArticleID, error)
+	Save(tx transaction.Transaction, article *model.Article) error
+	Remove(tx transaction.Transaction, id *model.ArticleID) error
+	FindByID(tx transaction.Transaction, id *model.ArticleID) (*model.Article, error)
 }

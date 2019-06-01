@@ -2,20 +2,21 @@ package ui
 
 import (
 	"fmt"
-	"lmm/api/service/article/application/command"
 	"math"
 
-	"github.com/pkg/errors"
-
 	"lmm/api/http"
+	"lmm/api/pkg/auth"
+	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/application"
+	"lmm/api/service/article/application/command"
 	"lmm/api/service/article/application/query"
 	"lmm/api/service/article/domain"
-	"lmm/api/service/article/domain/finder"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
-	"lmm/api/service/article/domain/service"
+	"lmm/api/service/article/domain/viewer"
 	"lmm/api/util/stringutil"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -31,21 +32,21 @@ type UI struct {
 
 // NewUI returns a new ui
 func NewUI(
-	articleFinder finder.ArticleFinder,
+	articleViewer viewer.ArticleViewer,
 	articleRepository repository.ArticleRepository,
-	authorService service.AuthorService,
+	transactionManager transaction.Manager,
 ) *UI {
 	appService := application.NewService(
-		application.NewArticleCommandService(articleRepository, authorService),
-		application.NewArticleQueryService(articleFinder),
+		application.NewArticleCommandService(articleRepository, transactionManager),
+		application.NewArticleQueryService(articleViewer, transactionManager),
 	)
 	return &UI{appService: appService}
 }
 
 // PostNewArticle handles POST /1/articles
 func (ui *UI) PostNewArticle(c http.Context) {
-	userName := c.Request().Header.Get("X-LMM-ID")
-	if userName == "" {
+	user, ok := auth.FromContext(c)
+	if !ok {
 		http.Unauthorized(c)
 		return
 	}
@@ -61,15 +62,15 @@ func (ui *UI) PostNewArticle(c http.Context) {
 		return
 	}
 
-	articleID, err := ui.appService.ArticleCommandService().PostNewArticle(c,
-		userName,
-		*article.Title,
-		*article.Body,
-		article.Tags,
-	)
+	articleID, err := ui.appService.Command().PostNewArticle(c, command.PostArticle{
+		AuthorID: user.ID,
+		Title:    *article.Title,
+		Body:     *article.Body,
+		Tags:     article.Tags,
+	})
 	switch errors.Cause(err) {
 	case nil:
-		c.Header("Location", "/v1/articles/"+articleID.String())
+		c.Header("Location", fmt.Sprintf("/v1/articles/%d", articleID.ID()))
 		c.String(http.StatusCreated, "Success")
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
@@ -82,11 +83,17 @@ func (ui *UI) PostNewArticle(c http.Context) {
 	}
 }
 
-// EditArticle handles PUT /1/article/:articleID
-func (ui *UI) EditArticle(c http.Context) {
-	userName := c.Request().Header.Get("X-LMM-ID")
-	if userName == "" {
+// PutV1Articles handles PUT /v1/article/:articleID
+func (ui *UI) PutV1Articles(c http.Context) {
+	user, ok := auth.FromContext(c)
+	if !ok {
 		http.Unauthorized(c)
+		return
+	}
+
+	articleID, err := stringutil.ParseInt64(c.Request().PathParam("articleID"))
+	if err != nil {
+		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 		return
 	}
 
@@ -101,17 +108,17 @@ func (ui *UI) EditArticle(c http.Context) {
 		return
 	}
 
-	err := ui.appService.ArticleCommandService().EditArticle(c,
-		&command.EditArticle{
-			UserName:        userName,
-			TargetArticleID: c.Request().PathParam("articleID"),
-			AliasArticleID:  article.AliasID,
-			Title:           *article.Title,
-			Body:            *article.Body,
-			TagNames:        article.Tags,
-		},
-	)
-	switch errors.Cause(err) {
+	err = ui.appService.Command().EditArticle(c, command.EditArticle{
+		UserID:    user.ID,
+		ArticleID: articleID,
+		LinkName:  *article.LinkName,
+		Title:     *article.Title,
+		Body:      *article.Body,
+		Tags:      article.Tags,
+	})
+
+	original := errors.Cause(err)
+	switch original {
 	case nil:
 		http.NoContent(c)
 
@@ -121,7 +128,7 @@ func (ui *UI) EditArticle(c http.Context) {
 		domain.ErrInvalidArticleTitle,
 		domain.ErrInvalidAliasArticleID:
 
-		c.String(http.StatusBadRequest, err.Error())
+		c.String(http.StatusBadRequest, original.Error())
 
 	case domain.ErrNoSuchArticle, domain.ErrInvalidArticleID:
 		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
@@ -130,7 +137,7 @@ func (ui *UI) EditArticle(c http.Context) {
 		http.Unauthorized(c)
 
 	case domain.ErrNotArticleAuthor:
-		c.String(http.StatusForbidden, err.Error())
+		c.String(http.StatusForbidden, original.Error())
 
 	default:
 		http.Log().Panic(c, err.Error())
@@ -152,7 +159,7 @@ func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 
 // ListArticles handles GET /v1/articles
 func (ui *UI) ListArticles(c http.Context) {
-	v, err := ui.appService.ArticleQueryService().ListArticlesByPage(
+	v, err := ui.appService.Query().ListArticlesByPage(
 		c,
 		ui.buildListArticleQueryFromContext(c),
 	)
@@ -181,7 +188,7 @@ func (ui *UI) buildListArticleQueryFromContext(c http.Context) query.ListArticle
 func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAdapter {
 	items := make([]articleListItem, len(view.Items()), len(view.Items()))
 	for i, item := range view.Items() {
-		items[i].ID = item.ID().String()
+		items[i].ID = fmt.Sprintf("%d", item.ID())
 		items[i].Title = item.Title()
 		items[i].PostAt = item.PostAt().Unix()
 	}
@@ -200,7 +207,7 @@ func (ui *UI) articleListViewToJSONV2(c http.Context, view *model.ArticleListVie
 		Total:    view.Total(),
 	}
 
-	last := uint(math.Ceil(
+	last := int(math.Ceil(
 		float64(adapterV2.Total) / float64(adapterV2.PerPage),
 	))
 
@@ -220,13 +227,14 @@ func (ui *UI) articleListViewToJSONV2(c http.Context, view *model.ArticleListVie
 	return adapterV2
 }
 
-func buildURI(base string, page, perPage uint) *string {
-	return stringutil.Pointer(fmt.Sprintf("%s?page=%d&perPage=%d", base, page, perPage))
+func buildURI(path string, page, perPage int) *string {
+	uri := fmt.Sprintf("%s?page=%d&perPage=%d", path, page, perPage)
+	return &uri
 }
 
 // GetArticle handles GET /v1/articles/:articleID
 func (ui *UI) GetArticle(c http.Context) {
-	view, err := ui.appService.ArticleQueryService().ArticleByID(c,
+	view, err := ui.appService.Query().ArticleByLinkName(c,
 		c.Request().PathParam("articleID"),
 	)
 	switch errors.Cause(err) {
@@ -239,36 +247,36 @@ func (ui *UI) GetArticle(c http.Context) {
 	}
 }
 
-func (ui *UI) articleViewToJSON(view *model.ArticleView) *articleViewResponse {
-	tags := make([]articleViewTag, len(view.Content().Tags()), len(view.Content().Tags()))
-	for i, tag := range view.Content().Tags() {
-		tags[i].Name = tag.Name()
+func (ui *UI) articleViewToJSON(model *model.Article) *articleViewResponse {
+	tags := make([]articleViewTag, len(model.Content().Tags()), len(model.Content().Tags()))
+	for i, tag := range model.Content().Tags() {
+		tags[i].Name = tag
 	}
 	return &articleViewResponse{
-		ID:           view.ID().String(),
-		Title:        view.Content().Text().Title(),
-		Body:         view.Content().Text().Body(),
-		PostAt:       view.PostAt().Unix(),
-		LastEditedAt: view.LastEditedAt().Unix(),
+		ID:           fmt.Sprintf("%d", model.ID().ID()),
+		Title:        model.Content().Text().Title(),
+		Body:         model.Content().Text().Body(),
+		PostAt:       model.CreatedAt().Unix(),
+		LastEditedAt: model.LastModified().Unix(),
 		Tags:         tags,
 	}
 }
 
 // GetAllArticleTags handles GET /v1/articleTags
 func (ui *UI) GetAllArticleTags(c http.Context) {
-	view, err := ui.appService.ArticleQueryService().AllArticleTags(c)
+	tags, err := ui.appService.Query().AllArticleTags(c)
 
 	switch errors.Cause(err) {
 	case nil:
-		c.JSON(http.StatusOK, ui.tagListViewToJSON(view))
+		c.JSON(http.StatusOK, ui.tagListViewToJSON(tags))
 	default:
 		http.Log().Panic(c, err.Error())
 	}
 }
 
-func (ui *UI) tagListViewToJSON(view model.TagListView) articleTagListView {
-	tags := make([]articleTagListItemView, len(view), len(view))
-	for i, tag := range view {
+func (ui *UI) tagListViewToJSON(views []*model.TagView) articleTagListView {
+	tags := make([]articleTagListItemView, len(views), len(views))
+	for i, tag := range views {
 		tags[i].Name = tag.Name()
 	}
 	return tags

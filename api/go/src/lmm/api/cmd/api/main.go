@@ -26,9 +26,7 @@ import (
 	userUI "lmm/api/service/user/ui"
 
 	// article
-	articleFetcher "lmm/api/service/article/infra/fetcher"
 	articleStorage "lmm/api/service/article/infra/persistence"
-	authorService "lmm/api/service/article/infra/service"
 	articleUI "lmm/api/service/article/ui"
 
 	// asset
@@ -107,12 +105,10 @@ func main() {
 	router.POST("/v1/auth/token", userUI.Token)
 
 	// article
-	authorAdapter := authorService.NewAuthorAdapter(mysql)
-	articleRepo := articleStorage.NewArticleStorage(mysql, authorAdapter)
-	articleFinder := articleFetcher.NewArticleFetcher(mysql)
-	articleUI := articleUI.NewUI(articleFinder, articleRepo, authorAdapter)
+	articleRepo := articleStorage.NewArticleDataStore(datastoreClient)
+	articleUI := articleUI.NewUI(articleRepo, articleRepo, articleRepo)
 	router.POST("/v1/articles", userUI.BearerAuth(articleUI.PostNewArticle))
-	router.PUT("/v1/articles/:articleID", userUI.BearerAuth(articleUI.EditArticle))
+	router.PUT("/v1/articles/:articleID", userUI.BearerAuth(articleUI.PutV1Articles))
 	router.GET("/v1/articles", articleUI.ListArticles)
 	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
