@@ -55,4 +55,8 @@ var (
 	ErrInvalidViewOrder = errors.New("invalid order")
 
 	ErrInvalidEmail = errors.New("invalid email")
+
+	ErrInvalidTokenFormat = errors.New("invalid token format")
+
+	ErrInvalidTokenLength = errors.New("invalid token length")
 )
