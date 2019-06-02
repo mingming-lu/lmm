@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	goHttp "net/http"
 	"os"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
+	"google.golang.org/appengine"
 
 	"lmm/api/http"
 	"lmm/api/log"
@@ -30,18 +32,6 @@ import (
 	assetApp "lmm/api/service/asset/usecase"
 )
 
-var (
-	gcpProjectID string
-)
-
-func init() {
-	gcpProjectID = os.Getenv("GCP_PROJECT_ID")
-	if gcpProjectID == "" {
-		panic("empty gcp project id")
-	}
-	fmt.Printf("gcp project id: %s\n", gcpProjectID)
-}
-
 func main() {
 	gcsClient, err := storage.NewClient(context.TODO(), option.WithCredentialsFile("/gcp/credentials/service_account.json"))
 	if err != nil {
@@ -52,6 +42,7 @@ func main() {
 	callback := log.Init(ioutil.Discard)
 	defer callback()
 
+	fmt.Println("ds pro id: ", os.Getenv("DATASTORE_PROJECT_ID"))
 	datastoreClient, err := datastore.NewClient(context.TODO(), "lmm")
 	if err != nil {
 		panic(err)
@@ -96,8 +87,8 @@ func main() {
 	router.POST("/v1/photos", userUI.BearerAuth(assetUI.PostV1Photos))
 	router.GET("/v1/photos", assetUI.GetV1Photos)
 
-	server := http.NewServer(":8002", router)
-	server.Run()
+	goHttp.Handle("/", router)
+	appengine.Main()
 }
 
 func getEnvOrPanic(key string) string {
