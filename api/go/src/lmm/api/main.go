@@ -72,11 +72,3 @@ func main() {
 	goHttp.Handle("/", router)
 	appengine.Main()
 }
-
-func getEnvOrPanic(key string) string {
-	s := os.Getenv(key)
-	if s == "" {
-		panic("empty environment variable: " + key)
-	}
-	return s
-}
