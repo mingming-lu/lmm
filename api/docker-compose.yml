@@ -1,7 +1,9 @@
 version: "3.7"
 services:
   api:
-    image: golang:1.12.0
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     volumes:
       - ./go:/go
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
