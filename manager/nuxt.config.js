@@ -1,7 +1,7 @@
 const pkg = require('./package')
 import colors from 'vuetify/es5/util/colors'
 
-module.exports = {
+export default {
   mode: 'spa',
 
   /*
