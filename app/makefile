@@ -21,6 +21,3 @@ logs:
 
 build:
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml run --rm --no-deps app sh -c "npm --prefix /app run build"
-
-prod:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d

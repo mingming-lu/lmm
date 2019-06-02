@@ -19,9 +19,6 @@ build-cli:
 cli:
 	docker-compose -f docker-compose.yml -f docker-compose.${env}.yml run --rm api cli ${commands}
 
-prod:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-
 restart: stop
 	make start
 
