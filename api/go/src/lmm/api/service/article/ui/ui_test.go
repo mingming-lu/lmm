@@ -5,13 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"math/rand"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
 
-	"lmm/api/http"
+	"github.com/gin-gonic/gin"
+
 	testUtil "lmm/api/pkg/testing"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/infra/persistence"
@@ -24,7 +26,7 @@ import (
 )
 
 var (
-	router    *http.Router
+	router    *gin.Engine
 	dataStore *datastore.Client
 )
 
@@ -37,7 +39,7 @@ func TestMain(m *testing.M) {
 		panic("failed to connect to datastore: " + err.Error())
 	}
 
-	router = http.NewRouter()
+	router = gin.New()
 
 	repo := persistence.NewArticleDataStore(dataStore)
 	ui := NewUI(repo, repo, repo)
