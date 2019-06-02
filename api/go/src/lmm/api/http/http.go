@@ -2,8 +2,6 @@ package http
 
 import (
 	"net/http"
-
-	"go.uber.org/zap"
 )
 
 const (
@@ -49,7 +47,6 @@ func (h notFoundHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type Middleware = func(Handler) Handler
 
 func Serve(addr string, r *Router) {
-	zap.L().Info("Serving at:" + addr)
 	if err := http.ListenAndServe(addr, r); err != nil {
 		panic(err)
 	}

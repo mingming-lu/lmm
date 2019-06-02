@@ -2,17 +2,15 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
+	goHttp "net/http"
 	"os"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
+	"google.golang.org/appengine"
 
 	"lmm/api/http"
-	"lmm/api/log"
-	"lmm/api/middleware"
 
 	// user
 	userApp "lmm/api/service/user/application"
@@ -30,18 +28,6 @@ import (
 	assetApp "lmm/api/service/asset/usecase"
 )
 
-var (
-	gcpProjectID string
-)
-
-func init() {
-	gcpProjectID = os.Getenv("GCP_PROJECT_ID")
-	if gcpProjectID == "" {
-		panic("empty gcp project id")
-	}
-	fmt.Printf("gcp project id: %s\n", gcpProjectID)
-}
-
 func main() {
 	gcsClient, err := storage.NewClient(context.TODO(), option.WithCredentialsFile("/gcp/credentials/service_account.json"))
 	if err != nil {
@@ -49,26 +35,13 @@ func main() {
 	}
 	defer gcsClient.Close()
 
-	callback := log.Init(ioutil.Discard)
-	defer callback()
-
-	datastoreClient, err := datastore.NewClient(context.TODO(), "lmm")
+	datastoreClient, err := datastore.NewClient(context.TODO(), os.Getenv("PROJECT_ID"))
 	if err != nil {
 		panic(err)
 	}
 	defer datastoreClient.Close()
 
 	router := http.NewRouter()
-
-	// middlewares
-	// access log
-	accessLogger := middleware.NewAccessLog(ioutil.Discard)
-	defer accessLogger.Sync()
-	router.Use(accessLogger.AccessLog)
-	// recovery
-	router.Use(middleware.Recovery)
-	// request id
-	router.Use(middleware.WithRequestID)
 
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
@@ -96,14 +69,6 @@ func main() {
 	router.POST("/v1/photos", userUI.BearerAuth(assetUI.PostV1Photos))
 	router.GET("/v1/photos", assetUI.GetV1Photos)
 
-	server := http.NewServer(":8002", router)
-	server.Run()
-}
-
-func getEnvOrPanic(key string) string {
-	s := os.Getenv(key)
-	if s == "" {
-		panic("empty environment variable: " + key)
-	}
-	return s
+	goHttp.Handle("/", router)
+	appengine.Main()
 }

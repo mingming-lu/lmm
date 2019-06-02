@@ -5,5 +5,8 @@ dispatch:
   - url: "www.lumingming.net/*"
     service: default
 
+  - url: "api.lumingming.net/*"
+    service: api
+
   - url: "manager.lumingming.net/*"
     service: manager

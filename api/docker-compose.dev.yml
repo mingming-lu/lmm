@@ -3,12 +3,12 @@ services:
   api:
     env_file:
       - ./.env/dev.env
-    command: api
+    command: dev_appserver.py api.yaml --host 0.0.0.0 --port 8002 --enable_host_checking=False
     environment:
       APP_HOST: https://www.lmm.local
       HTTP_TIMEOUT_SECOND: 3
       DATASTORE_EMULATOR_HOST: datastore:8081
-      DATASTORE_PROJECT_ID: lmm
+      DATASTORE_PROJECT_ID: lmm-dev
       PROJECT_ID: lmm-dev
     networks:
       - lmm
@@ -20,7 +20,7 @@ services:
     networks:
       - lmm-api
     command: |
-      gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081
+      gcloud beta emulators datastore start --project=lmm-dev --host-port=0.0.0.0:8081
 
 networks:
   lmm:

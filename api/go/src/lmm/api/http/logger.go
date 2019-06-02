@@ -3,9 +3,7 @@ package http
 import (
 	"context"
 
-	"lmm/api/util/contextutil"
-
-	"go.uber.org/zap"
+	"google.golang.org/appengine/log"
 )
 
 var logger *loggerImpl
@@ -30,17 +28,17 @@ func Log() Logger {
 type loggerImpl struct{}
 
 func (l *loggerImpl) Info(c context.Context, msg string) {
-	zap.L().Info(msg, zap.String("request_id", contextutil.RequestID(c)))
+	log.Infof(c, msg)
 }
 
 func (l *loggerImpl) Warn(c context.Context, msg string) {
-	zap.L().Warn(msg, zap.String("request_id", contextutil.RequestID(c)))
+	log.Warningf(c, msg)
 }
 
 func (l *loggerImpl) Error(c context.Context, msg string) {
-	zap.L().Error(msg, zap.String("request_id", contextutil.RequestID(c)))
+	log.Errorf(c, msg)
 }
 
 func (l *loggerImpl) Panic(c context.Context, msg string) {
-	zap.L().Panic(msg, zap.String("request_id", contextutil.RequestID(c)))
+	log.Criticalf(c, msg)
 }

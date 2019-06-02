@@ -16,7 +16,6 @@ import (
 	"lmm/api/util/stringutil"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 var (
@@ -26,7 +25,7 @@ var (
 
 func init() {
 	if len(tokenSecretKey) == 0 {
-		zap.L().Panic("token key not set")
+		panic("token key not set")
 	}
 }
 
@@ -47,13 +46,13 @@ func (s *CFBTokenService) Encrypt(rawToken string) (*model.AccessToken, error) {
 
 	block, err := aes.NewCipher(tokenSecretKey)
 	if err != nil {
-		zap.L().Panic(err.Error())
+		panic(err.Error())
 	}
 
 	encoded := make([]byte, aes.BlockSize+len(b))
 	iv := encoded[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		zap.L().Panic(err.Error())
+		panic(err.Error())
 	}
 
 	stream := cipher.NewCFBEncrypter(block, iv)

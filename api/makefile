@@ -6,10 +6,7 @@ start:
 go/mod/tidy:
 	docker-compose run --rm --no-deps api go mod tidy
 
-build: build-api build-cli
-
-build-api:
-	docker-compose -f docker-compose.yml run --rm --no-deps api bash -c "cd cmd/api && go install -v"
+build: build-cli
 
 build-cli:
 	docker-compose -f docker-compose.yml run --rm --no-deps api bash -c "cd cmd/cli && go install -v"

@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 // Context is a abstraction of http context
@@ -49,11 +47,7 @@ func (c *contextImpl) Value(key interface{}) interface{} {
 
 func (c *contextImpl) Header(key, value string) {
 	if c.res.Header().Get(key) != "" {
-		zap.L().Warn("unexpected to set same header more than once",
-			zap.String("request_id", c.Request().RequestID()),
-			zap.String("header", key),
-			zap.String("value", value),
-		)
+		Log().Warn(c, "unexpected to set same header more than once")
 		return
 	}
 	c.res.Header().Set(key, value)
