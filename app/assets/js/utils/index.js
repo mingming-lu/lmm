@@ -57,7 +57,11 @@ const buildPageNumbers = (page, total, maxItem = 5) => {
   }
 
   if (total - page < maxItem / 2) {
-    return range(total - maxItem + 1, total)
+    let from = total - maxItem + 1
+    if (from < 1) {
+      from = 1
+    }
+    return range(from, total)
   }
 
   let growLeft = Math.floor(maxItem / 2)
