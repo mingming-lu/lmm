@@ -119,7 +119,7 @@ workflows:
               only:
                 - *app_release_branches
       - gae_node_build_and_deploy_nuxt:
-          node_image: node:10.15.1-alpine
+          node_image: node:10.16.0-alpine
           service_name: manager
           filters:
             branches:
