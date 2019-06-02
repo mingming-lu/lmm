@@ -25,9 +25,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - &api_go_mod_cache_key api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-            - api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-
-            - api_go_mod-v1-
+            - &api_go_mod_cache_key api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-
+            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}
           paths:
             - &api_go_mod_cache_path /go/pkg/mod
       - run:
