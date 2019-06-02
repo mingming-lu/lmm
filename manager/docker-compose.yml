@@ -1,15 +1,8 @@
 version: "3.7"
 services:
   manager:
-    image: node:10.15.1-alpine
+    image: node:10.16.0-alpine
     volumes:
       - .:/manager
     environment:
       TZ: Asia/Tokyo
-    networks:
-      - lmm
-
-networks:
-  lmm:
-    external:
-      name: lmm

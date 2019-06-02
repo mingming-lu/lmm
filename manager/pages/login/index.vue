@@ -31,7 +31,6 @@ export default {
     return {
       callback: () => {
         const location = query.redirect ? query.redirect : '/'
-        console.log(location)
         redirect(location)
       },
       username: '',

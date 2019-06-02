@@ -145,7 +145,6 @@ export default {
         .changeRole(userName, oldRole, newRole)
         .catch(err => {
           if (!err.response) {
-            console.log(err)
             return
           }
           alert(err.response.data)

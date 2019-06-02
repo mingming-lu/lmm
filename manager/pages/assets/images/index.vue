@@ -113,9 +113,7 @@ export default {
         () => {
           this.copied = true
         },
-        err => {
-          console.log(err)
-        }
+        err => {}
       )
     },
     pickOnePhoto() {
