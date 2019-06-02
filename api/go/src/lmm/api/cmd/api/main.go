@@ -6,7 +6,9 @@ import (
 	"os"
 
 	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/storage"
 	_ "github.com/go-sql-driver/mysql"
+	"google.golang.org/api/option"
 
 	"lmm/api/http"
 	"lmm/api/log"
@@ -30,10 +32,9 @@ import (
 	articleUI "lmm/api/service/article/ui"
 
 	// asset
-	assetDomainService "lmm/api/service/asset/domain/service"
-	assetStorage "lmm/api/service/asset/infra/persistence"
-	assetService "lmm/api/service/asset/infra/service"
-	asset "lmm/api/service/asset/ui"
+	assetStore "lmm/api/service/asset/infra/persistence"
+	assetUI "lmm/api/service/asset/presentation"
+	assetApp "lmm/api/service/asset/usecase"
 )
 
 var (
@@ -54,6 +55,12 @@ func main() {
 		panic(err)
 	}
 	defer pubsubClient.Close()
+
+	gcsClient, err := storage.NewClient(context.TODO(), option.WithCredentialsFile("/gcp/credentials/service_account.json"))
+	if err != nil {
+		panic(err)
+	}
+	defer gcsClient.Close()
 
 	callback := log.Init(pubsub.NewPubSubTopicPublisher(
 		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_LOG")),
@@ -114,17 +121,12 @@ func main() {
 	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
 
 	// asset
-	assetFinder := assetService.NewAssetFetcher(mysql)
-	assetRepo := assetStorage.NewAssetStorage(mysql, rabbitMQUploader)
-	imageService := assetService.NewImageService(mysql)
-	imageEncoder := &assetDomainService.NopImageEncoder{}
-	asset := asset.New(assetFinder, assetRepo, imageService, imageEncoder, assetService.NewUserAdapter(mysql))
-	router.POST("/v1/assets/images", userUI.BearerAuth(asset.UploadImage))
-	router.GET("/v1/assets/images", asset.ListImages)
-	router.POST("/v1/assets/photos", userUI.BearerAuth(asset.UploadPhoto))
-	router.PUT("/v1/assets/photos/:photo/alts", userUI.BearerAuth(asset.PutPhotoAlternateTexts))
-	router.GET("/v1/assets/photos", asset.ListPhotos)
-	router.GET("/v1/assets/photos/:photo", userUI.BearerAuth(asset.GetPhotoDescription))
+	assetRepo := assetStore.NewAssetDataStore(datastoreClient)
+	assetStorage := assetStore.NewGCSUploader(gcsClient)
+	assetUsecase := assetApp.New(assetRepo, assetStorage, assetRepo)
+	assetUI := assetUI.New(assetUsecase)
+
+	router.POST("/v1/photos", userUI.BearerAuth(assetUI.PostV1Photos))
 
 	server := http.NewServer(":8002", router)
 	server.Run()
