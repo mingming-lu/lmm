@@ -62,8 +62,28 @@ func (p *Presentation) PostV1Photos(c http.Context) {
 	}
 }
 
+type photoList struct {
+	Items      []*usecase.Photo `json:"items"`
+	NextCursor string           `json:"next_cursor"`
+}
+
 // GetV1Photos handles GET /v1/photos
 func (p *Presentation) GetV1Photos(c http.Context) {
+	photos, cursor, err := p.usecase.ListPhotos(c,
+		c.Request().QueryParamOrDefault("count", "10"),
+		c.Request().QueryParamOrDefault("cursor", ""),
+	)
+
+	if err != nil {
+		http.Log().Warn(c, err.Error())
+		http.NotFound(c)
+		return
+	}
+
+	c.JSON(http.StatusOK, &photoList{
+		Items:      photos,
+		NextCursor: cursor,
+	})
 }
 
 // PatchV1Photos handles PATCH /v1/photos/:photo

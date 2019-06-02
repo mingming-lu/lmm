@@ -8,6 +8,7 @@ import (
 
 	"lmm/api/clock"
 	"lmm/api/pkg/transaction"
+	"lmm/api/util/stringutil"
 	"lmm/api/util/uuidutil"
 
 	"github.com/pkg/errors"
@@ -31,8 +32,13 @@ type FileUploader interface {
 	Upload(c context.Context, assert *AssetToUpload) (string, error)
 }
 
+type Photo struct {
+	URL string `json:"url"`
+}
+
 type AssetRepository interface {
 	Save(c context.Context, asset *Asset) error
+	ListPhotos(c context.Context, count int, cursor string) ([]*Photo, string, error)
 }
 
 type Usecase struct {
@@ -79,4 +85,13 @@ func (uc *Usecase) UploadPhoto(c context.Context, photo *AssetToUpload) (url str
 
 func (uc *Usecase) UploadAsset(c context.Context, assert *AssetToUpload) error {
 	panic("not implemented")
+}
+
+func (uc *Usecase) ListPhotos(c context.Context, countStr, cursor string) ([]*Photo, string, error) {
+	count, err := stringutil.ParseInt(countStr)
+	if err != nil || count < 1 {
+		return nil, "", errors.New("invalid count")
+	}
+
+	return uc.assetRepository.ListPhotos(c, count, cursor)
 }
