@@ -22,6 +22,7 @@ const (
 
 var (
 	ErrNotMultipart = http.ErrNotMultipart
+	ErrMissingFile  = http.ErrMissingFile
 )
 
 const (
