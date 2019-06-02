@@ -1,7 +1,0 @@
-go/pkg
-go/bin
-
-go/src/github.com
-go/src/golang.org
-
-.env

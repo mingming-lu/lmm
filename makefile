@@ -15,7 +15,7 @@ start:
 start-gateway:
 	cd gateway && make
 
-start-services: start-api start-app start-asset start-manager start-messaging start-logging
+start-services: start-api start-app start-asset start-manager start-messaging
 
 start-api:
 	cd api && make
@@ -32,14 +32,11 @@ start-manager:
 start-messaging:
 	cd messaging && make
 
-start-logging:
-	cd logging && make
-
 stop:
 	make stop-services -j 4
 	make stop-gateway
 
-stop-services: stop-api stop-app stop-asset stop-manager stop-messaging stop-logging
+stop-services: stop-api stop-app stop-asset stop-manager stop-messaging
 
 stop-api:
 	cd api && make stop
@@ -56,9 +53,6 @@ stop-manager:
 stop-messaging:
 	cd messaging && make stop
 
-stop-logging:
-	cd logging && make stop
-
 stop-gateway:
 	cd gateway && make stop
 
@@ -69,7 +63,6 @@ restart:
 go-build:
 	cd api && make build
 	cd asset && make build
-	cd logging && make build
 
 scale-api:
 	docker-compose -f api/docker-compose.yml -f api/docker-compose.${env}.yml up -d --scale api=${n}
