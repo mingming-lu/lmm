@@ -7,22 +7,17 @@ import (
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
-	_ "github.com/go-sql-driver/mysql"
 	"google.golang.org/api/option"
 
 	"lmm/api/http"
 	"lmm/api/log"
-	"lmm/api/messaging"
 	"lmm/api/messaging/pubsub"
 	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
-	"lmm/api/storage/db"
 	"lmm/api/storage/file"
 
 	// user
 	userApp "lmm/api/service/user/application"
-	userEvent "lmm/api/service/user/domain/event"
-	userMessaging "lmm/api/service/user/infra/messaging"
 	userStorage "lmm/api/service/user/infra/persistence"
 	userUtil "lmm/api/service/user/infra/service"
 	userUI "lmm/api/service/user/ui"
@@ -70,9 +65,6 @@ func main() {
 	))
 	defer callback()
 
-	mysql := db.DefaultMySQL()
-	defer mysql.Close()
-
 	datastoreClient, err := datastore.NewClient(context.TODO(), "lmm")
 	if err != nil {
 		panic(err)
@@ -104,9 +96,6 @@ func main() {
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
 	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
 	userUI := userUI.NewUI(userAppService)
-	userEventSubscriber := userMessaging.NewSubscriber(mysql)
-	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, userEventSubscriber.OnUserRoleChanged)
-	messaging.SyncBus().Subscribe(&userEvent.UserPasswordChanged{}, userEventSubscriber.OnUserPasswordChanged)
 	router.POST("/v1/users", userUI.SignUp)
 	router.PUT("/v1/users/:user/password", userUI.ChangeUserPassword)
 	router.POST("/v1/auth/token", userUI.Token)

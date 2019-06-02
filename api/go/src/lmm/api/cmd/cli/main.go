@@ -4,8 +4,6 @@ import (
 	"context"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
-
 	"lmm/api/cli"
 	_ "lmm/api/cli/simple"
 )
