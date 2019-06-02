@@ -50,7 +50,10 @@ jobs:
           command: |
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             cd api/go/src/lmm/api
-            go test ./... -count 1 -cover -v
+            mkdir -p /tmp/test-results
+            gotestsum --junitfile /tmp/test-results/api-tests.xml
+      - store_test_results:
+          path: /tmp/test-results
 
   gae_node_build_and_deploy_nuxt:
     <<: *google_cloud_sdk
@@ -116,7 +119,7 @@ workflows:
               only:
                 - *app_release_branches
       - gae_node_build_and_deploy_nuxt:
-          node_image: node:10.15.1-alpine
+          node_image: node:10.16.0-alpine
           service_name: manager
           filters:
             branches:
