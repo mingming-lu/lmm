@@ -12,9 +12,7 @@ import (
 
 	"lmm/api/http"
 	"lmm/api/log"
-	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
-	"lmm/api/storage/file"
 
 	// user
 	userApp "lmm/api/service/user/application"
@@ -59,10 +57,6 @@ func main() {
 		panic(err)
 	}
 	defer datastoreClient.Close()
-
-	rabbitMQClient := rabbitmq.DefaultClient()
-	rabbitMQUploader := file.NewRabbitMQAssetUploader(rabbitMQClient)
-	defer rabbitMQUploader.Close() // would close rabbitMQClient too
 
 	router := http.NewRouter()
 

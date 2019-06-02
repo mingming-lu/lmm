@@ -6,10 +6,6 @@ services:
     command: api
     environment:
       APP_HOST: https://www.lmm.local
-      RABBIT_HOST: rabbitmq
-      RABBIT_PORT: 5672
-      RABBIT_USER: guest
-      RABBIT_PASS: guest
       HTTP_TIMEOUT_SECOND: 3
       DATASTORE_EMULATOR_HOST: datastore:8081
       DATASTORE_PROJECT_ID: lmm

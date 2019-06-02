@@ -13,19 +13,6 @@ services:
       GO111MODULE: 'on'
     networks:
       - lmm
-  subscriber:
-    image: golang:1.12.0
-    working_dir: /go/src/lmm/asset
-    volumes:
-      - ./go/:/go/
-      - ./static/images:/static/images
-      - ./static/photos:/static/photos
-    command: subscriber
-    environment:
-      TZ: Asia/Tokyo
-      GO111MODULE: 'on'
-    networks:
-      - lmm
 
 networks:
   lmm:
