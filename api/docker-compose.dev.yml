@@ -8,7 +8,7 @@ services:
       APP_HOST: https://www.lmm.local
       HTTP_TIMEOUT_SECOND: 3
       DATASTORE_EMULATOR_HOST: datastore:8081
-      DATASTORE_PROJECT_ID: lmm
+      DATASTORE_PROJECT_ID: lmm-dev
       PROJECT_ID: lmm-dev
     networks:
       - lmm
@@ -20,7 +20,7 @@ services:
     networks:
       - lmm-api
     command: |
-      gcloud beta emulators datastore start --project=lmm --host-port=0.0.0.0:8081
+      gcloud beta emulators datastore start --project=lmm-dev --host-port=0.0.0.0:8081
 
 networks:
   lmm:
