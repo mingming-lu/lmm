@@ -14,8 +14,5 @@ logs:
 	docker-compose logs # no follow and display nginx access log
 	docker-compose run --rm nginx sh -c "tail /var/log/nginx/access.log"
 
-prod:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-
 reload-nginx:
 	docker-compose kill -s SIGHUP nginx
