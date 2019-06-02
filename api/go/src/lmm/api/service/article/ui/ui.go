@@ -18,7 +18,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"google.golang.org/appengine/log"
 )
 
 var (
@@ -80,7 +79,7 @@ func (ui *UI) PostNewArticle(c *gin.Context) {
 	case domain.ErrNoSuchUser:
 		httpUtil.Unauthorized(c)
 	default:
-		log.Criticalf(c, err.Error())
+		httpUtil.LogCritf(c, err.Error())
 	}
 }
 
@@ -141,7 +140,7 @@ func (ui *UI) PutV1Articles(c *gin.Context) {
 		c.String(http.StatusForbidden, original.Error())
 
 	default:
-		log.Criticalf(c, err.Error())
+		httpUtil.LogCritf(c, err.Error())
 	}
 }
 
@@ -174,7 +173,7 @@ func (ui *UI) ListArticles(c *gin.Context) {
 	case application.ErrInvalidCount, application.ErrInvalidPage:
 		c.JSON(http.StatusBadRequest, err.Error())
 	default:
-		log.Criticalf(c, err.Error())
+		httpUtil.LogCritf(c, err.Error())
 	}
 }
 
@@ -250,7 +249,7 @@ func (ui *UI) GetArticle(c *gin.Context) {
 	case domain.ErrInvalidArticleID, domain.ErrNoSuchArticle:
 		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 	default:
-		log.Criticalf(c, err.Error())
+		httpUtil.LogCritf(c, err.Error())
 	}
 }
 
@@ -278,7 +277,7 @@ func (ui *UI) GetAllArticleTags(c *gin.Context) {
 	case nil:
 		c.JSON(http.StatusOK, ui.tagListViewToJSON(tags))
 	default:
-		log.Criticalf(c, err.Error())
+		httpUtil.LogCritf(c, err.Error())
 	}
 }
 

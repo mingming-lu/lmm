@@ -17,7 +17,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"google.golang.org/appengine/log"
 )
 
 var (
@@ -68,7 +67,7 @@ func (ui *UI) SignUp(c *gin.Context) {
 		c.String(http.StatusConflict, domain.ErrUserNameAlreadyUsed.Error())
 
 	default:
-		log.Criticalf(c, err.Error())
+		httpUtil.LogCritf(c, err.Error())
 	}
 }
 
@@ -163,7 +162,7 @@ func (ui *UI) Token(c *gin.Context) {
 
 		token, err := ui.appService.RefreshAccessToken(c, matched[1])
 		if err != nil {
-			log.Warningf(c, err.Error())
+			httpUtil.LogWarnf(c, err.Error())
 			httpUtil.Unauthorized(c)
 			return
 		}
@@ -180,7 +179,7 @@ func (ui *UI) Token(c *gin.Context) {
 func (ui *UI) ChangeUserPassword(c *gin.Context) {
 	requestBody := changePasswordRequestBody{}
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
-		log.Warningf(c, err.Error())
+		httpUtil.LogWarnf(c, err.Error())
 		httpUtil.BadRequest(c)
 		return
 	}
@@ -211,6 +210,6 @@ func (ui *UI) ChangeUserPassword(c *gin.Context) {
 		c.String(http.StatusNotFound, domain.ErrNoSuchUser.Error())
 
 	default:
-		log.Criticalf(c, err.Error())
+		httpUtil.LogCritf(c, err.Error())
 	}
 }

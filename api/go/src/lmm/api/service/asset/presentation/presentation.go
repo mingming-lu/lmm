@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
-	"google.golang.org/appengine/log"
 )
 
 var (
@@ -37,7 +36,7 @@ func (p *Presentation) PostV1Photos(c *gin.Context) {
 			c.String(http.StatusBadRequest, "photo required")
 			return
 		}
-		log.Warningf(c, err.Error())
+		httpUtil.LogWarnf(c, err.Error())
 		httpUtil.BadRequest(c)
 		return
 	}
@@ -61,7 +60,7 @@ func (p *Presentation) PostV1Photos(c *gin.Context) {
 		c.Header("Location", url)
 		httpUtil.Response(c, http.StatusCreated, "Success")
 	default:
-		log.Criticalf(c, err.Error())
+		httpUtil.LogCritf(c, err.Error())
 	}
 }
 
@@ -78,7 +77,7 @@ func (p *Presentation) GetV1Photos(c *gin.Context) {
 	)
 
 	if err != nil {
-		log.Warningf(c, err.Error())
+		httpUtil.LogWarnf(c, err.Error())
 		httpUtil.NotFound(c)
 		return
 	}
