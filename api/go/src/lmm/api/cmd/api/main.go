@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"cloud.google.com/go/datastore"
@@ -11,7 +12,6 @@ import (
 
 	"lmm/api/http"
 	"lmm/api/log"
-	"lmm/api/messaging/pubsub"
 	"lmm/api/messaging/rabbitmq"
 	"lmm/api/middleware"
 	"lmm/api/storage/file"
@@ -45,24 +45,13 @@ func init() {
 }
 
 func main() {
-	pubsubClient, err := pubsub.NewClient(gcpProjectID, "/gcp/credentials/service_account.json")
-	if err != nil {
-		panic(err)
-	}
-	defer pubsubClient.Close()
-
 	gcsClient, err := storage.NewClient(context.TODO(), option.WithCredentialsFile("/gcp/credentials/service_account.json"))
 	if err != nil {
 		panic(err)
 	}
 	defer gcsClient.Close()
 
-	callback := log.Init(pubsub.NewPubSubTopicPublisher(
-		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_LOG")),
-		func() context.Context {
-			return context.Background()
-		},
-	))
+	callback := log.Init(ioutil.Discard)
 	defer callback()
 
 	datastoreClient, err := datastore.NewClient(context.TODO(), "lmm")
@@ -79,12 +68,7 @@ func main() {
 
 	// middlewares
 	// access log
-	accessLogger := middleware.NewAccessLog(pubsub.NewPubSubTopicPublisher(
-		pubsubClient.Topic(getEnvOrPanic("GCP_PUBSUB_TOPIC_API_ACCESS_LOG")),
-		func() context.Context {
-			return context.Background()
-		},
-	))
+	accessLogger := middleware.NewAccessLog(ioutil.Discard)
 	defer accessLogger.Sync()
 	router.Use(accessLogger.AccessLog)
 	// recovery
