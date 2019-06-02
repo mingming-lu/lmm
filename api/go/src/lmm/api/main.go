@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
 	goHttp "net/http"
 	"os"
 
@@ -13,8 +11,6 @@ import (
 	"google.golang.org/appengine"
 
 	"lmm/api/http"
-	"lmm/api/log"
-	"lmm/api/middleware"
 
 	// user
 	userApp "lmm/api/service/user/application"
@@ -39,27 +35,13 @@ func main() {
 	}
 	defer gcsClient.Close()
 
-	callback := log.Init(ioutil.Discard)
-	defer callback()
-
-	fmt.Println("ds pro id: ", os.Getenv("DATASTORE_PROJECT_ID"))
-	datastoreClient, err := datastore.NewClient(context.TODO(), "lmm")
+	datastoreClient, err := datastore.NewClient(context.TODO(), os.Getenv("PROJECT_ID"))
 	if err != nil {
 		panic(err)
 	}
 	defer datastoreClient.Close()
 
 	router := http.NewRouter()
-
-	// middlewares
-	// access log
-	accessLogger := middleware.NewAccessLog(ioutil.Discard)
-	defer accessLogger.Sync()
-	router.Use(accessLogger.AccessLog)
-	// recovery
-	router.Use(middleware.Recovery)
-	// request id
-	router.Use(middleware.WithRequestID)
 
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
