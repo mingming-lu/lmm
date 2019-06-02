@@ -10,7 +10,7 @@
           required/>
         <v-text-field 
           v-model="newArticleID" 
-          label="alias id" 
+          label="link name"
           required/>
         <v-combobox
           v-model="articleTags"
@@ -125,7 +125,7 @@ export default {
         .put(
           `/v1/articles/${this.articleID}`,
           {
-            alias_id: this.newArticleID,
+            link_name: this.newArticleID,
             title: this.articleTitle,
             body: this.articleBody,
             tags: this.articleTags

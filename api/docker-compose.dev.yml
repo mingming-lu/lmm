@@ -13,9 +13,12 @@ services:
       HTTP_TIMEOUT_SECOND: 3
       DATASTORE_EMULATOR_HOST: datastore:8081
       DATASTORE_PROJECT_ID: lmm
+      PROJECT_ID: lmm-dev
     networks:
       - lmm
   datastore:
+    volumes:
+      - ./.datastore:/root/.config/gcloud/emulators/datastore
     environment:
       PROJECT_ID: lmm
     networks:
