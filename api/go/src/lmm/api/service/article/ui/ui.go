@@ -3,9 +3,9 @@ package ui
 import (
 	"fmt"
 	"math"
+	"net/http"
 
-	"lmm/api/http"
-	"lmm/api/pkg/auth"
+	httpUtil "lmm/api/pkg/http"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/application"
 	"lmm/api/service/article/application/command"
@@ -16,7 +16,9 @@ import (
 	"lmm/api/service/article/domain/viewer"
 	"lmm/api/util/stringutil"
 
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"google.golang.org/appengine/log"
 )
 
 var (
@@ -44,21 +46,20 @@ func NewUI(
 }
 
 // PostNewArticle handles POST /1/articles
-func (ui *UI) PostNewArticle(c http.Context) {
-	user, ok := auth.FromContext(c)
+func (ui *UI) PostNewArticle(c *gin.Context) {
+	user, ok := httpUtil.AuthFromGinContext(c)
 	if !ok {
-		http.Unauthorized(c)
+		httpUtil.Unauthorized(c)
 		return
 	}
 
 	article := postArticleAdapter{}
-	if err := c.Request().Bind(&article); err != nil {
-		http.BadRequest(c)
-		return
+	if err := c.ShouldBindJSON(&article); err != nil {
+		httpUtil.BadRequest(c)
 	}
 
 	if err := ui.validatePostArticleAdaptor(&article); err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		httpUtil.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -77,29 +78,29 @@ func (ui *UI) PostNewArticle(c http.Context) {
 	case domain.ErrInvalidArticleTitle:
 		c.String(http.StatusBadRequest, err.Error())
 	case domain.ErrNoSuchUser:
-		http.Unauthorized(c)
+		httpUtil.Unauthorized(c)
 	default:
-		http.Log().Panic(c, err.Error())
+		log.Criticalf(c, err.Error())
 	}
 }
 
 // PutV1Articles handles PUT /v1/article/:articleID
-func (ui *UI) PutV1Articles(c http.Context) {
-	user, ok := auth.FromContext(c)
+func (ui *UI) PutV1Articles(c *gin.Context) {
+	user, ok := httpUtil.AuthFromGinContext(c)
 	if !ok {
-		http.Unauthorized(c)
+		httpUtil.Unauthorized(c)
 		return
 	}
 
-	articleID, err := stringutil.ParseInt64(c.Request().PathParam("articleID"))
+	articleID, err := stringutil.ParseInt64(c.Param("articleID"))
 	if err != nil {
 		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 		return
 	}
 
 	article := postArticleAdapter{}
-	if err := c.Request().Bind(&article); err != nil {
-		http.BadRequest(c)
+	if err := c.ShouldBindJSON(&article); err != nil {
+		httpUtil.BadRequest(c)
 		return
 	}
 
@@ -120,7 +121,7 @@ func (ui *UI) PutV1Articles(c http.Context) {
 	original := errors.Cause(err)
 	switch original {
 	case nil:
-		http.NoContent(c)
+		httpUtil.Response(c, http.StatusOK, "Success")
 
 	case
 		domain.ErrArticleTitleTooLong,
@@ -134,13 +135,13 @@ func (ui *UI) PutV1Articles(c http.Context) {
 		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 
 	case domain.ErrNoSuchUser:
-		http.Unauthorized(c)
+		httpUtil.Unauthorized(c)
 
 	case domain.ErrNotArticleAuthor:
 		c.String(http.StatusForbidden, original.Error())
 
 	default:
-		http.Log().Panic(c, err.Error())
+		log.Criticalf(c, err.Error())
 	}
 }
 
@@ -158,14 +159,14 @@ func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 }
 
 // ListArticles handles GET /v1/articles
-func (ui *UI) ListArticles(c http.Context) {
+func (ui *UI) ListArticles(c *gin.Context) {
 	v, err := ui.appService.Query().ListArticlesByPage(
 		c,
 		ui.buildListArticleQueryFromContext(c),
 	)
 	switch errors.Cause(err) {
 	case nil:
-		if c.Request().QueryParamOrDefault("flavor", "") == "true" {
+		if c.DefaultQuery("flavor", "") == "true" {
 			c.JSON(http.StatusOK, ui.articleListViewToJSONV2(c, v))
 		} else {
 			c.JSON(http.StatusOK, ui.articleListViewToJSON(v))
@@ -173,22 +174,28 @@ func (ui *UI) ListArticles(c http.Context) {
 	case application.ErrInvalidCount, application.ErrInvalidPage:
 		c.JSON(http.StatusBadRequest, err.Error())
 	default:
-		http.Log().Panic(c, err.Error())
+		log.Criticalf(c, err.Error())
 	}
 }
 
-func (ui *UI) buildListArticleQueryFromContext(c http.Context) query.ListArticleQuery {
+func (ui *UI) buildListArticleQueryFromContext(c *gin.Context) query.ListArticleQuery {
+	var tag *string
+	if c.Query("tag") == "" {
+		tmp := c.Query("tag")
+		tag = &tmp
+	}
 	return query.ListArticleQuery{
-		Page:  c.Request().QueryParamOrDefault("page", "1"),
-		Count: c.Request().QueryParamOrDefault("perPage", "5"),
-		Tag:   c.Request().QueryParam("tag"),
+		Page:  c.DefaultQuery("page", "1"),
+		Count: c.DefaultQuery("perPage", "5"),
+		Tag:   tag,
 	}
 }
 
 func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAdapter {
 	items := make([]articleListItem, len(view.Items()), len(view.Items()))
 	for i, item := range view.Items() {
-		items[i].ID = item.LinkName()
+		items[i].ID = item.ID()
+		items[i].Link = item.LinkName()
 		items[i].Title = item.Title()
 		items[i].PostAt = item.PostAt().Unix()
 	}
@@ -198,7 +205,7 @@ func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAda
 	}
 }
 
-func (ui *UI) articleListViewToJSONV2(c http.Context, view *model.ArticleListView) *articleListAdapterV2 {
+func (ui *UI) articleListViewToJSONV2(c *gin.Context, view *model.ArticleListView) *articleListAdapterV2 {
 	adapter := ui.articleListViewToJSON(view)
 	adapterV2 := &articleListAdapterV2{
 		Articles: adapter.Articles,
@@ -212,16 +219,16 @@ func (ui *UI) articleListViewToJSONV2(c http.Context, view *model.ArticleListVie
 	))
 
 	if adapterV2.Page > 1 && adapterV2.Page <= last+1 {
-		adapterV2.PrevPage = buildURI(c.Request().Path(), adapterV2.Page-1, adapterV2.PerPage)
+		adapterV2.PrevPage = buildURI(c.Request.URL.Path, adapterV2.Page-1, adapterV2.PerPage)
 	}
 
 	if view.HasNextPage() {
-		adapterV2.NextPage = buildURI(c.Request().Path(), adapterV2.Page+1, adapterV2.PerPage)
+		adapterV2.NextPage = buildURI(c.Request.URL.Path, adapterV2.Page+1, adapterV2.PerPage)
 	}
 
 	if adapterV2.Total > 0 {
-		adapterV2.FirstPage = buildURI(c.Request().Path(), 1, adapterV2.PerPage)
-		adapterV2.LastPage = buildURI(c.Request().Path(), last, adapterV2.PerPage)
+		adapterV2.FirstPage = buildURI(c.Request.URL.Path, 1, adapterV2.PerPage)
+		adapterV2.LastPage = buildURI(c.Request.URL.Path, last, adapterV2.PerPage)
 	}
 
 	return adapterV2
@@ -233,9 +240,9 @@ func buildURI(path string, page, perPage int) *string {
 }
 
 // GetArticle handles GET /v1/articles/:articleID
-func (ui *UI) GetArticle(c http.Context) {
+func (ui *UI) GetArticle(c *gin.Context) {
 	view, err := ui.appService.Query().ArticleByLinkName(c,
-		c.Request().PathParam("articleID"),
+		c.Param("articleID"),
 	)
 	switch errors.Cause(err) {
 	case nil:
@@ -243,7 +250,7 @@ func (ui *UI) GetArticle(c http.Context) {
 	case domain.ErrInvalidArticleID, domain.ErrNoSuchArticle:
 		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 	default:
-		http.Log().Panic(c, err.Error())
+		log.Criticalf(c, err.Error())
 	}
 }
 
@@ -253,7 +260,8 @@ func (ui *UI) articleViewToJSON(model *model.Article) *articleViewResponse {
 		tags[i].Name = tag
 	}
 	return &articleViewResponse{
-		ID:           model.LinkName(),
+		ID:           model.ID().ID(),
+		Link:         model.LinkName(),
 		Title:        model.Content().Text().Title(),
 		Body:         model.Content().Text().Body(),
 		PostAt:       model.CreatedAt().Unix(),
@@ -263,14 +271,14 @@ func (ui *UI) articleViewToJSON(model *model.Article) *articleViewResponse {
 }
 
 // GetAllArticleTags handles GET /v1/articleTags
-func (ui *UI) GetAllArticleTags(c http.Context) {
+func (ui *UI) GetAllArticleTags(c *gin.Context) {
 	tags, err := ui.appService.Query().AllArticleTags(c)
 
 	switch errors.Cause(err) {
 	case nil:
 		c.JSON(http.StatusOK, ui.tagListViewToJSON(tags))
 	default:
-		http.Log().Panic(c, err.Error())
+		log.Criticalf(c, err.Error())
 	}
 }
 

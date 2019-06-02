@@ -24,13 +24,15 @@ type articleListAdapterV2 struct {
 }
 
 type articleListItem struct {
-	ID     string `json:"id"`
+	ID     int64  `json:"id,string"`
+	Link   string `json:"link"`
 	Title  string `json:"title"`
 	PostAt int64  `json:"post_at,string"`
 }
 
 type articleViewResponse struct {
-	ID           string           `json:"id"`
+	ID           int64            `json:"id,string"`
+	Link         string           `json:"link"`
 	Title        string           `json:"title"`
 	Body         string           `json:"body"`
 	PostAt       int64            `json:"post_at,string"`

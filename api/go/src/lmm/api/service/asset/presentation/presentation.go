@@ -1,11 +1,14 @@
 package presentation
 
 import (
-	"lmm/api/http"
-	"lmm/api/pkg/auth"
+	"net/http"
+
+	httpUtil "lmm/api/pkg/http"
 	"lmm/api/service/asset/usecase"
 
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"google.golang.org/appengine/log"
 )
 
 var (
@@ -21,21 +24,21 @@ func New(app *usecase.Usecase) *Presentation {
 }
 
 // PostV1Photos handles POST /v1/photos
-func (p *Presentation) PostV1Photos(c http.Context) {
-	user, ok := auth.FromContext(c)
+func (p *Presentation) PostV1Photos(c *gin.Context) {
+	user, ok := httpUtil.AuthFromGinContext(c)
 	if !ok {
-		http.Unauthorized(c)
+		httpUtil.Unauthorized(c)
 		return
 	}
 
-	f, fh, err := c.Request().FormFile("photo")
+	f, fh, err := c.Request.FormFile("photo")
 	if err != nil {
 		if err == http.ErrMissingFile || err == http.ErrNotMultipart {
 			c.String(http.StatusBadRequest, "photo required")
 			return
 		}
-		http.Log().Warn(c, err.Error())
-		http.BadRequest(c)
+		log.Warningf(c, err.Error())
+		httpUtil.BadRequest(c)
 		return
 	}
 
@@ -56,9 +59,9 @@ func (p *Presentation) PostV1Photos(c http.Context) {
 	switch err {
 	case nil:
 		c.Header("Location", url)
-		http.Created(c)
+		httpUtil.Response(c, http.StatusCreated, "Success")
 	default:
-		http.Log().Panic(c, err.Error())
+		log.Criticalf(c, err.Error())
 	}
 }
 
@@ -68,15 +71,15 @@ type photoList struct {
 }
 
 // GetV1Photos handles GET /v1/photos
-func (p *Presentation) GetV1Photos(c http.Context) {
+func (p *Presentation) GetV1Photos(c *gin.Context) {
 	photos, cursor, err := p.usecase.ListPhotos(c,
-		c.Request().QueryParamOrDefault("count", "10"),
-		c.Request().QueryParamOrDefault("cursor", ""),
+		c.DefaultQuery("count", "10"),
+		c.DefaultQuery("cursor", ""),
 	)
 
 	if err != nil {
-		http.Log().Warn(c, err.Error())
-		http.NotFound(c)
+		log.Warningf(c, err.Error())
+		httpUtil.NotFound(c)
 		return
 	}
 
@@ -87,10 +90,10 @@ func (p *Presentation) GetV1Photos(c http.Context) {
 }
 
 // PatchV1Photos handles PATCH /v1/photos/:photo
-func (p *Presentation) PatchV1Photos(c http.Context) {
+func (p *Presentation) PatchV1Photos(c *gin.Context) {
 }
 
 // PostV1Assets handles POST /v1/assets
 // This endpoint is to upload common assets
-func (p *Presentation) PostV1Assets(c http.Context) {
+func (p *Presentation) PostV1Assets(c *gin.Context) {
 }
