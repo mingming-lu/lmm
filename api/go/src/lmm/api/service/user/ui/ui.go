@@ -1,9 +1,15 @@
 package ui
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"regexp"
+	"strings"
 
 	"lmm/api/http"
+	authUtil "lmm/api/pkg/auth"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
@@ -28,7 +34,7 @@ func (ui *UI) SignUp(c http.Context) {
 	reqBody := signUpRequestBody{}
 	c.Request().Bind(&reqBody)
 
-	_, err := ui.appService.RegisterNewUser(c, command.Register{
+	userID, err := ui.appService.RegisterNewUser(c, command.Register{
 		UserName:     reqBody.Name,
 		EmailAddress: reqBody.Email,
 		Password:     reqBody.Password,
@@ -37,6 +43,7 @@ func (ui *UI) SignUp(c http.Context) {
 	originalError := errors.Cause(err)
 	switch originalError {
 	case nil:
+		c.Header("Location", fmt.Sprintf("users/%d", userID))
 		c.String(http.StatusCreated, "success")
 
 	case
@@ -55,6 +62,110 @@ func (ui *UI) SignUp(c http.Context) {
 	default:
 		http.Log().Panic(c, err.Error())
 	}
+}
+
+// BasicAuth middleware
+func (ui *UI) BasicAuth(next http.Handler) http.Handler {
+	pattern := regexp.MustCompile(`^Basic +(.+)$`)
+
+	return func(c http.Context) {
+		authHeader := c.Request().Header.Get("Authorization")
+
+		matched := pattern.FindStringSubmatch(authHeader)
+		if len(matched) != 2 {
+			next(c)
+			return
+		}
+
+		b, err := base64.URLEncoding.DecodeString(matched[1])
+		if err != nil {
+			next(c)
+			return
+		}
+
+		basicauth := basicAuth{}
+		if err := json.NewDecoder(bytes.NewReader(b)).Decode(&basicauth); err != nil {
+			next(c)
+			return
+		}
+
+		auth, err := ui.appService.BasicAuth(c, command.Login{
+			UserName: basicauth.UserName,
+			Password: basicauth.Password,
+		})
+		if err != nil {
+			next(c)
+			return
+		}
+
+		ctx := authUtil.NewContext(c.Request().Context(), auth)
+
+		next(c.With(ctx))
+	}
+}
+
+// BearerAuth is a middleware of bearer auth
+func (ui *UI) BearerAuth(next http.Handler) http.Handler {
+	return func(c http.Context) {
+		authHeader := c.Request().Header.Get("Authorization")
+
+		matched := bearerAuthPattern.FindStringSubmatch(authHeader)
+		if len(matched) != 2 {
+			next(c)
+			return
+		}
+
+		auth, err := ui.appService.BearerAuth(c, matched[1])
+		if err != nil {
+			next(c)
+			return
+		}
+
+		ctx := authUtil.NewContext(c.Request().Context(), auth)
+
+		next(c.With(ctx))
+	}
+}
+
+var bearerAuthPattern = regexp.MustCompile(`^Bearer +(.+)$`)
+
+// Token handles /v1/auth/token
+func (ui *UI) Token(c http.Context) {
+	authHeader := c.Request().Header.Get("Authorization")
+
+	if strings.HasPrefix(authHeader, "Basic ") {
+		ui.BasicAuth(func(c http.Context) {
+			auth, ok := authUtil.FromContext(c)
+			if !ok {
+				http.Unauthorized(c)
+				return
+			}
+			c.JSON(http.StatusOK, accessTokenView{
+				AccessToken: auth.Token,
+			})
+		})(c)
+		return
+
+	} else if strings.HasPrefix(authHeader, "Bearer ") {
+		matched := bearerAuthPattern.FindStringSubmatch(authHeader)
+		if len(matched) != 2 {
+			http.Unauthorized(c)
+			return
+		}
+
+		token, err := ui.appService.RefreshAccessToken(c, matched[1])
+		if err != nil {
+			http.Log().Warn(c, err.Error())
+			http.Unauthorized(c)
+			return
+		}
+		c.JSON(http.StatusOK, accessTokenView{
+			AccessToken: token.Hashed(),
+		})
+		return
+	}
+
+	http.Unauthorized(c)
 }
 
 // AssignUserRole handles PUT /v1/users/:user/role

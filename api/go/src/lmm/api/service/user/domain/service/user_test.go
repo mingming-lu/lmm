@@ -104,7 +104,7 @@ func newUserWithRole(role model.Role) *model.User {
 	password := uuid.New().String()
 	token := uuid.New().String()
 
-	user, err := model.NewUser(randomUserName, email, password, token, role, clock.Now())
+	user, err := model.NewUser(0, randomUserName, email, password, token, role, clock.Now())
 	if err != nil {
 		panic(err)
 	}

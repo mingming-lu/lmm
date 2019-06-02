@@ -37,12 +37,12 @@ func NewText(title, body string) (*Text, error) {
 }
 
 // Title returns the title of the article text
-func (t *Text) Title() string {
+func (t Text) Title() string {
 	return t.title
 }
 
 // Body returns the body of the article text
-func (t *Text) Body() string {
+func (t Text) Body() string {
 	return t.body
 }
 

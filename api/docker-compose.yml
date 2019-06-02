@@ -4,7 +4,6 @@ services:
     image: golang:1.12.0
     volumes:
       - ./go:/go
-      - ./mysql/sql/init.sql:/sql/schema.sql
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
     working_dir: /go/src/lmm/api/
     environment:
@@ -12,16 +11,11 @@ services:
       GO111MODULE: 'on'
       HTTP_TIMEOUT_SECOND: 10
     depends_on:
-      - mysql
+      - datastore
     networks:
       - lmm-api
-  mysql:
-    image: mysql:5.7.25
-    volumes:
-      - ./mysql/lib:/var/lib/mysql
-      - ./mysql/log:/var/log/mysql
-      - ./mysql/my.cnf:/etc/mysql/my.cnf
-      - ./mysql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+  datastore:
+    image: google/cloud-sdk:247.0.0
     environment:
       TZ: Asia/Tokyo
     networks:
