@@ -6,10 +6,6 @@ services:
     command: api
     environment:
       APP_HOST: https://www.lmm.local
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_NAME: lmm
-      MYSQL_USER: root
       RABBIT_HOST: rabbitmq
       RABBIT_PORT: 5672
       RABBIT_USER: guest
@@ -19,9 +15,6 @@ services:
       DATASTORE_PROJECT_ID: lmm
     networks:
       - lmm
-  mysql:
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
   datastore:
     environment:
       PROJECT_ID: lmm

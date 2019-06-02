@@ -9,10 +9,6 @@ services:
     restart: always
     networks:
       - lmm
-  mysql:
-    env_file:
-      - ./mysql/.env/prod.env
-    restart: always
 
 networks:
   lmm:

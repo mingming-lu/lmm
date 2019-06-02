@@ -3,6 +3,9 @@ all: start
 start:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
+go/mod/tidy:
+	docker-compose run --rm --no-deps api go mod tidy
+
 build: build-api build-cli
 
 build-api:

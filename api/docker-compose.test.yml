@@ -5,21 +5,11 @@ services:
     env_file:
       - ./.env/test.env
     environment:
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_NAME: lmm_test
-      MYSQL_USER: root
       DATASTORE_EMULATOR_HOST: datastore:8081
       DATASTORE_PROJECT_ID: lmm-test
       HTTP_TIMEOUT_SECOND: 3
     working_dir: /go/src/lmm/api
-    command: gotestsum
-  mysql:
-    volumes:
-      - ./mysql/sql/init_test.sql:/mysql/sql/init_test.sql
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
-    command: --init-file /mysql/sql/init_test.sql
+    command: gotestsum -f short-verbose
   datastore:
     environment:
       PROJECT_ID: lmm-test
