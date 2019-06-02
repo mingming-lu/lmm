@@ -36,7 +36,6 @@ export default async function({
         )
       })
       .catch(e => {
-        console.log(e)
         redirectToLogin(redirect, route.path)
       })
   }
