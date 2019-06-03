@@ -70,7 +70,6 @@ jobs:
     parameters:
       service_name:
         type: string
-      # TODO inject into << parameters.service_name >>.yaml
       gin_mode: # https://godoc.org/github.com/gin-gonic/gin#pkg-constants
         type: string
         default: debug
@@ -83,8 +82,11 @@ jobs:
           name: deploy
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
           command: |
-            export LMM_API_TOKEN_KEY=$<< parameters.env >>_LMM_API_TOKEN_KEY
-            gcloud app deploy -q << parameters.service_name >>.yaml
+            docker run -it -v ${PWD}:/workdir mikefarah/yq yq write << parameters.service_name >>.yaml \
+              env_variables.GCP_PROJECT_ID $<< parameters.env >>_GCP_PROJECT_ID \
+              env_variables.GIN_MODE << parameters.gin_mode >> \
+              env_variables.LMM_API_TOKEN_KEY $<< parameters.env >>_LMM_API_TOKEN_KEY >> service.yaml
+            gcloud app deploy -q service.yaml
 
   gae_node_build_and_deploy_nuxt:
     <<: *google_cloud_sdk
@@ -124,8 +126,10 @@ jobs:
           name: deploy
           working_directory: << parameters.service_name >>
           command: |
-            export GCP_PROJECT_ID=<< parameters.env >>_GCP_PROJECT_ID
-            gcloud app deploy -q << parameters.service_name >>.yaml
+            docker run -it -v ${PWD}:/workdir mikefarah/yq yq write << parameters.service_name >>.yaml \
+              env_variables.API_URL $<< parameters.env >>_API_URL \
+              env_variables.API_URL_BROWSER $<< parameters.env >>_API_URL_BROWSER >> service.yaml
+            gcloud app deploy -q service.yaml
 
 workflows:
   version: 2.1
