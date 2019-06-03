@@ -71,11 +71,9 @@ func (ui *UI) PostNewArticle(c *gin.Context) {
 	switch errors.Cause(err) {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/v1/articles/%d", articleID.ID()))
-		c.String(http.StatusCreated, "Success")
-	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle:
-		c.String(http.StatusBadRequest, err.Error())
-	case domain.ErrInvalidArticleTitle:
-		c.String(http.StatusBadRequest, err.Error())
+		httpUtil.Response(c, http.StatusCreated, "Success")
+	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle, domain.ErrInvalidArticleTitle:
+		httpUtil.ErrorResponse(c, http.StatusBadRequest, err.Error())
 	case domain.ErrNoSuchUser:
 		httpUtil.Unauthorized(c)
 	default:
@@ -93,7 +91,7 @@ func (ui *UI) PutV1Articles(c *gin.Context) {
 
 	articleID, err := stringutil.ParseInt64(c.Param("articleID"))
 	if err != nil {
-		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
+		httpUtil.ErrorResponse(c, http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 		return
 	}
 
@@ -104,7 +102,7 @@ func (ui *UI) PutV1Articles(c *gin.Context) {
 	}
 
 	if err := ui.validatePostArticleAdaptor(&article); err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		httpUtil.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -128,16 +126,16 @@ func (ui *UI) PutV1Articles(c *gin.Context) {
 		domain.ErrInvalidArticleTitle,
 		domain.ErrInvalidAliasArticleID:
 
-		c.String(http.StatusBadRequest, original.Error())
+		httpUtil.ErrorResponse(c, http.StatusBadRequest, original.Error())
 
 	case domain.ErrNoSuchArticle, domain.ErrInvalidArticleID:
-		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
+		httpUtil.ErrorResponse(c, http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 
 	case domain.ErrNoSuchUser:
 		httpUtil.Unauthorized(c)
 
 	case domain.ErrNotArticleAuthor:
-		c.String(http.StatusForbidden, original.Error())
+		httpUtil.ErrorResponse(c, http.StatusForbidden, original.Error())
 
 	default:
 		httpUtil.LogCritf(c, err.Error())
@@ -247,7 +245,7 @@ func (ui *UI) GetArticle(c *gin.Context) {
 	case nil:
 		c.JSON(http.StatusOK, ui.articleViewToJSON(view))
 	case domain.ErrInvalidArticleID, domain.ErrNoSuchArticle:
-		c.String(http.StatusNotFound, domain.ErrNoSuchArticle.Error())
+		httpUtil.ErrorResponse(c, http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 	default:
 		httpUtil.LogCritf(c, err.Error())
 	}

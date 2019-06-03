@@ -146,7 +146,7 @@ func TestPutV1UsersPassword(t *testing.T) {
 			NewPassword: uuidutil.NewUUID() + uuidutil.NewUUID(),
 		})
 
-		assert.Equal(t, 204, res.Code)
+		assert.Equal(t, http.StatusOK, res.Code)
 	})
 
 	t.Run("Failure", func(t *testing.T) {
