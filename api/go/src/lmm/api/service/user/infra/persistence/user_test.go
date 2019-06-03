@@ -39,6 +39,16 @@ func mustRandomUser(userDataStore *UserDataStore) *model.User {
 	return user
 }
 
+func mustSaveRandomUser(c context.Context, userDataStore *UserDataStore) *model.User {
+	user := mustRandomUser(userDataStore)
+	if err := userDataStore.RunInTransaction(c, func(tx transaction.Transaction) error {
+		return userDataStore.Save(tx, user)
+	}, nil); err != nil {
+		panic("failed to save new user")
+	}
+	return user
+}
+
 func TestUserDataStore(t *testing.T) {
 	c, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -51,8 +61,6 @@ func TestUserDataStore(t *testing.T) {
 
 	userDataStore := NewUserDataStore(dataStore)
 
-	user := mustRandomUser(userDataStore)
-
 	t.Run("NextID", func(t *testing.T) {
 		userDataStore.RunInTransaction(c, func(tx transaction.Transaction) error {
 			userID, err := userDataStore.NextID(tx)
@@ -63,6 +71,7 @@ func TestUserDataStore(t *testing.T) {
 	})
 
 	t.Run("Save", func(t *testing.T) {
+		user := mustRandomUser(userDataStore)
 		t.Run("Insert", func(t *testing.T) {
 			userDataStore.RunInTransaction(c, func(tx transaction.Transaction) error {
 				assert.NoError(t, userDataStore.Save(tx, user))
@@ -73,6 +82,8 @@ func TestUserDataStore(t *testing.T) {
 
 	t.Run("FindByName", func(t *testing.T) {
 		t.Run("Found", func(t *testing.T) {
+			user := mustSaveRandomUser(c, userDataStore)
+
 			userDataStore.RunInTransaction(c, func(tx transaction.Transaction) error {
 				userFound, err := userDataStore.FindByName(tx, user.Name())
 				if !assert.NoError(t, err) {
@@ -121,6 +132,8 @@ func TestUserDataStore(t *testing.T) {
 
 	t.Run("FindByToken", func(t *testing.T) {
 		t.Run("Found", func(t *testing.T) {
+			user := mustSaveRandomUser(c, userDataStore)
+
 			userDataStore.RunInTransaction(c, func(tx transaction.Transaction) error {
 				userFound, err := userDataStore.FindByToken(tx, user.Token())
 				if !assert.NoError(t, err) {
