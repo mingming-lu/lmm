@@ -4,6 +4,12 @@ references:
   app_release_branches: &app_release_branches /^app-release$/
   manager_release_branch: &manager_release_branch /^manager-release$/
 
+  only_dev_branch: &only_dev_branch
+    filters:
+      branches:
+        only:
+          - /^develop$/
+
   google_cloud_sdk: &google_cloud_sdk
     docker:
       - image: google/cloud-sdk
