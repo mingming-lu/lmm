@@ -9,7 +9,9 @@ services:
       HTTP_TIMEOUT_SECOND: 3
       DATASTORE_EMULATOR_HOST: datastore:8081
       DATASTORE_PROJECT_ID: lmm-dev
-      PROJECT_ID: lmm-dev
+      ASSET_BUCKET_NAME: lmm-dev-asset
+      GCP_PROJECT_ID: lmm-dev
+      GCP_SERVICE_KEY_FILE: /gcp/credentials/service_account.json
     networks:
       - lmm
   datastore:

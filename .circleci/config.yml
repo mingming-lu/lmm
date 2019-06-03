@@ -18,17 +18,18 @@ references:
     run:
       name: setup gcloud
       command: |
-        echo $(<< parameters.env >>_GCP_SERVICE_KEY) | base64 --decode > $GCP_SERVICE_KEY_FILE
-        gcloud --quiet config set project $(<< parameters.env >>_GCP_PROJECT_ID)
+        echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
+        gcloud --quiet config set project $<< parameters.env >>_GCP_PROJECT_ID
         gcloud auth activate-service-account --key-file $GCP_SERVICE_KEY_FILE
 
 jobs:
-  api:
+  api_test:
     docker:
       - image: circleci/golang:1.12.0
         environment:
           DATASTORE_EMULATOR_HOST: datastore:8081
           DATASTORE_PROJECT_ID: lmm-test
+          GIN_MODE: test
           HTTP_TIMEOUT_SECOND: 3
       - image: google/cloud-sdk:247.0.0
         name: datastore
@@ -60,7 +61,7 @@ jobs:
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             cd api/go/src/lmm/api
             mkdir -p /tmp/test-results/api
-            gotestsum --junitfile /tmp/test-results/api/api-tests.xml
+            gotestsum -f short-verbose --junitfile /tmp/test-results/api/api-tests.xml
       - store_test_results:
           path: /tmp/test-results
 
@@ -122,13 +123,14 @@ jobs:
           name: deploy
           working_directory: << parameters.service_name >>
           command: |
+            export GCP_PROJECT_ID=<< parameters.env >>_GCP_PROJECT_ID
             gcloud app deploy -q << parameters.service_name >>.yaml
 
 workflows:
   version: 2.1
   test_build_deploy:
     jobs:
-      - api:
+      - api_test:
           filters:
             branches:
               ignore:
@@ -150,6 +152,8 @@ workflows:
           service_name: api
           env: DEV
           <<: *only_dev_branch
+          requires:
+            - api_test
       # ------------- prod -------------
       - gae_node_build_and_deploy_nuxt:
           service_name: app

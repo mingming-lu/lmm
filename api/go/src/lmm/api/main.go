@@ -29,14 +29,24 @@ import (
 	assetApp "lmm/api/service/asset/usecase"
 )
 
+var gcpServiceKeyFile string
+
+func init() {
+	gcpServiceKeyFile = os.Getenv("GCP_SERVICE_KEY_FILE")
+	if gcpServiceKeyFile == "" {
+		panic("GCP_SERVICE_KEY_FILE not set")
+	}
+}
+
 func main() {
-	gcsClient, err := storage.NewClient(context.TODO(), option.WithCredentialsFile("/gcp/credentials/service_account.json"))
+	gcsClient, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(gcpServiceKeyFile))
 	if err != nil {
 		panic(err)
 	}
 	defer gcsClient.Close()
 
-	datastoreClient, err := datastore.NewClient(context.TODO(), os.Getenv("PROJECT_ID"))
+	datastoreClient, err := datastore.NewClient(context.TODO(), os.Getenv("GCP_PROJECT_ID"))
+
 	if err != nil {
 		panic(err)
 	}

@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	httpUtil "lmm/api/pkg/http"
+	jsonUtil "lmm/api/pkg/json"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
@@ -147,6 +148,7 @@ func TestPutV1UsersPassword(t *testing.T) {
 		})
 
 		assert.Equal(t, http.StatusOK, res.Code)
+		assert.JSONEq(t, jsonUtil.MustJSONify(jsonUtil.JSON{"message": "Success"}), res.Body.String())
 	})
 
 	t.Run("Failure", func(t *testing.T) {
