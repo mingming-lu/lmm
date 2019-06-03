@@ -1,23 +1,29 @@
-runtime: nodejs10
-env: standard
-instance_class: F2
+Error: asked to process document index 0 but there are only 0 document(s)
+Usage:
+  yq write [yaml_file] [path] [value] [flags]
 
-handlers:
-  - url: /_nuxt
-    static_dir: .nuxt/dist/client
-    secure: always
+Aliases:
+  write, w
 
-  - url: /(.*\.(gif|png|jpg|ico|txt))$
-    static_files: static/\1
-    upload: static/.*\.(gif|png|jpg|ico|txt)$
-    secure: always
+Examples:
 
-  - url: /.*
-    script: auto
-    secure: always
+yq write things.yaml a.b.c cat
+yq write --inplace -- things.yaml a.b.c --cat
+yq w -i things.yaml a.b.c cat
+yq w --script update_script.yaml things.yaml
+yq w -i -s update_script.yaml things.yaml
+yq w --doc 2 things.yaml a.b.d[+] foo
+yq w -d2 things.yaml a.b.d[+] foo
+      
 
-env_variables:
-  API_URL: 'https://api.lumingming.net'
-  API_URL_BROWSER: 'https://api.lumingming.net'
-  NODE_ENV: 'production'
-  TZ: 'Asia/Tokyo'
+Flags:
+  -d, --doc string      process document index number (0 based, * for all documents) (default "0")
+  -h, --help            help for write
+  -i, --inplace         update the yaml file inplace
+  -s, --script string   yaml script for updating yaml
+
+Global Flags:
+  -t, --trim      trim yaml output (default true)
+  -v, --verbose   verbose mode
+
+[31m16:48:31 main [ERRO][0m asked to process document index 0 but there are only 0 document(s)

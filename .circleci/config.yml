@@ -117,7 +117,7 @@ jobs:
       - run:
           name: nuxt build
           command: |
-            CONTAINER_NAME=$(docker create -e API_URL=$API_URL -e API_URL_BROWSER=$API_URL_BROWSER -e ASSET_URL=$ASSET_URL -it << parameters.docker_image >> npm --prefix /<< parameters.service_name >> run build)
+            CONTAINER_NAME=$(docker create -e API_URL=$<< parameters.env >>_API_URL -e API_URL_BROWSER=$<< parameters.env >>_API_URL_BROWSER -it << parameters.docker_image >> npm --prefix /<< parameters.service_name >> run build)
             docker cp << parameters.service_name >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
             docker cp $CONTAINER_NAME:/<< parameters.service_name >>/dist << parameters.service_name >>/. || << parameters.universal_mode >>
