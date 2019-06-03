@@ -140,13 +140,13 @@ workflows:
       - gae_node_build_and_deploy_nuxt:
           service_name: app
           env: DEV
-          docker_image: gcr.io/google-appengine/nodejs
+          docker_image: node:10.16.0-alpine
           universal_mode: true
           <<: *only_dev_branch
       - gae_node_build_and_deploy_nuxt:
           service_name: manager
           env: DEV
-          docker_image: gcr.io/google-appengine/nodejs
+          docker_image: node:10.16.0-alpine
           <<: *only_dev_branch
       - gae_deploy_gin:
           service_name: api
@@ -158,7 +158,7 @@ workflows:
       - gae_node_build_and_deploy_nuxt:
           service_name: app
           env: PROD
-          docker_image: node:10.15.1-alpine
+          docker_image: node:10.16.0-alpine
           universal_mode: true
           filters:
             branches:
