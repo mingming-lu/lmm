@@ -83,6 +83,7 @@ jobs:
           name: deploy
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
           command: |
+            export LMM_API_TOKEN_KEY=$<< parameters.env >>_LMM_API_TOKEN_KEY
             gcloud app deploy -q << parameters.service_name >>.yaml
 
   gae_node_build_and_deploy_nuxt:
