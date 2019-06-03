@@ -80,13 +80,17 @@ jobs:
       - setup_remote_docker
       - *setup_gcloud_cli
       - run:
+          name: write env_variables
+          working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
+          command: >
+            docker run -it -v ${PWD}:/workdir mikefarah/yq sh -c '
+            yq w << parameters.service_name >>.yaml env_variables.GIN_MODE << parameters.gin_mode >> |
+            yq w - env_variables.GCP_PROJECT_ID $<< parameters.env >>_GCP_PROJECT_ID |
+            yq w - env_variables.LMM_API_TOKEN_KEY $<< parameters.env >>_LMM_API_TOKEN_KEY > service.yaml'
+      - run:
           name: deploy
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
           command: |
-            docker run -it -v ${PWD}:/workdir mikefarah/yq yq write << parameters.service_name >>.yaml \
-              env_variables.GCP_PROJECT_ID $<< parameters.env >>_GCP_PROJECT_ID \
-              env_variables.GIN_MODE << parameters.gin_mode >> \
-              env_variables.LMM_API_TOKEN_KEY $<< parameters.env >>_LMM_API_TOKEN_KEY >> service.yaml
             gcloud app deploy -q service.yaml
 
   gae_node_build_and_deploy_nuxt:
@@ -117,7 +121,7 @@ jobs:
       - run:
           name: nuxt build
           command: |
-            CONTAINER_NAME=$(docker create -e API_URL=$API_URL -e API_URL_BROWSER=$API_URL_BROWSER -e ASSET_URL=$ASSET_URL -it << parameters.docker_image >> npm --prefix /<< parameters.service_name >> run build)
+            CONTAINER_NAME=$(docker create -e API_URL=$<< parameters.env >>_API_URL -e API_URL_BROWSER=$<< parameters.env >>_API_URL_BROWSER -it << parameters.docker_image >> npm --prefix /<< parameters.service_name >> run build)
             docker cp << parameters.service_name >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
             docker cp $CONTAINER_NAME:/<< parameters.service_name >>/dist << parameters.service_name >>/. || << parameters.universal_mode >>
@@ -127,10 +131,7 @@ jobs:
           name: deploy
           working_directory: << parameters.service_name >>
           command: |
-            docker run -it -v ${PWD}:/workdir mikefarah/yq yq write << parameters.service_name >>.yaml \
-              env_variables.API_URL $<< parameters.env >>_API_URL \
-              env_variables.API_URL_BROWSER $<< parameters.env >>_API_URL_BROWSER >> service.yaml
-            gcloud app deploy -q service.yaml
+            gcloud app deploy -q << parameters.service_name >>.yaml
 
 workflows:
   version: 2.1
