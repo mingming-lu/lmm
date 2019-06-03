@@ -5,13 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"math/rand"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
 
-	"lmm/api/http"
+	"github.com/gin-gonic/gin"
+
+	jsonUtil "lmm/api/pkg/json"
 	testUtil "lmm/api/pkg/testing"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/infra/persistence"
@@ -24,7 +27,7 @@ import (
 )
 
 var (
-	router    *http.Router
+	router    *gin.Engine
 	dataStore *datastore.Client
 )
 
@@ -37,7 +40,7 @@ func TestMain(m *testing.M) {
 		panic("failed to connect to datastore: " + err.Error())
 	}
 
-	router = http.NewRouter()
+	router = gin.New()
 
 	repo := persistence.NewArticleDataStore(dataStore)
 	ui := NewUI(repo, repo, repo)
@@ -78,7 +81,7 @@ func TestPostV1Articles(t *testing.T) {
 			}(),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusCreated,
-			ResBody:       "Success",
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"message": "Success"}),
 			ResHeaders:    map[string]string{"Location": `^\/v1\/articles\/\w+$`},
 		},
 		"NoTags": {
@@ -87,7 +90,7 @@ func TestPostV1Articles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusCreated,
-			ResBody:       "Success",
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"message": "Success"}),
 			ResHeaders:    map[string]string{"Location": `^\/v1\/articles\/\w+$`},
 		},
 		"Unauthorized": {
@@ -96,7 +99,7 @@ func TestPostV1Articles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    nil,
 			ResStatusCode: http.StatusUnauthorized,
-			ResBody:       http.StatusText(http.StatusUnauthorized),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": http.StatusText(http.StatusUnauthorized)}),
 			ResHeaders:    nil,
 		},
 		"TitleRequired": {
@@ -105,7 +108,7 @@ func TestPostV1Articles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       errTitleRequired.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": errTitleRequired.Error()}),
 			ResHeaders:    nil,
 		},
 		"BodyRequired": {
@@ -114,7 +117,7 @@ func TestPostV1Articles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       errBodyRequired.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": errBodyRequired.Error()}),
 			ResHeaders:    nil,
 		},
 		"TagsRequired": {
@@ -123,7 +126,7 @@ func TestPostV1Articles(t *testing.T) {
 			ReqTags:       nil,
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       errTagsRequired.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": errTagsRequired.Error()}),
 			ResHeaders:    nil,
 		},
 		"EmptyTitle": {
@@ -132,7 +135,7 @@ func TestPostV1Articles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       domain.ErrEmptyArticleTitle.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrEmptyArticleTitle.Error()}),
 			ResHeaders:    nil,
 		},
 		"InvalidTitle": {
@@ -141,7 +144,7 @@ func TestPostV1Articles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       domain.ErrInvalidArticleTitle.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrInvalidArticleTitle.Error()}),
 			ResHeaders:    nil,
 		},
 		"LongTitle": {
@@ -150,7 +153,7 @@ func TestPostV1Articles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       domain.ErrArticleTitleTooLong.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrArticleTitleTooLong.Error()}),
 			ResHeaders:    nil,
 		},
 	}
@@ -165,10 +168,10 @@ func TestPostV1Articles(t *testing.T) {
 					Tags:  testCase.ReqTags,
 				},
 			)
-			assert.Equal(t, testCase.ResStatusCode, res.Code)
-			assert.Equal(t, testCase.ResBody, res.Body.String())
+			assert.Equal(t, testCase.ResStatusCode, res.Code, testName)
+			assert.JSONEq(t, testCase.ResBody, res.Body.String(), testName)
 			for k, v := range testCase.ResHeaders {
-				assert.Regexp(t, v, res.Header().Get(k))
+				assert.Regexp(t, v, res.Header().Get(k), testName)
 			}
 		})
 	}
@@ -212,8 +215,8 @@ func TestPutArticles(t *testing.T) {
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       []string{"foo", "bar"},
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
-			ResStatusCode: http.StatusNoContent,
-			ResBody:       "",
+			ResStatusCode: http.StatusOK,
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"message": "Success"}),
 		},
 		"NoTags": {
 			ArticleID:     articleID,
@@ -221,8 +224,8 @@ func TestPutArticles(t *testing.T) {
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
-			ResStatusCode: http.StatusNoContent,
-			ResBody:       "",
+			ResStatusCode: http.StatusOK,
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"message": "Success"}),
 		},
 		"Unauthorized": {
 			ArticleID:     articleID,
@@ -231,7 +234,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    nil,
 			ResStatusCode: http.StatusUnauthorized,
-			ResBody:       http.StatusText(http.StatusUnauthorized),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": http.StatusText(http.StatusUnauthorized)}),
 		},
 		"NotAuthor": {
 			ArticleID:     articleID,
@@ -240,7 +243,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testUtil.NewUser(c, dataStore).AccessToken}},
 			ResStatusCode: http.StatusNotFound,
-			ResBody:       domain.ErrNoSuchArticle.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrNoSuchArticle.Error()}),
 		},
 		"NotFound": {
 			ArticleID:     "notfound",
@@ -249,7 +252,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testUtil.NewUser(c, dataStore).AccessToken}},
 			ResStatusCode: http.StatusNotFound,
-			ResBody:       domain.ErrNoSuchArticle.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrNoSuchArticle.Error()}),
 		},
 		"InvalidArticleID": {
 			ArticleID:     "!nv@lidchrcter$",
@@ -258,7 +261,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testUtil.NewUser(c, dataStore).AccessToken}},
 			ResStatusCode: http.StatusNotFound,
-			ResBody:       domain.ErrNoSuchArticle.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrNoSuchArticle.Error()}),
 		},
 		"TitleRequired": {
 			ArticleID:     articleID,
@@ -267,7 +270,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       errTitleRequired.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": errTitleRequired.Error()}),
 		},
 		"BodyRequired": {
 			ArticleID:     articleID,
@@ -276,7 +279,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       errBodyRequired.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": errBodyRequired.Error()}),
 		},
 		"TagsRequired": {
 			ArticleID:     articleID,
@@ -285,7 +288,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       nil,
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       errTagsRequired.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": errTagsRequired.Error()}),
 		},
 		"EmptyTitle": {
 			ArticleID:     articleID,
@@ -294,7 +297,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       domain.ErrEmptyArticleTitle.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrEmptyArticleTitle.Error()}),
 		},
 		"InvalidTitle": {
 			ArticleID:     articleID,
@@ -303,7 +306,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       domain.ErrInvalidArticleTitle.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrInvalidArticleTitle.Error()}),
 		},
 		"LongTitle": {
 			ArticleID:     articleID,
@@ -312,7 +315,7 @@ func TestPutArticles(t *testing.T) {
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + user.AccessToken}},
 			ResStatusCode: http.StatusBadRequest,
-			ResBody:       domain.ErrArticleTitleTooLong.Error(),
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrArticleTitleTooLong.Error()}),
 		},
 	}
 

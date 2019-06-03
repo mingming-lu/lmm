@@ -7,7 +7,8 @@ import (
 	"regexp"
 	"time"
 
-	"lmm/api/http"
+	"github.com/gin-gonic/gin"
+
 	"lmm/api/pkg/auth"
 	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/infra/service"
@@ -79,11 +80,11 @@ func NewUser(ctx context.Context, dataStore *datastore.Client) *User {
 }
 
 // BearerAuth middleware for testing
-func BearerAuth(dataStore *datastore.Client, next http.Handler) http.Handler {
+func BearerAuth(dataStore *datastore.Client, next gin.HandlerFunc) gin.HandlerFunc {
 	pattern := regexp.MustCompile(`^Bearer +(.+)$`)
 
-	return func(c http.Context) {
-		authHeader := c.Request().Header.Get("Authorization")
+	return func(c *gin.Context) {
+		authHeader := c.Request.Header.Get("Authorization")
 
 		matched := pattern.FindStringSubmatch(authHeader)
 		if len(matched) != 2 {
@@ -104,7 +105,6 @@ func BearerAuth(dataStore *datastore.Client, next http.Handler) http.Handler {
 		keys, err := dataStore.GetAll(c, q, nil)
 		if err != nil {
 			log.Print(err.Error())
-			http.Log().Warn(c, err.Error())
 			next(c)
 			return
 		}
@@ -117,13 +117,14 @@ func BearerAuth(dataStore *datastore.Client, next http.Handler) http.Handler {
 		}
 
 		user := users[0]
-		ctxWithAuth := auth.NewContext(c.Request().Context(), &auth.Auth{
+		ctxWithAuth := auth.NewContext(c.Request.Context(), &auth.Auth{
 			ID:    user.ID(),
 			Name:  user.Name,
 			Token: user.RawToken,
 			Role:  user.Role,
 		})
+		c.Request = c.Request.WithContext(ctxWithAuth)
 
-		next(c.With(ctxWithAuth))
+		next(c)
 	}
 }

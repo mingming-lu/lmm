@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
+	"lmm/api/pkg/http/middleware"
 	goHttp "net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
 	"google.golang.org/appengine"
-
-	"lmm/api/http"
 
 	// user
 	userApp "lmm/api/service/user/application"
@@ -41,7 +42,8 @@ func main() {
 	}
 	defer datastoreClient.Close()
 
-	router := http.NewRouter()
+	router := gin.New()
+	router.Use(middleware.WrapAppEngineContext)
 
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)

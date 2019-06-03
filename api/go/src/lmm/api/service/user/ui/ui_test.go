@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"regexp"
@@ -12,8 +13,7 @@ import (
 	"strings"
 	"testing"
 
-	"lmm/api/http"
-	authUtil "lmm/api/pkg/auth"
+	httpUtil "lmm/api/pkg/http"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
@@ -22,12 +22,13 @@ import (
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	router *http.Router
+	router *gin.Engine
 	ui     *UI
 )
 
@@ -41,7 +42,7 @@ func TestMain(m *testing.M) {
 	userAppService := application.NewService(&service.BcryptService{}, &service.CFBTokenService{}, userRepo, userRepo)
 	ui = NewUI(userAppService)
 
-	router = http.NewRouter()
+	router = gin.New()
 	router.POST("/v1/users", ui.SignUp)
 	router.PUT("/v1/users/:user/password", ui.ChangeUserPassword)
 
@@ -145,7 +146,7 @@ func TestPutV1UsersPassword(t *testing.T) {
 			NewPassword: uuidutil.NewUUID() + uuidutil.NewUUID(),
 		})
 
-		assert.Equal(t, 204, res.Code)
+		assert.Equal(t, http.StatusOK, res.Code)
 	})
 
 	t.Run("Failure", func(t *testing.T) {
@@ -240,11 +241,11 @@ func TestBasicAuth(t *testing.T) {
 	matched := regexp.MustCompile(`users/(\d+)`).FindStringSubmatch(location)
 	userIDStr := matched[1]
 
-	router := http.NewRouter()
-	router.GET("/", ui.BasicAuth(func(c http.Context) {
-		auth, ok := authUtil.FromContext(c)
+	router := gin.New()
+	router.GET("/", ui.BasicAuth(func(c *gin.Context) {
+		auth, ok := httpUtil.AuthFromGinContext(c)
 		if !ok {
-			http.Unauthorized(c)
+			httpUtil.Unauthorized(c)
 			return
 		}
 		t.Run("FromContext", func(t *testing.T) {
