@@ -123,6 +123,7 @@ jobs:
           name: deploy
           working_directory: << parameters.service_name >>
           command: |
+            export GCP_PROJECT_ID=<< parameters.env >>_GCP_PROJECT_ID
             gcloud app deploy -q << parameters.service_name >>.yaml
 
 workflows:

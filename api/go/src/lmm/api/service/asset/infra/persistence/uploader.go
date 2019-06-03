@@ -17,7 +17,7 @@ type GCSUploader struct {
 }
 
 var (
-	bucketName    = os.Getenv("PROJECT_ID") + "-asset"
+	bucketName    = os.Getenv("ASSET_BUCKET_NAME")
 	publicURLBase = "https://storage.googleapis.com/" + bucketName + "/"
 )
 
