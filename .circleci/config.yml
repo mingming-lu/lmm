@@ -127,10 +127,7 @@ jobs:
           name: deploy
           working_directory: << parameters.service_name >>
           command: |
-            docker run -it -v ${PWD}:/workdir mikefarah/yq yq write << parameters.service_name >>.yaml \
-              env_variables.API_URL $<< parameters.env >>_API_URL \
-              env_variables.API_URL_BROWSER $<< parameters.env >>_API_URL_BROWSER >> service.yaml
-            gcloud app deploy -q service.yaml
+            gcloud app deploy -q << parameters.service_name >>.yaml
 
 workflows:
   version: 2.1
