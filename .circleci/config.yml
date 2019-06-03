@@ -134,6 +134,23 @@ workflows:
               ignore:
                 - *app_release_branches
                 - *manager_release_branch
+      # ------------- dev -------------
+      - gae_node_build_and_deploy_nuxt:
+          service_name: app
+          env: DEV
+          docker_image: gcr.io/google-appengine/nodejs
+          universal_mode: true
+          <<: *only_dev_branch
+      - gae_node_build_and_deploy_nuxt:
+          service_name: manager
+          env: DEV
+          docker_image: gcr.io/google-appengine/nodejs
+          <<: *only_dev_branch
+      - gae_deploy_gin:
+          service_name: api
+          env: DEV
+          <<: *only_dev_branch
+      # ------------- prod -------------
       - gae_node_build_and_deploy_nuxt:
           service_name: app
           env: PROD
