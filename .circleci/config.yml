@@ -23,7 +23,7 @@ references:
         gcloud auth activate-service-account --key-file $GCP_SERVICE_KEY_FILE
 
 jobs:
-  api:
+  api_test:
     docker:
       - image: circleci/golang:1.12.0
         environment:
@@ -128,7 +128,7 @@ workflows:
   version: 2.1
   test_build_deploy:
     jobs:
-      - api:
+      - api_test:
           filters:
             branches:
               ignore:
@@ -151,7 +151,7 @@ workflows:
           env: DEV
           <<: *only_dev_branch
           requires:
-            - api
+            - api_test
       # ------------- prod -------------
       - gae_node_build_and_deploy_nuxt:
           service_name: app
