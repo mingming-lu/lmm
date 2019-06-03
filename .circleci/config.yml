@@ -4,30 +4,44 @@ references:
   app_release_branches: &app_release_branches /^app-release$/
   manager_release_branch: &manager_release_branch /^manager-release$/
 
+  only_dev_branch: &only_dev_branch
+    filters:
+      branches:
+        only:
+          - /^develop$/
+
   google_cloud_sdk: &google_cloud_sdk
     docker:
       - image: google/cloud-sdk
+
+  setup_gcloud_cli: &setup_gcloud_cli
+    run:
+      name: setup gcloud
+      command: |
+        echo $(<< parameters.env >>_GCP_SERVICE_KEY) | base64 --decode > $GCP_SERVICE_KEY_FILE
+        gcloud --quiet config set project $(<< parameters.env >>_GCP_PROJECT_ID)
+        gcloud auth activate-service-account --key-file $GCP_SERVICE_KEY_FILE
 
 jobs:
   api:
     docker:
       - image: circleci/golang:1.12.0
-      - image: circleci/mysql:5.7.25
-    environment:
-      MYSQL_HOST: localhost
-      MYSQL_PORT: 3306
-      MYSQL_NAME: lmm_test
-      MYSQL_USER: root
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
-      HTTP_TIMEOUT_SECOND: 3
-
+        environment:
+          DATASTORE_EMULATOR_HOST: datastore:8081
+          DATASTORE_PROJECT_ID: lmm-test
+          HTTP_TIMEOUT_SECOND: 3
+      - image: google/cloud-sdk:247.0.0
+        name: datastore
+        environment:
+          PROJECT_ID: lmm-test
+        command: gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081
     steps:
       - checkout
       - restore_cache:
           keys:
-            - &api_go_mod_cache_key api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-            - api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-
-            - api_go_mod-v1-
+            - &api_go_mod_cache_key api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-
+            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}
           paths:
             - &api_go_mod_cache_path /go/pkg/mod
       - run:
@@ -39,42 +53,58 @@ jobs:
           key: *api_go_mod_cache_key
           paths:
             - *api_go_mod_cache_path
-      - run:
-          name: Setup API MySQL
-          command: |
-            dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
-            sudo apt install -y mysql-client || true
-            cat api/mysql/sql/init_test.sql | mysql -h localhost --protocol TCP -uroot
+      - run: dockerize -wait tcp://datastore:8081 -timeout 30s
       - run:
           name: API Go Test
           command: |
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             cd api/go/src/lmm/api
-            mkdir -p /tmp/test-results
-            gotestsum --junitfile /tmp/test-results/api-tests.xml
+            mkdir -p /tmp/test-results/api
+            gotestsum --junitfile /tmp/test-results/api/api-tests.xml
       - store_test_results:
           path: /tmp/test-results
+
+  gae_deploy_gin:
+    <<: *google_cloud_sdk
+    parameters:
+      service_name:
+        type: string
+      # TODO inject into << parameters.service_name >>.yaml
+      gin_mode: # https://godoc.org/github.com/gin-gonic/gin#pkg-constants
+        type: string
+        default: debug
+      env:
+        type: string
+    steps:
+      - checkout
+      - *setup_gcloud_cli
+      - run:
+          name: deploy
+          working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
+          command: |
+            gcloud app deploy -q << parameters.service_name >>.yaml
 
   gae_node_build_and_deploy_nuxt:
     <<: *google_cloud_sdk
     parameters:
-      node_image:
+      docker_image:
         type: string
       service_name:
         type: string
       universal_mode:
         type: boolean
         default: false
-    environment:
-      GCP_KEY_FILE: cloud/gcp/credentials/service_account.json
+      env:
+        type: string
     steps:
       - checkout
+      - *setup_gcloud_cli
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
           name: npm install
           command: |
-            CONTAINER_NAME=$(docker create -it << parameters.node_image >> npm --prefix /<< parameters.service_name >> install)
+            CONTAINER_NAME=$(docker create -it << parameters.docker_image >> npm --prefix /<< parameters.service_name >> install)
             docker cp << parameters.service_name >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
             docker cp $CONTAINER_NAME:/<< parameters.service_name >>/node_modules << parameters.service_name >>/.
@@ -82,22 +112,16 @@ jobs:
       - run:
           name: nuxt build
           command: |
-            CONTAINER_NAME=$(docker create -e API_URL=$API_URL -e API_URL_BROWSER=$API_URL_BROWSER -e ASSET_URL=$ASSET_URL -it << parameters.node_image >> npm --prefix /<< parameters.service_name >> run build)
+            CONTAINER_NAME=$(docker create -e API_URL=$API_URL -e API_URL_BROWSER=$API_URL_BROWSER -e ASSET_URL=$ASSET_URL -it << parameters.docker_image >> npm --prefix /<< parameters.service_name >> run build)
             docker cp << parameters.service_name >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
             docker cp $CONTAINER_NAME:/<< parameters.service_name >>/dist << parameters.service_name >>/. || << parameters.universal_mode >>
             docker cp $CONTAINER_NAME:/<< parameters.service_name >>/.nuxt << parameters.service_name >>/.
             docker container rm -f $CONTAINER_NAME
       - run:
-          name: setup gcloud env
-          command: |
-            echo $GCLOUD_SERVICE_KEY | base64 --decode > $GCP_KEY_FILE
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-            gcloud auth activate-service-account --key-file $GCP_KEY_FILE
-      - run:
           name: deploy
+          working_directory: << parameters.service_name >>
           command: |
-            cd << parameters.service_name >>
             gcloud app deploy -q << parameters.service_name >>.yaml
 
 workflows:
@@ -110,17 +134,36 @@ workflows:
               ignore:
                 - *app_release_branches
                 - *manager_release_branch
+      # ------------- dev -------------
       - gae_node_build_and_deploy_nuxt:
-          node_image: node:10.15.1-alpine
           service_name: app
+          env: DEV
+          docker_image: gcr.io/google-appengine/nodejs
+          universal_mode: true
+          <<: *only_dev_branch
+      - gae_node_build_and_deploy_nuxt:
+          service_name: manager
+          env: DEV
+          docker_image: gcr.io/google-appengine/nodejs
+          <<: *only_dev_branch
+      - gae_deploy_gin:
+          service_name: api
+          env: DEV
+          <<: *only_dev_branch
+      # ------------- prod -------------
+      - gae_node_build_and_deploy_nuxt:
+          service_name: app
+          env: PROD
+          docker_image: node:10.15.1-alpine
           universal_mode: true
           filters:
             branches:
               only:
                 - *app_release_branches
       - gae_node_build_and_deploy_nuxt:
-          node_image: node:10.16.0-alpine
           service_name: manager
+          env: PROD
+          docker_image: node:10.16.0-alpine
           filters:
             branches:
               only:

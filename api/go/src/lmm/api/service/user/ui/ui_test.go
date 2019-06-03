@@ -1,82 +1,79 @@
 package ui
 
 import (
-	"io"
+	"bytes"
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
+	"testing"
 
-	"lmm/api/http"
-	"lmm/api/messaging"
-	authApp "lmm/api/service/auth/application"
-	authStorage "lmm/api/service/auth/infra/persistence"
-	authUI "lmm/api/service/auth/ui"
+	httpUtil "lmm/api/pkg/http"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/event"
-	userMessaging "lmm/api/service/user/infra/messaging"
+	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/infra/persistence"
-	"lmm/api/storage/db"
-	"lmm/api/testing"
-	"lmm/api/util/stringutil"
+	"lmm/api/service/user/infra/service"
+	"lmm/api/util/uuidutil"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/google/uuid"
+	"cloud.google.com/go/datastore"
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
-	mysql  db.DB
-	router *http.Router
+	router *gin.Engine
+	ui     *UI
 )
 
 func TestMain(m *testing.M) {
-	mysql = db.DefaultMySQL()
-
-	authRepo := authStorage.NewUserStorage(mysql)
-	authAppService := authApp.NewService(authRepo)
-	authUI := authUI.NewUI(authAppService)
-
-	userRepo := persistence.NewUserStorage(mysql)
-	appService := application.NewService(userRepo)
-	ui := NewUI(appService)
-	router = http.NewRouter()
-
-	userEventSubscriber := userMessaging.NewSubscriber(mysql)
-
-	messaging.SyncBus().Subscribe(&event.UserRoleChanged{}, messaging.NopEventHandler)
-	messaging.SyncBus().Subscribe(&event.UserPasswordChanged{}, userEventSubscriber.OnUserPasswordChanged)
-
-	router.POST("/v1/users", ui.SignUp)
-	router.PUT("/v1/users/:user/role", authUI.BearerAuth(ui.AssignUserRole))
-	router.PUT("/v1/users/:user/password", ui.ChangeUserPassword)
-	router.GET("/v1/users", authUI.BearerAuth(ui.ViewAllUsers))
-
-	code := m.Run()
-
-	if err := mysql.Close(); err != nil {
+	dataStore, err := datastore.NewClient(context.Background(), "")
+	if err != nil {
 		panic(err)
 	}
 
-	os.Exit(code)
+	userRepo := persistence.NewUserDataStore(dataStore)
+	userAppService := application.NewService(&service.BcryptService{}, &service.CFBTokenService{}, userRepo, userRepo)
+	ui = NewUI(userAppService)
+
+	router = gin.New()
+	router.POST("/v1/users", ui.SignUp)
+	router.PUT("/v1/users/:user/password", ui.ChangeUserPassword)
+
+	exitCode := m.Run()
+
+	dataStore.Close()
+
+	os.Exit(exitCode)
 }
 
-func TestPostUser(tt *testing.T) {
-	username := "U" + stringutil.ReplaceAll(uuid.New().String(), "-", "")[:8]
+func TestPostV1Users(t *testing.T) {
+	username := "U" + uuidutil.NewUUID()[:8]
+	password := uuidutil.NewUUID() + uuidutil.NewUUID()
 	email := username + "@lmm.local"
-	password := uuid.New().String()
 
-	tt.Run("Success", func(tt *testing.T) {
-		t := testing.NewTester(tt)
-		res := postUser(testing.StructToRequestBody(signUpRequestBody{
+	t.Run("Created", func(t *testing.T) {
+		res := postV1Users(signUpRequestBody{
 			Name:     username,
-			Email:    email,
 			Password: password,
-		}))
+			Email:    email,
+		})
 
-		t.Is(201, res.StatusCode())
-		t.Is("success", res.Body())
+		assert.Equal(t, 201, res.Code)
+		assert.Regexp(t, regexp.MustCompile(`users/\d+`), res.Header().Get("Location"))
 	})
 
-	tt.Run("Fail", func(tt *testing.T) {
+	t.Run("BadRequest", func(tt *testing.T) {
+		generateNewName := func() string {
+			return "U" + uuidutil.NewUUID()[:8]
+		}
+
 		cases := map[string]struct {
 			UserName   string
 			Email      string
@@ -91,60 +88,226 @@ func TestPostUser(tt *testing.T) {
 				username, email, password, 409, domain.ErrUserNameAlreadyUsed.Error(),
 			},
 			"EmptyEmail": {
-				username, "", password, 400, domain.ErrInvalidEmail.Error(),
+				generateNewName(), "", password, 400, domain.ErrInvalidEmail.Error(),
 			},
 			"InvalidEmail": {
-				username, "example.com", password, 400, domain.ErrInvalidEmail.Error(),
+				generateNewName(), "example.com", password, 400, domain.ErrInvalidEmail.Error(),
 			},
 			"EmptyPassword": {
-				username, email, "", 400, domain.ErrUserPasswordEmpty.Error(),
+				generateNewName(), email, "", 400, domain.ErrUserPasswordEmpty.Error(),
 			},
 			"InvalidPassword": {
-				username, email, "不合法的密码", 400, domain.ErrInvalidPassword.Error(),
+				generateNewName(), email, "不合法的密码", 400, domain.ErrInvalidPassword.Error(),
 			},
 			"ShortPassword": {
-				username, email, "qwert", 400, domain.ErrUserPasswordTooShort.Error(),
+				generateNewName(), email, "qwert", 400, domain.ErrUserPasswordTooShort.Error(),
 			},
 			"LongPassword": {
-				username, email, strings.Repeat("s", 251), 400, domain.ErrUserPasswordTooLong.Error(),
+				generateNewName(), email, strings.Repeat("s", 251), 400, domain.ErrUserPasswordTooLong.Error(),
 			},
 			"WeakPassword": {
-				username, email, "password", 400, domain.ErrUserPasswordTooWeak.Error(),
+				generateNewName(), email, "password", 400, domain.ErrUserPasswordTooWeak.Error(),
 			},
 		}
 
 		for testName, testCase := range cases {
-			tt.Run(testName, func(tt *testing.T) {
-				t := testing.NewTester(tt)
-				res := postUser(testing.StructToRequestBody(signUpRequestBody{
+			t.Run(testName, func(tt *testing.T) {
+				res := postV1Users(signUpRequestBody{
 					Name:     testCase.UserName,
 					Email:    testCase.Email,
 					Password: testCase.Password,
-				}))
+				})
 
-				t.Is(testCase.StatusCode, res.StatusCode())
-				t.Is(testCase.Body, res.Body())
+				assert.Equal(t, testCase.StatusCode, res.Code)
+				assert.Equal(t, testCase.Body, res.Body.String())
 			})
 		}
 	})
 }
 
-func postUser(requestBody io.ReadCloser) *testing.Response {
-	request := testing.POST("/v1/users", &testing.RequestOptions{
-		FormData: requestBody,
+func TestPutV1UsersPassword(t *testing.T) {
+	username := "U" + uuidutil.NewUUID()[:8]
+	password := uuidutil.NewUUID() + uuidutil.NewUUID()
+	email := username + "@lmm.local"
+
+	res := postV1Users(signUpRequestBody{
+		Name:     username,
+		Password: password,
+		Email:    email,
 	})
 
-	return testing.DoRequest(request, router)
+	if !assert.Equal(t, http.StatusCreated, res.Code) {
+		t.Fatal("failed to create new user: " + res.Body.String())
+	}
+
+	t.Run("Success", func(t *testing.T) {
+		res := putV1UsersPassword(username, changePasswordRequestBody{
+			OldPassword: password,
+			NewPassword: uuidutil.NewUUID() + uuidutil.NewUUID(),
+		})
+
+		assert.Equal(t, http.StatusOK, res.Code)
+	})
+
+	t.Run("Failure", func(t *testing.T) {
+		type Case struct {
+			UserName    string
+			OldPassword string
+			NewPassword string
+			StatusCode  int
+			ResBody     string
+		}
+
+		cases := map[string]Case{
+			"NoSuchUser": Case{
+				UserName:    username + "a",
+				OldPassword: password,
+				NewPassword: "MayBe@ValidPassword",
+				StatusCode:  http.StatusNotFound,
+				ResBody:     domain.ErrNoSuchUser.Error(),
+			},
+			"WrongPassword": Case{
+				UserName:    username,
+				OldPassword: password + "aa",
+				NewPassword: "MayBe@ValidPassword",
+				StatusCode:  http.StatusUnauthorized,
+				ResBody:     domain.ErrUserPassword.Error(),
+			},
+			"EmptyOldPassword": Case{
+				UserName:    username,
+				NewPassword: "MayBe@ValidPassword",
+				StatusCode:  http.StatusUnauthorized,
+				ResBody:     domain.ErrUserPassword.Error(),
+			},
+			"EmptyNewPassword": Case{
+				UserName:    username,
+				OldPassword: password,
+				StatusCode:  http.StatusBadRequest,
+				ResBody:     domain.ErrUserPasswordEmpty.Error(),
+			},
+			"NewPasswordTooShort": Case{
+				UserName:    username,
+				OldPassword: password,
+				NewPassword: "short",
+				StatusCode:  http.StatusBadRequest,
+				ResBody:     domain.ErrUserPasswordTooShort.Error(),
+			},
+			"NewPasswordTooWeak": Case{
+				UserName:    username,
+				OldPassword: password,
+				NewPassword: "123456789",
+				StatusCode:  http.StatusBadRequest,
+				ResBody:     domain.ErrUserPasswordTooWeak.Error(),
+			},
+			"NewPasswordTooLong": Case{
+				UserName:    username,
+				OldPassword: password,
+				NewPassword: strings.Repeat("a", 251),
+				StatusCode:  http.StatusBadRequest,
+				ResBody:     domain.ErrUserPasswordTooLong.Error(),
+			},
+		}
+
+		for testname, testcase := range cases {
+			t.Run(testname, func(t *testing.T) {
+				res := putV1UsersPassword(testcase.UserName, changePasswordRequestBody{
+					OldPassword: testcase.OldPassword,
+					NewPassword: testcase.NewPassword,
+				})
+
+				assert.Equal(t, testcase.StatusCode, res.Code)
+				assert.Equal(t, testcase.ResBody, res.Body.String())
+			})
+		}
+	})
 }
 
-func getUsers(opts *testing.RequestOptions) *testing.Response {
-	req := testing.GET("/v1/users", opts)
+func TestBasicAuth(t *testing.T) {
+	username := "U" + uuidutil.NewUUID()[:8]
+	password := uuidutil.NewUUID() + uuidutil.NewUUID()
+	email := username + "@lmm.local"
 
-	return testing.DoRequest(req, router)
+	postUserRes := postV1Users(signUpRequestBody{
+		Name:     username,
+		Password: password,
+		Email:    email,
+	})
+
+	if !assert.Equal(t, http.StatusCreated, postUserRes.Code) {
+		t.Fatal("failed to create user: ", postUserRes.Body.String())
+	}
+
+	location := postUserRes.Header().Get("Location")
+	matched := regexp.MustCompile(`users/(\d+)`).FindStringSubmatch(location)
+	userIDStr := matched[1]
+
+	router := gin.New()
+	router.GET("/", ui.BasicAuth(func(c *gin.Context) {
+		auth, ok := httpUtil.AuthFromGinContext(c)
+		if !ok {
+			httpUtil.Unauthorized(c)
+			return
+		}
+		t.Run("FromContext", func(t *testing.T) {
+			assert.Equal(t, userIDStr, strconv.FormatInt(auth.ID, 10))
+			assert.Equal(t, username, auth.Name)
+			assert.Equal(t, model.Ordinary.Name(), auth.Role)
+			assert.NotEmpty(t, auth.Token)
+		})
+		c.String(http.StatusOK, "OK")
+	}))
+
+	t.Run("Authorized", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/", nil)
+		buf := new(bytes.Buffer)
+		if !assert.NoError(t, json.NewEncoder(buf).Encode(basicAuth{
+			UserName: username,
+			Password: password,
+		})) {
+			t.Fatal("unexpected failure of json encoding")
+		}
+		req.Header.Set("Authorization", "Basic "+base64.URLEncoding.EncodeToString(buf.Bytes()))
+
+		res := httptest.NewRecorder()
+
+		router.ServeHTTP(res, req)
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, "OK", res.Body.String())
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/", nil)
+		res := httptest.NewRecorder()
+		router.ServeHTTP(res, req)
+
+		assert.Equal(t, http.StatusUnauthorized, res.Code)
+	})
 }
 
-func assignUserRole(username string, opts *testing.RequestOptions) *testing.Response {
-	req := testing.PUT("/v1/users/"+username+"/role", opts)
+func postV1Users(body signUpRequestBody) *httptest.ResponseRecorder {
+	b, err := json.Marshal(body)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to decode to json"))
+	}
 
-	return testing.DoRequest(req, router)
+	req := httptest.NewRequest("POST", "/v1/users", bytes.NewReader(b))
+	res := httptest.NewRecorder()
+
+	router.ServeHTTP(res, req)
+
+	return res
+}
+
+func putV1UsersPassword(username string, body changePasswordRequestBody) *httptest.ResponseRecorder {
+	b, err := json.Marshal(body)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to decode to json"))
+	}
+
+	req := httptest.NewRequest("PUT", "/v1/users/"+username+"/password", bytes.NewReader(b))
+	res := httptest.NewRecorder()
+
+	router.ServeHTTP(res, req)
+
+	return res
 }

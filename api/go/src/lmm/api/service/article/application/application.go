@@ -21,12 +21,12 @@ func NewService(articleCommandService *ArticleCommandService, articleQueryServic
 	}
 }
 
-// ArticleCommandService getter
-func (s *Service) ArticleCommandService() *ArticleCommandService {
+// Command service
+func (s *Service) Command() *ArticleCommandService {
 	return s.articleCommandService
 }
 
-// ArticleQueryService getter
-func (s *Service) ArticleQueryService() *ArticleQueryService {
+// Query service
+func (s *Service) Query() *ArticleQueryService {
 	return s.articleQueryService
 }

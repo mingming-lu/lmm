@@ -3,23 +3,24 @@ services:
   api:
     env_file:
       - ./.env/dev.env
-    command: api
+    command: dev_appserver.py api.yaml --host 0.0.0.0 --port 8002 --enable_host_checking=False
     environment:
       APP_HOST: https://www.lmm.local
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_NAME: lmm
-      MYSQL_USER: root
-      RABBIT_HOST: rabbitmq
-      RABBIT_PORT: 5672
-      RABBIT_USER: guest
-      RABBIT_PASS: guest
       HTTP_TIMEOUT_SECOND: 3
+      DATASTORE_EMULATOR_HOST: datastore:8081
+      DATASTORE_PROJECT_ID: lmm-dev
+      PROJECT_ID: lmm-dev
     networks:
       - lmm
-  mysql:
+  datastore:
+    volumes:
+      - ./.datastore:/root/.config/gcloud/emulators/datastore
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      PROJECT_ID: lmm
+    networks:
+      - lmm-api
+    command: |
+      gcloud beta emulators datastore start --project=lmm-dev --host-port=0.0.0.0:8081
 
 networks:
   lmm:

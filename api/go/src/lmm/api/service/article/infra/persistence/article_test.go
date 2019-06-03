@@ -2,196 +2,136 @@ package persistence
 
 import (
 	"context"
-	"math/rand"
-	"time"
-
-	"github.com/google/uuid"
-
 	"lmm/api/service/article/domain"
+	"testing"
+
+	"lmm/api/clock"
+	_ "lmm/api/clock/testing"
+	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/testing"
-	"lmm/api/util/testutil"
+	"lmm/api/service/article/domain/repository"
+	"lmm/api/service/article/domain/viewer"
+	"lmm/api/util/stringutil"
+	"lmm/api/util/uuidutil"
+
+	"cloud.google.com/go/datastore"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestNextArticleID(tt *testing.T) {
-	t := testing.NewTester(tt)
-	c := context.Background()
+var testArticleRepo repository.ArticleRepository = &ArticleDataStore{}
 
-	idStr := articleRepository.NextID(c)
-	id, err := model.NewArticleID(idStr)
-	if !t.NoError(err) {
-		t.Logf(err.Error(), idStr)
-	}
-	t.NotNil(id)
-	t.Is(idStr, id.String())
-}
+var testArticleFinder viewer.ArticleViewer = &ArticleDataStore{}
 
-func TestSaveArticle(tt *testing.T) {
-	c := context.Background()
+func TestArticleDataStore(t *testing.T) {
+	ctx := context.Background()
 
-	user := testutil.NewUser(mysql)
-
-	author, err := authorService.AuthorFromUserName(c, user.Name())
+	dataStore, err := datastore.NewClient(context.Background(), "")
 	if err != nil {
-		tt.Fatal(err)
+		panic(errors.Wrap(err, "failed to connect to datastore"))
 	}
 
-	tt.Run("Success", func(tt *testing.T) {
-		cases := map[string]struct {
-			Title string
-			Body  string
-			Tags  []string
-		}{
-			"SaveFirstArticle": {
-				Title: uuid.New().String()[:8],
-				Body:  uuid.New().String(),
-				Tags:  randomStringSlice(),
-			},
-			"SaveSecondArticle": {
-				Title: uuid.New().String()[:8],
-				Body:  uuid.New().String(),
-				Tags:  randomStringSlice(),
-			},
-		}
+	articleDataStore := NewArticleDataStore(dataStore)
 
-		for testName, testCase := range cases {
-			tt.Run(testName, func(tt *testing.T) {
-				t := testing.NewTester(tt)
-				article, err := articleService.NewArticleToPost(c, author,
-					testCase.Title,
-					testCase.Body,
-					testCase.Tags,
-				)
-				t.NoError(err)
-				t.NoError(articleRepository.Save(c, article))
+	t.Run("NextID", func(t *testing.T) {
+		articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+			articleID, err := articleDataStore.NextID(tx, 1)
+			assert.NoError(t, err)
+			assert.NotZero(t, articleID.ID())
+			assert.Equal(t, articleID.AuthorID(), int64(1))
 
-				id, title, body, err := selectArticleWhereUIDIs(article.ID().String())
-				t.NoError(err)
-				t.Is(testCase.Title, title)
-				t.Is(testCase.Body, body)
+			return nil
+		}, nil)
+	})
 
-				tags, err := selectTagsWhereArticleIDIs(id)
-				t.NoError(err)
-				t.Are(testCase.Tags, tags)
+	t.Run("Save", func(t *testing.T) {
+		var article *model.Article
 
-				tt.Run("EditArticle", func(tt *testing.T) {
-					t := testing.NewTester(tt)
-					text, err := model.NewText(uuid.New().String()[:8], uuid.New().String())
-					t.NoError(err)
-					tags := func() []*model.Tag {
-						tags := make([]*model.Tag, 0)
-						for i, tagName := range randomStringSlice() {
-							tag, err := model.NewTag(article.ID(), uint(i+1), tagName)
-							t.NoError(err)
-							tags = append(tags, tag)
-						}
-						return tags
-					}()
-					content, err := model.NewContent(text, tags)
-					t.NoError(err)
+		t.Run("Insert", func(t *testing.T) {
+			articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+				articleID, err := articleDataStore.NextID(tx, 1)
+				assert.NoError(t, err)
+				assert.NotZero(t, articleID.ID())
 
-					article.EditContent(content)
-					t.NoError(articleRepository.Save(c, article))
+				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
+				if err != nil {
+					t.Fatal(errors.Wrap(err, "internal error"))
+				}
 
-					id, title, body, err := selectArticleWhereUIDIs(article.ID().String())
-					t.NoError(err)
-					t.Is(text.Title(), title)
-					t.Is(text.Body(), body)
-					tagsGot, err := selectTagsWhereArticleIDIs(id)
-					t.NoError(err)
-					t.Are(func() []string {
-						names := make([]string, 0)
-						for _, tag := range tags {
-							names = append(names, tag.Name())
-						}
-						return names
-					}(), tagsGot)
-				})
+				now := clock.Now()
+				article = model.NewArticle(articleID, stringutil.Int64ToStr(articleID.ID()), model.NewContent(text, []string{}), now, now)
+				if !assert.NoError(t, articleDataStore.Save(tx, article)) || !assert.NotNil(t, article) {
+					t.Fatal("failed to save article")
+				}
+
+				return nil
+			}, nil)
+
+			t.Run("FindByID", func(t *testing.T) {
+				articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+					articleFound, err := articleDataStore.FindByID(tx, article.ID())
+					if !assert.NoError(t, err) {
+						t.Fatal(err.Error())
+					}
+
+					assert.EqualValues(t, article, articleFound)
+
+					return nil
+				}, nil)
 			})
-		}
+		})
+
+		t.Run("Update", func(t *testing.T) {
+			newLinkName := uuid.New().String()
+			assert.NoError(t, articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
+				if err != nil {
+					t.Fatal(errors.Wrap(err, "internal error"))
+				}
+				article.ChangeLinkName(newLinkName)
+				article.EditContent(model.NewContent(text, []string{"tag1", "tag2"}))
+
+				return articleDataStore.Save(tx, article)
+			}, nil))
+
+			t.Run("FindByID", func(t *testing.T) {
+				articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+					articleFound, err := articleDataStore.FindByID(tx, article.ID())
+					if !assert.NoError(t, err) {
+						t.Fatal(err.Error())
+					}
+
+					assert.EqualValues(t, article, articleFound)
+
+					return nil
+				}, nil)
+			})
+
+			t.Run("ViewArticle", func(t *testing.T) {
+				articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+					articleFound, err := articleDataStore.ViewArticle(tx, newLinkName)
+					if !assert.NoError(t, err) {
+						t.Fatal(err.Error())
+					}
+
+					assert.EqualValues(t, article, articleFound)
+
+					return nil
+				}, &transaction.Option{ReadOnly: true})
+			})
+		})
 	})
-}
 
-func TestFindArticleByID(tt *testing.T) {
-	c := context.Background()
+	t.Run("ViewArticle", func(t *testing.T) {
+		t.Run("NotFound", func(t *testing.T) {
+			articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
+				articleFound, err := articleDataStore.ViewArticle(tx, uuid.New().String())
+				assert.Error(t, domain.ErrNoSuchArticle, err)
+				assert.Nil(t, articleFound)
 
-	user := testutil.NewUser(mysql)
-
-	author, err := authorService.AuthorFromUserName(c, user.Name())
-	if err != nil {
-		tt.Fatal(err)
-	}
-
-	article, err := articleService.NewArticleToPost(c, author, "awesome title", "awesome body", nil)
-	if err != nil {
-		tt.Fatal(err)
-	}
-
-	tt.Run("NotFound", func(tt *testing.T) {
-		t := testing.NewTester(tt)
-		articleGot, err := articleRepository.FindByID(c, article.ID())
-		t.IsError(domain.ErrNoSuchArticle, err)
-		t.Nil(articleGot)
+				return nil
+			}, &transaction.Option{ReadOnly: true})
+		})
 	})
-
-	if err := articleRepository.Save(c, article); err != nil {
-		tt.Fatal(err)
-	}
-
-	tt.Run("Found", func(tt *testing.T) {
-		t := testing.NewTester(tt)
-		articleGot, err := articleRepository.FindByID(c, article.ID())
-		t.NoError(err)
-		t.Is(article, articleGot)
-	})
-}
-
-func selectArticleWhereUIDIs(uid string) (int, string, string, error) {
-	var (
-		articleID int
-		title     string
-		body      string
-	)
-
-	err := mysql.QueryRow(context.Background(), `
-		select id, title, body from article where uid = ?
-	`, uid).Scan(&articleID, &title, &body)
-
-	if err != nil {
-		return 0, "", "", err
-	}
-
-	return articleID, title, body, nil
-}
-
-func selectTagsWhereArticleIDIs(id int) ([]string, error) {
-	rows, err := mysql.Query(context.Background(), `
-		select name from article_tag where article = ?
-	`, id)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var tagName string
-	tagNames := make([]string, 0)
-	for rows.Next() {
-		if err := rows.Scan(&tagName); err != nil {
-			return nil, err
-		}
-		tagNames = append(tagNames, tagName)
-	}
-
-	return tagNames, nil
-}
-
-func randomStringSlice() []string {
-	rand.Seed(time.Now().UnixNano())
-	s := make([]string, 0)
-
-	for i := 0; i < rand.Intn(10); i++ {
-		s = append(s, uuid.New().String()[:8])
-	}
-
-	return s
 }

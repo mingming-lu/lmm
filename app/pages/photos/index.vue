@@ -1,26 +1,20 @@
 <template>
-  <div 
+  <div
     v-if="isMounted" 
     class="container">
-    <div 
+    <div
       v-if="wideMode" 
       class="content">
       <div class="left">
         <div :class="{container: wideMode}">
           <a
             v-for="photo in left"
-            :key="photo.name"
-            :href="load_image_full(photo.name)"
+            :key="photo.url"
+            :href="photo.url"
           >
             <img
-              :src="load_image_full(photo.name)"
-              :srcset="`${load_image_1280(photo.name)} 1280w,
-                        ${load_image_960(photo.name)} 960w,
-                        ${load_image_640(photo.name)} 640w,
-                        ${load_image_320(photo.name)} 320w`"
-              :alt="photo.alts.join(' ')"
+              :src="photo.url"
               sizes="(min-width: 800px) 50vw, 100vw"
-              @error="load_image_fallback($event, photo.name)"
             >
           </a>
         </div>
@@ -29,18 +23,12 @@
         <div :class="{container: wideMode}">
           <a
             v-for="photo in right"
-            :key="photo.name"
-            :href="load_image_full(photo.name)"
+            :key="photo.url"
+            :href="photo.url"
           >
             <img
-              :src="load_image_full(photo.name)"
-              :srcset="`${load_image_1280(photo.name)} 1280w,
-                        ${load_image_960(photo.name)} 960w,
-                        ${load_image_640(photo.name)} 640w,
-                        ${load_image_320(photo.name)} 320w`"
-              :alt="photo.alts.join(' ')"
+              :src="photo.url"
               sizes="(min-width: 800px) 50vw, 100vw"
-              @error="load_image_fallback($event, photo.name)"
             >
           </a>
         </div>
@@ -49,38 +37,32 @@
     <div v-else>
       <a
         v-for="photo in photos"
-        :key="photo.name"
-        :href="load_image_full(photo.name)"
+        :key="photo.url"
+        :href="photo.url"
       >
         <img
-          :src="load_image_full(photo.name)"
-          :srcset="`${load_image_1280(photo.name)} 1280w,
-                    ${load_image_960(photo.name)} 960w,
-                    ${load_image_640(photo.name)} 640w,
-                    ${load_image_320(photo.name)} 320w`"
-          :alt="photo.alts.join(' ')"
+          :src="photo.url"
           sizes="(min-width: 800px) 50vw, 100vw"
-          @error="load_image_fallback($event, photo.name)"
         >
       </a>
     </div>
 
-    <div 
+    <div
       v-if="!isPageLoaded" 
       class="center">
       <LdsEllipsis class="fade-in" />
     </div>
 
-    <div 
+    <div
       v-if="hasNext && isPageLoaded" 
       class="center">
       <br>
-      <button 
+      <button
         class="more" 
         @click.prevent="fetchMorePhotos()">See more&hellip;</button>
     </div>
 
-    <div 
+    <div
       v-if="!hasNext && isPageLoaded" 
       class="center">
       <p class="hint">No more photos.</p>
@@ -93,11 +75,11 @@
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
 import buildURLEncodedString from '~/assets/js/utils'
 
-const apiPath = '/v1/assets/photos'
+const apiPath = '/v1/photos'
 const photoFetcher = httpClient => {
   return {
-    fetch: page => {
-      return httpClient.get(`${apiPath}?perPage=10&page=${page}`)
+    fetch: cursor => {
+      return httpClient.get(`${apiPath}?count=10&cursor=${cursor}`)
     }
   }
 }
@@ -120,33 +102,24 @@ export default {
   },
   head() {
     return {
-      title: 'Photos',
-      link: this.links
+      title: 'Photos'
     }
   },
   asyncData({ $axios, error, query, route }) {
-    const page = Boolean(query.page) ? query.page : 1
+    const cursor = Boolean(query.cursor) ? query.cursor : ''
 
     return photoFetcher($axios)
-      .fetch(page)
+      .fetch(cursor)
       .then(res => {
-        const next = res.data.hasNextPage
-          ? `${apiPath}?page=${Number(page) + 1}`
-          : undefined
         return {
-          photos: res.data.photos,
-          left: res.data.photos.filter((item, index) => index % 2 === 0),
-          right: res.data.photos.filter((item, index) => index % 2 === 1),
-          page: page,
-          hasNext: res.data.hasNextPage,
-          isPageLoaded: true,
+          photos: res.data.items,
+          left: res.data.items.filter((item, index) => index % 2 === 0),
+          right: res.data.items.filter((item, index) => index % 2 === 1),
+          cursor: res.data.next_cursor,
+          hasNext:
+            Boolean(res.data.next_cursor) && res.data.next_cursor !== cursor,
           wideMode: false,
-          links: buildLinks(
-            {
-              next: next
-            },
-            route.path
-          )
+          isPageLoaded: true
         }
       })
       .catch(e => {
@@ -173,24 +146,21 @@ export default {
   methods: {
     fetchMorePhotos() {
       this.isPageLoaded = false
-      const nextPage = Number(this.page) + 1
       photoFetcher(this.$axios)
-        .fetch(nextPage)
+        .fetch(this.cursor)
         .then(res => {
-          this.isPageLoaded = true
-          this.hasNext = res.data.hasNextPage
+          this.hasNext =
+            Boolean(res.data.next_cursor) &&
+            res.data.next_cursor !== this.cursor
 
-          const photos = res.data.photos
+          this.cursor = res.data.next_cursor
+
+          const photos = res.data.items
           this.photos.push(...photos)
           this.left.push(...photos.filter((item, index) => index % 2 === 0))
           this.right.push(...photos.filter((item, index) => index % 2 === 1))
 
-          let next = undefined
-          if (this.hasNext) {
-            this.page = nextPage
-            next = `${apiPath}?page=${nextPage}`
-          }
-          this.links = buildLinks({ next: next }, this.$route.path)
+          this.isPageLoaded = true
         })
         .catch(e => {
           console.log(e)

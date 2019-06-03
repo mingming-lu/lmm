@@ -1,19 +1,16 @@
 package model
 
-import "lmm/api/service/base/model"
-
 // ArticleListView is the model used to view article list
 type ArticleListView struct {
-	model.ValueObject
 	items       []*ArticleListViewItem
-	page        uint
-	perPage     uint
-	total       uint
+	page        int
+	perPage     int
+	total       int
 	hasNextPage bool
 }
 
 // NewArticleListView constructs a new ArticleListView
-func NewArticleListView(items []*ArticleListViewItem, page, perPage, total uint, hasNextPage bool) *ArticleListView {
+func NewArticleListView(items []*ArticleListViewItem, page, perPage, total int, hasNextPage bool) *ArticleListView {
 	return &ArticleListView{
 		items:       items,
 		page:        page,
@@ -28,16 +25,16 @@ func (v *ArticleListView) Items() []*ArticleListViewItem {
 	return v.items
 }
 
-func (v *ArticleListView) Page() uint {
+func (v *ArticleListView) Page() int {
 	return v.page
 }
 
-func (v *ArticleListView) PerPage() uint {
+func (v *ArticleListView) PerPage() int {
 	return v.perPage
 }
 
 // Total returns total articles number
-func (v *ArticleListView) Total() uint {
+func (v *ArticleListView) Total() int {
 	return v.total
 }
 

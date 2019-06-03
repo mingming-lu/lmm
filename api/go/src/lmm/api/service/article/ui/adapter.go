@@ -1,10 +1,10 @@
 package ui
 
 type postArticleAdapter struct {
-	AliasID string   `json:"alias_id"`
-	Title   *string  `json:"title"`
-	Body    *string  `json:"body"`
-	Tags    []string `json:"tags"`
+	LinkName *string  `json:"link_name"`
+	Title    *string  `json:"title"`
+	Body     *string  `json:"body"`
+	Tags     []string `json:"tags"`
 }
 
 type articleListAdapter struct {
@@ -14,9 +14,9 @@ type articleListAdapter struct {
 
 type articleListAdapterV2 struct {
 	Articles  []articleListItem `json:"articles"`
-	Page      uint              `json:"page"`
-	PerPage   uint              `json:"perPage"`
-	Total     uint              `json:"total"`
+	Page      int               `json:"page"`
+	PerPage   int               `json:"perPage"`
+	Total     int               `json:"total"`
 	PrevPage  *string           `json:"prevPage"`
 	NextPage  *string           `json:"nextPage"`
 	FirstPage *string           `json:"firstPage"`
@@ -24,13 +24,15 @@ type articleListAdapterV2 struct {
 }
 
 type articleListItem struct {
-	ID     string `json:"id"`
+	ID     int64  `json:"id,string"`
+	Link   string `json:"link"`
 	Title  string `json:"title"`
 	PostAt int64  `json:"post_at,string"`
 }
 
 type articleViewResponse struct {
-	ID           string           `json:"id"`
+	ID           int64            `json:"id,string"`
+	Link         string           `json:"link"`
 	Title        string           `json:"title"`
 	Body         string           `json:"body"`
 	PostAt       int64            `json:"post_at,string"`

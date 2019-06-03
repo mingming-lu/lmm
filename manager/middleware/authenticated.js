@@ -18,10 +18,8 @@ export default async function({
   if (accessToken && !store.state.accessToken) {
     await $axios
       .post(
-        '/v1/auth/login',
-        {
-          grantType: 'refreshToken'
-        },
+        '/v1/auth/token',
+        {},
         {
           headers: {
             Authorization: 'Bearer ' + accessToken
@@ -29,7 +27,7 @@ export default async function({
         }
       )
       .then(res => {
-        window.localStorage.setItem('accessToken', res.data.accessToken)
+        window.localStorage.setItem('accessToken', res.data.access_token)
         store.commit(
           'setAccessToken',
           window.localStorage.getItem('accessToken')
