@@ -87,7 +87,7 @@ jobs:
   gae_node_build_and_deploy_nuxt:
     <<: *google_cloud_sdk
     parameters:
-      node_image:
+      docker_image:
         type: string
       service_name:
         type: string
