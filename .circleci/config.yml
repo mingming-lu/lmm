@@ -18,8 +18,8 @@ references:
     run:
       name: setup gcloud
       command: |
-        echo $(<< parameters.env >>_GCP_SERVICE_KEY) | base64 --decode > $GCP_SERVICE_KEY_FILE
-        gcloud --quiet config set project $(<< parameters.env >>_GCP_PROJECT_ID)
+        echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
+        gcloud --quiet config set project $<< parameters.env >>_GCP_PROJECT_ID
         gcloud auth activate-service-account --key-file $GCP_SERVICE_KEY_FILE
 
 jobs:
