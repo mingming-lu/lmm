@@ -80,13 +80,17 @@ jobs:
       - setup_remote_docker
       - *setup_gcloud_cli
       - run:
+          name: write env_variables
+          working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
+          command: >
+            docker run -it -v ${PWD}:/workdir mikefarah/yq sh -c '
+            yq w << parameters.service_name >>.yaml env_variables.GIN_MODE << parameters.gin_mode >> |
+            yq w - env_variables.GCP_PROJECT_ID $<< parameters.env >>_GCP_PROJECT_ID |
+            yq w - env_variables.LMM_API_TOKEN_KEY $<< parameters.env >>_LMM_API_TOKEN_KEY > service.yaml'
+      - run:
           name: deploy
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
           command: |
-            docker run -it -v ${PWD}:/workdir mikefarah/yq yq write << parameters.service_name >>.yaml \
-              env_variables.GCP_PROJECT_ID $<< parameters.env >>_GCP_PROJECT_ID \
-              env_variables.GIN_MODE << parameters.gin_mode >> \
-              env_variables.LMM_API_TOKEN_KEY $<< parameters.env >>_LMM_API_TOKEN_KEY >> service.yaml
             gcloud app deploy -q service.yaml
 
   gae_node_build_and_deploy_nuxt:

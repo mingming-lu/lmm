@@ -4,5 +4,4 @@ env: standard
 instance_class: F2
 
 env_variables:
-  GIN_MODE: release
   TZ: 'Asia/Tokyo'
