@@ -29,6 +29,7 @@ jobs:
         environment:
           DATASTORE_EMULATOR_HOST: datastore:8081
           DATASTORE_PROJECT_ID: lmm-test
+          GIN_MODE: test
           HTTP_TIMEOUT_SECOND: 3
       - image: google/cloud-sdk:247.0.0
         name: datastore
