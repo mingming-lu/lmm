@@ -3,7 +3,9 @@ services:
   api:
     env_file:
       - ./.env/dev.env
-    command: dev_appserver.py api.yaml --host 0.0.0.0 --port 8002 --enable_host_checking=False
+    command: >
+      bash -c "sh script/generate_app_yaml.sh &&
+      dev_appserver.py app.yaml --host 0.0.0.0 --port 8002 --enable_host_checking=False"
     environment:
       APP_HOST: https://www.lmm.local
       HTTP_TIMEOUT_SECOND: 3
@@ -11,7 +13,8 @@ services:
       DATASTORE_PROJECT_ID: lmm-dev
       ASSET_BUCKET_NAME: lmm-dev-asset
       GCP_PROJECT_ID: lmm-dev
-      GOOGLE_APPLICATION_CREDENTIALS: /go/src/lmm/api/cloud/gcp/credentials/service_account.json
+      GIN_MODE: debug
+      GOOGLE_APPLICATION_CREDENTIALS: /gcp/credentials/service_account.json
     networks:
       - lmm
   datastore:
