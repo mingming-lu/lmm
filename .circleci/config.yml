@@ -83,10 +83,13 @@ jobs:
           name: write env_variables
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
           command: >
-            docker run -it -v ${PWD}:/workdir mikefarah/yq sh -c '
-            yq w << parameters.service_name >>.yaml env_variables.GIN_MODE << parameters.gin_mode >> |
-            yq w - env_variables.GCP_PROJECT_ID $<< parameters.env >>_GCP_PROJECT_ID |
-            yq w - env_variables.LMM_API_TOKEN_KEY $<< parameters.env >>_LMM_API_TOKEN_KEY > service.yaml'
+            CONTAINER=$(docker create -it mikefarah/yq sh -c '
+              yq w << parameters.service_name >>.yaml env_variables.GIN_MODE << parameters.gin_mode >> |
+              yq w - env_variables.GCP_PROJECT_ID $<< parameters.env >>_GCP_PROJECT_ID |
+              yq w - env_variables.LMM_API_TOKEN_KEY $<< parameters.env >>_LMM_API_TOKEN_KEY > service.yaml') && 
+            docker cp << parameters.service_name >>.yaml $CONTAINER:/workdir &&
+            docker start -i $CONTAINER > service.yaml &&
+            docker container rm -f $CONTAINER
       - run:
           name: deploy
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
