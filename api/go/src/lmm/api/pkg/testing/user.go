@@ -28,13 +28,13 @@ var (
 // User used for testing
 type User struct {
 	Key            *datastore.Key `datastore:"__key__"`
-	Name           string         `datastore:"Name"`
-	Role           string         `datastore:"Role"`
-	RawPassword    string         `datastore:"Password"`
+	Name           string         `datastore:"Name,noindex"`
+	Role           string         `datastore:"Role,noindex"`
+	RawPassword    string         `datastore:"Password,noindex"`
 	HashedPassword string         `datastore:"-"`
 	RawToken       string         `datastore:"Token"`
 	AccessToken    string         `datastore:"-"`
-	RegisteredAt   time.Time      `datastore:"RegisteredAt"`
+	RegisteredAt   time.Time      `datastore:"RegisteredAt,noindex"`
 }
 
 // ID is a shortcut for user.Key.ID
