@@ -5,3 +5,4 @@ go/pkg
 go/src/github.com
 
 .datastore
+app.yaml

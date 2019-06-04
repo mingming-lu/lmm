@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"lmm/api/pkg/http/middleware"
 	goHttp "net/http"
+	"os"
 
-	"github.com/gin-gonic/gin"
+	"lmm/api/pkg/http/middleware"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
+	"github.com/gin-gonic/gin"
 	"google.golang.org/appengine"
 
 	// user
@@ -34,7 +35,7 @@ func main() {
 	}
 	defer gcsClient.Close()
 
-	datastoreClient, err := datastore.NewClient(context.TODO(), "*detect-project-id*")
+	datastoreClient, err := datastore.NewClient(context.TODO(), os.Getenv("DATASTORE_PROJECT_ID"))
 
 	if err != nil {
 		panic(err)
