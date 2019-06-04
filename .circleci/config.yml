@@ -65,6 +65,26 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
 
+  datastore_update_indexes:
+    <<: *google_cloud_sdk
+    parameters:
+      env:
+        type: string
+      index_file_dir:
+        type: string
+      index_file:
+        type: string
+        default: index.yaml
+    steps:
+      - checkout
+      - *setup_gcloud_cli
+      - run:
+          name: update index
+          working_directory: << parameters.index_file_dir >>
+          command: |
+            gcloud datastore indexes create << parameters.index_file >> -q
+            gcloud datastore indexes cleanup << parameters.index_file >> -q
+
   gae_deploy_gin:
     <<: *google_cloud_sdk
     parameters:
@@ -152,22 +172,32 @@ workflows:
                 - *manager_release_branch
       # ------------- dev -------------
       - gae_node_build_and_deploy_nuxt:
+          name: dev_deploy_app
           service_name: app
           env: DEV
           docker_image: node:10.16.0-alpine
           universal_mode: true
           <<: *only_dev_branch
       - gae_node_build_and_deploy_nuxt:
+          name: dev_deploy_manager
           service_name: manager
           env: DEV
           docker_image: node:10.16.0-alpine
           <<: *only_dev_branch
+      - datastore_update_indexes:
+          name: dev_api_datastore_update_indexes
+          env: DEV
+          index_file_dir: api/datastore
+          <<: *only_dev_branch
+          requires:
+            - api_test
       - gae_deploy_gin:
+          name: dev_deploy_api
           service_name: api
           env: DEV
           <<: *only_dev_branch
           requires:
-            - api_test
+            - dev_api_datastore_update_indexes
       # ------------- prod -------------
       - gae_node_build_and_deploy_nuxt:
           service_name: app
