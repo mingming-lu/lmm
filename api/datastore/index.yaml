@@ -1,0 +1,13 @@
+indexes:
+- kind: "Article"
+  properties:
+  - name: "CreatedAt"
+    direction: desc
+  - name: "LinkName"
+  - name: "Title"
+- kind: "Asset"
+  properties:
+  - name: "Type"
+  - name: "CreatedAt"
+    direction: desc
+  - name: "Filename"
