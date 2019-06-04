@@ -182,6 +182,13 @@ workflows:
           env: DEV
           docker_image: node:10.16.0-alpine
           <<: *only_dev_branch
+      - datastore_update_indexes:
+          name: dev_api_datastore_update_indexes
+          env: DEV
+          index_file_dir: api/datastore
+          <<: *only_dev_branch
+          requires:
+            - api_test
       - gae_deploy_gin:
           service_name: api
           env: DEV
