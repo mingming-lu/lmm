@@ -90,7 +90,7 @@ jobs:
             yq w - env_variables.LMM_API_TOKEN_KEY $<< parameters.env >>_LMM_API_TOKEN_KEY") &&
             docker cp << parameters.service_name >>.yaml $CONTAINER:/workdir/. &&
             docker start -i $CONTAINER |
-            tr -d '\0' > service.yaml &&
+            tr -d '^@' > service.yaml &&
             docker container rm -f $CONTAINER &&
             cat service.yaml
       - run:
