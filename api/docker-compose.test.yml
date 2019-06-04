@@ -15,4 +15,4 @@ services:
     environment:
       PROJECT_ID: lmm-test
     command: |
-      gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081
+      gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081 --consistency=1.0
