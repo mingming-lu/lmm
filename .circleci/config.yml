@@ -108,7 +108,7 @@ jobs:
             --GIN_MODE=$<< parameters.env >>_GIN_MODE
             --GOOGLE_APPLICATION_CREDENTIALS=$<< parameters.env >>_GCP_SERVICE_KEY_FILE
             --LMM_API_TOKEN_KEY=$<< parameters.env >>_LMM_API_TOKEN_KEY
-            --YAML_FILE=$<< parameters.service_name >>.yaml
+            --YAML_FILE=<< parameters.service_name >>.yaml
       - run:
           name: deploy
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
