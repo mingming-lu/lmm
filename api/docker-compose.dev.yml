@@ -11,7 +11,7 @@ services:
       DATASTORE_PROJECT_ID: lmm-dev
       ASSET_BUCKET_NAME: lmm-dev-asset
       GCP_PROJECT_ID: lmm-dev
-      GCP_SERVICE_KEY_FILE: /gcp/credentials/service_account.json
+      GOOGLE_APPLICATION_CREDENTIALS: /go/src/lmm/api/cloud/gcp/credentials/service_account.json
     networks:
       - lmm
   datastore:

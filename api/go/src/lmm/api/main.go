@@ -4,13 +4,11 @@ import (
 	"context"
 	"lmm/api/pkg/http/middleware"
 	goHttp "net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
-	"google.golang.org/api/option"
 	"google.golang.org/appengine"
 
 	// user
@@ -29,23 +27,14 @@ import (
 	assetApp "lmm/api/service/asset/usecase"
 )
 
-var gcpServiceKeyFile string
-
-func init() {
-	gcpServiceKeyFile = os.Getenv("GCP_SERVICE_KEY_FILE")
-	if gcpServiceKeyFile == "" {
-		panic("GCP_SERVICE_KEY_FILE not set")
-	}
-}
-
 func main() {
-	gcsClient, err := storage.NewClient(context.TODO(), option.WithCredentialsFile(gcpServiceKeyFile))
+	gcsClient, err := storage.NewClient(context.TODO())
 	if err != nil {
 		panic(err)
 	}
 	defer gcsClient.Close()
 
-	datastoreClient, err := datastore.NewClient(context.TODO(), os.Getenv("GCP_PROJECT_ID"))
+	datastoreClient, err := datastore.NewClient(context.TODO(), "*detect-project-id*")
 
 	if err != nil {
 		panic(err)
