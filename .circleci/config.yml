@@ -96,6 +96,7 @@ jobs:
           name: deploy
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
           command: |
+            echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
             gcloud app deploy -q service.yaml
 
   gae_node_build_and_deploy_nuxt:

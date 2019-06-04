@@ -6,7 +6,7 @@ services:
       dockerfile: docker/Dockerfile
     volumes:
       - ./go:/go
-      - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
+      - ./../cloud/gcp/credentials/service_account.json:/go/src/lmm/api/cloud/gcp/credentials/service_account.json
     working_dir: /go/src/lmm/api/
     environment:
       TZ: Asia/Tokyo
