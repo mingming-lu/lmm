@@ -17,10 +17,10 @@ type user struct {
 	ID           *datastore.Key `datastore:"__key__"`
 	Name         string         `datastore:"Name"`
 	Email        string         `datastore:"Email"`
-	Password     string         `datastore:"Password"`
+	Password     string         `datastore:"Password,noindex"`
 	Token        string         `datastore:"Token"`
-	Role         string         `datastore:"Role"`
-	RegisteredAt time.Time      `datastore:"RegisteredAt"`
+	Role         string         `datastore:"Role,noindex"`
+	RegisteredAt time.Time      `datastore:"RegisteredAt,noindex"`
 }
 
 const (
