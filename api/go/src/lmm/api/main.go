@@ -44,6 +44,7 @@ func main() {
 
 	router := gin.New()
 	router.Use(middleware.WrapAppEngineContext)
+	router.Use(middleware.CORS)
 
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
