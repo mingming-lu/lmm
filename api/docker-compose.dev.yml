@@ -7,7 +7,8 @@ services:
       bash -c "sh script/generate_app_yaml.sh &&
       dev_appserver.py app.yaml --host 0.0.0.0 --port 8002 --enable_host_checking=False"
     environment:
-      APP_HOST: https://www.lmm.local
+      APP_ORIGIN: https://www.lmm.local
+      MANAGER_ORIGIN: https://manager.lmm.local
       HTTP_TIMEOUT_SECOND: 3
       DATASTORE_EMULATOR_HOST: datastore:8081
       DATASTORE_PROJECT_ID: lmm-dev

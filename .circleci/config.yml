@@ -104,6 +104,8 @@ jobs:
           working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
           command: >
             python script/generate_app_yaml.py
+            --APP_ORIGIN=$<< parameters.env >>_APP_ORIGIN
+            --MANAGER_ORIGIN=$<< parameters.env >>_MANAGER_ORIGIN
             --DATASTORE_PROJECT_ID=$<< parameters.env >>_DATASTORE_PROJECT_ID
             --GIN_MODE=$<< parameters.env >>_GIN_MODE
             --GOOGLE_APPLICATION_CREDENTIALS=$<< parameters.env >>_GCP_SERVICE_KEY_FILE
