@@ -44,8 +44,8 @@ func main() {
 
 	router := gin.New()
 	router.Use(middleware.WrapAppEngineContext, middleware.CORS(
-		os.Getenv("APP_DOMAIN"),
-		os.Getenv("MANAGER_DOMAIN"),
+		os.Getenv("APP_ORIGIN"),
+		os.Getenv("MANAGER_ORIGIN"),
 	))
 
 	// user
