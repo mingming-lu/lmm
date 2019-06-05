@@ -81,7 +81,7 @@ export default {
           this.callback()
         })
         .catch(e => {
-          alert(e.response.data)
+          alert(e.response.data.error)
         })
     }
   }
