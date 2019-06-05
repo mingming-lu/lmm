@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	goHttp "net/http"
+	"net/http"
 	"os"
 
 	"lmm/api/pkg/http/middleware"
@@ -43,8 +43,10 @@ func main() {
 	defer datastoreClient.Close()
 
 	router := gin.New()
-	router.Use(middleware.WrapAppEngineContext)
-	router.Use(middleware.CORS)
+	router.Use(middleware.WrapAppEngineContext, middleware.CORS(
+		os.Getenv("APP_DOMAIN"),
+		os.Getenv("MANAGER_DOMAIN"),
+	))
 
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
@@ -72,6 +74,6 @@ func main() {
 	router.POST("/v1/photos", userUI.BearerAuth(assetUI.PostV1Photos))
 	router.GET("/v1/photos", assetUI.GetV1Photos)
 
-	goHttp.Handle("/", router)
+	http.Handle("/", router)
 	appengine.Main()
 }

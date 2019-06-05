@@ -1,36 +1,27 @@
 package middleware
 
 import (
-	"os"
+	"net/http"
 	"sort"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-var whiteList []string
-
-func init() {
-	if appOrigin := os.Getenv("APP_ORIGIN"); appOrigin != "" {
-		whiteList = append(whiteList, appOrigin)
-	}
-	if managerOrigin := os.Getenv("MANAGER_ORIGIN"); managerOrigin != "" {
-		whiteList = append(whiteList, managerOrigin)
-	}
-
-	sort.Strings(whiteList)
-}
-
 // CORS middleware
-func CORS(c *gin.Context) {
-	c.Next()
+func CORS(whiteList ...string) gin.HandlerFunc {
+	sort.Strings(whiteList)
 
-	origin := c.GetHeader("Origin")
+	return cors.New(cors.Config{
+		AllowMethods:  []string{http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowHeaders:  []string{"Authorization", "Content-Type", "Origin"},
+		ExposeHeaders: []string{"Content-Length", "Location"},
+		AllowOriginFunc: func(origin string) bool {
+			idx := sort.SearchStrings(whiteList, origin)
 
-	if origin == "" {
-		return
-	}
-
-	if idx := sort.SearchStrings(whiteList, origin); idx < len(whiteList) && whiteList[idx] == origin {
-		c.Header("Access-Control-Allow-Origin", origin)
-	}
+			return idx < len(whiteList) && whiteList[idx] == origin
+		},
+		MaxAge: 24 * time.Hour,
+	})
 }
