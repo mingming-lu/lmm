@@ -203,6 +203,7 @@ workflows:
           workdir: manager
           params: >
             --API_URL ${DEV_API_URL}
+            --API_URL_BROWSER ${DEV_API_URL_BROWSER}
           env: DEV
           docker_image: node:10.16.0-alpine
           <<: *only_dev_branch
