@@ -120,6 +120,7 @@ jobs:
           working_directory: << parameters.workdir >>
           command: |
             echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
+            cat << parameters.app_yaml_file >>
             gcloud app deploy -q << parameters.app_yaml_file >>
 
   gae_node_build_and_deploy_nuxt:
@@ -171,6 +172,7 @@ jobs:
           name: deploy
           working_directory: << parameters.workdir >>
           command: |
+            cat << parameters.app_yaml_file >>
             gcloud app deploy -q << parameters.app_yaml_file >>
 
 workflows:
@@ -191,6 +193,7 @@ workflows:
           workdir: app
           params: >
             --API_URL ${DEV_API_URL}
+            --API_URL_BROWSER ${DEV_API_URL_BROWSER}
           docker_image: node:10.16.0-alpine
           universal_mode: true
           <<: *only_dev_branch
