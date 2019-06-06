@@ -88,11 +88,17 @@ jobs:
   gae_deploy_gin:
     <<: *google_cloud_sdk
     parameters:
-      service_name:
+      template_app_yaml_file:
         type: string
-      gin_mode: # https://godoc.org/github.com/gin-gonic/gin#pkg-constants
+        default: template.yaml
+      app_yaml_file:
         type: string
-        default: debug
+        default: app.yaml
+      workdir:
+        type: string
+        default: .
+      params:
+        type: string
       env:
         type: string
     steps:
@@ -101,36 +107,37 @@ jobs:
       - *setup_gcloud_cli
       - run:
           name: write env_variables
-          working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
           command: >
-            python script/generate_app_yaml.py
-            --APP_ORIGIN=$<< parameters.env >>_APP_ORIGIN
-            --MANAGER_ORIGIN=$<< parameters.env >>_MANAGER_ORIGIN
-            --ASSET_BUCKET_NAME=$<< parameters.env >>_ASSET_BUCKET_NAME
-            --DATASTORE_PROJECT_ID=$<< parameters.env >>_DATASTORE_PROJECT_ID
-            --GIN_MODE=<< parameters.gin_mode >>
-            --GOOGLE_APPLICATION_CREDENTIALS=$GCP_SERVICE_KEY_FILE
-            --LMM_API_TOKEN_KEY=$<< parameters.env >>_LMM_API_TOKEN_KEY
-            --YAML_FILE=<< parameters.service_name >>.yaml
+            python script/gae/render_app_yaml.py
+            --input << parameters.workdir >>/<< parameters.template_app_yaml_file >>
+            --input << parameters.workdir >>/<< parameters.app_yaml_file >>
+            << parameters.params >>
       - run:
           name: deploy
-          working_directory: << parameters.service_name >>/go/src/lmm/<< parameters.service_name >>
+          working_directory: << parameters.workdir >>
           command: |
             echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
-            gcloud app deploy -q << parameters.service_name >>.yaml
+            gcloud app deploy -q << parameters.app_yaml_file >>.yaml
 
   gae_node_build_and_deploy_nuxt:
     <<: *google_cloud_sdk
     parameters:
       docker_image:
         type: string
+      workdir:
+        type: string
       service_name:
         type: string
       universal_mode:
         type: boolean
         default: false
+      params:
+        type: string
       env:
         type: string
+      gae_app_yaml_file:
+        type: string
+        default: app.yaml
     steps:
       - checkout
       - *setup_gcloud_cli
@@ -138,26 +145,28 @@ jobs:
           docker_layer_caching: true
       - run:
           name: npm install
+          working_directory: << parameters.workdir >>
           command: |
-            CONTAINER_NAME=$(docker create -it << parameters.docker_image >> npm --prefix /<< parameters.service_name >> install)
-            docker cp << parameters.service_name >> $CONTAINER_NAME:/.
+            CONTAINER_NAME=$(docker create -it << parameters.docker_image >> npm --prefix /<< parameters.workdir >> install)
+            docker cp . $CONTAINER_NAME:/<< parameters.workdir >>/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/node_modules << parameters.service_name >>/.
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/node_modules .
             docker container rm -f $CONTAINER_NAME
       - run:
           name: nuxt build
+          working_directory: << parameters.workdir >>
           command: |
-            CONTAINER_NAME=$(docker create -e API_URL=$<< parameters.env >>_API_URL -e API_URL_BROWSER=$<< parameters.env >>_API_URL_BROWSER -it << parameters.docker_image >> npm --prefix /<< parameters.service_name >> run build)
-            docker cp << parameters.service_name >> $CONTAINER_NAME:/.
+            CONTAINER_NAME=$(docker create << parameters.docker_image >> npm --prefix /<< parameters.workdir >> run build)
+            docker cp . $CONTAINER_NAME:/<< parameters.workdir >>/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/dist << parameters.service_name >>/. || << parameters.universal_mode >>
-            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/.nuxt << parameters.service_name >>/.
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/dist . || << parameters.universal_mode >>
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/.nuxt .
             docker container rm -f $CONTAINER_NAME
       - run:
           name: deploy
-          working_directory: << parameters.service_name >>
+          working_directory: << parameters.workdir >>
           command: |
-            gcloud app deploy -q << parameters.service_name >>.yaml
+            gcloud app deploy -q << parameters.gae_app_yaml_file >>.yaml
 
 workflows:
   version: 2.1
@@ -174,12 +183,20 @@ workflows:
           name: dev_deploy_app
           service_name: app
           env: DEV
+          workdir: app
+          params: >
+            --API_URL ${DEV_API_URL}
+            --API_URL_BROWSER ${DEV_API_URL_BROWSER}
           docker_image: node:10.16.0-alpine
           universal_mode: true
           <<: *only_dev_branch
       - gae_node_build_and_deploy_nuxt:
           name: dev_deploy_manager
           service_name: manager
+          workdir: manager
+          params: >
+            --API_URL ${DEV_API_URL}
+            --API_URL_BROWSER ${DEV_API_URL_BROWSER}
           env: DEV
           docker_image: node:10.16.0-alpine
           <<: *only_dev_branch
@@ -192,26 +209,34 @@ workflows:
             - api_test
       - gae_deploy_gin:
           name: dev_deploy_api
-          service_name: api
+          workdir: api/go/src/lmm/api
+          params: >
+            --APP_ORIGIN ${DEV_APP_ORIGIN}
+            --MANAGER_ORIGIN ${DEV_MANAGER_ORIGIN}
+            --ASSET_BUCKET_NAME ${DEV_ASSET_BUCKET_NAME}
+            --DATASTORE_PROJECT_ID ${DEV_DATASTORE_PROJECT_ID}
+            --GIN_MODE ${DEV_GIN_MODE}
+            --GOOGLE_APPLICATION_CREDENTIALS ${DEV_GOOGLE_APPLICATION_CREDENTIALS}
+            --LMM_API_TOKEN_KEY ${LMM_API_TOKEN_KEY}
           env: DEV
           <<: *only_dev_branch
           requires:
             - dev_api_datastore_update_indexes
       # ------------- prod -------------
-      - gae_node_build_and_deploy_nuxt:
-          service_name: app
-          env: PROD
-          docker_image: node:10.16.0-alpine
-          universal_mode: true
-          filters:
-            branches:
-              only:
-                - *app_release_branches
-      - gae_node_build_and_deploy_nuxt:
-          service_name: manager
-          env: PROD
-          docker_image: node:10.16.0-alpine
-          filters:
-            branches:
-              only:
-                - *manager_release_branch
+      # - gae_node_build_and_deploy_nuxt:
+      #     service_name: app
+      #     env: PROD
+      #     docker_image: node:10.16.0-alpine
+      #     universal_mode: true
+      #     filters:
+      #       branches:
+      #         only:
+      #           - *app_release_branches
+      # - gae_node_build_and_deploy_nuxt:
+      #     service_name: manager
+      #     env: PROD
+      #     docker_image: node:10.16.0-alpine
+      #     filters:
+      #       branches:
+      #         only:
+      #           - *manager_release_branch
