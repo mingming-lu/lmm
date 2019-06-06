@@ -152,22 +152,20 @@ jobs:
           docker_layer_caching: true
       - run:
           name: npm install
-          working_directory: << parameters.workdir >>
           command: |
             CONTAINER_NAME=$(docker create -it << parameters.docker_image >> npm --prefix /<< parameters.workdir >> install)
-            docker cp . $CONTAINER_NAME:/<< parameters.workdir >>/.
+            docker cp << parameters.workdir >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/node_modules .
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/node_modules << parameters.workdir >>/.
             docker container rm -f $CONTAINER_NAME
       - run:
           name: nuxt build
-          working_directory: << parameters.workdir >>
           command: |
             CONTAINER_NAME=$(docker create << parameters.docker_image >> npm --prefix /<< parameters.workdir >> run build)
-            docker cp . $CONTAINER_NAME:/<< parameters.workdir >>/.
+            docker cp << parameters.workdir >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/dist . || << parameters.universal_mode >>
-            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/.nuxt .
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/dist << parameters.workdir >>/. || << parameters.universal_mode >>
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/.nuxt << parameters.workdir >>/.
             docker container rm -f $CONTAINER_NAME
       - run:
           name: deploy
