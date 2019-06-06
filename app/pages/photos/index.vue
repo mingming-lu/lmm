@@ -129,7 +129,7 @@ export default {
             message: e.response.data
           })
         } else {
-          console.log(e)
+          console.log(`failed to fetch photos ${e}`)
         }
       })
   },
