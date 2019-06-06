@@ -1,9 +1,8 @@
 import argparse
 import sys
-from typing import Union
 
 
-def parse_args() -> Union[dict, dict]:
+def parse_args():
     parser = argparse.ArgumentParser(description='default')
     parser.add_argument('--input', default='input')
     parser.add_argument('--output', default='output')
@@ -14,7 +13,7 @@ def parse_args() -> Union[dict, dict]:
     return vars(known), vars(extra)
 
 
-def _parse_attribute(args: list) -> dict:
+def _parse_attribute(args: list):
     parser = argparse.ArgumentParser(description='attribute')
     for arg in args:
         if arg.startswith(("-", "--")):
