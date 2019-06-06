@@ -28,7 +28,7 @@ references:
       command: >
         python script/gae/render_app_yaml.py
         --input << parameters.workdir >>/<< parameters.template_app_yaml_file >>
-        --input << parameters.workdir >>/<< parameters.app_yaml_file >>
+        --output << parameters.workdir >>/<< parameters.app_yaml_file >>
         << parameters.params >>
 
 jobs:
