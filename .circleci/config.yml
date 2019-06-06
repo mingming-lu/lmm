@@ -121,7 +121,7 @@ jobs:
           working_directory: << parameters.workdir >>
           command: |
             echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
-            gcloud app deploy -q << parameters.app_yaml_file >>.yaml
+            gcloud app deploy -q << parameters.app_yaml_file >>
 
   gae_node_build_and_deploy_nuxt:
     <<: *google_cloud_sdk
@@ -172,7 +172,7 @@ jobs:
           name: deploy
           working_directory: << parameters.workdir >>
           command: |
-            gcloud app deploy -q << parameters.app_yaml_file >>.yaml
+            gcloud app deploy -q << parameters.app_yaml_file >>
 
 workflows:
   version: 2.1
