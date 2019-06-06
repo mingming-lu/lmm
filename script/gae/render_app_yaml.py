@@ -13,7 +13,7 @@ def parse_args():
     return vars(known), vars(extra)
 
 
-def _parse_attribute(args: list):
+def _parse_attribute(args):
     parser = argparse.ArgumentParser(description='attribute')
     for arg in args:
         if arg.startswith(("-", "--")):
