@@ -222,7 +222,7 @@ workflows:
             --DATASTORE_PROJECT_ID ${DEV_DATASTORE_PROJECT_ID}
             --GIN_MODE debug
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
-            --LMM_API_TOKEN_KEY ${LMM_API_TOKEN_KEY}
+            --LMM_API_TOKEN_KEY ${DEV_LMM_API_TOKEN_KEY}
           env: DEV
           <<: *only_dev_branch
           requires:
