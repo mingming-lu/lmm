@@ -96,7 +96,7 @@ export default {
           }
         })
         .then(res => {
-          alert(`Uploaded\nmessage: ${res.data}`)
+          alert(`Uploaded\nmessage: ${res.data.message}`)
           fetcher(this.$axios)
             .fetch(1)
             .then(res => {

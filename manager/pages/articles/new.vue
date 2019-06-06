@@ -119,6 +119,9 @@ export default {
           alert(`Article posted\nmessage: ${JSON.stringify(res.data)}`)
           this.$router.push('/articles')
         })
+        .catch(e => {
+          alert(e.response.data.error)
+        })
     }
   }
 }

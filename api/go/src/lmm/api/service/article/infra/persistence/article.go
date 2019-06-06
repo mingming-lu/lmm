@@ -45,7 +45,7 @@ func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*
 type article struct {
 	ID           *datastore.Key `datastore:"__key__"`
 	LinkName     string         `datastore:"LinkName"`
-	Title        string         `datastore:"Title,noindex"`
+	Title        string         `datastore:"Title"`
 	Body         string         `datastore:"Body,noindex"`
 	CreatedAt    time.Time      `datastore:"CreatedAt"`
 	LastModified time.Time      `datastore:"LastModified,noindex"`
