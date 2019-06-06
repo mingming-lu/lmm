@@ -29,8 +29,7 @@ references:
         python script/gae/render_app_yaml.py
         --input << parameters.workdir >>/<< parameters.template_app_yaml_file >>
         --output << parameters.workdir >>/<< parameters.app_yaml_file >>
-        << parameters.params >> &&
-        cat << parameters.workdir >>/<< parameters.app_yaml_file >>
+        << parameters.params >>
 
 jobs:
   api_test:
@@ -222,7 +221,7 @@ workflows:
             --ASSET_BUCKET_NAME ${DEV_ASSET_BUCKET_NAME}
             --DATASTORE_PROJECT_ID ${DEV_DATASTORE_PROJECT_ID}
             --GIN_MODE debug
-            --GOOGLE_APPLICATION_CREDENTIALS ${DEV_GOOGLE_APPLICATION_CREDENTIALS}
+            --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
             --LMM_API_TOKEN_KEY ${LMM_API_TOKEN_KEY}
           env: DEV
           <<: *only_dev_branch
