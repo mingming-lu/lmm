@@ -142,7 +142,7 @@ func (ui *UI) Token(c *gin.Context) {
 
 	if strings.HasPrefix(authHeader, "Basic ") {
 		ui.BasicAuth(func(c *gin.Context) {
-			auth, ok := authUtil.FromContext(c)
+			auth, ok := httpUtil.AuthFromGinContext(c)
 			if !ok {
 				httpUtil.Unauthorized(c)
 				return
