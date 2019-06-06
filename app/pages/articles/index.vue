@@ -189,10 +189,14 @@ export default {
         }
       })
       .catch(e => {
-        error({
-          statusCode: e.response.status,
-          message: e.response.data
-        })
+        if (e.response) {
+          error({
+            statusCode: e.response.status,
+            message: e.response.data
+          })
+        } else {
+          console.log(e)
+        }
       })
   },
   data() {

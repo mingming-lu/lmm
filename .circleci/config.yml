@@ -106,6 +106,7 @@ jobs:
             python script/generate_app_yaml.py
             --APP_ORIGIN=$<< parameters.env >>_APP_ORIGIN
             --MANAGER_ORIGIN=$<< parameters.env >>_MANAGER_ORIGIN
+            --ASSET_BUCKET_NAME=$<< parameters.env >>_ASSET_BUCKET_NAME
             --DATASTORE_PROJECT_ID=$<< parameters.env >>_DATASTORE_PROJECT_ID
             --GIN_MODE=<< parameters.gin_mode >>
             --GOOGLE_APPLICATION_CREDENTIALS=$GCP_SERVICE_KEY_FILE
