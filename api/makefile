@@ -1,8 +1,5 @@
 all: start
 
-start:
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-
 go/mod/tidy:
 	docker-compose run --rm --no-deps api go mod tidy
 
@@ -15,6 +12,9 @@ build-cli:
 # > make cli env=dev commands="hello-world"
 cli:
 	docker-compose -f docker-compose.yml -f docker-compose.${env}.yml run --rm api cli ${commands}
+
+start:
+	docker-compose up -d
 
 restart: stop
 	make start
