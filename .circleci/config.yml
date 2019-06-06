@@ -22,6 +22,15 @@ references:
         gcloud --quiet config set project $<< parameters.env >>_GCP_PROJECT_ID
         gcloud auth activate-service-account --key-file $GCP_SERVICE_KEY_FILE
 
+  render_gae_app_yaml: &render_gae_app_yaml
+    run:
+      name: render GAE app.yaml
+      command: >
+        python script/gae/render_app_yaml.py
+        --input << parameters.workdir >>/<< parameters.template_app_yaml_file >>
+        --input << parameters.workdir >>/<< parameters.app_yaml_file >>
+        << parameters.params >>
+
 jobs:
   api_test:
     docker:
@@ -105,13 +114,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - *setup_gcloud_cli
-      - run:
-          name: write env_variables
-          command: >
-            python script/gae/render_app_yaml.py
-            --input << parameters.workdir >>/<< parameters.template_app_yaml_file >>
-            --input << parameters.workdir >>/<< parameters.app_yaml_file >>
-            << parameters.params >>
+      - *render_gae_app_yaml
       - run:
           name: deploy
           working_directory: << parameters.workdir >>
@@ -135,12 +138,16 @@ jobs:
         type: string
       env:
         type: string
-      gae_app_yaml_file:
+      template_app_yaml_file:
+        type: string
+        default: template.yaml
+      app_yaml_file:
         type: string
         default: app.yaml
     steps:
       - checkout
       - *setup_gcloud_cli
+      - *render_gae_app_yaml
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
@@ -166,7 +173,7 @@ jobs:
           name: deploy
           working_directory: << parameters.workdir >>
           command: |
-            gcloud app deploy -q << parameters.gae_app_yaml_file >>.yaml
+            gcloud app deploy -q << parameters.app_yaml_file >>.yaml
 
 workflows:
   version: 2.1
