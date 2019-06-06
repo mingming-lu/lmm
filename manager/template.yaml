@@ -20,5 +20,4 @@ handlers:
 
 env_variables:
   API_URL: {API_URL}
-  API_URL_BROWSER: {API_URL_BROWSER}
   NODE_ENV: 'production'
