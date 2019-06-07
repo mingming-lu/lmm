@@ -1,5 +1,5 @@
-deploy/on_photo_uploaded:
-	cd on_photo_uploaded \
+deploy/on_asset_uploaded:
+	cd on_asset_uploaded \
 	&& gcloud functions deploy create_thumbnails \
 		--memory=128MB \
 		--region=asia-northeast1 \

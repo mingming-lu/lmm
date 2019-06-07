@@ -1,11 +1,12 @@
 import io
+import re
 
 from google.cloud import storage
 from os import path
 from PIL import Image
 
 
-def create_thumbnails(event, context):
+def on_asset_uploaded(event, context):
     """
     event: dict of json: {
       "kind": "storage#object",
@@ -36,30 +37,46 @@ def create_thumbnails(event, context):
       }
     }
     """
+
+    if event['contentType'].startswith('image/'):
+
+        if event['name'].startswith('thumbnail/'):
+            print(f'skip thumbnail: {event['name']}')
+            return
+
+        return create_thumbnails(event['bucket'], event['filename'])
+
+    print(f'unhandled event: {event}')
+
+
+def create_thumbnails(bucketname, filename):
     client = storage.Client()
 
-    filename, buckername = event['name'], event['bucket']
-    bucket = client.get_bucket(buckername)
+    bucket = client.get_bucket(bucketname)
+
     src = bucket.get_blob(filename)
     buffer = io.BytesIO()
     src.download_to_file(buffer)
 
+    format = src.content_type.replace('image/', '')
+
     with Image.open(buffer) as image:
         for width in (320, 640, 960, 1280):
-            dst = _create_photo_thumbnail(image, width)
-            dst.seek(0)
+            thumbnail = _create_thumbnail(image, width)
+            data = io.BytesIO()
+            thumbnail.save(data, format=format)
 
-            name, ext = path.splitext(filename)
-            thumbnail = bucket.blob(f"{name}_{width}{ext}")
-            thumbnail.cache_control = src.cache_control
-            thumbnail.upload_from_file(
-              dst,
-              content_type=src.content_type,
-              predefined_acl='publicRead',
+            dst = bucket.blob(f"thumbnail/w{width}/{filename}")
+            dst.cache_control = src.cache_control
+            dst.upload_from_file(
+                data,
+                content_type=src.content_type,
+                predefined_acl='publicRead',
+                rewind=True,
             )
 
 
-def _create_photo_thumbnail(image: Image.Image, width: int) -> Image.Image:
+def _create_thumbnail(image: Image.Image, width: int) -> Image.Image:
     img = image.copy()
 
     if img.size[0] < width:
