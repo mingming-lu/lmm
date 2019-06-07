@@ -191,7 +191,7 @@ jobs:
           name: deploy
           working_directory: << parameters.workdir >>
           command: |
-            make deploy/on_photo_uploaded SUBSCRIBE_BUCKET=${<< parameters.env >>_ASSET_BUCKET_NAME}
+            make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${<< parameters.env >>_ASSET_BUCKET_NAME}
 
 workflows:
   version: 2.1
