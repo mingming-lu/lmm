@@ -47,7 +47,6 @@ def create_thumbnails(event, context):
     with Image.open(buffer) as image:
         for width in (320, 640, 960, 1280):
             dst = _create_photo_thumbnail(image, width)
-            dst.seek(0)
 
             name, ext = path.splitext(filename)
             thumbnail = bucket.blob(f"{name}_{width}{ext}")
@@ -55,7 +54,9 @@ def create_thumbnails(event, context):
             thumbnail.acl = src.acl
             thumbnail.upload_from_file(
               dst,
+              rewind=True,
               content_type=src.content_type,
+              predefined_acl='publicRead',
             )
 
 
