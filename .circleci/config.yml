@@ -186,6 +186,7 @@ jobs:
     steps:
       - checkout
       - *setup_gcloud_cli
+      - run: apt install make
       - run:
           name: deploy
           working_directory: << parameters.workdir >>
