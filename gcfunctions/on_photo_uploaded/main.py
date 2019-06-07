@@ -5,7 +5,7 @@ from os import path
 from PIL import Image
 
 
-def create_photo_thumbnails(event, context):
+def create_thumbnails(event, context):
     """
     event: dict of json: {
       "kind": "storage#object",
@@ -47,8 +47,11 @@ def create_photo_thumbnails(event, context):
     with Image.open(buffer) as image:
         for width in (320, 640, 960, 1280):
             dst = _create_photo_thumbnail(image, width)
+            dst.seek(0)
+
             name, ext = path.splitext(original['name'])
             thumbnail = bucket.blob(f"{name}_{width}{ext}")
+            thumbnail.cache_control = original['cacheControl']
             thumbnail.upload_from_file(
               dst,
               content_type=original['contentType'],
