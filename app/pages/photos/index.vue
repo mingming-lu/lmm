@@ -14,7 +14,12 @@
           >
             <img
               :src="photo.url"
+              :srcset="`${photoThumbnailUrl(photo.url, 1280)} 1280w,
+                        ${photoThumbnailUrl(photo.url, 960)} 960w,
+                        ${photoThumbnailUrl(photo.url, 640)} 640w,
+                        ${photoThumbnailUrl(photo.url, 320)} 320w`"
               sizes="(min-width: 800px) 50vw, 100vw"
+              @error="fallbackOnThumbnailFailure($event, photo.url)"
             >
           </a>
         </div>
@@ -28,7 +33,12 @@
           >
             <img
               :src="photo.url"
+              :srcset="`${photoThumbnailUrl(photo.url, 1280)} 1280w,
+                        ${photoThumbnailUrl(photo.url, 960)} 960w,
+                        ${photoThumbnailUrl(photo.url, 640)} 640w,
+                        ${photoThumbnailUrl(photo.url, 320)} 320w`"
               sizes="(min-width: 800px) 50vw, 100vw"
+              @error="fallbackOnThumbnailFailure($event, photo.url)"
             >
           </a>
         </div>
@@ -42,7 +52,12 @@
       >
         <img
           :src="photo.url"
+          :srcset="`${photoThumbnailUrl(photo.url, 1280)} 1280w,
+                    ${photoThumbnailUrl(photo.url, 960)} 960w,
+                    ${photoThumbnailUrl(photo.url, 640)} 640w,
+                    ${photoThumbnailUrl(photo.url, 320)} 320w`"
           sizes="(min-width: 800px) 50vw, 100vw"
+          @error="fallbackOnThumbnailFailure($event, photo.url)"
         >
       </a>
     </div>
@@ -170,23 +185,14 @@ export default {
           console.log(e)
         })
     },
-    load_image_full(name) {
-      return `${process.env.ASSET_URL}/photos/${name}`
+    photoThumbnailUrl(originalURL, width) {
+      const idx = originalURL.lastIndexOf('/')
+      const prefix = originalURL.substring(0, idx)
+      const suffix = originalURL.substring(idx)
+      return `${prefix}/thumbnail/w${width}${suffix}`
     },
-    load_image_320(name) {
-      return this.load_image_full(`320w/${name}`)
-    },
-    load_image_640(name) {
-      return this.load_image_full(`640w/${name}`)
-    },
-    load_image_960(name) {
-      return this.load_image_full(`960w/${name}`)
-    },
-    load_image_1280(name) {
-      return this.load_image_full(`1280w/${name}`)
-    },
-    load_image_fallback(event, name) {
-      event.target.srcset = this.load_image_full(name)
+    fallbackOnThumbnailFailure(event, url) {
+      event.target.srcset = url
     },
     calcIsWideMode() {
       this.wideMode = window.innerWidth >= 800
