@@ -175,6 +175,23 @@ jobs:
             cat << parameters.app_yaml_file >>
             gcloud app deploy -q << parameters.app_yaml_file >>
 
+  gcfunctions_deploy:
+    <<: *google_cloud_sdk
+    parameters:
+      env:
+        type: string
+      workdir:
+        type: string
+        default: gcfunctions
+    steps:
+      - checkout
+      - *setup_gcloud_cli
+      - run:
+          name: deploy
+          working_directory: << parameters.workdir >>
+          command: |
+            make deploy/on_photo_uploaded SUBSCRIBE_BUCKET=${<< parameters.env >>_ASSET_BUCKET_NAME}
+
 workflows:
   version: 2.1
   test_build_deploy:
@@ -229,6 +246,13 @@ workflows:
           <<: *only_dev_branch
           requires:
             - dev_api_datastore_update_indexes
+      - gcfunctions_deploy:
+          name: dev_deploy_google_cloud_functions
+          env: DEV
+          filters:
+            branches:
+              only:
+                - /^feature\/functions?/
       # ------------- prod -------------
       # - gae_node_build_and_deploy_nuxt:
       #     service_name: app
