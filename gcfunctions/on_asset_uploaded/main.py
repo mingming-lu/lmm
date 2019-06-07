@@ -6,7 +6,7 @@ from os import path
 from PIL import Image
 
 
-def on_asset_uploaded(event, context):
+def main(event, context):
     """
     event: dict of json: {
       "kind": "storage#object",
@@ -44,7 +44,7 @@ def on_asset_uploaded(event, context):
             print(f"skip thumbnail: {event['name']}")
             return
 
-        return create_thumbnails(event['bucket'], event['filename'])
+        return create_thumbnails(event['bucket'], event['name'])
 
     print(f'unhandled event: {event}')
 

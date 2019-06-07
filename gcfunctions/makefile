@@ -1,6 +1,6 @@
 deploy/on_asset_uploaded:
 	cd on_asset_uploaded \
-	&& gcloud functions deploy create_thumbnails \
+	&& gcloud functions deploy main \
 		--memory=128MB \
 		--region=asia-northeast1 \
 		--runtime=python37 \
