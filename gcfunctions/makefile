@@ -1,5 +1,6 @@
 deploy/on_photo_uploaded:
-	gcloud functions deploy create_thumbnails \
+	cd on_photo_uploaded \
+	&& gcloud functions deploy create_thumbnails \
 		--memory=128MB \
 		--region=asia-northeast1 \
 		--runtime=python37 \
