@@ -1,6 +1,6 @@
 deploy/on_asset_uploaded:
 	cd on_asset_uploaded \
-	&& gcloud functions deploy main \
+	&& gcloud functions deploy on_asset_uploaded \
 		--memory=128MB \
 		--region=asia-northeast1 \
 		--runtime=python37 \
