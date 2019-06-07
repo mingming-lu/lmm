@@ -51,7 +51,6 @@ def create_thumbnails(event, context):
             name, ext = path.splitext(filename)
             thumbnail = bucket.blob(f"{name}_{width}{ext}")
             thumbnail.cache_control = src.cache_control
-            thumbnail.acl = src.acl
             thumbnail.upload_from_file(
               dst,
               rewind=True,
