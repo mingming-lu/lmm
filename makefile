@@ -1,11 +1,17 @@
-all: dev
+all: local
 
-install:
+install: install-api install-app install-manager
+
+install-api:
 	cd api && make install
+
+install-app:
 	cd app && make install
+
+install-manager:
 	cd manager && make install
 
-dev:
+local:
 	make start
 
 start:
@@ -50,6 +56,3 @@ restart:
 
 go-build:
 	cd api && make build
-
-scale-api:
-	docker-compose -f api/docker-compose.yml -f api/docker-compose.${env}.yml up -d --scale api=${n}
