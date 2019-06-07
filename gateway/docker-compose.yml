@@ -4,6 +4,7 @@ services:
     image: nginx:1.15.8-alpine
     restart: on-failure
     volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/run:/var/run
       - ./nginx/log:/var/log/nginx
       - ./nginx/conf:/etc/nginx/conf

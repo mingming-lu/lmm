@@ -2,7 +2,17 @@ version: "3.7"
 services:
   manager:
     image: node:10.16.0-alpine
+    command: npm --prefix /manager run dev
     volumes:
       - .:/manager
     environment:
+      API_URL: 'https://api.lmm.local'
+      API_URL_BROWSER: 'https://api.lmm.local'
       TZ: Asia/Tokyo
+    networks:
+      - lmm
+
+networks:
+  lmm:
+    external:
+      name: lmm

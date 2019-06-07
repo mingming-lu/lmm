@@ -7,22 +7,45 @@ services:
     volumes:
       - ./go:/go
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
+      - ./../script/gae:/gae
+      - ./script:/script
+    env_file:
+      - ./.env/dev.env
+    command: |
+      dev_appserver.py app.yaml --host 0.0.0.0 --port 8002 --enable_host_checking=False
     working_dir: /go/src/lmm/api/
     environment:
-      TZ: Asia/Tokyo
+      APP_ORIGIN: https://www.lmm.local
+      ASSET_BUCKET_NAME: lmm-dev-asset
+      DATASTORE_EMULATOR_HOST: datastore:8081
+      DATASTORE_PROJECT_ID: lmm-dev
+      GCP_PROJECT_ID: lmm-dev
       GO111MODULE: 'on'
+      GOOGLE_APPLICATION_CREDENTIALS: /gcp/credentials/service_account.json
+      GIN_MODE: debug
       HTTP_TIMEOUT_SECOND: 10
+      MANAGER_ORIGIN: https://manager.lmm.local
+      TZ: Asia/Tokyo
     depends_on:
       - datastore
     networks:
+      - lmm
       - lmm-api
   datastore:
     image: google/cloud-sdk:247.0.0
+    volumes:
+      - ./.datastore:/root/.config/gcloud/emulators/datastore
     environment:
       TZ: Asia/Tokyo
+      PROJECT_ID: lmm-dev
     networks:
       - lmm-api
+    command: |
+      gcloud beta emulators datastore start --project=lmm-dev --host-port=0.0.0.0:8081
 
 networks:
+  lmm:
+    external:
+      name: lmm
   lmm-api:
     name: lmm-api
