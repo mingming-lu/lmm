@@ -1,9 +1,20 @@
 all: dev
 
-install:
-	cd api && make install
+install: install-api install-app install-manager
+
+install-api:
+	cd api && make build
+
+install-app:
 	cd app && make install
+
+install-manager:
 	cd manager && make install
+
+init: init-api
+
+init-api:
+	cd api && make init
 
 dev:
 	make start
@@ -47,9 +58,3 @@ stop-gateway:
 restart:
 	make stop
 	make start
-
-go-build:
-	cd api && make build
-
-scale-api:
-	docker-compose -f api/docker-compose.yml -f api/docker-compose.${env}.yml up -d --scale api=${n}
