@@ -1,6 +1,8 @@
 import io
 import re
 
+from datetime import datetime, timezone
+from dateutil import parser
 from google.cloud import storage
 from os import path
 from PIL import Image
@@ -37,6 +39,9 @@ def on_asset_uploaded(event, context):
       }
     }
     """
+
+    if _check_timeout(context):
+        return f'Timeout: {context.event_id}'
 
     if event['contentType'].startswith('image/'):
 
@@ -86,3 +91,16 @@ def _create_thumbnail(image: Image.Image, width: int) -> Image.Image:
     height = int(img.size[1] * ratio)
     img.thumbnail((width, height), Image.ANTIALIAS)
     return img
+
+
+def _check_timeout(context, timeout_minutes=10) -> bool:
+    timestamp = context.timestamp
+
+    event_time = parser.parse(timestamp)
+    event_age = (datetime.now(timezone.utc) - event_time).total_seconds()
+    event_age_ms = event_age * 1000
+
+    max_age_ms = timeout_minutes * 60 * 1000
+    if event_age_ms > max_age_ms:
+        return True
+    return False
