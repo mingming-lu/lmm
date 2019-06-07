@@ -250,6 +250,7 @@ workflows:
       - gcfunctions_deploy:
           name: dev_deploy_google_cloud_functions
           env: DEV
+          <<: *only_dev_branch
       # ------------- prod -------------
       # - gae_node_build_and_deploy_nuxt:
       #     service_name: app
