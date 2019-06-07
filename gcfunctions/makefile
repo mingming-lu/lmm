@@ -4,4 +4,4 @@ deploy/on_photo_uploaded:
 		--region=asia-northeast1 \
 		--runtime=python37 \
 		--trigger-event=google.storage.object.finalize \
-		--trigger-resource=${SUBSCRIBE_BUCKET} \
+		--trigger-resource=${SUBSCRIBE_BUCKET}
