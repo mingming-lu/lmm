@@ -41,7 +41,7 @@ def on_asset_uploaded(event, context):
     if event['contentType'].startswith('image/'):
 
         if event['name'].startswith('thumbnail/'):
-            print(f'skip thumbnail: {event['name']}')
+            print(f"skip thumbnail: {event['name']}")
             return
 
         return create_thumbnails(event['bucket'], event['filename'])
