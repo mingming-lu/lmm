@@ -42,7 +42,7 @@ def create_photo_thumbnails(event, context):
     bucket = client.get_bucket(original['bucket'])
     src = bucket.get_blob(original['name'])
     buffer = io.BytesIO()
-    blob.download_to_file(buffer)
+    src.download_to_file(buffer)
 
     with Image.open(buffer) as image:
         for width in (320, 640, 960, 1280):
