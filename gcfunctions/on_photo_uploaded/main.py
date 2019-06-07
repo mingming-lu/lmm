@@ -55,7 +55,7 @@ def _create_photo_thumbnail(image: Image.Image, width: int) -> Image.Image:
     img = photo.copy()
 
     if img.size[0] < width:
-        print(f'skip {img.size[0]}: width is {width}')
+        print(f'skip resizing: the width {img.size[0]} is less than {width}')
         return img
     ratio = width / img.size[0]
     height = int(img.size[1] * ratio)
