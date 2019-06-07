@@ -38,9 +38,9 @@ def create_thumbnails(event, context):
     """
     client = storage.Client()
 
-    original = event
-    bucket = client.get_bucket(original['bucket'])
-    src = bucket.get_blob(original['name'])
+    filename, buckername = event['name'], event['bucket']
+    bucket = client.get_bucket(buckername)
+    src = bucket.get_blob(filename)
     buffer = io.BytesIO()
     src.download_to_file(buffer)
 
@@ -49,12 +49,13 @@ def create_thumbnails(event, context):
             dst = _create_photo_thumbnail(image, width)
             dst.seek(0)
 
-            name, ext = path.splitext(original['name'])
+            name, ext = path.splitext(filename)
             thumbnail = bucket.blob(f"{name}_{width}{ext}")
-            thumbnail.cache_control = original['cacheControl']
+            thumbnail.cache_control = src.cache_control
+            thumbnail.acl = src.acl
             thumbnail.upload_from_file(
               dst,
-              content_type=original['contentType'],
+              content_type=src.content_type,
             )
 
 
