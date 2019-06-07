@@ -48,7 +48,11 @@ def create_photo_thumbnails(event, context):
         for width in (320, 640, 960, 1280):
             dst = _create_photo_thumbnail(image, width)
             name, ext = path.splitext(original['name'])
-            bucket.blob(f"{name}_{width}{ext}").upload_from_file(dst)
+            thumbnail = bucket.blob(f"{name}_{width}{ext}")
+            thumbnail.upload_from_file(
+              dst,
+              content_type=original['contentType'],
+            )
 
 
 def _create_photo_thumbnail(image: Image.Image, width: int) -> Image.Image:
