@@ -7,6 +7,8 @@ services:
     volumes:
       - ./go:/go
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
+      - ./../script/gae:/gae
+      - ./script:/script
     env_file:
       - ./.env/dev.env
     command: |

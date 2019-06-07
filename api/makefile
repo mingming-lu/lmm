@@ -1,5 +1,8 @@
 all: start
 
+init:
+	docker-compose run --rm --no-deps api sh /script/render_app_yaml.sh
+
 go/mod/tidy:
 	docker-compose run --rm --no-deps api go mod tidy
 

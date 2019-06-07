@@ -1,9 +1,9 @@
-all: local
+all: dev
 
 install: install-api install-app install-manager
 
 install-api:
-	cd api && make install
+	cd api && make build
 
 install-app:
 	cd app && make install
@@ -11,7 +11,12 @@ install-app:
 install-manager:
 	cd manager && make install
 
-local:
+init: init-api
+
+init-api:
+	cd api && make init
+
+dev:
 	make start
 
 start:
@@ -53,6 +58,3 @@ stop-gateway:
 restart:
 	make stop
 	make start
-
-go-build:
-	cd api && make build
