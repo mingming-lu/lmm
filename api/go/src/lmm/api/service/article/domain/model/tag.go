@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"lmm/api/service/article/domain"
-	"lmm/api/service/base/model"
 )
 
 var (
@@ -14,7 +13,6 @@ var (
 
 // Tag is the tag model
 type Tag struct {
-	model.Entity
 	id   *TagID
 	name string
 }

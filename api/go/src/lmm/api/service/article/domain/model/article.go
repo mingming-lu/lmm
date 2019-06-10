@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"lmm/api/clock"
-	"lmm/api/service/base/model"
 )
 
 type ArticleID struct {
@@ -26,7 +25,6 @@ func (id *ArticleID) AuthorID() int64 {
 
 // Article is an aggregate root model
 type Article struct {
-	model.Entity
 	id           *ArticleID
 	linkName     string
 	content      *Content

@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 
-	"lmm/api/service/base/model"
 	"lmm/api/service/user/domain"
 	"lmm/api/util/uuidutil"
 )
@@ -21,7 +20,6 @@ type UserID int64
 
 // UserDescriptor describes user's basic infomation
 type UserDescriptor struct {
-	model.Entity
 	id           UserID
 	name         string
 	email        string
