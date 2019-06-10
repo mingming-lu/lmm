@@ -1,32 +1,30 @@
 package service
 
 import (
+	"testing"
+
 	"lmm/api/service/user/domain/model"
-	"lmm/api/testing"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestBcryptService(tt *testing.T) {
+func TestBcryptService(t *testing.T) {
 	encrypter := BcryptService{}
 
-	tt.Run("Encrypt", func(tt *testing.T) {
-		t := testing.NewTester(tt)
-
+	t.Run("Encrypt", func(t *testing.T) {
 		rawText := uuid.New().String()
 		pw, err := model.NewPassword(rawText)
 		if err != nil {
-			tt.Fatal(err)
+			t.Fatal(err)
 		}
 
 		hashed, err := encrypter.Encrypt(pw)
-		t.NoError(err)
+		assert.NoError(t, err)
 
-		tt.Run("Verify", func(tt *testing.T) {
-			t := testing.NewTester(tt)
-
-			t.True(encrypter.Verify(rawText, hashed))
-			t.False(encrypter.Verify("wrong password", hashed))
+		t.Run("Verify", func(t *testing.T) {
+			assert.True(t, encrypter.Verify(rawText, hashed))
+			assert.False(t, encrypter.Verify("wrong password", hashed))
 		})
 	})
 }

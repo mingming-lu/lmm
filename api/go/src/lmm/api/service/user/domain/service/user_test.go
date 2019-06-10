@@ -2,19 +2,20 @@ package service
 
 import (
 	"context"
+	"testing"
 
 	"lmm/api/clock"
 	"lmm/api/messaging"
 	"lmm/api/service/user/domain"
 	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/testing"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestAssignUserRole(tt *testing.T) {
+func TestAssignUserRole(t *testing.T) {
 	type TestCase struct {
 		operator    *model.User
 		targetUser  *model.User
@@ -81,11 +82,10 @@ func TestAssignUserRole(tt *testing.T) {
 
 	c := context.Background()
 	for testname, testcase := range cases {
-		tt.Run(testname, func(tt *testing.T) {
-			t := testing.NewTester(tt)
+		t.Run(testname, func(t *testing.T) {
 			err := AssignUserRole(c, testcase.operator, testcase.targetUser, testcase.targetRole)
 
-			t.Is(testcase.expectedErr, errors.Cause(err))
+			assert.Equal(t, testcase.expectedErr, errors.Cause(err))
 		})
 	}
 }

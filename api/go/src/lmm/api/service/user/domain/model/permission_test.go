@@ -1,12 +1,14 @@
 package model
 
-import "lmm/api/testing"
+import (
+	"testing"
 
-func TestPermission(tt *testing.T) {
-	t := testing.NewTester(tt)
+	"github.com/stretchr/testify/assert"
+)
 
-	t.Is(Permission(0), NoPermission)
-	t.Is(Permission(1), PermissionAssignToOrdinary)
-	t.Is(Permission(2), PermissionAssignToAdmin)
-	t.Is(Permission(3), PermissionAssignToAdmin|PermissionAssignToOrdinary)
+func TestPermission(t *testing.T) {
+	assert.Equal(t, Permission(0), NoPermission)
+	assert.Equal(t, Permission(1), PermissionAssignToOrdinary)
+	assert.Equal(t, Permission(2), PermissionAssignToAdmin)
+	assert.Equal(t, Permission(3), PermissionAssignToAdmin|PermissionAssignToOrdinary)
 }
