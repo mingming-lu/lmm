@@ -1,7 +1,8 @@
 package service
 
 import (
-	"lmm/api/testing"
+	"testing"
+
 	"lmm/api/util/uuidutil"
 
 	"github.com/stretchr/testify/assert"
