@@ -178,6 +178,22 @@ jobs:
             cat << parameters.app_yaml_file >>
             gcloud app deploy -q << parameters.app_yaml_file >>
 
+  gae_deploy_dispatch:
+    <<: *google_cloud_sdk
+    parameters:
+      env:
+        type: string
+      workdir:
+        type: string
+    steps:
+      - checkout
+      - *setup_gcloud_cli
+      - run:
+          name: deploy
+          working_directory: << parameters.workdir >>
+          command: |
+            gcloud app deploy -q dispatch.yaml
+
   gcfunctions_deploy:
     <<: *google_cloud_sdk
     parameters:
