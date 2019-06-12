@@ -23,8 +23,8 @@ import (
 	articleUI "lmm/api/service/article/port/adapter/presentation"
 
 	// asset
-	assetStore "lmm/api/service/asset/infra/persistence"
-	assetUI "lmm/api/service/asset/presentation"
+	assetStore "lmm/api/service/asset/port/adapter/persistence"
+	assetUI "lmm/api/service/asset/port/adapter/presentation"
 	assetApp "lmm/api/service/asset/usecase"
 )
 
@@ -55,7 +55,7 @@ func main() {
 	assetRepo := assetStore.NewAssetDataStore(datastoreClient)
 	assetStorage := assetStore.NewGCSUploader(gcsClient)
 	assetUsecase := assetApp.New(assetRepo, assetStorage, assetRepo)
-	assetUI := assetUI.New(assetUsecase)
+	assetUI := assetUI.NewGinRouterProvider(assetUsecase)
 
 	router := gin.New()
 	router.Use(middleware.WrapAppEngineContext, middleware.CORS(
@@ -66,11 +66,9 @@ func main() {
 		// TODO: delete this
 	}))
 
-	router.POST("/v1/photos", userUI.BearerAuth(assetUI.PostV1Photos))
-	router.GET("/v1/photos", assetUI.GetV1Photos)
-
 	userUI.Provide(router)
 	articleUI.Provide(router)
+	assetUI.Provide(router)
 
 	http.Handle("/", router)
 	appengine.Main()

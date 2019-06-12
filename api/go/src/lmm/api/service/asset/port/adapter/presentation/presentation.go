@@ -14,16 +14,21 @@ var (
 	ErrUnsupportType = errors.New("unsupport type")
 )
 
-type Presentation struct {
+type GinRouterProvider struct {
 	usecase *usecase.Usecase
 }
 
-func New(app *usecase.Usecase) *Presentation {
-	return &Presentation{usecase: app}
+func NewGinRouterProvider(app *usecase.Usecase) *GinRouterProvider {
+	return &GinRouterProvider{usecase: app}
+}
+
+func (p *GinRouterProvider) Provide(router *gin.Engine) {
+	router.POST("/v1/photos", p.PostV1Photos)
+	router.GET("/v1/photos", p.GetV1Photos)
 }
 
 // PostV1Photos handles POST /v1/photos
-func (p *Presentation) PostV1Photos(c *gin.Context) {
+func (p *GinRouterProvider) PostV1Photos(c *gin.Context) {
 	user, ok := httpUtil.AuthFromGinContext(c)
 	if !ok {
 		httpUtil.Unauthorized(c)
@@ -70,7 +75,7 @@ type photoList struct {
 }
 
 // GetV1Photos handles GET /v1/photos
-func (p *Presentation) GetV1Photos(c *gin.Context) {
+func (p *GinRouterProvider) GetV1Photos(c *gin.Context) {
 	photos, cursor, err := p.usecase.ListPhotos(c,
 		c.DefaultQuery("count", "10"),
 		c.DefaultQuery("cursor", ""),
@@ -89,10 +94,10 @@ func (p *Presentation) GetV1Photos(c *gin.Context) {
 }
 
 // PatchV1Photos handles PATCH /v1/photos/:photo
-func (p *Presentation) PatchV1Photos(c *gin.Context) {
+func (p *GinRouterProvider) PatchV1Photos(c *gin.Context) {
 }
 
 // PostV1Assets handles POST /v1/assets
 // This endpoint is to upload common assets
-func (p *Presentation) PostV1Assets(c *gin.Context) {
+func (p *GinRouterProvider) PostV1Assets(c *gin.Context) {
 }
