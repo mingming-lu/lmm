@@ -192,6 +192,8 @@ export default {
       return `${prefix}/thumbnail/w${width}${suffix}`
     },
     fallbackOnThumbnailFailure(event, url) {
+      // sleep 500ms on error
+      setTimeout(() => {}, 500)
       event.target.srcset = url
     },
     calcIsWideMode() {
