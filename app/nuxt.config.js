@@ -81,7 +81,5 @@ module.exports = {
   /*
   ** Environment configuration
   */
-  env: {
-    ASSET_URL: process.env.ASSET_URL
-  }
+  env: {}
 }

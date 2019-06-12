@@ -75,9 +75,6 @@ export default {
     pickOnePhoto() {
       this.$refs.photoPicker.click()
     },
-    wrapAssetURL(name) {
-      return `${process.env.ASSET_URL}/photos/${name}`
-    },
     onPhotoPicked({ target }) {
       const photo = target.files[0]
       if (!photo) {
