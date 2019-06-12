@@ -1,4 +1,4 @@
-package ui
+package presentation
 
 import (
 	"bytes"
@@ -23,25 +23,30 @@ var (
 	bearerAuthPattern = regexp.MustCompile(`^Bearer +(.+)$`)
 )
 
-// UI handles user apis
-type UI struct {
+type GinRouterProvider struct {
 	appService *application.Service
 }
 
-// NewUI creates a new UI pointer
-func NewUI(appService *application.Service) *UI {
-	return &UI{appService: appService}
+func NewGinRouterProvider(appService *application.Service) *GinRouterProvider {
+	return &GinRouterProvider{appService: appService}
+}
+
+func (p *GinRouterProvider) Provide(router *gin.Engine) {
+	router.POST("/v1/users", p.SignUp)
+	router.PUT("/v1/users/:user/password", p.ChangeUserPassword)
+
+	router.POST("/v1/auth/token", p.Token)
 }
 
 // SignUp handles POST /v1/users
-func (ui *UI) SignUp(c *gin.Context) {
+func (p *GinRouterProvider) SignUp(c *gin.Context) {
 	reqBody := signUpRequestBody{}
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
 		httpUtil.BadRequest(c)
 		return
 	}
 
-	userID, err := ui.appService.RegisterNewUser(c, command.Register{
+	userID, err := p.appService.RegisterNewUser(c, command.Register{
 		UserName:     reqBody.Name,
 		EmailAddress: reqBody.Email,
 		Password:     reqBody.Password,
@@ -72,7 +77,7 @@ func (ui *UI) SignUp(c *gin.Context) {
 }
 
 // BasicAuth middleware
-func (ui *UI) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
+func (p *GinRouterProvider) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
 	pattern := regexp.MustCompile(`^Basic +(.+)$`)
 
 	return func(c *gin.Context) {
@@ -96,7 +101,7 @@ func (ui *UI) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
 			return
 		}
 
-		auth, err := ui.appService.BasicAuth(c, command.Login{
+		auth, err := p.appService.BasicAuth(c, command.Login{
 			UserName: basicauth.UserName,
 			Password: basicauth.Password,
 		})
@@ -113,7 +118,7 @@ func (ui *UI) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
 }
 
 // BearerAuth is a middleware of bearer auth
-func (ui *UI) BearerAuth(next gin.HandlerFunc) gin.HandlerFunc {
+func (p *GinRouterProvider) BearerAuth(next gin.HandlerFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 
@@ -123,7 +128,7 @@ func (ui *UI) BearerAuth(next gin.HandlerFunc) gin.HandlerFunc {
 			return
 		}
 
-		auth, err := ui.appService.BearerAuth(c, matched[1])
+		auth, err := p.appService.BearerAuth(c, matched[1])
 		if err != nil {
 			next(c)
 			return
@@ -136,12 +141,12 @@ func (ui *UI) BearerAuth(next gin.HandlerFunc) gin.HandlerFunc {
 	}
 }
 
-// Token handles /v1/auth/token
-func (ui *UI) Token(c *gin.Context) {
+// Token handles POST /v1/auth/token
+func (p *GinRouterProvider) Token(c *gin.Context) {
 	authHeader := c.Request.Header.Get("Authorization")
 
 	if strings.HasPrefix(authHeader, "Basic ") {
-		ui.BasicAuth(func(c *gin.Context) {
+		p.BasicAuth(func(c *gin.Context) {
 			auth, ok := httpUtil.AuthFromGinContext(c)
 			if !ok {
 				httpUtil.Unauthorized(c)
@@ -160,7 +165,7 @@ func (ui *UI) Token(c *gin.Context) {
 			return
 		}
 
-		token, err := ui.appService.RefreshAccessToken(c, matched[1])
+		token, err := p.appService.RefreshAccessToken(c, matched[1])
 		if err != nil {
 			httpUtil.LogWarnf(c, err.Error())
 			httpUtil.Unauthorized(c)
@@ -176,7 +181,7 @@ func (ui *UI) Token(c *gin.Context) {
 }
 
 // ChangeUserPassword handles PUT /v1/user/:user/password
-func (ui *UI) ChangeUserPassword(c *gin.Context) {
+func (p *GinRouterProvider) ChangeUserPassword(c *gin.Context) {
 	requestBody := changePasswordRequestBody{}
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
 		httpUtil.LogWarnf(c, err.Error())
@@ -184,7 +189,7 @@ func (ui *UI) ChangeUserPassword(c *gin.Context) {
 		return
 	}
 
-	err := ui.appService.UserChangePassword(c, command.ChangePassword{
+	err := p.appService.UserChangePassword(c, command.ChangePassword{
 		User:        c.Param("user"),
 		OldPassword: requestBody.OldPassword,
 		NewPassword: requestBody.NewPassword,

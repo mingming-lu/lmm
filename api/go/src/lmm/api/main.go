@@ -15,8 +15,8 @@ import (
 	// user
 	userApp "lmm/api/service/user/application"
 	userStorage "lmm/api/service/user/port/adapter/persistence"
+	userUI "lmm/api/service/user/port/adapter/presentation"
 	userUtil "lmm/api/service/user/port/adapter/service"
-	userUI "lmm/api/service/user/ui"
 
 	// article
 	articleStorage "lmm/api/service/article/infra/persistence"
@@ -51,10 +51,8 @@ func main() {
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
 	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
-	userUI := userUI.NewUI(userAppService)
-	router.POST("/v1/users", userUI.SignUp)
-	router.PUT("/v1/users/:user/password", userUI.ChangeUserPassword)
-	router.POST("/v1/auth/token", userUI.Token)
+	userUI := userUI.NewGinRouterProvider(userAppService)
+	userUI.Provide(router)
 
 	// article
 	articleRepo := articleStorage.NewArticleDataStore(datastoreClient)
