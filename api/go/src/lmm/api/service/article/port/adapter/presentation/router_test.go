@@ -17,7 +17,7 @@ import (
 	jsonUtil "lmm/api/pkg/json"
 	testUtil "lmm/api/pkg/testing"
 	"lmm/api/service/article/domain"
-	"lmm/api/service/article/infra/persistence"
+	"lmm/api/service/article/port/adapter/persistence"
 	"lmm/api/util/stringutil"
 
 	"cloud.google.com/go/datastore"

@@ -2,12 +2,12 @@ package persistence
 
 import (
 	"context"
-	"lmm/api/service/article/domain"
 	"testing"
 
 	"lmm/api/clock"
 	_ "lmm/api/clock/testing"
 	"lmm/api/pkg/transaction"
+	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
 	"lmm/api/service/article/domain/repository"
 	"lmm/api/service/article/domain/viewer"

@@ -19,8 +19,8 @@ import (
 	userUtil "lmm/api/service/user/port/adapter/service"
 
 	// article
-	articleStorage "lmm/api/service/article/infra/persistence"
-	articleUI "lmm/api/service/article/ui"
+	articleStorage "lmm/api/service/article/port/adapter/persistence"
+	articleUI "lmm/api/service/article/port/adapter/presentation"
 
 	// asset
 	assetStore "lmm/api/service/asset/infra/persistence"
