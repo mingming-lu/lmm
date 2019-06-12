@@ -11,6 +11,17 @@ func (r Role) Name() string {
 	return r.name
 }
 
+func RoleFromString(name string) Role {
+	switch name {
+	case "admin":
+		return Admin
+	case "ordinary":
+		return Ordinary
+	default:
+		return Guest
+	}
+}
+
 // HasPermission returns ture if r has perm
 func (r Role) HasPermission(permission Permission) bool {
 	return r.permssion&permission == permission

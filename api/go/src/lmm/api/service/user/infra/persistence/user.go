@@ -7,7 +7,6 @@ import (
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/service"
 
 	"cloud.google.com/go/datastore"
 	"github.com/pkg/errors"
@@ -150,7 +149,7 @@ func (s *UserDataStore) findByFilter(tx transaction.Transaction, filter, value s
 		user.Email,
 		user.Password,
 		user.Token,
-		service.RoleAdapter(user.Role),
+		model.RoleFromString(user.Role),
 		user.RegisteredAt,
 	)
 }

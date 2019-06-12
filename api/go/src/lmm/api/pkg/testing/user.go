@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"lmm/api/pkg/auth"
-	"lmm/api/service/user/domain/factory"
+	"lmm/api/service/user/domain/model"
 	"lmm/api/service/user/infra/service"
 	"lmm/api/util/uuidutil"
 
@@ -47,7 +47,7 @@ func NewUser(ctx context.Context, dataStore *datastore.Client) *User {
 	username := "U" + uuidutil.NewUUID()[:8]
 	password := uuidutil.NewUUID() + uuidutil.NewUUID()
 
-	hashedPassword, err := factory.NewFactory(PasswordService, nil).NewPassword(password)
+	hashedPassword, err := model.NewFactory(PasswordService, nil).NewPassword(password)
 	if err != nil {
 		panic("failed to encrypt password: " + err.Error())
 	}
