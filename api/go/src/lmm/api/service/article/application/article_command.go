@@ -7,7 +7,6 @@ import (
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/application/command"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/service/article/domain/repository"
 	"lmm/api/util/stringutil"
 
 	"github.com/pkg/errors"
@@ -15,12 +14,12 @@ import (
 
 // ArticleCommandService is a command side application
 type ArticleCommandService struct {
-	articleRepository  repository.ArticleRepository
+	articleRepository  model.ArticleRepository
 	transactionManager transaction.Manager
 }
 
 // NewArticleCommandService is a constructor of ArticleCommandService
-func NewArticleCommandService(articleRepository repository.ArticleRepository, transactionManager transaction.Manager) *ArticleCommandService {
+func NewArticleCommandService(articleRepository model.ArticleRepository, transactionManager transaction.Manager) *ArticleCommandService {
 	return &ArticleCommandService{
 		articleRepository:  articleRepository,
 		transactionManager: transactionManager,

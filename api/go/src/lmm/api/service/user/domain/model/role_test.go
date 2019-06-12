@@ -1,11 +1,13 @@
 package model
 
-import "lmm/api/testing"
+import (
+	"testing"
 
-func TestRoleAdmin(tt *testing.T) {
-	t := testing.NewTester(tt)
+	"github.com/stretchr/testify/assert"
+)
 
-	t.Is("admin", Admin.Name())
-	t.True(Admin.HasPermission(PermissionAssignToAdmin))
-	t.True(Admin.HasPermission(PermissionAssignToOrdinary))
+func TestRoleAdmin(t *testing.T) {
+	assert.Equal(t, "admin", Admin.Name())
+	assert.True(t, Admin.HasPermission(PermissionAssignToAdmin))
+	assert.True(t, Admin.HasPermission(PermissionAssignToOrdinary))
 }

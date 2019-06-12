@@ -6,7 +6,6 @@ import (
 	"unicode/utf8"
 
 	"lmm/api/service/article/domain"
-	"lmm/api/service/base/model"
 )
 
 var (
@@ -16,7 +15,6 @@ var (
 
 // Text is the text content model of a article
 type Text struct {
-	model.ValueObject
 	title string
 	body  string
 }

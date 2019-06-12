@@ -1,10 +1,7 @@
 package model
 
-import "lmm/api/service/base/model"
-
 // TagID is a value object to identify tag
 type TagID struct {
-	model.ValueObject
 	articleID *ArticleID
 	order     uint
 }

@@ -8,33 +8,31 @@ import (
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/factory"
+	"lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/repository"
-	"lmm/api/service/user/domain/service"
 
 	"github.com/pkg/errors"
 )
 
 // Service is a application service
 type Service struct {
-	encrypter          service.EncryptService
-	factory            *factory.Factory
+	encrypter          model.EncryptService
+	factory            *model.Factory
 	tokenService       model.TokenService
 	transactionManager transaction.Manager
-	userRepository     repository.UserRepository
+	userRepository     model.UserRepository
 }
 
 // NewService creates a new Service pointer
 func NewService(
-	encrypter service.EncryptService,
+	encrypter model.EncryptService,
 	tokenService model.TokenService,
 	txManager transaction.Manager,
-	userRepository repository.UserRepository,
+	userRepository model.UserRepository,
 ) *Service {
 	return &Service{
 		encrypter:          encrypter,
-		factory:            factory.NewFactory(encrypter, userRepository),
+		factory:            model.NewFactory(encrypter, userRepository),
 		tokenService:       tokenService,
 		transactionManager: txManager,
 		userRepository:     userRepository,
@@ -181,25 +179,6 @@ func (s *Service) ViewAllUsersByOptions(c context.Context, query query.ViewAllUs
 	panic("not implemented")
 }
 
-func (s *Service) mappingOrder(orderBy, order string) (repository.DescribeAllOrder, error) {
-	switch orderBy + "_" + order {
-	case "name_asc":
-		return repository.DescribeAllOrderByNameAsc, nil
-	case "name_desc":
-		return repository.DescribeAllOrderByNameDesc, nil
-	case "registered_date_asc":
-		return repository.DescribeAllOrderByRegisteredDateAsc, nil
-	case "registered_date_desc":
-		return repository.DescribeAllOrderByRegisteredDateDesc, nil
-	case "role_asc":
-		return repository.DescribeAllOrderByRoleAsc, nil
-	case "role_desc":
-		return repository.DescribeAllOrderByRoleDesc, nil
-	default:
-		return repository.DescribeAllOrder(-1), domain.ErrInvalidViewOrder
-	}
-}
-
 // UserChangePassword supports a application to chagne user's password
 func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePassword) error {
 	hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)
@@ -227,4 +206,26 @@ func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePasswo
 
 		return nil
 	}, nil)
+}
+
+// AssignUserRole allows operator assign targetUser to role
+func AssignUserRole(c context.Context, operator *model.User, targetUser *model.User, role model.Role) error {
+	if operator.Is(targetUser) {
+		return domain.ErrCannotAssignSelfRole
+	}
+
+	perm := model.PermissionAssignToRole(role)
+	if perm == model.NoPermission {
+		return errors.Wrap(domain.ErrNoSuchRole, role.Name())
+	}
+
+	if !operator.Role().HasPermission(perm) {
+		return domain.ErrNoPermission
+	}
+
+	if err := targetUser.ChangeRole(role); err != nil {
+		return err
+	}
+
+	return event.PublishUserRoleChanged(c, operator.Name(), targetUser.Name(), targetUser.Role().Name())
 }

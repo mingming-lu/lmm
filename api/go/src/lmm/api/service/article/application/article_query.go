@@ -8,18 +8,17 @@ import (
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/application/query"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/service/article/domain/viewer"
 	"lmm/api/util/stringutil"
 )
 
 // ArticleQueryService is a query side application
 type ArticleQueryService struct {
-	viewer    viewer.ArticleViewer
+	viewer    model.ArticleViewer
 	txManager transaction.Manager
 }
 
 // NewArticleQueryService is a constructor of ArticleQueryService
-func NewArticleQueryService(viewer viewer.ArticleViewer, txManager transaction.Manager) *ArticleQueryService {
+func NewArticleQueryService(viewer model.ArticleViewer, txManager transaction.Manager) *ArticleQueryService {
 	return &ArticleQueryService{viewer: viewer, txManager: txManager}
 }
 
