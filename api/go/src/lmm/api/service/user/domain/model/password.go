@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 
-	"lmm/api/service/base/model"
 	"lmm/api/service/user/domain"
 	"lmm/api/util/mathutil"
 )
@@ -31,7 +30,6 @@ var (
 
 // Password domain value object model
 type Password struct {
-	model.ValueObject
 	text string
 }
 
@@ -84,4 +82,10 @@ func (pw Password) calculateStrength() int {
 	}
 
 	return total
+}
+
+// EncryptService defines the interface that used to encrypt/verify password domain model
+type EncryptService interface {
+	Encrypt(password *Password) (encryptedText string, err error)
+	Verify(raw, hashed string) bool
 }

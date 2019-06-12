@@ -2,107 +2,77 @@ package application
 
 import (
 	"context"
-	"lmm/api/service/article/application/command"
 
-	"lmm/api/service/article/domain"
+	"lmm/api/clock"
+	"lmm/api/pkg/transaction"
+	"lmm/api/service/article/application/command"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/service/article/domain/repository"
-	"lmm/api/service/article/domain/service"
+	"lmm/api/util/stringutil"
+
+	"github.com/pkg/errors"
 )
 
 // ArticleCommandService is a command side application
 type ArticleCommandService struct {
-	articleService    *service.ArticleService
-	articleRepository repository.ArticleRepository
-	authorService     service.AuthorService
+	articleRepository  model.ArticleRepository
+	transactionManager transaction.Manager
 }
 
 // NewArticleCommandService is a constructor of ArticleCommandService
-func NewArticleCommandService(articleRepository repository.ArticleRepository, authorService service.AuthorService) *ArticleCommandService {
+func NewArticleCommandService(articleRepository model.ArticleRepository, transactionManager transaction.Manager) *ArticleCommandService {
 	return &ArticleCommandService{
-		articleService:    service.NewArticleService(articleRepository),
-		articleRepository: articleRepository,
-		authorService:     authorService,
+		articleRepository:  articleRepository,
+		transactionManager: transactionManager,
 	}
 }
 
 // PostNewArticle is used for posting a new article
-func (app *ArticleCommandService) PostNewArticle(c context.Context, userName, title string, body string, tagNames []string) (*model.ArticleID, error) {
-	author, err := app.authorService.AuthorFromUserName(c, userName)
+func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.PostArticle) (id *model.ArticleID, err error) {
+	text, err := model.NewText(cmd.Title, cmd.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	article, err := app.articleService.NewArticleToPost(c, author, title, body, tagNames)
-	if err != nil {
-		return nil, err
-	}
+	content := model.NewContent(text, cmd.Tags)
 
-	if err := app.articleRepository.Save(c, article); err != nil {
-		return nil, err
-	}
+	err = app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		now := clock.Now()
 
-	return article.ID(), nil
-}
-
-// EditArticle is used for edit the article content
-func (app *ArticleCommandService) EditArticle(c context.Context, cmd *command.EditArticle) error {
-	author, err := app.authorService.AuthorFromUserName(c, cmd.UserName)
-	if err != nil {
-		return err
-	}
-
-	article, err := app.articleWithID(c, cmd.TargetArticleID)
-	if err != nil {
-		return err
-	}
-
-	if cmd.AliasArticleID != "" {
-		if err := article.ID().SetAlias(cmd.AliasArticleID); err != nil {
+		id, err = app.articleRepository.NextID(tx, cmd.AuthorID)
+		if err != nil {
 			return err
 		}
-	}
 
-	if article.Author().Name() != author.Name() {
-		return domain.ErrNotArticleAuthor
-	}
+		article := model.NewArticle(id, stringutil.Int64ToStr(id.ID()), content, now, now)
 
-	newText, err := model.NewText(cmd.Title, cmd.Body)
-	if err != nil {
-		return err
-	}
+		return app.articleRepository.Save(tx, article)
+	}, nil)
 
-	newTags, err := app.tagsFromNames(cmd.TagNames, article.ID())
-	if err != nil {
-		return err
-	}
-
-	content, err := model.NewContent(newText, newTags)
-
-	article.EditContent(content)
-
-	return app.articleRepository.Save(c, article)
+	return
 }
 
-func (app *ArticleCommandService) articleWithID(c context.Context, id string) (*model.Article, error) {
-	articleID, err := model.NewArticleID(id)
+// EditArticle command
+func (app *ArticleCommandService) EditArticle(c context.Context, cmd command.EditArticle) error {
+	articleID := model.NewArticleID(cmd.ArticleID, cmd.UserID)
+
+	text, err := model.NewText(cmd.Title, cmd.Body)
 	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "invalid text")
 	}
 
-	return app.articleRepository.FindByID(c, articleID)
-}
+	content := model.NewContent(text, cmd.Tags)
 
-func (app *ArticleCommandService) tagsFromNames(tagNames []string, articleID *model.ArticleID) ([]*model.Tag, error) {
-	tags := make([]*model.Tag, len(tagNames), len(tagNames))
-
-	for i, name := range tagNames {
-		tag, err := model.NewTag(articleID, uint(i+1), name)
+	return app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		article, err := app.articleRepository.FindByID(tx, articleID)
 		if err != nil {
-			return nil, err
+			return errors.Wrap(err, "article not found")
 		}
-		tags[i] = tag
-	}
 
-	return tags, nil
+		if err := article.ChangeLinkName(cmd.LinkName); err != nil {
+			return errors.Wrap(err, "invalid article link name")
+		}
+		article.EditContent(content)
+
+		return app.articleRepository.Save(tx, article)
+	}, nil)
 }

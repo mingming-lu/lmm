@@ -1,7 +1,7 @@
 all: start
 
 start:
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+	docker-compose up -d
 
 restart:
 	make stop
@@ -13,9 +13,6 @@ stop:
 logs:
 	docker-compose logs # no follow and display nginx access log
 	docker-compose run --rm nginx sh -c "tail /var/log/nginx/access.log"
-
-prod:
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 reload-nginx:
 	docker-compose kill -s SIGHUP nginx

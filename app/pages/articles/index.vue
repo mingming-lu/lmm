@@ -15,7 +15,7 @@
               <td>
                 <p class="title">
                   <nuxt-link
-                    :to="'/articles/' + article.id"
+                    :to="'/articles/' + article.link"
                     class="link">{{ article.title }}</nuxt-link>
                 </p>
                 <p class="post-at">
@@ -189,10 +189,14 @@ export default {
         }
       })
       .catch(e => {
-        error({
-          statusCode: e.response.status,
-          message: e.response.data
-        })
+        if (e.response) {
+          error({
+            statusCode: e.response.status,
+            message: e.response.data
+          })
+        } else {
+          console.log(`failed to fetch articles ${e}`)
+        }
       })
   },
   data() {

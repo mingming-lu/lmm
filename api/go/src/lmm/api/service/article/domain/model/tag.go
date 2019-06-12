@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"lmm/api/service/article/domain"
-	"lmm/api/service/base/model"
 )
 
 var (
@@ -14,7 +13,6 @@ var (
 
 // Tag is the tag model
 type Tag struct {
-	model.Entity
 	id   *TagID
 	name string
 }
@@ -51,4 +49,19 @@ func validateTagName(s string) (string, error) {
 		return "", domain.ErrInvalidTagName
 	}
 	return name, nil
+}
+
+// TagView is a model used to view tag
+type TagView struct {
+	name string
+}
+
+// NewTagView creates a new TagView
+func NewTagView(name string) *TagView {
+	return &TagView{name: name}
+}
+
+// Name returns tag name
+func (v *TagView) Name() string {
+	return v.name
 }

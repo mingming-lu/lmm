@@ -2,19 +2,25 @@ package application
 
 import (
 	"context"
-	"lmm/api/service/user/application/command"
 	"os"
 	"strings"
+	"sync"
+	"testing"
+
+	"lmm/api/clock"
+	"lmm/api/messaging"
+	"lmm/api/pkg/transaction"
+	"lmm/api/service/user/application/command"
+	"lmm/api/service/user/domain"
+	userEvent "lmm/api/service/user/domain/event"
+	"lmm/api/service/user/domain/model"
+	"lmm/api/service/user/port/adapter/service"
+	"lmm/api/util/uuidutil"
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
-
-	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/repository"
-	"lmm/api/testing"
-	"lmm/api/util/uuidutil"
 )
 
 var (
@@ -22,18 +28,29 @@ var (
 )
 
 type InmemoryUserRepository struct {
-	memory []*model.User
+	sync.RWMutex
+	memory map[model.UserID]*model.User
 }
 
-func (repo *InmemoryUserRepository) Save(c context.Context, user *model.User) error {
-	if user, _ := repo.FindByName(c, user.Name()); user != nil {
-		return domain.ErrUserNameAlreadyUsed
-	}
-	repo.memory = append(repo.memory, user)
+func (repo *InmemoryUserRepository) NextID(tx transaction.Transaction) (model.UserID, error) {
+	repo.Lock()
+	defer repo.Unlock()
+
+	return model.UserID(int64(len(repo.memory) + 1)), nil
+}
+
+func (repo *InmemoryUserRepository) Save(tx transaction.Transaction, user *model.User) error {
+	repo.Lock()
+	defer repo.Unlock()
+
+	repo.memory[user.ID()] = user
 	return nil
 }
 
-func (repo *InmemoryUserRepository) FindByName(c context.Context, username string) (*model.User, error) {
+func (repo *InmemoryUserRepository) FindByName(tx transaction.Transaction, username string) (*model.User, error) {
+	repo.RLock()
+	defer repo.RUnlock()
+
 	for _, user := range repo.memory {
 		if user.Name() == username {
 			return user, nil
@@ -42,43 +59,65 @@ func (repo *InmemoryUserRepository) FindByName(c context.Context, username strin
 	return nil, domain.ErrNoSuchUser
 }
 
-func (repo *InmemoryUserRepository) DescribeAll(context.Context, repository.DescribeAllOptions) ([]*model.UserDescriptor, uint, error) {
-	panic("not implemented")
+func (repo *InmemoryUserRepository) FindByToken(tx transaction.Transaction, token string) (*model.User, error) {
+	repo.RLock()
+	defer repo.RUnlock()
+
+	for _, user := range repo.memory {
+		if user.Token() == token {
+			return user, nil
+		}
+	}
+	return nil, domain.ErrNoSuchUser
+}
+
+func (repo *InmemoryUserRepository) Begin(c context.Context, opts *transaction.Option) (transaction.Transaction, error) {
+	return transaction.Nop(), nil
+}
+
+func (repo *InmemoryUserRepository) RunInTransaction(c context.Context, f func(tx transaction.Transaction) error, opts *transaction.Option) error {
+	tx, err := repo.Begin(c, opts)
+	if err != nil {
+		panic("unexpected error: " + err.Error())
+	}
+	defer tx.Commit()
+
+	return f(tx)
 }
 
 func TestMain(m *testing.M) {
-	testAppService = NewService(&InmemoryUserRepository{memory: make([]*model.User, 0)})
+	repo := &InmemoryUserRepository{memory: make(map[model.UserID]*model.User)}
+	testAppService = NewService(&service.BcryptService{}, &service.CFBTokenService{}, repo, repo)
 	code := m.Run()
 	os.Exit(code)
 }
 
-func TestRegisterNewUser(tt *testing.T) {
+func TestRegisterNewUser(t *testing.T) {
 	c := context.Background()
 
-	tt.Run("Success", func(tt *testing.T) {
-		t := testing.NewTester(tt)
+	t.Run("Success", func(t *testing.T) {
 		username, password := "username", "~!@#$%^&*()-_=+{[}]|\\:;\"'<,>.?/"
-		nameGot, err := testAppService.RegisterNewUser(c, command.Register{
+		userID, err := testAppService.RegisterNewUser(c, command.Register{
 			UserName:     username,
 			EmailAddress: username + "@lmm.local",
 			Password:     password,
 		})
-		t.NoError(err)
-		t.Is(username, nameGot)
+		assert.NoError(t, err)
+		assert.NotZero(t, userID)
 
-		user, err := testAppService.userRepository.FindByName(c, "username")
-		t.NoError(err)
-		t.Is(username, user.Name())
-		t.NoError(bcrypt.CompareHashAndPassword(
+		user, err := testAppService.userRepository.FindByName(nil, "username")
+		assert.NoError(t, err)
+		assert.Equal(t, username, user.Name())
+		assert.NoError(t, bcrypt.CompareHashAndPassword(
 			[]byte(user.Password()),
 			[]byte(password),
 		))
-		t.NotPanic(func() {
+		assert.NotPanics(t, func() {
 			uuid.Must(uuidutil.ParseString(user.Token()))
 		})
 	})
 
-	tt.Run("Fail", func(tt *testing.T) {
+	t.Run("Fail", func(t *testing.T) {
 		cases := map[string]struct {
 			UserName string
 			Email    string
@@ -109,16 +148,154 @@ func TestRegisterNewUser(tt *testing.T) {
 		}
 
 		for testName, testCase := range cases {
-			tt.Run(testName, func(tt *testing.T) {
-				t := testing.NewTester(tt)
-				nameGot, err := testAppService.RegisterNewUser(c, command.Register{
+			t.Run(testName, func(t *testing.T) {
+				userIDGot, err := testAppService.RegisterNewUser(c, command.Register{
 					UserName:     testCase.UserName,
 					EmailAddress: testCase.Email,
 					Password:     testCase.Password,
 				})
-				t.IsError(testCase.Err, errors.Cause(err), testName)
-				t.Is("", nameGot, testName)
+				assert.Error(t, testCase.Err, errors.Cause(err), testName)
+				assert.Equal(t, int64(0), userIDGot, testName)
 			})
 		}
 	})
+}
+
+func TestUserChangePassword(t *testing.T) {
+	c := context.Background()
+
+	username, password := "U"+uuidutil.NewUUID()[:8], "U$ErP@ssw0rD"
+	userID, err := testAppService.RegisterNewUser(c, command.Register{
+		UserName:     username,
+		EmailAddress: username + "@lmm.local",
+		Password:     password,
+	})
+	if !assert.NoError(t, err) || !assert.NotZero(t, userID) {
+		t.Fatal("failed to create new user")
+	}
+
+	userBeforePasswordChanging, err := testAppService.userRepository.FindByName(nil, username)
+	if !assert.NoError(t, err) {
+		t.Fatal(err)
+	}
+
+	// record value since it's changed by pointer
+	oldToken := userBeforePasswordChanging.Token()
+
+	newPassword := uuidutil.NewUUID() + uuidutil.NewUUID()
+
+	assert.NoError(t, testAppService.UserChangePassword(c, command.ChangePassword{
+		User:        username,
+		OldPassword: password,
+		NewPassword: newPassword,
+	}))
+
+	userAfterPasswordChanging, err := testAppService.userRepository.FindByName(nil, username)
+	if !assert.NoError(t, err) {
+		t.Fatal(err)
+	}
+
+	assert.True(t, testAppService.encrypter.Verify(newPassword, userAfterPasswordChanging.Password()))
+	assert.NotEqual(t, oldToken, userAfterPasswordChanging.Token())
+}
+
+func TestAssignUserRole(t *testing.T) {
+	type TestCase struct {
+		operator    *model.User
+		targetUser  *model.User
+		targetRole  model.Role
+		expectedErr error
+	}
+
+	cases := map[string]TestCase{
+		"AdminAssginAdminToAdmin": TestCase{
+			operator:    newAdmin(),
+			targetUser:  newAdmin(),
+			targetRole:  model.Admin,
+			expectedErr: nil,
+		},
+		"AdminAssginAdminToOrdinary": TestCase{
+			operator:    newAdmin(),
+			targetUser:  newAdmin(),
+			targetRole:  model.Ordinary,
+			expectedErr: nil,
+		},
+		"AdminAssginOrdinaryToAdmin": TestCase{
+			operator:    newAdmin(),
+			targetUser:  newOrdinary(),
+			targetRole:  model.Admin,
+			expectedErr: nil,
+		},
+		"AdminAssignOrdinaryToOrdinary": TestCase{
+			operator:    newAdmin(),
+			targetUser:  newOrdinary(),
+			targetRole:  model.Ordinary,
+			expectedErr: nil,
+		},
+		"OrdinaryAssignAdminToAdmin": TestCase{
+			operator:    newOrdinary(),
+			targetUser:  newAdmin(),
+			targetRole:  model.Admin,
+			expectedErr: domain.ErrNoPermission,
+		},
+		"OrdinaryAssignAdminToOrdinary": TestCase{
+			operator:    newOrdinary(),
+			targetUser:  newAdmin(),
+			targetRole:  model.Ordinary,
+			expectedErr: domain.ErrNoPermission,
+		},
+		"OrdinaryAssignOrdinaryToAdmin": TestCase{
+			operator:    newOrdinary(),
+			targetUser:  newOrdinary(),
+			targetRole:  model.Admin,
+			expectedErr: domain.ErrNoPermission,
+		},
+		"OrdinaryAssignOrdinaryToOrdinary": TestCase{
+			operator:    newOrdinary(),
+			targetUser:  newOrdinary(),
+			targetRole:  model.Ordinary,
+			expectedErr: domain.ErrNoPermission,
+		},
+		"InvalidPermission": TestCase{
+			operator:    newAdmin(),
+			targetUser:  newOrdinary(),
+			targetRole:  model.Role{},
+			expectedErr: domain.ErrNoSuchRole,
+		},
+	}
+
+	c := context.Background()
+	for testname, testcase := range cases {
+		t.Run(testname, func(t *testing.T) {
+			err := AssignUserRole(c, testcase.operator, testcase.targetUser, testcase.targetRole)
+
+			assert.Equal(t, testcase.expectedErr, errors.Cause(err))
+		})
+	}
+}
+
+func newAdmin() *model.User {
+	return newUserWithRole(model.Admin)
+}
+
+func newOrdinary() *model.User {
+	return newUserWithRole(model.Ordinary)
+}
+
+func newUserWithRole(role model.Role) *model.User {
+	randomUserName := "u" + uuid.New().String()[:7]
+	email := randomUserName + "@lmm.local"
+	password := uuid.New().String()
+	token := uuid.New().String()
+
+	user, err := model.NewUser(0, randomUserName, email, password, token, role, clock.Now())
+	if err != nil {
+		panic(err)
+	}
+
+	return user
+}
+
+func init() {
+	messaging.SyncBus().Subscribe(&userEvent.UserRoleChanged{}, messaging.NopEventHandler)
 }

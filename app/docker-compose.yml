@@ -2,9 +2,15 @@ version: "3.7"
 services:
   app:
     image: node:10.16.0-alpine
+    command: npm --prefix /app run dev
     volumes:
       - .:/app
     environment:
+      API_HOST: api.lmm.local
+      API_URL: https://nginx
+      API_URL_BROWSER: https://api.lmm.local
+      HOST: '0.0.0.0'
+      PORT: 8001
       TZ: Asia/Tokyo
     networks:
       - lmm

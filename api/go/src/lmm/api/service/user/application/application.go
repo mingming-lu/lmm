@@ -3,129 +3,229 @@ package application
 import (
 	"context"
 
+	authUtil "lmm/api/pkg/auth"
+	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/event"
-	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/repository"
-	"lmm/api/service/user/domain/service"
-	"lmm/api/util/stringutil"
 
 	"github.com/pkg/errors"
 )
 
 // Service is a application service
 type Service struct {
-	encrypter      service.EncryptService
-	factory        *factory.Factory
-	userRepository repository.UserRepository
+	encrypter          model.EncryptService
+	factory            *model.Factory
+	tokenService       model.TokenService
+	transactionManager transaction.Manager
+	userRepository     model.UserRepository
 }
 
 // NewService creates a new Service pointer
-func NewService(userRepository repository.UserRepository) *Service {
-	encrypter := &service.BcryptService{}
+func NewService(
+	encrypter model.EncryptService,
+	tokenService model.TokenService,
+	txManager transaction.Manager,
+	userRepository model.UserRepository,
+) *Service {
 	return &Service{
-		encrypter:      encrypter,
-		factory:        factory.NewFactory(encrypter),
-		userRepository: userRepository,
+		encrypter:          encrypter,
+		factory:            model.NewFactory(encrypter, userRepository),
+		tokenService:       tokenService,
+		transactionManager: txManager,
+		userRepository:     userRepository,
 	}
 }
 
 // RegisterNewUser registers new user
-func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (string, error) {
-	user, err := s.factory.NewUser(cmd.UserName, cmd.EmailAddress, cmd.Password)
+func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (int64, error) {
+	var userID int64
+
+	err := s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		if user, err := s.userRepository.FindByName(tx, cmd.UserName); err != domain.ErrNoSuchUser {
+			if user != nil {
+				return domain.ErrUserNameAlreadyUsed
+			}
+			return errors.Wrap(err, "error occurred when checking user name duplication")
+		}
+
+		user, err := s.factory.NewUser(tx, cmd.UserName, cmd.EmailAddress, cmd.Password)
+		if err != nil {
+			return errors.Wrap(err, "invalid user")
+		}
+
+		if err := s.userRepository.Save(tx, user); err != nil {
+			return errors.Wrap(err, "failed to save user")
+		}
+
+		userID = int64(user.ID())
+
+		return nil
+	}, nil)
+
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
-	if err := s.userRepository.Save(c, user); err != nil {
-		return "", err
+	return userID, nil
+}
+
+// BasicAuth authenticate user by basic auth
+func (s *Service) BasicAuth(c context.Context, cmd command.Login) (auth *authUtil.Auth, err error) {
+	err = s.transactionManager.RunInTransaction(c,
+		func(tx transaction.Transaction) error {
+			user, err := s.login(tx, cmd.UserName, cmd.Password)
+			if err != nil {
+				return errors.Wrap(err, "failed to login")
+			}
+
+			accessToken, err := s.tokenService.Encrypt(user.Token())
+			if err != nil {
+				return errors.Wrap(err, "internal error: faile to encrypt user token")
+			}
+
+			auth = &authUtil.Auth{
+				ID:    int64(user.ID()),
+				Name:  user.Name(),
+				Role:  user.Role().Name(),
+				Token: accessToken.Hashed(),
+			}
+
+			return nil
+		},
+		&transaction.Option{ReadOnly: true},
+	)
+	return
+}
+
+// BearerAuth authenticate user by bearer auth
+func (s *Service) BearerAuth(c context.Context, hashed string) (auth *authUtil.Auth, err error) {
+	token, err := s.tokenService.Decrypt(hashed)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid access token")
 	}
 
-	return user.Name(), nil
+	if token.Expired() {
+		return nil, errors.New("access token expired")
+	}
+
+	err = s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		user, err := s.userRepository.FindByToken(tx, token.Raw())
+		if err != nil {
+			return errors.Wrap(err, "failed to find user by token")
+		}
+
+		auth = &authUtil.Auth{
+			ID:    int64(user.ID()),
+			Name:  user.Name(),
+			Role:  user.Role().Name(),
+			Token: user.Token(), // note that this is the raw token instead of the hashed one
+		}
+
+		return nil
+	}, &transaction.Option{ReadOnly: true})
+	return
+}
+
+// RefreshAccessToken refreshes a valid oldAccessToken into a valid newAccessToken
+func (s *Service) RefreshAccessToken(c context.Context, hashed string) (newAccessToken *model.AccessToken, err error) {
+	token, err := s.tokenService.Decrypt(hashed)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid access token")
+	}
+
+	if token.Expired() {
+		return nil, errors.New("access token expired")
+	}
+
+	err = s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		user, err := s.userRepository.FindByToken(tx, token.Raw())
+		if err != nil {
+			return err
+		}
+		newAccessToken, err = s.tokenService.Encrypt(user.Token())
+		if err != nil {
+			panic(errors.Wrap(err, "internal error"))
+		}
+		return nil
+	}, &transaction.Option{ReadOnly: true})
+
+	return
+}
+
+func (s *Service) login(tx transaction.Transaction, username, password string) (*model.User, error) {
+	user, err := s.userRepository.FindByName(tx, username)
+	if err != nil {
+		return nil, errors.Wrap(domain.ErrNoSuchUser, err.Error())
+	}
+
+	if !s.encrypter.Verify(password, user.Password()) {
+		return nil, domain.ErrUserPassword
+	}
+
+	return user, nil
 }
 
 // AssignRole handles command which operator assign user to role
 func (s *Service) AssignRole(c context.Context, cmd command.AssignRole) error {
-	operator, err := s.userRepository.FindByName(c, cmd.OperatorUser)
-	if err != nil {
-		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	}
-
-	user, err := s.userRepository.FindByName(c, cmd.TargetUser)
-	if err != nil {
-		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	}
-
-	role := service.RoleAdapter(cmd.TargetRole)
-
-	return service.AssignUserRole(c, operator, user, role)
+	panic("not implemented")
 }
 
 const maxCount uint = 100
 
 func (s *Service) ViewAllUsersByOptions(c context.Context, query query.ViewAllUsers) ([]*model.UserDescriptor, uint, error) {
-	page, err := stringutil.ParseUint(query.Page)
-	if err != nil || page == 0 {
-		return nil, 0, errors.Wrap(domain.ErrInvalidPage, query.Page)
-	}
-
-	count, err := stringutil.ParseUint(query.Count)
-	if err != nil || count > maxCount {
-		return nil, 0, errors.Wrap(domain.ErrInvalidCount, query.Count)
-	}
-
-	order, err := s.mappingOrder(query.OrderBy, query.Order)
-	if err != nil {
-		return nil, 0, errors.Wrap(domain.ErrInvalidViewOrder, query.Order)
-	}
-	return s.userRepository.DescribeAll(c, repository.DescribeAllOptions{
-		Page:  page,
-		Count: count,
-		Order: order,
-	})
-}
-
-func (s *Service) mappingOrder(orderBy, order string) (repository.DescribeAllOrder, error) {
-	switch orderBy + "_" + order {
-	case "name_asc":
-		return repository.DescribeAllOrderByNameAsc, nil
-	case "name_desc":
-		return repository.DescribeAllOrderByNameDesc, nil
-	case "registered_date_asc":
-		return repository.DescribeAllOrderByRegisteredDateAsc, nil
-	case "registered_date_desc":
-		return repository.DescribeAllOrderByRegisteredDateDesc, nil
-	case "role_asc":
-		return repository.DescribeAllOrderByRoleAsc, nil
-	case "role_desc":
-		return repository.DescribeAllOrderByRoleDesc, nil
-	default:
-		return repository.DescribeAllOrder(-1), domain.ErrInvalidViewOrder
-	}
+	panic("not implemented")
 }
 
 // UserChangePassword supports a application to chagne user's password
 func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePassword) error {
 	hashedPassword, err := s.factory.NewPassword(cmd.NewPassword)
 	if err != nil {
+		return errors.Wrap(err, "invalid password")
+	}
+
+	return s.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		user, err := s.login(tx, cmd.User, cmd.OldPassword)
+		if err != nil {
+			return errors.Wrap(err, "failed to login")
+		}
+
+		if err := user.ChangePassword(hashedPassword); err != nil {
+			return errors.Wrap(err, "failed to change password")
+		}
+
+		if err := user.ChangeToken(s.factory.NewToken()); err != nil {
+			return errors.Wrap(err, "failed to change token")
+		}
+
+		if err := s.userRepository.Save(tx, user); err != nil {
+			return errors.Wrap(err, "failed to save user after password and token changed")
+		}
+
+		return nil
+	}, nil)
+}
+
+// AssignUserRole allows operator assign targetUser to role
+func AssignUserRole(c context.Context, operator *model.User, targetUser *model.User, role model.Role) error {
+	if operator.Is(targetUser) {
+		return domain.ErrCannotAssignSelfRole
+	}
+
+	perm := model.PermissionAssignToRole(role)
+	if perm == model.NoPermission {
+		return errors.Wrap(domain.ErrNoSuchRole, role.Name())
+	}
+
+	if !operator.Role().HasPermission(perm) {
+		return domain.ErrNoPermission
+	}
+
+	if err := targetUser.ChangeRole(role); err != nil {
 		return err
 	}
 
-	user, err := s.userRepository.FindByName(c, cmd.User)
-	if err != nil {
-		return errors.Wrap(domain.ErrNoSuchUser, err.Error())
-	}
-
-	if !s.encrypter.Verify(cmd.OldPassword, user.Password()) {
-		return domain.ErrUserPassword
-	}
-
-	if err := user.ChangePassword(hashedPassword); err != nil {
-		return err
-	}
-
-	return event.PublishUserPasswordChanged(c, user.Name(), user.Password())
+	return event.PublishUserRoleChanged(c, operator.Name(), targetUser.Name(), targetUser.Role().Name())
 }

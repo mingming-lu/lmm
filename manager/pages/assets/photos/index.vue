@@ -18,12 +18,12 @@
             align-center>
             <v-flex
               v-for="photo in photos"
-              :key="photo.name"
+              :key="photo.url"
               xs4
             >
               <nuxt-link :to="`/assets/photos/${photo.name}`">
                 <v-img
-                  :src="wrapAssetURL(photo.name)"
+                  :src="photo.url"
                   class="img"
                 />
               </nuxt-link>
@@ -49,8 +49,8 @@
 <script>
 const fetcher = axios => {
   return {
-    fetch: page => {
-      return axios.get('/v1/assets/photos?perPage=100')
+    fetch: cursor => {
+      return axios.get('/v1/photos?count=100')
     }
   }
 }
@@ -63,20 +63,17 @@ export default {
   },
   asyncData({ $axios }) {
     return fetcher($axios)
-      .fetch(1)
+      .fetch('TODO: paging')
       .then(res => {
         return {
-          photos: res.data.photos,
-          hasNextPage: res.data.hasNextPage
+          photos: res.data.items,
+          cursor: res.data.next_cursor
         }
       })
   },
   methods: {
     pickOnePhoto() {
       this.$refs.photoPicker.click()
-    },
-    wrapAssetURL(name) {
-      return `${process.env.ASSET_URL}/photos/${name}`
     },
     onPhotoPicked({ target }) {
       const photo = target.files[0]
@@ -87,7 +84,7 @@ export default {
       let formData = new FormData()
       formData.append('photo', photo)
       this.$axios
-        .post('/v1/assets/photos', formData, {
+        .post('/v1/photos', formData, {
           headers: {
             Authorization: `Bearer ${window.localStorage.getItem(
               'accessToken'
@@ -96,12 +93,12 @@ export default {
           }
         })
         .then(res => {
-          alert(`Uploaded\nmessage: ${res.data}`)
+          alert(`Uploaded\nmessage: ${res.data.message}`)
           fetcher(this.$axios)
             .fetch(1)
             .then(res => {
-              this.photos = res.data.photos
-              this.hasNextPage = res.data.hasNextPage
+              this.photos = res.data.items
+              this.cursor = res.data.next_cursor
             })
         })
     }

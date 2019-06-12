@@ -1,8 +1,0 @@
-version: '3.7'
-services:
-  subscriber:
-    environment:
-      RABBIT_HOST: rabbitmq
-      RABBIT_PORT: 5672
-      RABBIT_USER: guest
-      RABBIT_PASS: guest

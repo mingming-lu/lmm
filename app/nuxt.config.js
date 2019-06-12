@@ -46,14 +46,6 @@ module.exports = {
     // Doc: https://github.com/nuxt-community/axios-module#usage
     '@nuxtjs/axios'
   ],
-  /*
-  ** Axios module configuration
-  */
-  axios: {
-    // See https://github.com/nuxt-community/axios-module#options
-    baseURL: process.env.API_URL,
-    browserBaseURL: process.env.API_URL_BROWSER
-  },
 
   /*
   ** Build configuration
@@ -89,7 +81,5 @@ module.exports = {
   /*
   ** Environment configuration
   */
-  env: {
-    ASSET_URL: process.env.ASSET_URL
-  }
+  env: {}
 }

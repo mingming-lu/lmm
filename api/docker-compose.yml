@@ -1,32 +1,51 @@
 version: "3.7"
 services:
   api:
-    image: golang:1.12.0
+    build:
+      context: docker
+      dockerfile: Dockerfile
     volumes:
       - ./go:/go
-      - ./mysql/sql/init.sql:/sql/schema.sql
       - ./../cloud/gcp/credentials/service_account.json:/gcp/credentials/service_account.json
+      - ./../script/gae:/gae
+      - ./script:/script
+    env_file:
+      - ./.env/dev.env
+    command: |
+      dev_appserver.py app.yaml --host 0.0.0.0 --port 8002 --enable_host_checking=False
     working_dir: /go/src/lmm/api/
     environment:
-      TZ: Asia/Tokyo
+      APP_ORIGIN: https://www.lmm.local
+      ASSET_BUCKET_NAME: lmm-dev-asset
+      DATASTORE_EMULATOR_HOST: datastore:8081
+      DATASTORE_PROJECT_ID: lmm-dev
+      GCP_PROJECT_ID: lmm-dev
       GO111MODULE: 'on'
+      GOOGLE_APPLICATION_CREDENTIALS: /gcp/credentials/service_account.json
+      GIN_MODE: debug
       HTTP_TIMEOUT_SECOND: 10
+      MANAGER_ORIGIN: https://manager.lmm.local
+      TZ: Asia/Tokyo
     depends_on:
-      - mysql
+      - datastore
     networks:
+      - lmm
       - lmm-api
-  mysql:
-    image: mysql:5.7.25
+  datastore:
+    image: google/cloud-sdk:247.0.0
     volumes:
-      - ./mysql/lib:/var/lib/mysql
-      - ./mysql/log:/var/log/mysql
-      - ./mysql/my.cnf:/etc/mysql/my.cnf
-      - ./mysql/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./.datastore:/root/.config/gcloud/emulators/datastore
     environment:
       TZ: Asia/Tokyo
+      PROJECT_ID: lmm-dev
     networks:
       - lmm-api
+    command: |
+      gcloud beta emulators datastore start --project=lmm-dev --host-port=0.0.0.0:8081
 
 networks:
+  lmm:
+    external:
+      name: lmm
   lmm-api:
     name: lmm-api

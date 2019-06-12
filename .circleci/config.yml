@@ -1,33 +1,60 @@
 version: 2.1
 
 references:
-  app_release_branches: &app_release_branches /^app-release$/
-  manager_release_branch: &manager_release_branch /^manager-release$/
+  only_dev_branch: &only_dev_branch
+    filters:
+      branches:
+        only:
+          - /^develop$/
+
+  only_master_branch: &only_master_branch
+    filters:
+      branches:
+        only:
+          - /^master$/
 
   google_cloud_sdk: &google_cloud_sdk
     docker:
       - image: google/cloud-sdk
 
+  setup_gcloud_cli: &setup_gcloud_cli
+    run:
+      name: setup gcloud
+      command: |
+        echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
+        gcloud --quiet config set project $<< parameters.env >>_GCP_PROJECT_ID
+        gcloud auth activate-service-account --key-file $GCP_SERVICE_KEY_FILE
+
+  render_gae_app_yaml: &render_gae_app_yaml
+    run:
+      name: render GAE app.yaml
+      command: >
+        python script/gae/render_app_yaml.py
+        --input << parameters.workdir >>/<< parameters.template_app_yaml_file >>
+        --output << parameters.workdir >>/<< parameters.app_yaml_file >>
+        << parameters.params >>
+
 jobs:
-  api:
+  api_test:
     docker:
       - image: circleci/golang:1.12.0
-      - image: circleci/mysql:5.7.25
-    environment:
-      MYSQL_HOST: localhost
-      MYSQL_PORT: 3306
-      MYSQL_NAME: lmm_test
-      MYSQL_USER: root
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
-      HTTP_TIMEOUT_SECOND: 3
-
+        environment:
+          DATASTORE_EMULATOR_HOST: datastore:8081
+          DATASTORE_PROJECT_ID: lmm-test
+          GIN_MODE: test
+          HTTP_TIMEOUT_SECOND: 3
+      - image: google/cloud-sdk:247.0.0
+        name: datastore
+        environment:
+          PROJECT_ID: lmm-test
+        command: gcloud beta emulators datastore start --project=lmm-test --host-port=0.0.0.0:8081 --consistency=1.0
     steps:
       - checkout
       - restore_cache:
           keys:
-            - &api_go_mod_cache_key api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
-            - api_go_mod-v1-{{ checksum "api/go/src/lmm/api/go.mod" }}-
-            - api_go_mod-v1-
+            - &api_go_mod_cache_key api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-{{ checksum "api/go/src/lmm/api/go.sum" }}
+            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "api/go/src/lmm/api/go.mod" }}-
+            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}
           paths:
             - &api_go_mod_cache_path /go/pkg/mod
       - run:
@@ -39,89 +66,259 @@ jobs:
           key: *api_go_mod_cache_key
           paths:
             - *api_go_mod_cache_path
-      - run:
-          name: Setup API MySQL
-          command: |
-            dockerize -wait tcp://127.0.0.1:3306 -timeout 120s
-            sudo apt install -y mysql-client || true
-            cat api/mysql/sql/init_test.sql | mysql -h localhost --protocol TCP -uroot
+      - run: dockerize -wait tcp://datastore:8081 -timeout 30s
       - run:
           name: API Go Test
           command: |
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             cd api/go/src/lmm/api
-            mkdir -p /tmp/test-results
-            gotestsum --junitfile /tmp/test-results/api-tests.xml
+            mkdir -p /tmp/test-results/api
+            gotestsum -f short-verbose --junitfile /tmp/test-results/api/api-tests.xml
       - store_test_results:
           path: /tmp/test-results
+
+  datastore_update_indexes:
+    <<: *google_cloud_sdk
+    parameters:
+      env:
+        type: string
+      index_file_dir:
+        type: string
+      index_file:
+        type: string
+        default: index.yaml
+    steps:
+      - checkout
+      - *setup_gcloud_cli
+      - run:
+          name: update index
+          working_directory: << parameters.index_file_dir >>
+          command: |
+            gcloud datastore indexes create << parameters.index_file >> -q
+            gcloud datastore indexes cleanup << parameters.index_file >> -q
+
+  gae_deploy_gin:
+    <<: *google_cloud_sdk
+    parameters:
+      template_app_yaml_file:
+        type: string
+        default: template.yaml
+      app_yaml_file:
+        type: string
+        default: app.yaml
+      workdir:
+        type: string
+        default: .
+      params:
+        type: string
+      env:
+        type: string
+    steps:
+      - checkout
+      - setup_remote_docker
+      - *setup_gcloud_cli
+      - *render_gae_app_yaml
+      - run:
+          name: deploy
+          working_directory: << parameters.workdir >>
+          command: |
+            echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
+            cat << parameters.app_yaml_file >>
+            gcloud app deploy -q << parameters.app_yaml_file >>
 
   gae_node_build_and_deploy_nuxt:
     <<: *google_cloud_sdk
     parameters:
-      node_image:
+      docker_image:
+        type: string
+      workdir:
         type: string
       service_name:
         type: string
       universal_mode:
         type: boolean
         default: false
-    environment:
-      GCP_KEY_FILE: cloud/gcp/credentials/service_account.json
+      params:
+        type: string
+      env:
+        type: string
+      template_app_yaml_file:
+        type: string
+        default: template.yaml
+      app_yaml_file:
+        type: string
+        default: app.yaml
     steps:
       - checkout
+      - *setup_gcloud_cli
+      - *render_gae_app_yaml
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
           name: npm install
           command: |
-            CONTAINER_NAME=$(docker create -it << parameters.node_image >> npm --prefix /<< parameters.service_name >> install)
-            docker cp << parameters.service_name >> $CONTAINER_NAME:/.
+            CONTAINER_NAME=$(docker create -it << parameters.docker_image >> npm --prefix /<< parameters.workdir >> install)
+            docker cp << parameters.workdir >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/node_modules << parameters.service_name >>/.
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/node_modules << parameters.workdir >>/.
             docker container rm -f $CONTAINER_NAME
       - run:
           name: nuxt build
           command: |
-            CONTAINER_NAME=$(docker create -e API_URL=$API_URL -e API_URL_BROWSER=$API_URL_BROWSER -e ASSET_URL=$ASSET_URL -it << parameters.node_image >> npm --prefix /<< parameters.service_name >> run build)
-            docker cp << parameters.service_name >> $CONTAINER_NAME:/.
+            CONTAINER_NAME=$(docker create -e API_URL=${<< parameters.env >>_API_URL} -e API_URL_BROWSER=${<< parameters.env >>_API_URL_BROWSER} << parameters.docker_image >> npm --prefix /<< parameters.workdir >> run build)
+            docker cp << parameters.workdir >> $CONTAINER_NAME:/.
             docker start -i $CONTAINER_NAME
-            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/dist << parameters.service_name >>/. || << parameters.universal_mode >>
-            docker cp $CONTAINER_NAME:/<< parameters.service_name >>/.nuxt << parameters.service_name >>/.
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/dist << parameters.workdir >>/. || << parameters.universal_mode >>
+            docker cp $CONTAINER_NAME:/<< parameters.workdir >>/.nuxt << parameters.workdir >>/.
             docker container rm -f $CONTAINER_NAME
       - run:
-          name: setup gcloud env
+          name: deploy
+          working_directory: << parameters.workdir >>
           command: |
-            echo $GCLOUD_SERVICE_KEY | base64 --decode > $GCP_KEY_FILE
-            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
-            gcloud auth activate-service-account --key-file $GCP_KEY_FILE
+            cat << parameters.app_yaml_file >>
+            gcloud app deploy -q << parameters.app_yaml_file >>
+
+  gae_deploy_dispatch:
+    <<: *google_cloud_sdk
+    parameters:
+      env:
+        type: string
+      workdir:
+        type: string
+    steps:
+      - checkout
+      - *setup_gcloud_cli
       - run:
           name: deploy
+          working_directory: << parameters.workdir >>
           command: |
-            cd << parameters.service_name >>
-            gcloud app deploy -q << parameters.service_name >>.yaml
+            gcloud app deploy -q dispatch.yaml
+
+  gcfunctions_deploy:
+    <<: *google_cloud_sdk
+    parameters:
+      env:
+        type: string
+      workdir:
+        type: string
+        default: gcfunctions
+    steps:
+      - checkout
+      - *setup_gcloud_cli
+      - run: apt install make
+      - run:
+          name: deploy
+          working_directory: << parameters.workdir >>
+          command: |
+            make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${<< parameters.env >>_ASSET_BUCKET_NAME}
 
 workflows:
   version: 2.1
   test_build_deploy:
     jobs:
-      - api:
-          filters:
-            branches:
-              ignore:
-                - *app_release_branches
-                - *manager_release_branch
+      - api_test
+      # ------------- dev -------------
       - gae_node_build_and_deploy_nuxt:
-          node_image: node:10.15.1-alpine
+          name: dev_deploy_app
           service_name: app
+          env: DEV
+          workdir: app
+          params: >
+            --API_URL ${DEV_API_URL}
+            --API_URL_BROWSER ${DEV_API_URL_BROWSER}
+          docker_image: node:10.16.0-alpine
           universal_mode: true
-          filters:
-            branches:
-              only:
-                - *app_release_branches
+          <<: *only_dev_branch
       - gae_node_build_and_deploy_nuxt:
-          node_image: node:10.16.0-alpine
+          name: dev_deploy_manager
           service_name: manager
-          filters:
-            branches:
-              only:
-                - *manager_release_branch
+          workdir: manager
+          params: >
+            --API_URL ${DEV_API_URL}
+            --API_URL_BROWSER ${DEV_API_URL_BROWSER}
+          env: DEV
+          docker_image: node:10.16.0-alpine
+          <<: *only_dev_branch
+      - datastore_update_indexes:
+          name: dev_api_datastore_update_indexes
+          env: DEV
+          index_file_dir: api/datastore
+          <<: *only_dev_branch
+          requires:
+            - api_test
+      - gae_deploy_gin:
+          name: dev_deploy_api
+          workdir: api/go/src/lmm/api
+          params: >
+            --APP_ORIGIN ${DEV_APP_ORIGIN}
+            --MANAGER_ORIGIN ${DEV_MANAGER_ORIGIN}
+            --ASSET_BUCKET_NAME ${DEV_ASSET_BUCKET_NAME}
+            --DATASTORE_PROJECT_ID ${DEV_DATASTORE_PROJECT_ID}
+            --GIN_MODE debug
+            --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
+            --LMM_API_TOKEN_KEY ${DEV_LMM_API_TOKEN_KEY}
+          env: DEV
+          <<: *only_dev_branch
+          requires:
+            - dev_api_datastore_update_indexes
+      - gcfunctions_deploy:
+          name: dev_deploy_google_cloud_functions
+          env: DEV
+          <<: *only_dev_branch
+      # ------------- prod -------------
+      - gae_node_build_and_deploy_nuxt:
+          name: prod_deploy_app
+          service_name: app
+          env: PROD
+          workdir: app
+          params: >
+            --API_URL ${PROD_API_URL}
+            --API_URL_BROWSER ${PROD_API_URL_BROWSER}
+          docker_image: node:10.16.0-alpine
+          universal_mode: true
+          <<: *only_master_branch
+      - gae_node_build_and_deploy_nuxt:
+          name: prod_deploy_manager
+          service_name: manager
+          workdir: manager
+          params: >
+            --API_URL ${PROD_API_URL}
+            --API_URL_BROWSER ${PROD_API_URL_BROWSER}
+          env: PROD
+          docker_image: node:10.16.0-alpine
+          <<: *only_master_branch
+      - datastore_update_indexes:
+          name: prod_api_datastore_update_indexes
+          env: PROD
+          index_file_dir: api/datastore
+          <<: *only_master_branch
+          requires:
+            - api_test
+      - gae_deploy_gin:
+          name: prod_deploy_api
+          workdir: api/go/src/lmm/api
+          params: >
+            --APP_ORIGIN ${PROD_APP_ORIGIN}
+            --MANAGER_ORIGIN ${PROD_MANAGER_ORIGIN}
+            --ASSET_BUCKET_NAME ${PROD_ASSET_BUCKET_NAME}
+            --DATASTORE_PROJECT_ID ${PROD_DATASTORE_PROJECT_ID}
+            --GIN_MODE release
+            --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
+            --LMM_API_TOKEN_KEY ${PROD_LMM_API_TOKEN_KEY}
+          env: PROD
+          <<: *only_master_branch
+          requires:
+            - prod_api_datastore_update_indexes
+      - gae_deploy_dispatch:
+          name: prod_update_gae_dispatch
+          env: PROD
+          workdir: gateway/appengine
+          <<: *only_master_branch
+          requires:
+            - prod_deploy_api
+            - prod_deploy_app
+            - prod_deploy_manager
+      - gcfunctions_deploy:
+          name: prod_deploy_google_cloud_functions
+          env: PROD
+          <<: *only_master_branch

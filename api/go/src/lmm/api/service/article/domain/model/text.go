@@ -6,7 +6,6 @@ import (
 	"unicode/utf8"
 
 	"lmm/api/service/article/domain"
-	"lmm/api/service/base/model"
 )
 
 var (
@@ -16,7 +15,6 @@ var (
 
 // Text is the text content model of a article
 type Text struct {
-	model.ValueObject
 	title string
 	body  string
 }
@@ -37,12 +35,12 @@ func NewText(title, body string) (*Text, error) {
 }
 
 // Title returns the title of the article text
-func (t *Text) Title() string {
+func (t Text) Title() string {
 	return t.title
 }
 
 // Body returns the body of the article text
-func (t *Text) Body() string {
+func (t Text) Body() string {
 	return t.body
 }
 

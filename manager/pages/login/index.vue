@@ -55,7 +55,7 @@ export default {
     login() {
       this.$axios
         .post(
-          '/v1/auth/login',
+          '/v1/auth/token',
           {
             grantType: 'basicAuth'
           },
@@ -73,7 +73,7 @@ export default {
           }
         )
         .then(res => {
-          window.localStorage.setItem('accessToken', res.data.accessToken)
+          window.localStorage.setItem('accessToken', res.data.access_token)
           this.$store.commit(
             'setAccessToken',
             window.localStorage.getItem('accessToken')
@@ -81,7 +81,7 @@ export default {
           this.callback()
         })
         .catch(e => {
-          alert(e.response.data)
+          alert(e.response.data.error)
         })
     }
   }
