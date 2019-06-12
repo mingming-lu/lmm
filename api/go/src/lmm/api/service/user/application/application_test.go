@@ -14,7 +14,7 @@ import (
 	"lmm/api/service/user/domain"
 	userEvent "lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/infra/service"
+	"lmm/api/service/user/port/adapter/service"
 	"lmm/api/util/uuidutil"
 
 	"github.com/google/uuid"

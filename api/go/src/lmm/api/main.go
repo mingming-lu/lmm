@@ -14,8 +14,8 @@ import (
 
 	// user
 	userApp "lmm/api/service/user/application"
-	userStorage "lmm/api/service/user/infra/persistence"
-	userUtil "lmm/api/service/user/infra/service"
+	userStorage "lmm/api/service/user/port/adapter/persistence"
+	userUtil "lmm/api/service/user/port/adapter/service"
 	userUI "lmm/api/service/user/ui"
 
 	// article

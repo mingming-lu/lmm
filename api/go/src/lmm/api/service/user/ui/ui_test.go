@@ -18,8 +18,8 @@ import (
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/infra/persistence"
-	"lmm/api/service/user/infra/service"
+	"lmm/api/service/user/port/adapter/persistence"
+	"lmm/api/service/user/port/adapter/service"
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
