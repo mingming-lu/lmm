@@ -1,14 +1,17 @@
 version: 2.1
 
 references:
-  app_release_branches: &app_release_branches /^app-release$/
-  manager_release_branch: &manager_release_branch /^manager-release$/
-
   only_dev_branch: &only_dev_branch
     filters:
       branches:
         only:
           - /^develop$/
+
+  only_master_branch: &only_master_branch
+    filters:
+      branches:
+        only:
+          - /^master$/
 
   google_cloud_sdk: &google_cloud_sdk
     docker:
