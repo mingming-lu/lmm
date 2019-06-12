@@ -2,14 +2,17 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"lmm/api/pkg/http/middleware"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/appengine"
 
 	// user
@@ -28,32 +31,47 @@ import (
 	assetApp "lmm/api/service/asset/usecase"
 )
 
+var (
+	dsClient *datastore.Client
+	gsClient *storage.Client
+)
+
+func init() {
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	eg, egCtx := errgroup.WithContext(timeoutCtx)
+	eg.Go(func() (err error) {
+		gsClient, err = storage.NewClient(egCtx)
+		return err
+	})
+	eg.Go(func() (err error) {
+		dsClient, err = datastore.NewClient(egCtx, os.Getenv("DATASTORE_PROJECT_ID"))
+		return err
+	})
+
+	if err := eg.Wait(); err != nil {
+		fmt.Fprintf(os.Stderr, "%#v", err)
+		os.Exit(1)
+	}
+}
+
 func main() {
-	gcsClient, err := storage.NewClient(context.TODO())
-	if err != nil {
-		panic(err)
-	}
-	defer gcsClient.Close()
-
-	datastoreClient, err := datastore.NewClient(context.TODO(), os.Getenv("DATASTORE_PROJECT_ID"))
-
-	if err != nil {
-		panic(err)
-	}
-	defer datastoreClient.Close()
+	defer dsClient.Close()
+	defer gsClient.Close()
 
 	// user
-	userRepo := userStorage.NewUserDataStore(datastoreClient)
+	userRepo := userStorage.NewUserDataStore(dsClient)
 	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
 	userUI := userUI.NewGinRouterProvider(userAppService)
 
 	// article
-	articleRepo := articleStorage.NewArticleDataStore(datastoreClient)
+	articleRepo := articleStorage.NewArticleDataStore(dsClient)
 	articleUI := articleUI.NewGinRouterProvider(articleRepo, articleRepo, articleRepo)
 
 	// asset
-	assetRepo := assetStore.NewAssetDataStore(datastoreClient)
-	assetStorage := assetStore.NewGCSUploader(gcsClient)
+	assetRepo := assetStore.NewAssetDataStore(dsClient)
+	assetStorage := assetStore.NewGCSUploader(gsClient)
 	assetUsecase := assetApp.New(assetRepo, assetStorage, assetRepo)
 	assetUI := assetUI.NewGinRouterProvider(assetUsecase)
 
