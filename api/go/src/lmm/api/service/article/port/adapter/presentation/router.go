@@ -12,8 +12,6 @@ import (
 	"lmm/api/service/article/application/query"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/service/article/domain/repository"
-	"lmm/api/service/article/domain/viewer"
 	"lmm/api/util/stringutil"
 
 	"github.com/gin-gonic/gin"
@@ -33,8 +31,8 @@ type UI struct {
 
 // NewUI returns a new ui
 func NewUI(
-	articleViewer viewer.ArticleViewer,
-	articleRepository repository.ArticleRepository,
+	articleViewer model.ArticleViewer,
+	articleRepository model.ArticleRepository,
 	transactionManager transaction.Manager,
 ) *UI {
 	appService := application.NewService(
