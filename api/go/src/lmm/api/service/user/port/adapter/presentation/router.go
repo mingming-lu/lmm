@@ -118,27 +118,25 @@ func (p *GinRouterProvider) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
 }
 
 // BearerAuth is a middleware of bearer auth
-func (p *GinRouterProvider) BearerAuth(next gin.HandlerFunc) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeader := c.Request.Header.Get("Authorization")
+func (p *GinRouterProvider) BearerAuth(c *gin.Context) {
+	authHeader := c.Request.Header.Get("Authorization")
 
-		matched := bearerAuthPattern.FindStringSubmatch(authHeader)
-		if len(matched) != 2 {
-			next(c)
-			return
-		}
-
-		auth, err := p.appService.BearerAuth(c, matched[1])
-		if err != nil {
-			next(c)
-			return
-		}
-
-		ctxWithAuth := authUtil.NewContext(c.Request.Context(), auth)
-		c.Request = c.Request.WithContext(ctxWithAuth)
-
-		next(c)
+	matched := bearerAuthPattern.FindStringSubmatch(authHeader)
+	if len(matched) != 2 {
+		c.Next()
+		return
 	}
+
+	auth, err := p.appService.BearerAuth(c, matched[1])
+	if err != nil {
+		c.Next()
+		return
+	}
+
+	ctxWithAuth := authUtil.NewContext(c.Request.Context(), auth)
+	c.Request = c.Request.WithContext(ctxWithAuth)
+
+	c.Next()
 }
 
 // Token handles POST /v1/auth/token

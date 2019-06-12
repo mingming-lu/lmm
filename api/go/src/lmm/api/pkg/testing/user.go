@@ -80,7 +80,7 @@ func NewUser(ctx context.Context, dataStore *datastore.Client) *User {
 }
 
 // BearerAuth middleware for testing
-func BearerAuth(dataStore *datastore.Client, next gin.HandlerFunc) gin.HandlerFunc {
+func BearerAuth(dataStore *datastore.Client) gin.HandlerFunc {
 	pattern := regexp.MustCompile(`^Bearer +(.+)$`)
 
 	return func(c *gin.Context) {
@@ -89,7 +89,7 @@ func BearerAuth(dataStore *datastore.Client, next gin.HandlerFunc) gin.HandlerFu
 		matched := pattern.FindStringSubmatch(authHeader)
 		if len(matched) != 2 {
 			log.Printf("invalid header: %s", authHeader)
-			next(c)
+			c.Next()
 			return
 		}
 
@@ -97,7 +97,7 @@ func BearerAuth(dataStore *datastore.Client, next gin.HandlerFunc) gin.HandlerFu
 		token, err := TokenService.Decrypt(accessToken)
 		if err != nil {
 			log.Print(err.Error())
-			next(c)
+			c.Next()
 			return
 		}
 
@@ -105,14 +105,14 @@ func BearerAuth(dataStore *datastore.Client, next gin.HandlerFunc) gin.HandlerFu
 		keys, err := dataStore.GetAll(c, q, nil)
 		if err != nil {
 			log.Print(err.Error())
-			next(c)
+			c.Next()
 			return
 		}
 
 		users := make([]*User, len(keys))
 		if err := dataStore.GetMulti(c, keys, users); err != nil {
 			log.Print(err.Error())
-			next(c)
+			c.Next()
 			return
 		}
 
@@ -125,6 +125,6 @@ func BearerAuth(dataStore *datastore.Client, next gin.HandlerFunc) gin.HandlerFu
 		})
 		c.Request = c.Request.WithContext(ctxWithAuth)
 
-		next(c)
+		c.Next()
 	}
 }

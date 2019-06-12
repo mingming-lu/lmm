@@ -61,10 +61,7 @@ func main() {
 	router.Use(middleware.WrapAppEngineContext, middleware.CORS(
 		os.Getenv("APP_ORIGIN"),
 		os.Getenv("MANAGER_ORIGIN"),
-	))
-	router.Use(userUI.BearerAuth(func(c *gin.Context) {
-		// TODO: delete this
-	}))
+	), userUI.BearerAuth)
 
 	userUI.Provide(router)
 	articleUI.Provide(router)
