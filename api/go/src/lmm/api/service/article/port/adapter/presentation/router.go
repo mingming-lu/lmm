@@ -24,26 +24,32 @@ var (
 	errTagsRequired  = errors.New("tags requried")
 )
 
-// UI is the user interface to contact with network
-type UI struct {
+type GinRouterProvider struct {
 	appService *application.Service
 }
 
-// NewUI returns a new ui
-func NewUI(
+func NewGinRouterProvider(
 	articleViewer model.ArticleViewer,
 	articleRepository model.ArticleRepository,
 	transactionManager transaction.Manager,
-) *UI {
+) *GinRouterProvider {
 	appService := application.NewService(
 		application.NewArticleCommandService(articleRepository, transactionManager),
 		application.NewArticleQueryService(articleViewer, transactionManager),
 	)
-	return &UI{appService: appService}
+	return &GinRouterProvider{appService: appService}
+}
+
+func (p *GinRouterProvider) Provide(router *gin.Engine) {
+	router.POST("/v1/articles", p.PostNewArticle)
+	router.PUT("/v1/articles/:articleID", p.PutV1Articles)
+	router.GET("/v1/articles", p.ListArticles)
+	router.GET("/v1/articles/:articleID", p.GetArticle)
+	router.GET("/v1/articleTags", p.GetAllArticleTags)
 }
 
 // PostNewArticle handles POST /1/articles
-func (ui *UI) PostNewArticle(c *gin.Context) {
+func (p *GinRouterProvider) PostNewArticle(c *gin.Context) {
 	user, ok := httpUtil.AuthFromGinContext(c)
 	if !ok {
 		httpUtil.Unauthorized(c)
@@ -55,12 +61,12 @@ func (ui *UI) PostNewArticle(c *gin.Context) {
 		httpUtil.BadRequest(c)
 	}
 
-	if err := ui.validatePostArticleAdaptor(&article); err != nil {
+	if err := p.validatePostArticleAdaptor(&article); err != nil {
 		httpUtil.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	articleID, err := ui.appService.Command().PostNewArticle(c, command.PostArticle{
+	articleID, err := p.appService.Command().PostNewArticle(c, command.PostArticle{
 		AuthorID: user.ID,
 		Title:    *article.Title,
 		Body:     *article.Body,
@@ -80,7 +86,7 @@ func (ui *UI) PostNewArticle(c *gin.Context) {
 }
 
 // PutV1Articles handles PUT /v1/article/:articleID
-func (ui *UI) PutV1Articles(c *gin.Context) {
+func (p *GinRouterProvider) PutV1Articles(c *gin.Context) {
 	user, ok := httpUtil.AuthFromGinContext(c)
 	if !ok {
 		httpUtil.Unauthorized(c)
@@ -99,12 +105,12 @@ func (ui *UI) PutV1Articles(c *gin.Context) {
 		return
 	}
 
-	if err := ui.validatePostArticleAdaptor(&article); err != nil {
+	if err := p.validatePostArticleAdaptor(&article); err != nil {
 		httpUtil.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err = ui.appService.Command().EditArticle(c, command.EditArticle{
+	err = p.appService.Command().EditArticle(c, command.EditArticle{
 		UserID:    user.ID,
 		ArticleID: articleID,
 		LinkName:  *article.LinkName,
@@ -140,7 +146,7 @@ func (ui *UI) PutV1Articles(c *gin.Context) {
 	}
 }
 
-func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
+func (p *GinRouterProvider) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 	if adaptor.Title == nil {
 		return errTitleRequired
 	}
@@ -154,17 +160,17 @@ func (ui *UI) validatePostArticleAdaptor(adaptor *postArticleAdapter) error {
 }
 
 // ListArticles handles GET /v1/articles
-func (ui *UI) ListArticles(c *gin.Context) {
-	v, err := ui.appService.Query().ListArticlesByPage(
+func (p *GinRouterProvider) ListArticles(c *gin.Context) {
+	v, err := p.appService.Query().ListArticlesByPage(
 		c,
-		ui.buildListArticleQueryFromContext(c),
+		p.buildListArticleQueryFromContext(c),
 	)
 	switch errors.Cause(err) {
 	case nil:
 		if c.DefaultQuery("flavor", "") == "true" {
-			c.JSON(http.StatusOK, ui.articleListViewToJSONV2(c, v))
+			c.JSON(http.StatusOK, p.articleListViewToJSONV2(c, v))
 		} else {
-			c.JSON(http.StatusOK, ui.articleListViewToJSON(v))
+			c.JSON(http.StatusOK, p.articleListViewToJSON(v))
 		}
 	case application.ErrInvalidCount, application.ErrInvalidPage:
 		c.JSON(http.StatusBadRequest, err.Error())
@@ -173,7 +179,7 @@ func (ui *UI) ListArticles(c *gin.Context) {
 	}
 }
 
-func (ui *UI) buildListArticleQueryFromContext(c *gin.Context) query.ListArticleQuery {
+func (p *GinRouterProvider) buildListArticleQueryFromContext(c *gin.Context) query.ListArticleQuery {
 	var tag *string
 	if c.Query("tag") == "" {
 		tmp := c.Query("tag")
@@ -186,7 +192,7 @@ func (ui *UI) buildListArticleQueryFromContext(c *gin.Context) query.ListArticle
 	}
 }
 
-func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAdapter {
+func (p *GinRouterProvider) articleListViewToJSON(view *model.ArticleListView) *articleListAdapter {
 	items := make([]articleListItem, len(view.Items()), len(view.Items()))
 	for i, item := range view.Items() {
 		items[i].ID = item.ID()
@@ -200,8 +206,8 @@ func (ui *UI) articleListViewToJSON(view *model.ArticleListView) *articleListAda
 	}
 }
 
-func (ui *UI) articleListViewToJSONV2(c *gin.Context, view *model.ArticleListView) *articleListAdapterV2 {
-	adapter := ui.articleListViewToJSON(view)
+func (p *GinRouterProvider) articleListViewToJSONV2(c *gin.Context, view *model.ArticleListView) *articleListAdapterV2 {
+	adapter := p.articleListViewToJSON(view)
 	adapterV2 := &articleListAdapterV2{
 		Articles: adapter.Articles,
 		Page:     view.Page(),
@@ -235,13 +241,13 @@ func buildURI(path string, page, perPage int) *string {
 }
 
 // GetArticle handles GET /v1/articles/:articleID
-func (ui *UI) GetArticle(c *gin.Context) {
-	view, err := ui.appService.Query().ArticleByLinkName(c,
+func (p *GinRouterProvider) GetArticle(c *gin.Context) {
+	view, err := p.appService.Query().ArticleByLinkName(c,
 		c.Param("articleID"),
 	)
 	switch errors.Cause(err) {
 	case nil:
-		c.JSON(http.StatusOK, ui.articleViewToJSON(view))
+		c.JSON(http.StatusOK, p.articleViewToJSON(view))
 	case domain.ErrInvalidArticleID, domain.ErrNoSuchArticle:
 		httpUtil.ErrorResponse(c, http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 	default:
@@ -249,7 +255,7 @@ func (ui *UI) GetArticle(c *gin.Context) {
 	}
 }
 
-func (ui *UI) articleViewToJSON(model *model.Article) *articleViewResponse {
+func (p *GinRouterProvider) articleViewToJSON(model *model.Article) *articleViewResponse {
 	tags := make([]articleViewTag, len(model.Content().Tags()), len(model.Content().Tags()))
 	for i, tag := range model.Content().Tags() {
 		tags[i].Name = tag
@@ -266,18 +272,18 @@ func (ui *UI) articleViewToJSON(model *model.Article) *articleViewResponse {
 }
 
 // GetAllArticleTags handles GET /v1/articleTags
-func (ui *UI) GetAllArticleTags(c *gin.Context) {
-	tags, err := ui.appService.Query().AllArticleTags(c)
+func (p *GinRouterProvider) GetAllArticleTags(c *gin.Context) {
+	tags, err := p.appService.Query().AllArticleTags(c)
 
 	switch errors.Cause(err) {
 	case nil:
-		c.JSON(http.StatusOK, ui.tagListViewToJSON(tags))
+		c.JSON(http.StatusOK, p.tagListViewToJSON(tags))
 	default:
 		httpUtil.LogCritf(c, err.Error())
 	}
 }
 
-func (ui *UI) tagListViewToJSON(views []*model.TagView) articleTagListView {
+func (p *GinRouterProvider) tagListViewToJSON(views []*model.TagView) articleTagListView {
 	tags := make([]articleTagListItemView, len(views), len(views))
 	for i, tag := range views {
 		tags[i].Name = tag.Name()

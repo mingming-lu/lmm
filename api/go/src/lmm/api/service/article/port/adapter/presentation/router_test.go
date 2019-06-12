@@ -41,12 +41,10 @@ func TestMain(m *testing.M) {
 	}
 
 	router = gin.New()
+	router.Use(testUtil.BearerAuth(dataStore, func(c *gin.Context) {}))
 
 	repo := persistence.NewArticleDataStore(dataStore)
-	ui := NewUI(repo, repo, repo)
-
-	router.POST("/v1/articles", testUtil.BearerAuth(dataStore, ui.PostNewArticle))
-	router.PUT("/v1/articles/:articleID", testUtil.BearerAuth(dataStore, ui.PutV1Articles))
+	NewGinRouterProvider(repo, repo, repo).Provide(router)
 
 	code := m.Run()
 

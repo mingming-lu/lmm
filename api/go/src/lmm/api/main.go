@@ -42,26 +42,14 @@ func main() {
 	}
 	defer datastoreClient.Close()
 
-	router := gin.New()
-	router.Use(middleware.WrapAppEngineContext, middleware.CORS(
-		os.Getenv("APP_ORIGIN"),
-		os.Getenv("MANAGER_ORIGIN"),
-	))
-
 	// user
 	userRepo := userStorage.NewUserDataStore(datastoreClient)
 	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
 	userUI := userUI.NewGinRouterProvider(userAppService)
-	userUI.Provide(router)
 
 	// article
 	articleRepo := articleStorage.NewArticleDataStore(datastoreClient)
-	articleUI := articleUI.NewUI(articleRepo, articleRepo, articleRepo)
-	router.POST("/v1/articles", userUI.BearerAuth(articleUI.PostNewArticle))
-	router.PUT("/v1/articles/:articleID", userUI.BearerAuth(articleUI.PutV1Articles))
-	router.GET("/v1/articles", articleUI.ListArticles)
-	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
-	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
+	articleUI := articleUI.NewGinRouterProvider(articleRepo, articleRepo, articleRepo)
 
 	// asset
 	assetRepo := assetStore.NewAssetDataStore(datastoreClient)
@@ -69,8 +57,20 @@ func main() {
 	assetUsecase := assetApp.New(assetRepo, assetStorage, assetRepo)
 	assetUI := assetUI.New(assetUsecase)
 
+	router := gin.New()
+	router.Use(middleware.WrapAppEngineContext, middleware.CORS(
+		os.Getenv("APP_ORIGIN"),
+		os.Getenv("MANAGER_ORIGIN"),
+	))
+	router.Use(userUI.BearerAuth(func(c *gin.Context) {
+		// TODO: delete this
+	}))
+
 	router.POST("/v1/photos", userUI.BearerAuth(assetUI.PostV1Photos))
 	router.GET("/v1/photos", assetUI.GetV1Photos)
+
+	userUI.Provide(router)
+	articleUI.Provide(router)
 
 	http.Handle("/", router)
 	appengine.Main()
