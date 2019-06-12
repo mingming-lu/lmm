@@ -1,14 +1,17 @@
 version: 2.1
 
 references:
-  app_release_branches: &app_release_branches /^app-release$/
-  manager_release_branch: &manager_release_branch /^manager-release$/
-
   only_dev_branch: &only_dev_branch
     filters:
       branches:
         only:
           - /^develop$/
+
+  only_master_branch: &only_master_branch
+    filters:
+      branches:
+        only:
+          - /^master$/
 
   google_cloud_sdk: &google_cloud_sdk
     docker:
@@ -175,6 +178,22 @@ jobs:
             cat << parameters.app_yaml_file >>
             gcloud app deploy -q << parameters.app_yaml_file >>
 
+  gae_deploy_dispatch:
+    <<: *google_cloud_sdk
+    parameters:
+      env:
+        type: string
+      workdir:
+        type: string
+    steps:
+      - checkout
+      - *setup_gcloud_cli
+      - run:
+          name: deploy
+          working_directory: << parameters.workdir >>
+          command: |
+            gcloud app deploy -q dispatch.yaml
+
   gcfunctions_deploy:
     <<: *google_cloud_sdk
     parameters:
@@ -197,12 +216,7 @@ workflows:
   version: 2.1
   test_build_deploy:
     jobs:
-      - api_test:
-          filters:
-            branches:
-              ignore:
-                - *app_release_branches
-                - *manager_release_branch
+      - api_test
       # ------------- dev -------------
       - gae_node_build_and_deploy_nuxt:
           name: dev_deploy_app
@@ -252,20 +266,59 @@ workflows:
           env: DEV
           <<: *only_dev_branch
       # ------------- prod -------------
-      # - gae_node_build_and_deploy_nuxt:
-      #     service_name: app
-      #     env: PROD
-      #     docker_image: node:10.16.0-alpine
-      #     universal_mode: true
-      #     filters:
-      #       branches:
-      #         only:
-      #           - *app_release_branches
-      # - gae_node_build_and_deploy_nuxt:
-      #     service_name: manager
-      #     env: PROD
-      #     docker_image: node:10.16.0-alpine
-      #     filters:
-      #       branches:
-      #         only:
-      #           - *manager_release_branch
+      - gae_node_build_and_deploy_nuxt:
+          name: prod_deploy_app
+          service_name: app
+          env: PROD
+          workdir: app
+          params: >
+            --API_URL ${PROD_API_URL}
+            --API_URL_BROWSER ${PROD_API_URL_BROWSER}
+          docker_image: node:10.16.0-alpine
+          universal_mode: true
+          <<: *only_master_branch
+      - gae_node_build_and_deploy_nuxt:
+          name: prod_deploy_manager
+          service_name: manager
+          workdir: manager
+          params: >
+            --API_URL ${PROD_API_URL}
+            --API_URL_BROWSER ${PROD_API_URL_BROWSER}
+          env: PROD
+          docker_image: node:10.16.0-alpine
+          <<: *only_master_branch
+      - datastore_update_indexes:
+          name: prod_api_datastore_update_indexes
+          env: PROD
+          index_file_dir: api/datastore
+          <<: *only_master_branch
+          requires:
+            - api_test
+      - gae_deploy_gin:
+          name: prod_deploy_api
+          workdir: api/go/src/lmm/api
+          params: >
+            --APP_ORIGIN ${PROD_APP_ORIGIN}
+            --MANAGER_ORIGIN ${PROD_MANAGER_ORIGIN}
+            --ASSET_BUCKET_NAME ${PROD_ASSET_BUCKET_NAME}
+            --DATASTORE_PROJECT_ID ${PROD_DATASTORE_PROJECT_ID}
+            --GIN_MODE release
+            --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
+            --LMM_API_TOKEN_KEY ${PROD_LMM_API_TOKEN_KEY}
+          env: PROD
+          <<: *only_master_branch
+          requires:
+            - prod_api_datastore_update_indexes
+      - gae_deploy_dispatch:
+          name: prod_update_gae_dispatch
+          env: PROD
+          workdir: gateway/appengine
+          <<: *only_master_branch
+          requires:
+            - prod_deploy_api
+            - prod_deploy_app
+            - prod_deploy_manager
+      - gcfunctions_deploy:
+          name: prod_deploy_google_cloud_functions
+          env: PROD
+          <<: *only_master_branch

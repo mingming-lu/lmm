@@ -89,7 +89,5 @@ export default {
   /*
   ** Environment configuration
   */
-  env: {
-    ASSET_URL: process.env.ASSET_URL
-  }
+  env: {}
 }

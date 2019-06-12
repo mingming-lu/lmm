@@ -9,7 +9,6 @@ services:
       API_HOST: api.lmm.local
       API_URL: https://nginx
       API_URL_BROWSER: https://api.lmm.local
-      ASSET_URL: https://asset.lmm.local
       HOST: '0.0.0.0'
       PORT: 8001
       TZ: Asia/Tokyo
