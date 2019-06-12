@@ -1,4 +1,4 @@
-package ui
+package presentation
 
 import "encoding/json"
 

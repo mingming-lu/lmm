@@ -12,15 +12,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gin-gonic/gin"
-
 	jsonUtil "lmm/api/pkg/json"
 	testUtil "lmm/api/pkg/testing"
 	"lmm/api/service/article/domain"
-	"lmm/api/service/article/infra/persistence"
+	"lmm/api/service/article/port/adapter/persistence"
 	"lmm/api/util/stringutil"
 
 	"cloud.google.com/go/datastore"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -41,12 +40,10 @@ func TestMain(m *testing.M) {
 	}
 
 	router = gin.New()
+	router.Use(testUtil.BearerAuth(dataStore))
 
 	repo := persistence.NewArticleDataStore(dataStore)
-	ui := NewUI(repo, repo, repo)
-
-	router.POST("/v1/articles", testUtil.BearerAuth(dataStore, ui.PostNewArticle))
-	router.PUT("/v1/articles/:articleID", testUtil.BearerAuth(dataStore, ui.PutV1Articles))
+	NewGinRouterProvider(repo, repo, repo).Provide(router)
 
 	code := m.Run()
 

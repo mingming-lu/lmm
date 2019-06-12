@@ -8,9 +8,8 @@ import (
 	_ "lmm/api/clock/testing"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/factory"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/infra/service"
+	"lmm/api/service/user/port/adapter/service"
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
@@ -22,7 +21,7 @@ func mustRandomUser(userDataStore *UserDataStore) *model.User {
 	email := username + "@lmm.local"
 	password := uuidutil.NewUUID()
 
-	f := factory.NewFactory(&service.BcryptService{}, userDataStore)
+	f := model.NewFactory(&service.BcryptService{}, userDataStore)
 
 	var user *model.User
 

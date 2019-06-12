@@ -2,77 +2,88 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"lmm/api/pkg/http/middleware"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/appengine"
 
 	// user
 	userApp "lmm/api/service/user/application"
-	userStorage "lmm/api/service/user/infra/persistence"
-	userUtil "lmm/api/service/user/infra/service"
-	userUI "lmm/api/service/user/ui"
+	userStorage "lmm/api/service/user/port/adapter/persistence"
+	userUI "lmm/api/service/user/port/adapter/presentation"
+	userUtil "lmm/api/service/user/port/adapter/service"
 
 	// article
-	articleStorage "lmm/api/service/article/infra/persistence"
-	articleUI "lmm/api/service/article/ui"
+	articleStorage "lmm/api/service/article/port/adapter/persistence"
+	articleUI "lmm/api/service/article/port/adapter/presentation"
 
 	// asset
-	assetStore "lmm/api/service/asset/infra/persistence"
-	assetUI "lmm/api/service/asset/presentation"
+	assetStore "lmm/api/service/asset/port/adapter/persistence"
+	assetUI "lmm/api/service/asset/port/adapter/presentation"
 	assetApp "lmm/api/service/asset/usecase"
 )
 
+var (
+	dsClient *datastore.Client
+	gsClient *storage.Client
+)
+
+func init() {
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	eg, egCtx := errgroup.WithContext(timeoutCtx)
+	eg.Go(func() (err error) {
+		gsClient, err = storage.NewClient(egCtx)
+		return err
+	})
+	eg.Go(func() (err error) {
+		dsClient, err = datastore.NewClient(egCtx, os.Getenv("DATASTORE_PROJECT_ID"))
+		return err
+	})
+
+	if err := eg.Wait(); err != nil {
+		fmt.Fprintf(os.Stderr, "%#v", err)
+		os.Exit(1)
+	}
+}
+
 func main() {
-	gcsClient, err := storage.NewClient(context.TODO())
-	if err != nil {
-		panic(err)
-	}
-	defer gcsClient.Close()
+	defer dsClient.Close()
+	defer gsClient.Close()
 
-	datastoreClient, err := datastore.NewClient(context.TODO(), os.Getenv("DATASTORE_PROJECT_ID"))
+	// user
+	userRepo := userStorage.NewUserDataStore(dsClient)
+	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
+	userUI := userUI.NewGinRouterProvider(userAppService)
 
-	if err != nil {
-		panic(err)
-	}
-	defer datastoreClient.Close()
+	// article
+	articleRepo := articleStorage.NewArticleDataStore(dsClient)
+	articleUI := articleUI.NewGinRouterProvider(articleRepo, articleRepo, articleRepo)
+
+	// asset
+	assetRepo := assetStore.NewAssetDataStore(dsClient)
+	assetStorage := assetStore.NewGCSUploader(gsClient)
+	assetUsecase := assetApp.New(assetRepo, assetStorage, assetRepo)
+	assetUI := assetUI.NewGinRouterProvider(assetUsecase)
 
 	router := gin.New()
 	router.Use(middleware.WrapAppEngineContext, middleware.CORS(
 		os.Getenv("APP_ORIGIN"),
 		os.Getenv("MANAGER_ORIGIN"),
-	))
+	), userUI.BearerAuth)
 
-	// user
-	userRepo := userStorage.NewUserDataStore(datastoreClient)
-	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
-	userUI := userUI.NewUI(userAppService)
-	router.POST("/v1/users", userUI.SignUp)
-	router.PUT("/v1/users/:user/password", userUI.ChangeUserPassword)
-	router.POST("/v1/auth/token", userUI.Token)
-
-	// article
-	articleRepo := articleStorage.NewArticleDataStore(datastoreClient)
-	articleUI := articleUI.NewUI(articleRepo, articleRepo, articleRepo)
-	router.POST("/v1/articles", userUI.BearerAuth(articleUI.PostNewArticle))
-	router.PUT("/v1/articles/:articleID", userUI.BearerAuth(articleUI.PutV1Articles))
-	router.GET("/v1/articles", articleUI.ListArticles)
-	router.GET("/v1/articles/:articleID", articleUI.GetArticle)
-	router.GET("/v1/articleTags", articleUI.GetAllArticleTags)
-
-	// asset
-	assetRepo := assetStore.NewAssetDataStore(datastoreClient)
-	assetStorage := assetStore.NewGCSUploader(gcsClient)
-	assetUsecase := assetApp.New(assetRepo, assetStorage, assetRepo)
-	assetUI := assetUI.New(assetUsecase)
-
-	router.POST("/v1/photos", userUI.BearerAuth(assetUI.PostV1Photos))
-	router.GET("/v1/photos", assetUI.GetV1Photos)
+	userUI.Provide(router)
+	articleUI.Provide(router)
+	assetUI.Provide(router)
 
 	http.Handle("/", router)
 	appengine.Main()

@@ -83,3 +83,9 @@ func (pw Password) calculateStrength() int {
 
 	return total
 }
+
+// EncryptService defines the interface that used to encrypt/verify password domain model
+type EncryptService interface {
+	Encrypt(password *Password) (encryptedText string, err error)
+	Verify(raw, hashed string) bool
+}

@@ -1,4 +1,4 @@
-package ui
+package presentation
 
 import (
 	"bytes"
@@ -18,8 +18,8 @@ import (
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/infra/persistence"
-	"lmm/api/service/user/infra/service"
+	"lmm/api/service/user/port/adapter/persistence"
+	"lmm/api/service/user/port/adapter/service"
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
@@ -29,8 +29,8 @@ import (
 )
 
 var (
-	router *gin.Engine
-	ui     *UI
+	router   *gin.Engine
+	provider *GinRouterProvider
 )
 
 func TestMain(m *testing.M) {
@@ -39,13 +39,12 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
+	router = gin.New()
+
 	userRepo := persistence.NewUserDataStore(dataStore)
 	userAppService := application.NewService(&service.BcryptService{}, &service.CFBTokenService{}, userRepo, userRepo)
-	ui = NewUI(userAppService)
-
-	router = gin.New()
-	router.POST("/v1/users", ui.SignUp)
-	router.PUT("/v1/users/:user/password", ui.ChangeUserPassword)
+	provider = NewGinRouterProvider(userAppService)
+	provider.Provide(router)
 
 	exitCode := m.Run()
 
@@ -244,7 +243,7 @@ func TestBasicAuth(t *testing.T) {
 	userIDStr := matched[1]
 
 	router := gin.New()
-	router.GET("/", ui.BasicAuth(func(c *gin.Context) {
+	router.GET("/", provider.BasicAuth(func(c *gin.Context) {
 		auth, ok := httpUtil.AuthFromGinContext(c)
 		if !ok {
 			httpUtil.Unauthorized(c)

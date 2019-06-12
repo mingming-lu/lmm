@@ -2,15 +2,13 @@ package persistence
 
 import (
 	"context"
-	"lmm/api/service/article/domain"
 	"testing"
 
 	"lmm/api/clock"
 	_ "lmm/api/clock/testing"
 	"lmm/api/pkg/transaction"
+	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/service/article/domain/repository"
-	"lmm/api/service/article/domain/viewer"
 	"lmm/api/util/stringutil"
 	"lmm/api/util/uuidutil"
 
@@ -20,9 +18,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testArticleRepo repository.ArticleRepository = &ArticleDataStore{}
-
-var testArticleFinder viewer.ArticleViewer = &ArticleDataStore{}
+var (
+	testArticleRepo   model.ArticleRepository = &ArticleDataStore{}
+	testArticleFinder model.ArticleViewer     = &ArticleDataStore{}
+)
 
 func TestArticleDataStore(t *testing.T) {
 	ctx := context.Background()

@@ -1,28 +1,25 @@
-package factory
+package model
 
 import (
 	"lmm/api/clock"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/repository"
-	"lmm/api/service/user/domain/service"
 	"lmm/api/util/uuidutil"
 )
 
 type Factory struct {
-	encrypter      service.EncryptService
-	userRepository repository.UserRepository
+	encrypter      EncryptService
+	userRepository UserRepository
 }
 
-func NewFactory(encrypter service.EncryptService, userRepository repository.UserRepository) *Factory {
+func NewFactory(encrypter EncryptService, userRepository UserRepository) *Factory {
 	return &Factory{
 		encrypter:      encrypter,
 		userRepository: userRepository,
 	}
 }
 
-func (f *Factory) NewUser(tx transaction.Transaction, username, email, password string) (*model.User, error) {
+func (f *Factory) NewUser(tx transaction.Transaction, username, email, password string) (*User, error) {
 	hashedPassword, err := f.NewPassword(password)
 	if err != nil {
 		return nil, err
@@ -35,11 +32,11 @@ func (f *Factory) NewUser(tx transaction.Transaction, username, email, password 
 		return nil, err
 	}
 
-	return model.NewUser(newID, username, email, hashedPassword, token, model.Ordinary, clock.Now())
+	return NewUser(newID, username, email, hashedPassword, token, Ordinary, clock.Now())
 }
 
 func (f *Factory) NewPassword(plainText string) (string, error) {
-	pw, err := model.NewPassword(plainText)
+	pw, err := NewPassword(plainText)
 	if err != nil {
 		return "", err
 	}

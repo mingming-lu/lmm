@@ -1,13 +1,12 @@
 package persistence
 
 import (
-	"context"
 	"time"
 
+	dsUtil "lmm/api/pkg/datastore"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
-	"lmm/api/service/user/domain/service"
 
 	"cloud.google.com/go/datastore"
 	"github.com/pkg/errors"
@@ -30,67 +29,14 @@ const (
 // UserDataStore implements UserRepository
 type UserDataStore struct {
 	source *datastore.Client
+	transaction.Manager
 }
 
 func NewUserDataStore(source *datastore.Client) *UserDataStore {
-	return &UserDataStore{source: source}
-}
-
-type txImpl struct {
-	context.Context
-	*datastore.Transaction
-}
-
-func (tx *txImpl) Commit() error {
-	_, err := tx.Transaction.Commit()
-	return err
-}
-
-func (s *UserDataStore) Begin(c context.Context, opts *transaction.Option) (transaction.Transaction, error) {
-	if opts != nil && opts.ReadOnly {
-		tx, err := s.source.NewTransaction(c, datastore.ReadOnly)
-		if err != nil {
-			return nil, err
-		}
-		return &txImpl{c, tx}, nil
+	return &UserDataStore{
+		source:  source,
+		Manager: dsUtil.NewTransactionManager(source),
 	}
-
-	tx, err := s.source.NewTransaction(c)
-	if err != nil {
-		return nil, err
-	}
-	return &txImpl{c, tx}, nil
-}
-
-func (s *UserDataStore) RunInTransaction(c context.Context, f func(tx transaction.Transaction) error, opts *transaction.Option) error {
-	tx, err := s.Begin(c, opts)
-	if err != nil {
-		return err
-	}
-
-	defer func() {
-		if recovered := recover(); recovered != nil {
-			tx.Rollback()
-			panic(recovered)
-		}
-	}()
-
-	if err := f(tx); err != nil {
-		if err2 := tx.Rollback(); err2 != nil {
-			return errors.Wrap(err2, err.Error())
-		}
-		return err
-	}
-
-	return tx.Commit()
-}
-
-func mustTx(t transaction.Transaction) *txImpl {
-	tx, ok := t.(*txImpl)
-	if !ok {
-		panic("not a *datastore.Transaction")
-	}
-	return tx
 }
 
 func (s *UserDataStore) NextID(tx transaction.Transaction) (model.UserID, error) {
@@ -109,7 +55,7 @@ func (s *UserDataStore) NextID(tx transaction.Transaction) (model.UserID, error)
 func (s *UserDataStore) Save(tx transaction.Transaction, model *model.User) error {
 	k := datastore.IDKey(userKind, int64(model.ID()), nil)
 
-	_, err := mustTx(tx).Mutate(
+	_, err := dsUtil.MustTransaction(tx).Mutate(
 		datastore.NewUpsert(k, &user{
 			ID:           k,
 			Name:         model.Name(),
@@ -137,7 +83,7 @@ func (s *UserDataStore) findByFilter(tx transaction.Transaction, filter, value s
 	}
 
 	var user user
-	if err := mustTx(tx).Get(keys[0], &user); err != nil {
+	if err := dsUtil.MustTransaction(tx).Get(keys[0], &user); err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			return nil, domain.ErrNoSuchUser
 		}
@@ -150,7 +96,7 @@ func (s *UserDataStore) findByFilter(tx transaction.Transaction, filter, value s
 		user.Email,
 		user.Password,
 		user.Token,
-		service.RoleAdapter(user.Role),
+		model.RoleFromString(user.Role),
 		user.RegisteredAt,
 	)
 }
