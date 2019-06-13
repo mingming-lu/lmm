@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"sort"
 	"time"
 
 	dsUtil "lmm/api/pkg/datastore"
@@ -51,7 +52,8 @@ type article struct {
 }
 
 type tag struct {
-	Name string `datastore:"Name"`
+	Name  string `datastore:"Name"`
+	Order int    `datastore:"Order"`
 }
 
 // Save saves article into datastore
@@ -85,9 +87,9 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 
 	tagKeys = tagKeys[:0]
 	tags := make([]*tag, len(model.Content().Tags()), len(model.Content().Tags()))
-	for i, name := range model.Content().Tags() {
+	for i, model := range model.Content().Tags() {
 		tagKeys = append(tagKeys, datastore.IncompleteKey(dsUtil.ArticleTagKind, articleKey))
-		tags[i] = &tag{Name: name}
+		tags[i] = &tag{Name: model.Name(), Order: int(model.Order())}
 	}
 
 	// save all tags
@@ -113,18 +115,20 @@ func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.Articl
 		return nil, errors.Wrap(err, "failed to get article tags")
 	}
 
-	text, err := model.NewText(data.Title, data.Body)
-	if err != nil {
-		return nil, errors.Wrap(err, "internal error")
-	}
+	sort.Slice(tags, func(i, j int) bool {
+		return tags[i].Order < tags[j].Order
+	})
 
-	content := model.NewContent(text, func() []string {
+	content, err := model.NewContent(data.Title, data.Body, func() []string {
 		ss := make([]string, len(tags), len(tags))
-		for i, tag := range tags {
-			ss[i] = tag.Name
+		for i, t := range tags {
+			ss[i] = t.Name
 		}
 		return ss
 	}())
+	if err != nil {
+		return nil, errors.Wrap(err, "internal error")
+	}
 
 	return model.NewArticle(id, data.LinkName, content, data.CreatedAt, data.LastModified), nil
 }
