@@ -53,13 +53,13 @@ func TestArticleDataStore(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotZero(t, articleID.ID())
 
-				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
+				content, err := model.NewContent(uuidutil.NewUUID(), uuidutil.NewUUID(), []string{})
 				if err != nil {
 					t.Fatal(errors.Wrap(err, "internal error"))
 				}
 
 				now := clock.Now()
-				article = model.NewArticle(articleID, stringutil.Int64ToStr(articleID.ID()), model.NewContent(text, []string{}), now, now)
+				article = model.NewArticle(articleID, stringutil.Int64ToStr(articleID.ID()), content, now, now)
 				if !assert.NoError(t, articleDataStore.Save(tx, article)) || !assert.NotNil(t, article) {
 					t.Fatal("failed to save article")
 				}
@@ -84,12 +84,12 @@ func TestArticleDataStore(t *testing.T) {
 		t.Run("Update", func(t *testing.T) {
 			newLinkName := uuid.New().String()
 			assert.NoError(t, articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
-				text, err := model.NewText(uuidutil.NewUUID(), uuidutil.NewUUID())
+				content, err := model.NewContent(uuidutil.NewUUID(), uuidutil.NewUUID(), []string{"tag1", "tag2"})
 				if err != nil {
 					t.Fatal(errors.Wrap(err, "internal error"))
 				}
 				article.ChangeLinkName(newLinkName)
-				article.EditContent(model.NewContent(text, []string{"tag1", "tag2"}))
+				article.EditContent(content)
 
 				return articleDataStore.Save(tx, article)
 			}, nil))

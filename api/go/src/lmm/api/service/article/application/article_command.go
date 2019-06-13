@@ -28,12 +28,10 @@ func NewArticleCommandService(articleRepository model.ArticleRepository, transac
 
 // PostNewArticle is used for posting a new article
 func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.PostArticle) (id *model.ArticleID, err error) {
-	text, err := model.NewText(cmd.Title, cmd.Body)
+	content, err := model.NewContent(cmd.Title, cmd.Body, cmd.Tags)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "invalid article content")
 	}
-
-	content := model.NewContent(text, cmd.Tags)
 
 	err = app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		now := clock.Now()
@@ -55,12 +53,10 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.
 func (app *ArticleCommandService) EditArticle(c context.Context, cmd command.EditArticle) error {
 	articleID := model.NewArticleID(cmd.ArticleID, cmd.UserID)
 
-	text, err := model.NewText(cmd.Title, cmd.Body)
+	content, err := model.NewContent(cmd.Title, cmd.Body, cmd.Tags)
 	if err != nil {
-		return errors.Wrap(err, "invalid text")
+		return errors.Wrap(err, "invalid article content")
 	}
-
-	content := model.NewContent(text, cmd.Tags)
 
 	return app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		article, err := app.articleRepository.FindByID(tx, articleID)
