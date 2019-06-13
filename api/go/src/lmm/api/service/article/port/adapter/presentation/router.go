@@ -72,12 +72,13 @@ func (p *GinRouterProvider) PostNewArticle(c *gin.Context) {
 		Body:     *article.Body,
 		Tags:     article.Tags,
 	})
-	switch errors.Cause(err) {
+	originalErr := errors.Cause(err)
+	switch originalErr {
 	case nil:
 		c.Header("Location", fmt.Sprintf("/v1/articles/%d", articleID.ID()))
 		httpUtil.Response(c, http.StatusCreated, "Success")
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle, domain.ErrInvalidArticleTitle:
-		httpUtil.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		httpUtil.ErrorResponse(c, http.StatusBadRequest, originalErr.Error())
 	case domain.ErrNoSuchUser:
 		httpUtil.Unauthorized(c)
 	default:
@@ -258,7 +259,7 @@ func (p *GinRouterProvider) GetArticle(c *gin.Context) {
 func (p *GinRouterProvider) articleViewToJSON(model *model.Article) *articleViewResponse {
 	tags := make([]articleViewTag, len(model.Content().Tags()), len(model.Content().Tags()))
 	for i, tag := range model.Content().Tags() {
-		tags[i].Name = tag
+		tags[i].Name = tag.Name()
 	}
 	return &articleViewResponse{
 		ID:           model.ID().ID(),

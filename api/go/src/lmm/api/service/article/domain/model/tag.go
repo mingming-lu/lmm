@@ -13,24 +13,18 @@ var (
 
 // Tag is the tag model
 type Tag struct {
-	id   *TagID
-	name string
+	name  string
+	order uint
 }
 
 // NewTag creates a new tag
-func NewTag(articleID *ArticleID, order uint, name string) (*Tag, error) {
+func NewTag(name string, order uint) (*Tag, error) {
 	name, err := validateTagName(name)
 	if err != nil {
 		return nil, err
 	}
 
-	id := &TagID{articleID: articleID, order: order}
-	return &Tag{id: id, name: name}, nil
-}
-
-// ID returns the tag's id
-func (tag *Tag) ID() *TagID {
-	return tag.id
+	return &Tag{name: name, order: order}, nil
 }
 
 // Name returns the tag's name
@@ -38,9 +32,8 @@ func (tag *Tag) Name() string {
 	return tag.name
 }
 
-// Equals compares tag with another
-func (tag *Tag) Equals(anotherTag *Tag) bool {
-	return tag.ID().Equals(anotherTag.ID())
+func (tag *Tag) Order() uint {
+	return tag.order
 }
 
 func validateTagName(s string) (string, error) {

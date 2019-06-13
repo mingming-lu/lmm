@@ -116,7 +116,7 @@ export default {
           }
         )
         .then(res => {
-          alert(`Article posted\nmessage: ${JSON.stringify(res.data)}`)
+          alert(`Article posted\nmessage: ${res.data.message}`)
           this.$router.push('/articles')
         })
         .catch(e => {
