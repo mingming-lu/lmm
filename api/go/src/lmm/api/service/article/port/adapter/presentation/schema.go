@@ -1,10 +1,9 @@
 package ui
 
 type postArticleAdapter struct {
-	LinkName *string  `json:"link_name"`
-	Title    *string  `json:"title"`
-	Body     *string  `json:"body"`
-	Tags     []string `json:"tags"`
+	Title *string  `json:"title"`
+	Body  *string  `json:"body"`
+	Tags  []string `json:"tags"`
 }
 
 type articleListAdapter struct {
@@ -24,15 +23,13 @@ type articleListAdapterV2 struct {
 }
 
 type articleListItem struct {
-	ID     int64  `json:"id,string"`
-	Link   string `json:"link"`
+	ID     string `json:"id"`
 	Title  string `json:"title"`
 	PostAt int64  `json:"post_at,string"`
 }
 
 type articleViewResponse struct {
-	ID           int64            `json:"id,string"`
-	Link         string           `json:"link"`
+	ID           string           `json:"id"`
 	Title        string           `json:"title"`
 	Body         string           `json:"body"`
 	PostAt       int64            `json:"post_at,string"`

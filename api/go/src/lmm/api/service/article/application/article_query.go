@@ -43,7 +43,7 @@ func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.Li
 	return
 }
 
-func (app *ArticleQueryService) ArticleByLinkName(c context.Context, linkName string) (article *model.Article, err error) {
+func (app *ArticleQueryService) ArticleByID(c context.Context, linkName string) (article *model.Article, err error) {
 	err = app.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		article, err = app.viewer.ViewArticle(tx, linkName)
 		return err

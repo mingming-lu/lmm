@@ -197,7 +197,6 @@ func TestPutArticles(t *testing.T) {
 
 	cases := map[string]struct {
 		ArticleID     string
-		ReqLinkName   string
 		ReqTitle      *string
 		ReqBody       *string
 		ReqTags       []string
@@ -207,7 +206,6 @@ func TestPutArticles(t *testing.T) {
 	}{
 		"Success": {
 			ArticleID:     articleID,
-			ReqLinkName:   uuid.New().String(),
 			ReqTitle:      stringutil.Pointer(uuid.New().String()[:8]),
 			ReqBody:       stringutil.Pointer(uuid.New().String()),
 			ReqTags:       []string{"foo", "bar"},
@@ -239,8 +237,8 @@ func TestPutArticles(t *testing.T) {
 			ReqBody:       stringutil.Pointer("dummy"),
 			ReqTags:       make([]string, 0),
 			ReqHeaders:    http.Header{"Authorization": []string{"Bearer " + testUtil.NewUser(c, dataStore).AccessToken}},
-			ResStatusCode: http.StatusNotFound,
-			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrNoSuchArticle.Error()}),
+			ResStatusCode: http.StatusForbidden,
+			ResBody:       jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrNotArticleAuthor.Error()}),
 		},
 		"NotFound": {
 			ArticleID:     "notfound",
@@ -322,10 +320,9 @@ func TestPutArticles(t *testing.T) {
 				testCase.ArticleID,
 				testCase.ReqHeaders,
 				postArticleAdapter{
-					LinkName: &testCase.ReqLinkName,
-					Title:    testCase.ReqTitle,
-					Body:     testCase.ReqBody,
-					Tags:     testCase.ReqTags,
+					Title: testCase.ReqTitle,
+					Body:  testCase.ReqBody,
+					Tags:  testCase.ReqTags,
 				},
 			)
 			assert.Equal(t, testCase.ResStatusCode, res.Code)

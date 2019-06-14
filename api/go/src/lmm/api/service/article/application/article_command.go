@@ -6,8 +6,8 @@ import (
 	"lmm/api/clock"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/application/command"
+	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/util/stringutil"
 
 	"github.com/pkg/errors"
 )
@@ -41,7 +41,9 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.
 			return err
 		}
 
-		article := model.NewArticle(id, stringutil.Int64ToStr(id.ID()), content, now, now)
+		author := model.NewAuthor(cmd.AuthorID)
+
+		article := model.NewArticle(id, author, content, now, now)
 
 		return app.articleRepository.Save(tx, article)
 	}, nil)
@@ -51,7 +53,7 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.
 
 // EditArticle command
 func (app *ArticleCommandService) EditArticle(c context.Context, cmd command.EditArticle) error {
-	articleID := model.NewArticleID(cmd.ArticleID, cmd.UserID)
+	articleID := model.NewArticleID(cmd.ArticleID)
 
 	content, err := model.NewContent(cmd.Title, cmd.Body, cmd.Tags)
 	if err != nil {
@@ -62,6 +64,10 @@ func (app *ArticleCommandService) EditArticle(c context.Context, cmd command.Edi
 		article, err := app.articleRepository.FindByID(tx, articleID)
 		if err != nil {
 			return errors.Wrap(err, "article not found")
+		}
+
+		if article.Author().ID() != cmd.UserID {
+			return domain.ErrNotArticleAuthor
 		}
 
 		if err := article.ChangeLinkName(cmd.LinkName); err != nil {

@@ -8,10 +8,6 @@
           v-model="articleTitle" 
           label="title" 
           required/>
-        <v-text-field 
-          v-model="newArticleLink" 
-          label="link name"
-          required/>
         <v-combobox
           v-model="articleTags"
           :items="tags"
@@ -71,7 +67,6 @@ const fetcher = axiosClient => {
       ]).then(([article, tags]) => {
         return {
           articleID: article.data.id,
-          newArticleLink: article.data.link,
           articleTitle: article.data.title,
           articleBody: article.data.body,
           articleTags: article.data.tags.map(tag => {
@@ -98,11 +93,8 @@ export default {
       title: 'Edit an article'
     }
   },
-  validate({ query }) {
-    return /^[\d\w-]{8,80}$/.test(query.link)
-  },
   asyncData({ $axios, query }) {
-    return fetcher($axios).fetch(query.link)
+    return fetcher($axios).fetch(query.id)
   },
   mounted() {
     this.onResize()
@@ -125,7 +117,6 @@ export default {
         .put(
           `/v1/articles/${this.articleID}`,
           {
-            link_name: this.newArticleLink,
             title: this.articleTitle,
             body: this.articleBody,
             tags: this.articleTags

@@ -14,6 +14,7 @@
           >
             <img
               :src="photo.url"
+              :alt="photo.tags.join(' ')"
               :srcset="`${photoThumbnailUrl(photo.url, 1280)} 1280w,
                         ${photoThumbnailUrl(photo.url, 960)} 960w,
                         ${photoThumbnailUrl(photo.url, 640)} 640w,

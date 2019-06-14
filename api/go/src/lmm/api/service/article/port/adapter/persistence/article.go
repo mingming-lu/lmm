@@ -35,20 +35,18 @@ func (s *ArticleDataStore) buildArticleKey(articleID, authorID int64) *datastore
 func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*model.ArticleID, error) {
 	key := datastore.IncompleteKey(dsUtil.ArticleKind, datastore.IDKey(dsUtil.UserKind, authorID, nil))
 	keys, err := s.dataStore.AllocateIDs(tx, []*datastore.Key{key})
-	if err != nil {
+	if err != nil || len(keys) == 0 {
 		return nil, errors.Wrap(err, "failed to allocate new article key")
 	}
 
-	return model.NewArticleID(keys[0].ID, authorID), nil
+	return model.NewArticleID(keys[0].Encode()), nil
 }
 
 type article struct {
-	ID           *datastore.Key `datastore:"__key__"`
-	LinkName     string         `datastore:"LinkName"`
-	Title        string         `datastore:"Title"`
-	Body         string         `datastore:"Body,noindex"`
-	CreatedAt    time.Time      `datastore:"CreatedAt"`
-	LastModified time.Time      `datastore:"LastModified,noindex"`
+	Title        string    `datastore:"Title"`
+	Body         string    `datastore:"Body,noindex"`
+	CreatedAt    time.Time `datastore:"CreatedAt"`
+	LastModified time.Time `datastore:"LastModified,noindex"`
 }
 
 type tag struct {
@@ -58,13 +56,12 @@ type tag struct {
 
 // Save saves article into datastore
 func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article) error {
-	articleKey := s.buildArticleKey(model.ID().ID(), model.ID().AuthorID())
+	articleKey := dsUtil.MustKey(model.ID().String())
 
 	dstx := dsUtil.MustTransaction(tx)
 
 	// save article
 	if _, err := dstx.Mutate(datastore.NewUpsert(articleKey, &article{
-		LinkName:     model.LinkName(),
 		Title:        model.Content().Text().Title(),
 		Body:         model.Content().Text().Body(),
 		CreatedAt:    model.CreatedAt(),
@@ -101,7 +98,10 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 }
 
 func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.ArticleID) (*model.Article, error) {
-	articleKey := s.buildArticleKey(id.ID(), id.AuthorID())
+	articleKey, err := datastore.DecodeKey(id.String())
+	if err != nil {
+		return nil, errors.Wrapf(domain.ErrNoSuchArticle, "%s: %s", err.Error(), id.String())
+	}
 
 	dsTx := dsUtil.MustTransaction(tx)
 	data := article{}
@@ -130,39 +130,27 @@ func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.Articl
 		return nil, errors.Wrap(err, "internal error")
 	}
 
-	return model.NewArticle(id, data.LinkName, content, data.CreatedAt, data.LastModified), nil
+	author := model.NewAuthor(articleKey.Parent.ID)
+
+	return model.NewArticle(id, author, content, data.CreatedAt, data.LastModified), nil
 }
 
 func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleID) error {
 	panic("not implemented")
 }
 
-func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, linkName string) (*model.Article, error) {
-	q := datastore.NewQuery(dsUtil.ArticleKind).KeysOnly().Filter("LinkName =", linkName).Limit(1)
-
-	keys, err := s.dataStore.GetAll(tx, q, nil)
-	if err != nil {
-		return nil, errors.Wrap(domain.ErrNoSuchArticle, err.Error())
-	}
-	if len(keys) == 0 {
-		return nil, domain.ErrNoSuchArticle
-	}
-
-	k := keys[0]
-
-	return s.FindByID(tx, model.NewArticleID(k.ID, k.Parent.ID))
+type articleItem struct {
+	Title     string `datastore:"Title"`
+	CreatedAt int64  `datastore:"CreatedAt"`
 }
 
-type articleItem struct {
-	ID        *datastore.Key `datastore:"__key__"`
-	LinkName  string         `datastore:"LinkName"`
-	Title     string         `datastore:"Title"`
-	CreatedAt int64          `datastore:"CreatedAt"`
+func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, id string) (*model.Article, error) {
+	return s.FindByID(tx, model.NewArticleID(id))
 }
 
 func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page int, filter *model.ArticlesFilter) (*model.ArticleListView, error) {
 	counting := datastore.NewQuery(dsUtil.ArticleKind)
-	paging := datastore.NewQuery(dsUtil.ArticleKind).Project("__key__", "LinkName", "Title", "CreatedAt").Order("-CreatedAt").Limit(count + 1).Offset((page - 1) * count)
+	paging := datastore.NewQuery(dsUtil.ArticleKind).Project("__key__", "Title", "CreatedAt").Order("-CreatedAt").Limit(count + 1).Offset((page - 1) * count)
 
 	total, err := s.dataStore.Count(tx, counting)
 	if err != nil {
@@ -170,7 +158,8 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 	}
 
 	var entities []*articleItem
-	if _, err := s.dataStore.GetAll(tx, paging, &entities); err != nil {
+	keys, err := s.dataStore.GetAll(tx, paging, &entities)
+	if err != nil {
 		return nil, errors.Wrap(err, "internal error")
 	}
 
@@ -182,7 +171,8 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 
 	items := make([]*model.ArticleListViewItem, len(entities), len(entities))
 	for i, entity := range entities {
-		item, err := model.NewArticleListViewItem(entity.ID.ID, entity.LinkName, entity.Title, time.Unix(entity.CreatedAt/dsUtil.UnixFactor, 0))
+		id := model.NewArticleID(keys[0].Encode())
+		item, err := model.NewArticleListViewItem(id, entity.Title, time.Unix(entity.CreatedAt/dsUtil.UnixFactor, 0))
 		if err != nil {
 			return nil, errors.Wrap(err, "internal error")
 		}
