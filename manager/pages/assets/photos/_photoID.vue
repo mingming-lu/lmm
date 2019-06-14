@@ -59,10 +59,10 @@ const photoFetcher = httpClient => {
 export default {
   asyncData({ $axios, params }) {
     return photoFetcher($axios)
-      .fetch(params.id)
+      .fetch(params.photoID)
       .then(res => {
         return {
-          id: id,
+          id: res.data.id,
           url: res.data.url,
           tags: res.data.tags
         }
