@@ -75,27 +75,27 @@ type tagList struct {
 	Tags []string `json:"tags"`
 }
 
-type assetFile struct {
-	Name string `uri:"photo" binding:"required"`
+type photo struct {
+	ID string `uri:"photo" binding:"required"`
 }
 
 // GetV1Photo handles GET /v1/photos/:photo
 func (p *GinRouterProvider) GetV1Photo(c *gin.Context) {
-	var file assetFile
-	if err := c.ShouldBindUri(&file); err != nil {
+	var photo photo
+	if err := c.ShouldBindUri(&photo); err != nil {
 		httpUtil.LogWarnf(c, err.Error())
 		httpUtil.BadRequest(c)
 		return
 	}
 
-	photo, err := p.usecase.GetPhotoInfo(c, file.Name)
+	json, err := p.usecase.GetPhotoInfo(c, photo.ID)
 	if err != nil {
 		httpUtil.LogWarnf(c, err.Error())
 		httpUtil.NotFound(c)
 		return
 	}
 
-	c.JSON(http.StatusOK, photo)
+	c.JSON(http.StatusOK, json)
 }
 
 // PutV1PhotoTags handles PUT /v1/photos/:photo/tags
@@ -103,10 +103,6 @@ func (p *GinRouterProvider) PutV1PhotoTags(c *gin.Context) {
 	user, ok := httpUtil.AuthFromGinContext(c)
 	if !ok {
 		httpUtil.Unauthorized(c)
-		return
-	}
-	if !user.IsAdmin() {
-		httpUtil.Forbidden(c)
 		return
 	}
 
@@ -117,19 +113,30 @@ func (p *GinRouterProvider) PutV1PhotoTags(c *gin.Context) {
 		return
 	}
 
-	var file assetFile
-	if err := c.ShouldBindUri(&file); err != nil {
+	var photo photo
+	if err := c.ShouldBindUri(&photo); err != nil {
 		httpUtil.LogWarnf(c, err.Error())
 		httpUtil.BadRequest(c)
 		return
 	}
 
-	err := p.usecase.SetPhotoTags(c, file.Name, tags.Tags)
+	err := p.usecase.SetPhotoTags(c, user.ID, photo.ID, tags.Tags)
 	if err != nil {
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogWarnf(c, err.Error())
 	}
 
-	httpUtil.Response(c, http.StatusOK, "Success")
+	original := errors.Cause(err)
+
+	switch original {
+	case nil:
+		httpUtil.Response(c, http.StatusOK, "Success")
+	case usecase.ErrNoSuchPhoto:
+		httpUtil.NotFound(c)
+	case usecase.ErrForbidden:
+		httpUtil.Forbidden(c)
+	default:
+		httpUtil.LogCritf(c, err.Error())
+	}
 }
 
 type photoList struct {

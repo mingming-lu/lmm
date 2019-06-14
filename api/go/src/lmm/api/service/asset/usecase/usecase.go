@@ -40,18 +40,26 @@ const (
 var (
 	ErrNoSuchPhoto = errors.New("no such photo")
 	ErrNotPhoto    = errors.New("not a photo")
+	ErrForbidden   = errors.New("forbidden")
 )
+
+type AssetID string
+
+func NewAssetID(s string) *AssetID {
+	id := AssetID(s)
+	return &id
+}
+
+func (id *AssetID) String() string {
+	return string(*id)
+}
 
 type Asset struct {
 	ID         *AssetID
+	UserID     int64
 	Filename   string
 	Type       AssetType
 	UploadedAt time.Time
-}
-
-type AssetID struct {
-	ID     int64
-	UserID int64
 }
 
 type AssetToUpload struct {
@@ -66,6 +74,7 @@ type FileUploader interface {
 }
 
 type Photo struct {
+	ID   string   `json:"id"`
 	URL  string   `json:"url"`
 	Tags []string `json:"tags"`
 }
@@ -73,7 +82,7 @@ type Photo struct {
 type AssetRepository interface {
 	NextID(c context.Context, userID int64) (*AssetID, error)
 	Save(c context.Context, asset *Asset) error
-	FindByFileName(c context.Context, filename string) (*Asset, error)
+	Find(c context.Context, id *AssetID) (*Asset, error)
 	SetPhotoTags(c context.Context, id *AssetID, tags []string) error
 	ListPhotos(c context.Context, count int, cursor string) ([]*Photo, string, error)
 	GetPublicURL(c context.Context, filename string) string
@@ -109,6 +118,7 @@ func (uc *Usecase) UploadPhoto(c context.Context, photo *AssetToUpload) (url str
 	err = uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		if err := uc.assetRepository.Save(tx, &Asset{
 			ID:         id,
+			UserID:     photo.UserID,
 			Filename:   photo.Filename,
 			UploadedAt: clock.Now(),
 			Type:       PhotoType,
@@ -127,11 +137,16 @@ func (uc *Usecase) UploadPhoto(c context.Context, photo *AssetToUpload) (url str
 	return
 }
 
-func (uc *Usecase) SetPhotoTags(c context.Context, filename string, tags []string) error {
+func (uc *Usecase) SetPhotoTags(c context.Context, userID int64, id string, tags []string) error {
+	assetID := NewAssetID(id)
 	return uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
-		asset, err := uc.assetRepository.FindByFileName(tx, filename)
+		asset, err := uc.assetRepository.Find(tx, assetID)
 		if err != nil {
 			return errors.Wrap(ErrNoSuchPhoto, err.Error())
+		}
+
+		if userID != asset.UserID {
+			return ErrForbidden
 		}
 
 		if asset.Type != PhotoType {
@@ -146,9 +161,10 @@ func (uc *Usecase) UploadAsset(c context.Context, assert *AssetToUpload) error {
 	panic("not implemented")
 }
 
-func (uc *Usecase) GetPhotoInfo(c context.Context, filename string) (photo *Photo, err error) {
+func (uc *Usecase) GetPhotoInfo(c context.Context, id string) (photo *Photo, err error) {
+	assetID := NewAssetID(id)
 	err = uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
-		asset, err := uc.assetRepository.FindByFileName(tx, filename)
+		asset, err := uc.assetRepository.Find(tx, assetID)
 		if asset.Type != PhotoType {
 			return ErrNotPhoto
 		}

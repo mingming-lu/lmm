@@ -12,7 +12,6 @@ import (
 	"lmm/api/service/article/application/query"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/util/stringutil"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -75,7 +74,7 @@ func (p *GinRouterProvider) PostNewArticle(c *gin.Context) {
 	originalErr := errors.Cause(err)
 	switch originalErr {
 	case nil:
-		c.Header("Location", fmt.Sprintf("/v1/articles/%d", articleID.ID()))
+		c.Header("Location", fmt.Sprintf("/v1/articles/%s", articleID.String()))
 		httpUtil.Response(c, http.StatusCreated, "Success")
 	case domain.ErrArticleTitleTooLong, domain.ErrEmptyArticleTitle, domain.ErrInvalidArticleTitle:
 		httpUtil.ErrorResponse(c, http.StatusBadRequest, originalErr.Error())
@@ -94,12 +93,6 @@ func (p *GinRouterProvider) PutV1Articles(c *gin.Context) {
 		return
 	}
 
-	articleID, err := stringutil.ParseInt64(c.Param("articleID"))
-	if err != nil {
-		httpUtil.ErrorResponse(c, http.StatusNotFound, domain.ErrNoSuchArticle.Error())
-		return
-	}
-
 	article := postArticleAdapter{}
 	if err := c.ShouldBindJSON(&article); err != nil {
 		httpUtil.BadRequest(c)
@@ -111,10 +104,9 @@ func (p *GinRouterProvider) PutV1Articles(c *gin.Context) {
 		return
 	}
 
-	err = p.appService.Command().EditArticle(c, command.EditArticle{
+	err := p.appService.Command().EditArticle(c, command.EditArticle{
 		UserID:    user.ID,
-		ArticleID: articleID,
-		LinkName:  *article.LinkName,
+		ArticleID: c.Param("articleID"),
 		Title:     *article.Title,
 		Body:      *article.Body,
 		Tags:      article.Tags,
@@ -196,8 +188,7 @@ func (p *GinRouterProvider) buildListArticleQueryFromContext(c *gin.Context) que
 func (p *GinRouterProvider) articleListViewToJSON(view *model.ArticleListView) *articleListAdapter {
 	items := make([]articleListItem, len(view.Items()), len(view.Items()))
 	for i, item := range view.Items() {
-		items[i].ID = item.ID()
-		items[i].Link = item.LinkName()
+		items[i].ID = item.ID().String()
 		items[i].Title = item.Title()
 		items[i].PostAt = item.PostAt().Unix()
 	}
@@ -243,7 +234,7 @@ func buildURI(path string, page, perPage int) *string {
 
 // GetArticle handles GET /v1/articles/:articleID
 func (p *GinRouterProvider) GetArticle(c *gin.Context) {
-	view, err := p.appService.Query().ArticleByLinkName(c,
+	view, err := p.appService.Query().ArticleByID(c,
 		c.Param("articleID"),
 	)
 	switch errors.Cause(err) {
@@ -262,8 +253,7 @@ func (p *GinRouterProvider) articleViewToJSON(model *model.Article) *articleView
 		tags[i].Name = tag.Name()
 	}
 	return &articleViewResponse{
-		ID:           model.ID().ID(),
-		Link:         model.LinkName(),
+		ID:           model.ID().String(),
 		Title:        model.Content().Text().Title(),
 		Body:         model.Content().Text().Body(),
 		PostAt:       model.CreatedAt().Unix(),

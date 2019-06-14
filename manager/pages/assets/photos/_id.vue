@@ -12,7 +12,7 @@
       <v-icon>done</v-icon>
     </v-btn>
     <v-combobox
-      v-model="alts"
+      v-model="tags"
       label="alternate text"
       chips
       multiple
@@ -22,7 +22,7 @@
         slot-scope="data">
         <v-chip
           close
-          @input="removeAlt(data.item)"
+          @input="removeTag(data.item)"
         >
           <strong>{{ data.item }}</strong>&nbsp;
         </v-chip>
@@ -30,7 +30,7 @@
     </v-combobox>
     <v-img
       :src="url"
-      :alt="alts.join(' ')"
+      :alt="tags.join(' ')"
     />
     <v-snackbar
       v-model="committed"
@@ -46,8 +46,8 @@
 <script>
 const photoFetcher = httpClient => {
   return {
-    fetch: name => {
-      return httpClient.get(`/v1/photos/${name}`, {
+    fetch: id => {
+      return httpClient.get(`/v1/photos/${id}`, {
         headers: {
           Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`
         }
@@ -59,12 +59,12 @@ const photoFetcher = httpClient => {
 export default {
   asyncData({ $axios, params }) {
     return photoFetcher($axios)
-      .fetch(params.name)
+      .fetch(params.id)
       .then(res => {
         return {
-          name: name,
+          id: id,
           url: res.data.url,
-          alts: res.data.tags
+          tags: res.data.tags
         }
       })
   },
@@ -74,17 +74,17 @@ export default {
     }
   },
   methods: {
-    removeAlt(name) {
-      this.alts.splice(this.alts.indexOf(name), 1)
-      this.alts = [...this.alts]
+    removeTag(name) {
+      this.tags.splice(this.tags.indexOf(name), 1)
+      this.tags = [...this.tags]
     },
     commit() {
       this.$axios
         .put(
-          `/v1/assets/photos/${this.name}/alts`,
+          `/v1/photos/${this.id}/tags`,
           {
-            names: this.alts.map(alt => {
-              return alt
+            tags: this.tags.map(tag => {
+              return tag
             })
           },
           {

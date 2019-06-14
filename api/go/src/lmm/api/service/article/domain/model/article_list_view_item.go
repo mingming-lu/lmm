@@ -6,29 +6,23 @@ import (
 
 // ArticleListViewItem is the item struct of AriticleListView
 type ArticleListViewItem struct {
-	id       int64
-	linkName string
-	title    string
-	postAt   time.Time
+	id     *ArticleID
+	title  string
+	postAt time.Time
 }
 
 // NewArticleListViewItem creates a new item ArticleListViewItem
-func NewArticleListViewItem(id int64, linkName, title string, postAt time.Time) (*ArticleListViewItem, error) {
+func NewArticleListViewItem(id *ArticleID, title string, postAt time.Time) (*ArticleListViewItem, error) {
 	return &ArticleListViewItem{
-		id:       id,
-		linkName: linkName,
-		title:    title,
-		postAt:   postAt,
+		id:     id,
+		title:  title,
+		postAt: postAt,
 	}, nil
 }
 
 // ID returns article's id
-func (i *ArticleListViewItem) ID() int64 {
+func (i *ArticleListViewItem) ID() *ArticleID {
 	return i.id
-}
-
-func (i *ArticleListViewItem) LinkName() string {
-	return i.linkName
 }
 
 // Title gets article's title
