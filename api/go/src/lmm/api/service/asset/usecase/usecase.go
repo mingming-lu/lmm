@@ -126,6 +126,21 @@ func (uc *Usecase) UploadPhoto(c context.Context, photo *AssetToUpload) (url str
 	return
 }
 
+func (uc *Usecase) SetPhotoTags(c context.Context, id *AssetID, tags []string) error {
+	return uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		asset, err := uc.assetRepository.Find(tx, id)
+		if err != nil {
+			return errors.Wrap(ErrNoSuchPhoto, err.Error())
+		}
+
+		if asset.Type != PhotoType {
+			return ErrNotPhoto
+		}
+
+		return uc.assetRepository.SetPhotoTags(tx, id, tags)
+	}, nil)
+}
+
 func (uc *Usecase) UploadAsset(c context.Context, assert *AssetToUpload) error {
 	panic("not implemented")
 }

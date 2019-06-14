@@ -24,6 +24,7 @@ func NewGinRouterProvider(app *usecase.Usecase) *GinRouterProvider {
 
 func (p *GinRouterProvider) Provide(router *gin.Engine) {
 	router.POST("/v1/photos", p.PostV1Photos)
+	router.PUT("/v1/photos/:photo/tags", p.PutV1PhotoTags)
 	router.GET("/v1/photos", p.GetV1Photos)
 }
 
