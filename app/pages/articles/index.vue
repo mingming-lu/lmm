@@ -15,7 +15,7 @@
               <td>
                 <p class="title">
                   <nuxt-link
-                    :to="'/articles/' + article.link"
+                    :to="'/articles/' + article.id"
                     class="link">{{ article.title }}</nuxt-link>
                 </p>
                 <p class="post-at">

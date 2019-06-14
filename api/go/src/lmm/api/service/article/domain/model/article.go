@@ -6,26 +6,21 @@ import (
 	"lmm/api/clock"
 )
 
-type ArticleID struct {
-	id       int64
-	authorID int64
+type ArticleID string
+
+func NewArticleID(s string) *ArticleID {
+	id := ArticleID(s)
+	return &id
 }
 
-func NewArticleID(id, authorID int64) *ArticleID {
-	return &ArticleID{id, authorID}
-}
-
-func (id *ArticleID) ID() int64 {
-	return id.id
-}
-
-func (id *ArticleID) AuthorID() int64 {
-	return id.authorID
+func (id *ArticleID) String() string {
+	return string(*id)
 }
 
 // Article is an aggregate root model
 type Article struct {
 	id           *ArticleID
+	author       *Author
 	linkName     string
 	content      *Content
 	createdAt    time.Time
@@ -33,10 +28,10 @@ type Article struct {
 }
 
 // NewArticle is a article constructor
-func NewArticle(articleID *ArticleID, linkName string, content *Content, createdAt, lastModified time.Time) *Article {
+func NewArticle(articleID *ArticleID, author *Author, content *Content, createdAt, lastModified time.Time) *Article {
 	article := &Article{
 		id:           articleID,
-		linkName:     linkName,
+		author:       author,
 		content:      content,
 		createdAt:    createdAt,
 		lastModified: lastModified,
@@ -49,9 +44,8 @@ func (a *Article) ID() *ArticleID {
 	return a.id
 }
 
-// LinkName returns a's link name
-func (a *Article) LinkName() string {
-	return a.linkName
+func (a *Article) Author() *Author {
+	return a.author
 }
 
 // ChangeLinkName changed a's LinkName to newLinkName

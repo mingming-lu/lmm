@@ -3,7 +3,7 @@
     <v-list v-if="articles.length">
       <template v-for="article in articles">
         <v-list-tile
-          :to="`/articles/edit?link=${article.link}`"
+          :to="`/articles/edit?id=${article.id}`"
           :key="article.id"
           nuxt
           exact
