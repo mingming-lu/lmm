@@ -47,24 +47,31 @@ func (s *AssetDataStore) NextID(c context.Context, userID int64) (*usecase.Asset
 		return nil, errors.New("failed to allocate new asset id")
 	}
 
-	assetKey := keys[0]
-
-	return &usecase.AssetID{ID: assetKey.ID, UserID: assetKey.Parent.ID}, nil
+	return usecase.NewAssetID(keys[0].Encode()), nil
 }
 
-func (s *AssetDataStore) assetKey(id *usecase.AssetID) *datastore.Key {
-	userKey := datastore.IDKey(dsUtil.UserKind, id.UserID, nil)
-
-	return datastore.IDKey(dsUtil.AssetKind, id.ID, userKey)
+func (s *AssetDataStore) assetKey(id *usecase.AssetID) (*datastore.Key, error) {
+	key, err := datastore.DecodeKey(id.String())
+	if err != nil {
+		return nil, errors.Wrapf(err, "invalid encoded datastore key: %s", id.String())
+	}
+	return key, nil
 }
 
 func (s *AssetDataStore) Save(c context.Context, model *usecase.Asset) error {
-	_, err := dsUtil.MustTransaction(c).Put(s.assetKey(model.ID), &asset{
+	key, err := s.assetKey(model.ID)
+	if err != nil {
+		return errors.Wrap(err, "error occurred on save asset")
+	}
+
+	if _, err := dsUtil.MustTransaction(c).Put(key, &asset{
 		CreatedAt: model.UploadedAt,
 		Filename:  model.Filename,
 		Type:      model.Type.String(),
-	})
-	return err
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type photoTag struct {
@@ -73,7 +80,10 @@ type photoTag struct {
 }
 
 func (s *AssetDataStore) SetPhotoTags(c context.Context, id *usecase.AssetID, tags []string) error {
-	assetKey := s.assetKey(id)
+	assetKey, err := s.assetKey(id)
+	if err != nil {
+		return errors.Wrap(err, "error occurred on set photo tags")
+	}
 
 	tx := dsUtil.MustTransaction(c)
 	q := datastore.NewQuery(dsUtil.PhotoTagKind).Ancestor(assetKey).KeysOnly().Transaction(tx)
@@ -102,14 +112,11 @@ func (s *AssetDataStore) SetPhotoTags(c context.Context, id *usecase.AssetID, ta
 	return nil
 }
 
-func (s *AssetDataStore) FindByFileName(c context.Context, filename string) (*usecase.Asset, error) {
-	q := datastore.NewQuery(dsUtil.AssetKind).Filter("Filename =", filename).KeysOnly().Limit(1)
-	keys, err := s.dataStore.GetAll(c, q, nil)
-	if err != nil || len(keys) == 0 {
-		return nil, errors.Wrap(err, "failed to find asset by filename")
+func (s *AssetDataStore) Find(c context.Context, id *usecase.AssetID) (*usecase.Asset, error) {
+	key, err := datastore.DecodeKey(id.String())
+	if err != nil {
+		return nil, errors.Wrapf(err, "invalid encoded datastore key: %s", id.String())
 	}
-
-	key := keys[0]
 
 	var model asset
 	if err := dsUtil.MustTransaction(c).Get(key, &model); err != nil {
@@ -117,7 +124,8 @@ func (s *AssetDataStore) FindByFileName(c context.Context, filename string) (*us
 	}
 
 	return &usecase.Asset{
-		ID:         &usecase.AssetID{ID: key.ID, UserID: key.Parent.ID},
+		ID:         usecase.NewAssetID(key.Encode()),
+		UserID:     key.Parent.ID,
 		Filename:   model.Filename,
 		Type:       usecase.AssetTypeFromString(model.Type),
 		UploadedAt: model.CreatedAt,
@@ -152,6 +160,7 @@ Iteration:
 		}
 
 		photos = append(photos, &usecase.Photo{
+			ID:   key.Encode(),
 			URL:  publicURLBase + photo.Filename,
 			Tags: tags,
 		})
@@ -170,7 +179,11 @@ func (s *AssetDataStore) GetPublicURL(c context.Context, filename string) string
 }
 
 func (s *AssetDataStore) GetTagsByPhotoID(c context.Context, id *usecase.AssetID) ([]string, error) {
-	return s.getTagsByAssetKey(c, s.assetKey(id))
+	key, err := s.assetKey(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "error occurred on get photo tags")
+	}
+	return s.getTagsByAssetKey(c, key)
 }
 
 func (s *AssetDataStore) getTagsByAssetKey(c context.Context, key *datastore.Key) ([]string, error) {
