@@ -66,7 +66,6 @@ type FileUploader interface {
 }
 
 type Photo struct {
-	ID   int64    `json:"id"`
 	URL  string   `json:"url"`
 	Tags []string `json:"tags"`
 }
@@ -74,9 +73,11 @@ type Photo struct {
 type AssetRepository interface {
 	NextID(c context.Context, userID int64) (*AssetID, error)
 	Save(c context.Context, asset *Asset) error
-	Find(c context.Context, id *AssetID) (*Asset, error)
+	FindByFileName(c context.Context, filename string) (*Asset, error)
 	SetPhotoTags(c context.Context, id *AssetID, tags []string) error
 	ListPhotos(c context.Context, count int, cursor string) ([]*Photo, string, error)
+	GetPublicURL(c context.Context, filename string) string
+	GetTagsByPhotoID(c context.Context, id *AssetID) ([]string, error)
 }
 
 type Usecase struct {
@@ -126,9 +127,9 @@ func (uc *Usecase) UploadPhoto(c context.Context, photo *AssetToUpload) (url str
 	return
 }
 
-func (uc *Usecase) SetPhotoTags(c context.Context, id *AssetID, tags []string) error {
+func (uc *Usecase) SetPhotoTags(c context.Context, filename string, tags []string) error {
 	return uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
-		asset, err := uc.assetRepository.Find(tx, id)
+		asset, err := uc.assetRepository.FindByFileName(tx, filename)
 		if err != nil {
 			return errors.Wrap(ErrNoSuchPhoto, err.Error())
 		}
@@ -137,12 +138,35 @@ func (uc *Usecase) SetPhotoTags(c context.Context, id *AssetID, tags []string) e
 			return ErrNotPhoto
 		}
 
-		return uc.assetRepository.SetPhotoTags(tx, id, tags)
+		return uc.assetRepository.SetPhotoTags(tx, asset.ID, tags)
 	}, nil)
 }
 
 func (uc *Usecase) UploadAsset(c context.Context, assert *AssetToUpload) error {
 	panic("not implemented")
+}
+
+func (uc *Usecase) GetPhotoInfo(c context.Context, filename string) (photo *Photo, err error) {
+	err = uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		asset, err := uc.assetRepository.FindByFileName(tx, filename)
+		if asset.Type != PhotoType {
+			return ErrNotPhoto
+		}
+
+		tags, err := uc.assetRepository.GetTagsByPhotoID(tx, asset.ID)
+		if err != nil {
+			return errors.Wrap(err, "failed to get photo tags")
+		}
+
+		photo = &Photo{
+			URL:  uc.assetRepository.GetPublicURL(tx, asset.Filename),
+			Tags: tags,
+		}
+
+		return err
+	}, &transaction.Option{ReadOnly: true})
+
+	return
 }
 
 func (uc *Usecase) ListPhotos(c context.Context, countStr, cursor string) (photos []*Photo, next string, err error) {
