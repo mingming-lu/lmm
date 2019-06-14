@@ -14,9 +14,37 @@ import (
 	"github.com/pkg/errors"
 )
 
+type AssetType string
+
+func (t AssetType) String() string {
+	return string(t)
+}
+
+func AssetTypeFromString(name string) AssetType {
+	switch name {
+	case "Image":
+		return ImageType
+	case "Photo":
+		return PhotoType
+	default:
+		return UnknownType
+	}
+}
+
+const (
+	ImageType   AssetType = "Image"
+	PhotoType   AssetType = "Photo"
+	UnknownType AssetType = "Unknown"
+)
+
+var (
+	ErrNoSuchPhoto = errors.New("no such photo")
+	ErrNotPhoto    = errors.New("not a photo")
+)
+
 type Asset struct {
 	Filename   string
-	Type       string
+	Type       AssetType
 	UploadedAt time.Time
 	UserID     int64
 }
@@ -64,10 +92,10 @@ func (uc *Usecase) UploadPhoto(c context.Context, photo *AssetToUpload) (url str
 
 	err = uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		if err := uc.assetRepository.Save(tx, &Asset{
+			ID:         id,
 			Filename:   photo.Filename,
 			UploadedAt: clock.Now(),
-			UserID:     photo.UserID,
-			Type:       "Photo",
+			Type:       PhotoType,
 		}); err != nil {
 			return err
 		}
