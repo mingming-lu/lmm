@@ -171,7 +171,7 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 
 	items := make([]*model.ArticleListViewItem, len(entities), len(entities))
 	for i, entity := range entities {
-		id := model.NewArticleID(keys[0].Encode())
+		id := model.NewArticleID(keys[i].Encode())
 		item, err := model.NewArticleListViewItem(id, entity.Title, time.Unix(entity.CreatedAt/dsUtil.UnixFactor, 0))
 		if err != nil {
 			return nil, errors.Wrap(err, "internal error")
