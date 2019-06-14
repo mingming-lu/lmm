@@ -43,10 +43,15 @@ var (
 )
 
 type Asset struct {
+	ID         *AssetID
 	Filename   string
 	Type       AssetType
 	UploadedAt time.Time
-	UserID     int64
+}
+
+type AssetID struct {
+	ID     int64
+	UserID int64
 }
 
 type AssetToUpload struct {
@@ -65,7 +70,10 @@ type Photo struct {
 }
 
 type AssetRepository interface {
+	NextID(c context.Context, userID int64) (*AssetID, error)
 	Save(c context.Context, asset *Asset) error
+	Find(c context.Context, id *AssetID) (*Asset, error)
+	SetPhotoTags(c context.Context, id *AssetID, tags []string) error
 	ListPhotos(c context.Context, count int, cursor string) ([]*Photo, string, error)
 }
 
@@ -89,6 +97,11 @@ func (uc *Usecase) UploadPhoto(c context.Context, photo *AssetToUpload) (url str
 		panic("internal error: empty filename")
 	}
 	photo.Filename = uuidutil.NewUUID() + path.Ext(photo.Filename)
+
+	id, err := uc.assetRepository.NextID(c, photo.UserID)
+	if err != nil {
+		return "", err
+	}
 
 	err = uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
 		if err := uc.assetRepository.Save(tx, &Asset{
