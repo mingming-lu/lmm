@@ -69,6 +69,44 @@ func (p *GinRouterProvider) PostV1Photos(c *gin.Context) {
 	}
 }
 
+type tagList struct {
+	Tags []string `json:"tags"`
+}
+
+type assetID struct {
+	ID int64 `uri:"photo" binding:"required"`
+}
+
+// PutV1PhotoTags handles PUT /v1/photos/:photo/tags
+func (p *GinRouterProvider) PutV1PhotoTags(c *gin.Context) {
+	user, ok := httpUtil.AuthFromGinContext(c)
+	if !ok {
+		httpUtil.Unauthorized(c)
+		return
+	}
+
+	var tags tagList
+	if err := c.ShouldBindJSON(&tags); err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.BadRequest(c)
+		return
+	}
+
+	var id assetID
+	if err := c.ShouldBindUri(&id); err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.BadRequest(c)
+		return
+	}
+
+	err := p.usecase.SetPhotoTags(c, &usecase.AssetID{ID: id.ID, UserID: user.ID}, tags.Tags)
+	if err != nil {
+		httpUtil.LogCritf(c, err.Error())
+	}
+
+	httpUtil.Response(c, http.StatusOK, "Success")
+}
+
 type photoList struct {
 	Items      []*usecase.Photo `json:"items"`
 	NextCursor string           `json:"next_cursor"`

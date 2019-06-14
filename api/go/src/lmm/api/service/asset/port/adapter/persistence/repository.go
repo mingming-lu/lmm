@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	dsUtil "lmm/api/pkg/datastore"
@@ -113,6 +114,8 @@ func (s *AssetDataStore) Find(c context.Context, id *usecase.AssetID) (*usecase.
 }
 
 func (s *AssetDataStore) ListPhotos(c context.Context, count int, cursor string) ([]*usecase.Photo, string, error) {
+	tx := dsUtil.MustTransaction(c)
+
 	q := datastore.NewQuery(dsUtil.AssetKind).Project("Filename").Filter("Type =", "Photo").Order("-CreatedAt").Limit(count)
 	dsCursor, err := datastore.DecodeCursor(cursor)
 	if err == nil {
@@ -126,14 +129,37 @@ func (s *AssetDataStore) ListPhotos(c context.Context, count int, cursor string)
 
 Iteration:
 	for {
-		if _, err := iter.Next(&photo); err != nil {
+		key, err := iter.Next(&photo)
+		if err != nil {
 			if err == iterator.Done {
 				break Iteration
 			}
 			return nil, "", errors.Wrap(err, "internal error")
 		}
 
-		photos = append(photos, &usecase.Photo{URL: publicURLBase + photo.Filename})
+		var tags []*photoTag
+		qt := datastore.NewQuery(dsUtil.PhotoTagKind).Ancestor(key).Transaction(tx)
+		if _, err := s.dataStore.GetAll(c, qt, &tags); err != nil {
+			return nil, "", errors.Wrap(err, "failed to get photo tags")
+		}
+
+		sort.Slice(tags, func(i, j int) bool {
+			return tags[i].Order < tags[j].Order
+		})
+
+		tagNames := func() []string {
+			names := make([]string, len(tags), len(tags))
+			for i, tag := range tags {
+				names[i] = tag.Name
+			}
+			return names
+		}()
+
+		photos = append(photos, &usecase.Photo{
+			ID:   key.ID,
+			URL:  publicURLBase + photo.Filename,
+			Tags: tagNames,
+		})
 	}
 
 	nextCursor, err := iter.Cursor()

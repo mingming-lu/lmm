@@ -66,7 +66,9 @@ type FileUploader interface {
 }
 
 type Photo struct {
-	URL string `json:"url"`
+	ID   int64    `json:"id"`
+	URL  string   `json:"url"`
+	Tags []string `json:"tags"`
 }
 
 type AssetRepository interface {
@@ -128,11 +130,19 @@ func (uc *Usecase) UploadAsset(c context.Context, assert *AssetToUpload) error {
 	panic("not implemented")
 }
 
-func (uc *Usecase) ListPhotos(c context.Context, countStr, cursor string) ([]*Photo, string, error) {
-	count, err := stringutil.ParseInt(countStr)
+func (uc *Usecase) ListPhotos(c context.Context, countStr, cursor string) (photos []*Photo, next string, err error) {
+	var count int
+	count, err = stringutil.ParseInt(countStr)
 	if err != nil || count < 1 {
-		return nil, "", errors.New("invalid count")
+		err = errors.Wrap(err, "invalid count")
+		return
 	}
 
-	return uc.assetRepository.ListPhotos(c, count, cursor)
+	err = uc.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		photos, next, err = uc.assetRepository.ListPhotos(tx, count, cursor)
+
+		return err
+	}, &transaction.Option{ReadOnly: true})
+
+	return
 }
