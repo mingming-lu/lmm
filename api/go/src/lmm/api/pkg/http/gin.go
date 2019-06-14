@@ -18,6 +18,11 @@ func Unauthorized(c *gin.Context) {
 	ErrorResponse(c, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 }
 
+// Forbidden default response
+func Forbidden(c *gin.Context) {
+	ErrorResponse(c, http.StatusForbidden, http.StatusText(http.StatusForbidden))
+}
+
 // NotFound default response
 func NotFound(c *gin.Context) {
 	ErrorResponse(c, http.StatusNotFound, http.StatusText(http.StatusNotFound))
