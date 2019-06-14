@@ -102,11 +102,22 @@ func (s *AssetDataStore) SetPhotoTags(c context.Context, id *usecase.AssetID, ta
 	return nil
 }
 
-func (s *AssetDataStore) Find(c context.Context, id *usecase.AssetID) (*usecase.Asset, error) {
+func (s *AssetDataStore) FindByFileName(c context.Context, filename string) (*usecase.Asset, error) {
+	q := datastore.NewQuery(dsUtil.AssetKind).Filter("Filename =", filename).KeysOnly().Limit(1)
+	keys, err := s.dataStore.GetAll(c, q, nil)
+	if err != nil || len(keys) == 0 {
+		return nil, errors.Wrap(err, "failed to find asset by filename")
+	}
+
+	key := keys[0]
+
 	var model asset
-	err := dsUtil.MustTransaction(c).Get(s.assetKey(id), &model)
+	if err := dsUtil.MustTransaction(c).Get(key, &model); err != nil {
+		return nil, errors.Wrap(err, "internel error: failed to get asset by key")
+	}
 
 	return &usecase.Asset{
+		ID:         &usecase.AssetID{ID: key.ID, UserID: key.Parent.ID},
 		Filename:   model.Filename,
 		Type:       usecase.AssetTypeFromString(model.Type),
 		UploadedAt: model.CreatedAt,
@@ -114,8 +125,6 @@ func (s *AssetDataStore) Find(c context.Context, id *usecase.AssetID) (*usecase.
 }
 
 func (s *AssetDataStore) ListPhotos(c context.Context, count int, cursor string) ([]*usecase.Photo, string, error) {
-	tx := dsUtil.MustTransaction(c)
-
 	q := datastore.NewQuery(dsUtil.AssetKind).Project("Filename").Filter("Type =", "Photo").Order("-CreatedAt").Limit(count)
 	dsCursor, err := datastore.DecodeCursor(cursor)
 	if err == nil {
@@ -137,28 +146,14 @@ Iteration:
 			return nil, "", errors.Wrap(err, "internal error")
 		}
 
-		var tags []*photoTag
-		qt := datastore.NewQuery(dsUtil.PhotoTagKind).Ancestor(key).Transaction(tx)
-		if _, err := s.dataStore.GetAll(c, qt, &tags); err != nil {
-			return nil, "", errors.Wrap(err, "failed to get photo tags")
+		tags, err := s.getTagsByAssetKey(c, key)
+		if err != nil {
+			return nil, "", errors.Wrap(err, "error occurred on getting photo list")
 		}
 
-		sort.Slice(tags, func(i, j int) bool {
-			return tags[i].Order < tags[j].Order
-		})
-
-		tagNames := func() []string {
-			names := make([]string, len(tags), len(tags))
-			for i, tag := range tags {
-				names[i] = tag.Name
-			}
-			return names
-		}()
-
 		photos = append(photos, &usecase.Photo{
-			ID:   key.ID,
 			URL:  publicURLBase + photo.Filename,
-			Tags: tagNames,
+			Tags: tags,
 		})
 	}
 
@@ -168,4 +163,34 @@ Iteration:
 	}
 
 	return photos, nextCursor.String(), nil
+}
+
+func (s *AssetDataStore) GetPublicURL(c context.Context, filename string) string {
+	return publicURLBase + filename
+}
+
+func (s *AssetDataStore) GetTagsByPhotoID(c context.Context, id *usecase.AssetID) ([]string, error) {
+	return s.getTagsByAssetKey(c, s.assetKey(id))
+}
+
+func (s *AssetDataStore) getTagsByAssetKey(c context.Context, key *datastore.Key) ([]string, error) {
+	var tags []*photoTag
+	qt := datastore.NewQuery(dsUtil.PhotoTagKind).Ancestor(key).Transaction(dsUtil.MustTransaction(c))
+	if _, err := s.dataStore.GetAll(c, qt, &tags); err != nil {
+		return nil, errors.Wrap(err, "internal error")
+	}
+
+	sort.Slice(tags, func(i, j int) bool {
+		return tags[i].Order < tags[j].Order
+	})
+
+	tagNames := func() []string {
+		names := make([]string, len(tags), len(tags))
+		for i, tag := range tags {
+			names[i] = tag.Name
+		}
+		return names
+	}()
+
+	return tagNames, nil
 }

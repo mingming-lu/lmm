@@ -26,6 +26,7 @@ func (p *GinRouterProvider) Provide(router *gin.Engine) {
 	router.POST("/v1/photos", p.PostV1Photos)
 	router.PUT("/v1/photos/:photo/tags", p.PutV1PhotoTags)
 	router.GET("/v1/photos", p.GetV1Photos)
+	router.GET("/v1/photos/:photo", p.GetV1Photo)
 }
 
 // PostV1Photos handles POST /v1/photos
@@ -74,8 +75,27 @@ type tagList struct {
 	Tags []string `json:"tags"`
 }
 
-type assetID struct {
-	ID int64 `uri:"photo" binding:"required"`
+type assetFile struct {
+	Name string `uri:"photo" binding:"required"`
+}
+
+// GetV1Photo handles GET /v1/photos/:photo
+func (p *GinRouterProvider) GetV1Photo(c *gin.Context) {
+	var file assetFile
+	if err := c.ShouldBindUri(&file); err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.BadRequest(c)
+		return
+	}
+
+	photo, err := p.usecase.GetPhotoInfo(c, file.Name)
+	if err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.NotFound(c)
+		return
+	}
+
+	c.JSON(http.StatusOK, photo)
 }
 
 // PutV1PhotoTags handles PUT /v1/photos/:photo/tags
@@ -83,6 +103,10 @@ func (p *GinRouterProvider) PutV1PhotoTags(c *gin.Context) {
 	user, ok := httpUtil.AuthFromGinContext(c)
 	if !ok {
 		httpUtil.Unauthorized(c)
+		return
+	}
+	if !user.IsAdmin() {
+		httpUtil.Forbidden(c)
 		return
 	}
 
@@ -93,14 +117,14 @@ func (p *GinRouterProvider) PutV1PhotoTags(c *gin.Context) {
 		return
 	}
 
-	var id assetID
-	if err := c.ShouldBindUri(&id); err != nil {
+	var file assetFile
+	if err := c.ShouldBindUri(&file); err != nil {
 		httpUtil.LogWarnf(c, err.Error())
 		httpUtil.BadRequest(c)
 		return
 	}
 
-	err := p.usecase.SetPhotoTags(c, &usecase.AssetID{ID: id.ID, UserID: user.ID}, tags.Tags)
+	err := p.usecase.SetPhotoTags(c, file.Name, tags.Tags)
 	if err != nil {
 		httpUtil.LogCritf(c, err.Error())
 	}
