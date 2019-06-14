@@ -29,7 +29,7 @@
       </template>
     </v-combobox>
     <v-img
-      :src="photoSrcOf(name)"
+      :src="url"
       :alt="alts.join(' ')"
     />
     <v-snackbar
@@ -47,7 +47,7 @@
 const photoFetcher = httpClient => {
   return {
     fetch: name => {
-      return httpClient.get(`/v1/assets/photos/${name}`, {
+      return httpClient.get(`/v1/photos/${name}`, {
         headers: {
           Authorization: `Bearer ${window.localStorage.getItem('accessToken')}`
         }
@@ -62,8 +62,9 @@ export default {
       .fetch(params.name)
       .then(res => {
         return {
-          name: res.data.name,
-          alts: res.data.alts
+          name: name,
+          url: res.data.url,
+          alts: res.data.tags
         }
       })
   },
@@ -73,9 +74,6 @@ export default {
     }
   },
   methods: {
-    photoSrcOf(name) {
-      return `${process.env.ASSET_URL}/photos/${name}`
-    },
     removeAlt(name) {
       this.alts.splice(this.alts.indexOf(name), 1)
       this.alts = [...this.alts]
