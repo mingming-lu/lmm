@@ -175,6 +175,7 @@ func (uc *Usecase) GetPhotoInfo(c context.Context, id string) (photo *Photo, err
 		}
 
 		photo = &Photo{
+			ID:   asset.ID.String(),
 			URL:  uc.assetRepository.GetPublicURL(tx, asset.Filename),
 			Tags: tags,
 		}
