@@ -12,16 +12,10 @@
             :key="photo.url"
             :href="photo.url"
           >
-            <img
-              :src="photo.url"
-              :alt="photo.tags.join(' ')"
-              :srcset="`${photoThumbnailUrl(photo.url, 1280)} 1280w,
-                        ${photoThumbnailUrl(photo.url, 960)} 960w,
-                        ${photoThumbnailUrl(photo.url, 640)} 640w,
-                        ${photoThumbnailUrl(photo.url, 320)} 320w`"
-              sizes="(min-width: 800px) 50vw, 100vw"
-              @error="fallbackOnThumbnailFailure($event, photo.url)"
-            >
+            <PhotoItem
+              :url="photo.url"
+              :tags="photo.tags"
+            />
           </a>
         </div>
       </div>
@@ -32,15 +26,10 @@
             :key="photo.url"
             :href="photo.url"
           >
-            <img
-              :src="photo.url"
-              :srcset="`${photoThumbnailUrl(photo.url, 1280)} 1280w,
-                        ${photoThumbnailUrl(photo.url, 960)} 960w,
-                        ${photoThumbnailUrl(photo.url, 640)} 640w,
-                        ${photoThumbnailUrl(photo.url, 320)} 320w`"
-              sizes="(min-width: 800px) 50vw, 100vw"
-              @error="fallbackOnThumbnailFailure($event, photo.url)"
-            >
+            <PhotoItem
+              :url="photo.url"
+              :tags="photo.tags"
+            />
           </a>
         </div>
       </div>
@@ -51,15 +40,10 @@
         :key="photo.url"
         :href="photo.url"
       >
-        <img
-          :src="photo.url"
-          :srcset="`${photoThumbnailUrl(photo.url, 1280)} 1280w,
-                    ${photoThumbnailUrl(photo.url, 960)} 960w,
-                    ${photoThumbnailUrl(photo.url, 640)} 640w,
-                    ${photoThumbnailUrl(photo.url, 320)} 320w`"
-          sizes="(min-width: 800px) 50vw, 100vw"
-          @error="fallbackOnThumbnailFailure($event, photo.url)"
-        >
+        <PhotoItem
+          :url="photo.url"
+          :tags="photo.tags"
+        />
       </a>
     </div>
 
@@ -89,6 +73,7 @@
 
 <script>
 import LdsEllipsis from '~/components/loadings/LdsEllipsis'
+import PhotoItem from '~/components/photos/photo-item'
 import buildURLEncodedString from '~/assets/js/utils'
 
 const apiPath = '/v1/photos'
@@ -114,6 +99,7 @@ const buildLinks = (obj, path) => {
 
 export default {
   components: {
+    PhotoItem,
     LdsEllipsis
   },
   head() {
@@ -185,17 +171,6 @@ export default {
         .catch(e => {
           console.log(e)
         })
-    },
-    photoThumbnailUrl(originalURL, width) {
-      const idx = originalURL.lastIndexOf('/')
-      const prefix = originalURL.substring(0, idx)
-      const suffix = originalURL.substring(idx)
-      return `${prefix}/thumbnail/w${width}${suffix}`
-    },
-    fallbackOnThumbnailFailure(event, url) {
-      // sleep 500ms on error
-      setTimeout(() => {}, 500)
-      event.target.srcset = url
     },
     calcIsWideMode() {
       this.wideMode = window.innerWidth >= 800

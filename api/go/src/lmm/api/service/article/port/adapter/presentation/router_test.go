@@ -11,12 +11,14 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	jsonUtil "lmm/api/pkg/json"
 	testUtil "lmm/api/pkg/testing"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/port/adapter/persistence"
 	"lmm/api/util/stringutil"
+	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
 	"github.com/gin-gonic/gin"
@@ -331,13 +333,96 @@ func TestPutArticles(t *testing.T) {
 	}
 }
 
+func TestGetV1Article(t *testing.T) {
+	c := context.Background()
+
+	user := testUtil.NewUser(c, dataStore)
+
+	header := http.Header{"Authorization": []string{"Bearer " + user.AccessToken}}
+	title := uuidutil.NewUUID()
+	body := uuidutil.NewUUID()
+
+	res := postV1Articles(
+		header,
+		postArticleAdapter{
+			Title: stringutil.Pointer(title),
+			Body:  stringutil.Pointer(body),
+			Tags:  []string{"aa", "bb"},
+		},
+	)
+
+	if res.Code != http.StatusCreated {
+		t.Fatal("failed to create test article data")
+	}
+
+	groups := regexp.MustCompile(`^/v1/articles/(.+)$`).FindStringSubmatch(res.Header().Get("Location"))
+	articleID := groups[1]
+
+	t.Run("AfterPost", func(t *testing.T) {
+		res := getV1Article(articleID)
+		assert.Equal(t, http.StatusOK, res.Code)
+
+		var articleJSON articleViewResponse
+		if err := json.NewDecoder(res.Body).Decode(&articleJSON); err != nil {
+			t.Fatal("invalid json: ", err.Error())
+		}
+
+		assert.Equal(t, title, articleJSON.Title)
+		assert.Equal(t, body, articleJSON.Body)
+		assert.Equal(t, []articleViewTag{articleViewTag{"aa"}, articleViewTag{"bb"}}, articleJSON.Tags)
+		assert.Equal(t, articleJSON.PostAt, articleJSON.LastEditedAt)
+		assert.InDelta(t, articleJSON.PostAt, time.Now().Unix(), 1.)
+
+		t.Run("AfterEdit", func(t *testing.T) {
+			newTitle := uuidutil.NewUUID()
+			newBody := uuidutil.NewUUID()
+
+			{
+				res := putV1Articles(
+					articleID,
+					header,
+					postArticleAdapter{
+						Title: stringutil.Pointer(newTitle),
+						Body:  stringutil.Pointer(newBody),
+						Tags:  []string{"bb", "aa"},
+					},
+				)
+
+				if !assert.Equal(t, http.StatusOK, res.Code) {
+					t.Fatalf("unexpected error on PUT /v1/article/%s", articleID)
+				}
+			}
+
+			res := getV1Article(articleID)
+			assert.Equal(t, http.StatusOK, res.Code)
+
+			var newArticleJSON articleViewResponse
+			if err := json.NewDecoder(res.Body).Decode(&newArticleJSON); err != nil {
+				t.Fatal("invalid json: ", err.Error())
+			}
+
+			assert.Equal(t, newTitle, newArticleJSON.Title)
+			assert.Equal(t, newBody, newArticleJSON.Body)
+			assert.Equal(t, []articleViewTag{articleViewTag{"bb"}, articleViewTag{"aa"}}, newArticleJSON.Tags)
+			assert.Equal(t, articleJSON.PostAt, newArticleJSON.PostAt)
+			assert.InDelta(t, newArticleJSON.LastEditedAt, time.Now().Unix(), 1.)
+		})
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		res := getV1Article("no-such-article")
+		assert.Equal(t, http.StatusNotFound, res.Code)
+		assert.JSONEq(t, jsonUtil.MustJSONify(jsonUtil.JSON{"error": domain.ErrNoSuchArticle.Error()}), res.Body.String())
+	})
+}
+
 func postV1Articles(header http.Header, body postArticleAdapter) *httptest.ResponseRecorder {
 	b, err := json.Marshal(body)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to decode to json"))
 	}
 
-	req := httptest.NewRequest("POST", "/v1/articles", bytes.NewReader(b))
+	req := httptest.NewRequest(http.MethodPost, "/v1/articles", bytes.NewReader(b))
 	for key, values := range header {
 		for _, value := range values {
 			req.Header.Add(key, value)
@@ -356,7 +441,7 @@ func putV1Articles(articleID string, header http.Header, body postArticleAdapter
 		panic(errors.Wrap(err, "failed to decode to json"))
 	}
 
-	req := httptest.NewRequest("PUT", "/v1/articles/"+articleID, bytes.NewReader(b))
+	req := httptest.NewRequest(http.MethodPut, "/v1/articles/"+articleID, bytes.NewReader(b))
 	for key, values := range header {
 		for _, value := range values {
 			req.Header.Add(key, value)
@@ -366,5 +451,12 @@ func putV1Articles(articleID string, header http.Header, body postArticleAdapter
 
 	router.ServeHTTP(res, req)
 
+	return res
+}
+
+func getV1Article(articleID string) *httptest.ResponseRecorder {
+	req := httptest.NewRequest(http.MethodGet, "/v1/articles/"+articleID, nil)
+	res := httptest.NewRecorder()
+	router.ServeHTTP(res, req)
 	return res
 }
