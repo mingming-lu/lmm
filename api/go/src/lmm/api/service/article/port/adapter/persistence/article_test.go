@@ -9,7 +9,6 @@ import (
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/util/stringutil"
 	"lmm/api/util/uuidutil"
 
 	"cloud.google.com/go/datastore"
@@ -37,8 +36,8 @@ func TestArticleDataStore(t *testing.T) {
 		articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
 			articleID, err := articleDataStore.NextID(tx, 1)
 			assert.NoError(t, err)
-			assert.NotZero(t, articleID.ID())
-			assert.Equal(t, articleID.AuthorID(), int64(1))
+			assert.NotNil(t, articleID)
+			assert.NotEmpty(t, articleID.String())
 
 			return nil
 		}, nil)
@@ -48,10 +47,12 @@ func TestArticleDataStore(t *testing.T) {
 		var article *model.Article
 
 		t.Run("Insert", func(t *testing.T) {
+			var authorID int64 = 1
 			articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
-				articleID, err := articleDataStore.NextID(tx, 1)
+				articleID, err := articleDataStore.NextID(tx, authorID)
 				assert.NoError(t, err)
-				assert.NotZero(t, articleID.ID())
+				assert.NotNil(t, articleID)
+				assert.NotEmpty(t, articleID.String())
 
 				content, err := model.NewContent(uuidutil.NewUUID(), uuidutil.NewUUID(), []string{})
 				if err != nil {
@@ -59,7 +60,7 @@ func TestArticleDataStore(t *testing.T) {
 				}
 
 				now := clock.Now()
-				article = model.NewArticle(articleID, stringutil.Int64ToStr(articleID.ID()), content, now, now)
+				article = model.NewArticle(articleID, model.NewAuthor(authorID), content, now, now)
 				if !assert.NoError(t, articleDataStore.Save(tx, article)) || !assert.NotNil(t, article) {
 					t.Fatal("failed to save article")
 				}
@@ -82,13 +83,11 @@ func TestArticleDataStore(t *testing.T) {
 		})
 
 		t.Run("Update", func(t *testing.T) {
-			newLinkName := uuid.New().String()
 			assert.NoError(t, articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
 				content, err := model.NewContent(uuidutil.NewUUID(), uuidutil.NewUUID(), []string{"tag1", "tag2"})
 				if err != nil {
 					t.Fatal(errors.Wrap(err, "internal error"))
 				}
-				article.ChangeLinkName(newLinkName)
 				article.EditContent(content)
 
 				return articleDataStore.Save(tx, article)
@@ -109,7 +108,7 @@ func TestArticleDataStore(t *testing.T) {
 
 			t.Run("ViewArticle", func(t *testing.T) {
 				articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
-					articleFound, err := articleDataStore.ViewArticle(tx, newLinkName)
+					articleFound, err := articleDataStore.ViewArticle(tx, article.ID().String())
 					if !assert.NoError(t, err) {
 						t.Fatal(err.Error())
 					}
@@ -126,7 +125,7 @@ func TestArticleDataStore(t *testing.T) {
 		t.Run("NotFound", func(t *testing.T) {
 			articleDataStore.RunInTransaction(ctx, func(tx transaction.Transaction) error {
 				articleFound, err := articleDataStore.ViewArticle(tx, uuid.New().String())
-				assert.Error(t, domain.ErrNoSuchArticle, err)
+				assert.Error(t, domain.ErrNoSuchArticle, errors.Cause(err))
 				assert.Nil(t, articleFound)
 
 				return nil

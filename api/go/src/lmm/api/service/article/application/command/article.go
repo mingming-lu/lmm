@@ -11,7 +11,7 @@ type PostArticle struct {
 // EditArticle command
 type EditArticle struct {
 	UserID    int64
-	ArticleID int64
+	ArticleID string
 	LinkName  string
 	Title     string
 	Body      string
