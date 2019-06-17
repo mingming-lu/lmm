@@ -14,7 +14,8 @@
           >
             <PhotoItem
               :url="photo.url"
-              :tags="photo.tags"/>
+              :tags="photo.tags"
+            />
           </a>
         </div>
       </div>
@@ -27,7 +28,8 @@
           >
             <PhotoItem
               :url="photo.url"
-              :tags="photo.tags"/>
+              :tags="photo.tags"
+            />
           </a>
         </div>
       </div>
@@ -40,7 +42,8 @@
       >
         <PhotoItem
           :url="photo.url"
-          :tags="photo.tags"/>
+          :tags="photo.tags"
+        />
       </a>
     </div>
 
@@ -96,6 +99,7 @@ const buildLinks = (obj, path) => {
 
 export default {
   components: {
+    PhotoItem,
     LdsEllipsis
   },
   head() {
