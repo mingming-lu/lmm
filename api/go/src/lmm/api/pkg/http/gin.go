@@ -1,8 +1,10 @@
 package http
 
 import (
-	"lmm/api/pkg/auth"
+	"fmt"
 	"net/http"
+
+	"lmm/api/pkg/auth"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/appengine/log"
@@ -16,6 +18,11 @@ func BadRequest(c *gin.Context) {
 // Unauthorized default response
 func Unauthorized(c *gin.Context) {
 	ErrorResponse(c, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+}
+
+// Forbidden default response
+func Forbidden(c *gin.Context) {
+	ErrorResponse(c, http.StatusForbidden, http.StatusText(http.StatusForbidden))
 }
 
 // NotFound default response
@@ -58,5 +65,5 @@ func LogWarnf(c *gin.Context, format string, args ...interface{}) {
 }
 
 func LogCritf(c *gin.Context, format string, args ...interface{}) {
-	log.Criticalf(c.Request.Context(), format, args...)
+	panic(fmt.Sprintf(format, args...))
 }

@@ -24,7 +24,9 @@ func NewGinRouterProvider(app *usecase.Usecase) *GinRouterProvider {
 
 func (p *GinRouterProvider) Provide(router *gin.Engine) {
 	router.POST("/v1/photos", p.PostV1Photos)
+	router.PUT("/v1/photos/:photo/tags", p.PutV1PhotoTags)
 	router.GET("/v1/photos", p.GetV1Photos)
+	router.GET("/v1/photos/:photo", p.GetV1Photo)
 }
 
 // PostV1Photos handles POST /v1/photos
@@ -64,6 +66,74 @@ func (p *GinRouterProvider) PostV1Photos(c *gin.Context) {
 	case nil:
 		c.Header("Location", url)
 		httpUtil.Response(c, http.StatusCreated, "Success")
+	default:
+		httpUtil.LogCritf(c, err.Error())
+	}
+}
+
+type tagList struct {
+	Tags []string `json:"tags"`
+}
+
+type photo struct {
+	ID string `uri:"photo" binding:"required"`
+}
+
+// GetV1Photo handles GET /v1/photos/:photo
+func (p *GinRouterProvider) GetV1Photo(c *gin.Context) {
+	var photo photo
+	if err := c.ShouldBindUri(&photo); err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.BadRequest(c)
+		return
+	}
+
+	json, err := p.usecase.GetPhotoInfo(c, photo.ID)
+	if err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.NotFound(c)
+		return
+	}
+
+	c.JSON(http.StatusOK, json)
+}
+
+// PutV1PhotoTags handles PUT /v1/photos/:photo/tags
+func (p *GinRouterProvider) PutV1PhotoTags(c *gin.Context) {
+	user, ok := httpUtil.AuthFromGinContext(c)
+	if !ok {
+		httpUtil.Unauthorized(c)
+		return
+	}
+
+	var tags tagList
+	if err := c.ShouldBindJSON(&tags); err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.BadRequest(c)
+		return
+	}
+
+	var photo photo
+	if err := c.ShouldBindUri(&photo); err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.BadRequest(c)
+		return
+	}
+
+	err := p.usecase.SetPhotoTags(c, user.ID, photo.ID, tags.Tags)
+	if err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+	}
+
+	original := errors.Cause(err)
+
+	switch original {
+	case nil:
+		httpUtil.Response(c, http.StatusOK, "Success")
+	case usecase.ErrNoSuchPhoto:
+		httpUtil.NotFound(c)
+	case usecase.ErrForbidden:
+		httpUtil.Forbidden(c)
 	default:
 		httpUtil.LogCritf(c, err.Error())
 	}

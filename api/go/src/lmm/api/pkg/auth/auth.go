@@ -1,29 +1,17 @@
 package auth
 
-import "context"
+import (
+	"context"
 
-type contextKey string
-
-const (
-	authKey contextKey = "auth"
+	"lmm/api/service/user/port/adapter/util"
 )
 
-type Auth struct {
-	ID    int64
-	Name  string
-	Token string
-	Role  string
-}
+type Auth = util.Auth
 
 func NewContext(c context.Context, auth *Auth) context.Context {
-	return context.WithValue(c, authKey, auth)
+	return util.NewContext(c, auth)
 }
 
 func FromContext(c context.Context) (*Auth, bool) {
-	auth, ok := c.Value(authKey).(*Auth)
-	if ok {
-		return auth, true
-	}
-
-	return nil, false
+	return util.FromContext(c)
 }

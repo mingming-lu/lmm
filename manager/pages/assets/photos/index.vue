@@ -21,7 +21,7 @@
               :key="photo.url"
               xs4
             >
-              <nuxt-link :to="`/assets/photos/${photo.name}`">
+              <nuxt-link :to="`/assets/photos/${photo.id}`">
                 <v-img
                   :src="photo.url"
                   class="img"
