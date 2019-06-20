@@ -250,8 +250,6 @@ workflows:
           name: dev_deploy_api
           workdir: api/go/src/lmm/api
           params: >
-            --APP_ORIGIN ${DEV_APP_ORIGIN}
-            --MANAGER_ORIGIN ${DEV_MANAGER_ORIGIN}
             --ASSET_BUCKET_NAME ${DEV_ASSET_BUCKET_NAME}
             --DATASTORE_PROJECT_ID ${DEV_DATASTORE_PROJECT_ID}
             --GIN_MODE debug
@@ -298,13 +296,12 @@ workflows:
           name: prod_deploy_api
           workdir: api/go/src/lmm/api
           params: >
-            --APP_ORIGIN ${PROD_APP_ORIGIN}
-            --MANAGER_ORIGIN ${PROD_MANAGER_ORIGIN}
             --ASSET_BUCKET_NAME ${PROD_ASSET_BUCKET_NAME}
             --DATASTORE_PROJECT_ID ${PROD_DATASTORE_PROJECT_ID}
             --GIN_MODE release
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
             --LMM_API_TOKEN_KEY ${PROD_LMM_API_TOKEN_KEY}
+            --LMM_DOMAIN ${PROD_LMM_DOMAIN}
           env: PROD
           <<: *only_master_branch
           requires:
