@@ -3,9 +3,9 @@ import sys
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='default')
-    parser.add_argument('--input', description='input')
-    parser.add_argument('--output', description='output')
+    parser = argparse.ArgumentParser(description='default', argument_default='')
+    parser.add_argument('--input')
+    parser.add_argument('--output')
 
     known, unknown = parser.parse_known_args()
     extra = _parse_attribute(unknown)
@@ -17,7 +17,7 @@ def _parse_attribute(args):
     parser = argparse.ArgumentParser(description='attribute')
     for arg in args:
         if arg.startswith(('-', '--')):
-            parser.add_argument(arg, default='')
+            parser.add_argument(arg)
 
     return parser.parse_args(args)
 
