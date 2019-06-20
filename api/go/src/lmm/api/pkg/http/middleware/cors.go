@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
-	"sort"
+	"os"
+	"regexp"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -10,17 +12,27 @@ import (
 )
 
 // CORS middleware
-func CORS(whiteList ...string) gin.HandlerFunc {
-	sort.Strings(whiteList)
+func CORS(customDomain string) gin.HandlerFunc {
+	var re *regexp.Regexp
+	if customDomain == "" {
+		gaeProjectID := os.Getenv("GCP_PROJECT_ID")
+		if gaeProjectID == "" {
+			panic("GCP_PROJECT_ID needed")
+		}
+		pattern := fmt.Sprintf(`^https://(.+-dot-)*%s.appspot\.com$`, gaeProjectID)
+		re = regexp.MustCompile(pattern)
+	} else {
+		pattern := fmt.Sprintf(`^https://(.+\.)*%s$`, regexp.QuoteMeta(customDomain))
+		re = regexp.MustCompile(pattern)
+	}
+	regexp.MustCompile("")
 
 	return cors.New(cors.Config{
 		AllowMethods:  []string{http.MethodPost, http.MethodPut, http.MethodDelete},
 		AllowHeaders:  []string{"Authorization", "Content-Type", "Origin"},
 		ExposeHeaders: []string{"Content-Length", "Location"},
 		AllowOriginFunc: func(origin string) bool {
-			idx := sort.SearchStrings(whiteList, origin)
-
-			return idx < len(whiteList) && whiteList[idx] == origin
+			return re.MatchString(origin)
 		},
 		MaxAge: 24 * time.Hour,
 	})

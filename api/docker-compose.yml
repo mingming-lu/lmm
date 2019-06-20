@@ -15,7 +15,6 @@ services:
       dev_appserver.py app.yaml --host 0.0.0.0 --port 8002 --enable_host_checking=False
     working_dir: /go/src/lmm/api/
     environment:
-      APP_ORIGIN: https://www.lmm.local
       ASSET_BUCKET_NAME: lmm-dev-asset
       DATASTORE_EMULATOR_HOST: datastore:8081
       DATASTORE_PROJECT_ID: lmm-dev
@@ -24,7 +23,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /gcp/credentials/service_account.json
       GIN_MODE: debug
       HTTP_TIMEOUT_SECOND: 10
-      MANAGER_ORIGIN: https://manager.lmm.local
+      LMM_DOMAIN: lmm.local
       TZ: Asia/Tokyo
     depends_on:
       - datastore
