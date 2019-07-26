@@ -6,6 +6,12 @@ install:
 npm/update:
 	docker-compose run --rm --no-deps manager npm --prefix /manager update
 
+npm/audit:
+	docker-compose run --rm --no-deps manager npm --prefix /manager audit
+
+npm/audit-fix:
+	docker-compose run --rm --no-deps manager npm --prefix /manager audit fix
+
 start:
 	docker-compose up -d
 
