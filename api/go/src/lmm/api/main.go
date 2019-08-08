@@ -53,7 +53,7 @@ func init() {
 		return err
 	})
 	eg.Go(func() (err error) {
-		pubsubClient, err = pubsub.NewClient(context.TODO(), "")
+		pubsubClient, err = pubsub.NewClient(timeoutCtx, os.Getenv("GCLOUD_PROJECT_ID"))
 		return err
 	})
 
