@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"lmm/api/pkg/http/middleware"
+	"lmm/api/pkg/pubsub"
 
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
@@ -17,6 +18,7 @@ import (
 
 	// user
 	userApp "lmm/api/service/user/application"
+	userMessaging "lmm/api/service/user/port/adapter/messaging"
 	userStorage "lmm/api/service/user/port/adapter/persistence"
 	userUI "lmm/api/service/user/port/adapter/presentation"
 	userUtil "lmm/api/service/user/port/adapter/service"
@@ -32,8 +34,9 @@ import (
 )
 
 var (
-	dsClient *datastore.Client
-	gsClient *storage.Client
+	dsClient     *datastore.Client
+	gsClient     *storage.Client
+	pubsubClient *pubsub.Client
 )
 
 func init() {
@@ -49,6 +52,10 @@ func init() {
 		dsClient, err = datastore.NewClient(egCtx, os.Getenv("DATASTORE_PROJECT_ID"))
 		return err
 	})
+	eg.Go(func() (err error) {
+		pubsubClient, err = pubsub.NewClient(timeoutCtx, os.Getenv("PUBSUB_PROJECT_ID"))
+		return err
+	})
 
 	if err := eg.Wait(); err != nil {
 		fmt.Fprintf(os.Stderr, "%#v", err)
@@ -59,10 +66,12 @@ func init() {
 func main() {
 	defer dsClient.Close()
 	defer gsClient.Close()
+	defer pubsubClient.Close()
 
 	// user
 	userRepo := userStorage.NewUserDataStore(dsClient)
-	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo)
+	userPub := userMessaging.NewUserEventPublisher(pubsubClient)
+	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo, userPub)
 	userUI := userUI.NewGinRouterProvider(userAppService)
 
 	// article

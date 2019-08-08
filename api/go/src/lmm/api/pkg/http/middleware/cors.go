@@ -25,7 +25,6 @@ func CORS(customDomain string) gin.HandlerFunc {
 		pattern := fmt.Sprintf(`^https://(.+\.)*%s$`, regexp.QuoteMeta(customDomain))
 		re = regexp.MustCompile(pattern)
 	}
-	regexp.MustCompile("")
 
 	return cors.New(cors.Config{
 		AllowMethods:  []string{http.MethodPost, http.MethodPut, http.MethodDelete},
