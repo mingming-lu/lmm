@@ -15,9 +15,9 @@ import (
 func CORS(customDomain string) gin.HandlerFunc {
 	var re *regexp.Regexp
 	if customDomain == "" {
-		gaeProjectID := os.Getenv("GCLOUD_PROJECT_ID")
+		gaeProjectID := os.Getenv("GCP_PROJECT_ID")
 		if gaeProjectID == "" {
-			panic("GCLOUD_PROJECT_ID needed")
+			panic("GCP_PROJECT_ID needed")
 		}
 		pattern := fmt.Sprintf(`^https://(.+-dot-)*%s.appspot\.com$`, gaeProjectID)
 		re = regexp.MustCompile(pattern)
