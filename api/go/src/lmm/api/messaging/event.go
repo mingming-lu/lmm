@@ -7,6 +7,6 @@ import (
 // Event interface
 type Event interface {
 	Topic() string
-	Message() []byte
+	Message() interface{}
 	PublishedAt() time.Time
 }

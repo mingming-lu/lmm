@@ -20,6 +20,7 @@ type Service struct {
 	tokenService       model.TokenService
 	transactionManager transaction.Manager
 	userRepository     model.UserRepository
+	userEventPublisher model.UserEventPublisher
 }
 
 // NewService creates a new Service pointer
@@ -28,6 +29,7 @@ func NewService(
 	tokenService model.TokenService,
 	txManager transaction.Manager,
 	userRepository model.UserRepository,
+	userEventPublisher model.UserEventPublisher,
 ) *Service {
 	return &Service{
 		encrypter:          encrypter,
@@ -35,6 +37,7 @@ func NewService(
 		tokenService:       tokenService,
 		transactionManager: txManager,
 		userRepository:     userRepository,
+		userEventPublisher: userEventPublisher,
 	}
 }
 
@@ -60,6 +63,10 @@ func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (int6
 		}
 
 		userID = int64(user.ID())
+
+		if err := s.userEventPublisher.NotifyUserRegistered(c, user.ID()); err != nil {
+			return errors.Wrap(err, "failed to notify user registered")
+		}
 
 		return nil
 	}, nil)
@@ -201,6 +208,10 @@ func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePasswo
 
 		if err := s.userRepository.Save(tx, user); err != nil {
 			return errors.Wrap(err, "failed to save user after password and token changed")
+		}
+
+		if err := s.userEventPublisher.NotifyUserPasswordChanged(c, user.ID()); err != nil {
+			return errors.Wrap(err, "failed to notify user password changed")
 		}
 
 		return nil
