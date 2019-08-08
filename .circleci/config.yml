@@ -252,9 +252,11 @@ workflows:
           params: >
             --ASSET_BUCKET_NAME ${DEV_ASSET_BUCKET_NAME}
             --DATASTORE_PROJECT_ID ${DEV_DATASTORE_PROJECT_ID}
+            --PUBSUB_PROJECT_ID ${DEV_PUBSUB_PROJECT_ID}
             --GIN_MODE debug
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
             --LMM_API_TOKEN_KEY ${DEV_LMM_API_TOKEN_KEY}
+             --LMM_DOMAIN ${DEV_LMM_DOMAIN}
           env: DEV
           <<: *only_dev_branch
           requires:
@@ -298,6 +300,7 @@ workflows:
           params: >
             --ASSET_BUCKET_NAME ${PROD_ASSET_BUCKET_NAME}
             --DATASTORE_PROJECT_ID ${PROD_DATASTORE_PROJECT_ID}
+            --PUBSUB_PROJECT_ID ${PROD_PUBSUB_PROJECT_ID}
             --GIN_MODE release
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
             --LMM_API_TOKEN_KEY ${PROD_LMM_API_TOKEN_KEY}
