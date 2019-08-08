@@ -41,6 +41,12 @@ func NewClient() *TestPubSubClient {
 	}
 }
 
+func (c *TestPubSubClient) Close() {
+	c.pubsubClient.Close()
+	c.fakeServer.Close()
+	c.grpcConn.Close()
+}
+
 func (c *TestPubSubClient) Publish(ctx context.Context, evt messaging.Event) error {
 	return c.pubsubClient.Publish(ctx, evt)
 }

@@ -41,10 +41,12 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
+	pubsubClient := pubsubtest.NewClient()
+
 	router = gin.New()
 
 	userRepo := persistence.NewUserDataStore(dataStore)
-	userPub := messaging.NewUserEventPublisher(pubsubtest.NewClient())
+	userPub := messaging.NewUserEventPublisher(pubsubClient)
 	userAppService := application.NewService(&service.BcryptService{}, &service.CFBTokenService{}, userRepo, userRepo, userPub)
 	provider = NewGinRouterProvider(userAppService)
 	provider.Provide(router)
@@ -52,6 +54,7 @@ func TestMain(m *testing.M) {
 	exitCode := m.Run()
 
 	dataStore.Close()
+	pubsubClient.Close()
 
 	os.Exit(exitCode)
 }

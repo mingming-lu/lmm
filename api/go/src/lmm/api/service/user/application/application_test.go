@@ -87,9 +87,11 @@ func (repo *InmemoryUserRepository) RunInTransaction(c context.Context, f func(t
 
 func TestMain(m *testing.M) {
 	repo := &InmemoryUserRepository{memory: make(map[model.UserID]*model.User)}
-	pub := messaging.NewUserEventPublisher(pubsubtest.NewClient())
+	pubsubClient := pubsubtest.NewClient()
+	pub := messaging.NewUserEventPublisher(pubsubClient)
 	testAppService = NewService(&service.BcryptService{}, &service.CFBTokenService{}, repo, repo, pub)
 	code := m.Run()
+	pubsubClient.Close()
 	os.Exit(code)
 }
 
