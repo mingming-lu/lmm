@@ -2,14 +2,11 @@ package messaging
 
 import (
 	"time"
-
-	"github.com/pkg/errors"
 )
 
-var ErrInvalidEvent = errors.New("invalid event")
-
-// Event definition
+// Event interface
 type Event interface {
 	Topic() string
-	OccurredAt() time.Time
+	Message() []byte
+	PublishedAt() time.Time
 }
