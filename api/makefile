@@ -17,7 +17,7 @@ cli:
 	docker-compose -f docker-compose.yml -f docker-compose.${env}.yml run --rm api cli ${commands}
 
 start:
-	docker-compose up -d
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
 restart: stop
 	make start

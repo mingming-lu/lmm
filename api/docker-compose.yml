@@ -28,7 +28,6 @@ services:
     depends_on:
       - datastore
     networks:
-      - lmm
       - lmm-api
   datastore:
     image: google/cloud-sdk:247.0.0
@@ -43,8 +42,5 @@ services:
       gcloud beta emulators datastore start --project=lmm-dev --host-port=0.0.0.0:8081
 
 networks:
-  lmm:
-    external:
-      name: lmm
   lmm-api:
     name: lmm-api
