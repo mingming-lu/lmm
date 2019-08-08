@@ -256,7 +256,7 @@ workflows:
             --GIN_MODE debug
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
             --LMM_API_TOKEN_KEY ${DEV_LMM_API_TOKEN_KEY}
-             --LMM_DOMAIN ${DEV_LMM_DOMAIN}
+            --LMM_DOMAIN ${DEV_LMM_DOMAIN}
           env: DEV
           <<: *only_dev_branch
           requires:
