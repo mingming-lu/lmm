@@ -51,6 +51,9 @@ func (p *GinRouterProvider) SignUp(c *gin.Context) {
 		EmailAddress: reqBody.Email,
 		Password:     reqBody.Password,
 	})
+	if err != nil {
+		httpUtil.LogWarn(c, "error on registing new user", err)
+	}
 
 	originalError := errors.Cause(err)
 	switch originalError {
@@ -72,7 +75,7 @@ func (p *GinRouterProvider) SignUp(c *gin.Context) {
 		c.String(http.StatusConflict, domain.ErrUserNameAlreadyUsed.Error())
 
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpect error", err)
 	}
 }
 
@@ -91,12 +94,14 @@ func (p *GinRouterProvider) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
 
 		b, err := base64.URLEncoding.DecodeString(matched[1])
 		if err != nil {
+			httpUtil.LogWarn(c, "error on encoding base64", err)
 			next(c)
 			return
 		}
 
 		basicauth := basicAuth{}
 		if err := json.NewDecoder(bytes.NewReader(b)).Decode(&basicauth); err != nil {
+			httpUtil.LogWarn(c, "error on decoding basic auth json", err)
 			next(c)
 			return
 		}
@@ -106,6 +111,7 @@ func (p *GinRouterProvider) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
 			Password: basicauth.Password,
 		})
 		if err != nil {
+			httpUtil.LogWarn(c, "error on calling BasicAuth app service", err)
 			next(c)
 			return
 		}
@@ -129,6 +135,7 @@ func (p *GinRouterProvider) BearerAuth(c *gin.Context) {
 
 	auth, err := p.appService.BearerAuth(c, matched[1])
 	if err != nil {
+		httpUtil.LogWarn(c, "error on calling BearerAuth app service", err)
 		c.Next()
 		return
 	}
@@ -165,7 +172,7 @@ func (p *GinRouterProvider) Token(c *gin.Context) {
 
 		token, err := p.appService.RefreshAccessToken(c, matched[1])
 		if err != nil {
-			httpUtil.LogWarnf(c, err.Error())
+			httpUtil.LogWarn(c, "error on refreshing access token", err)
 			httpUtil.Unauthorized(c)
 			return
 		}
@@ -182,7 +189,7 @@ func (p *GinRouterProvider) Token(c *gin.Context) {
 func (p *GinRouterProvider) ChangeUserPassword(c *gin.Context) {
 	requestBody := changePasswordRequestBody{}
 	if err := c.ShouldBindJSON(&requestBody); err != nil {
-		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.LogWarn(c, "bind json error", err)
 		httpUtil.BadRequest(c)
 		return
 	}
@@ -213,6 +220,6 @@ func (p *GinRouterProvider) ChangeUserPassword(c *gin.Context) {
 		c.String(http.StatusNotFound, domain.ErrNoSuchUser.Error())
 
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpect error", err)
 	}
 }

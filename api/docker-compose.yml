@@ -18,7 +18,9 @@ services:
       ASSET_BUCKET_NAME: lmm-dev-asset
       DATASTORE_EMULATOR_HOST: datastore:8081
       DATASTORE_PROJECT_ID: lmm-dev
-      GCP_PROJECT_ID: lmm-dev
+      PUBSUB_EMULATOR_HOST: pubsub:8085
+      PUBSUB_PROJECT_ID: lmm-dev
+      GCLOUD_PROJECT_ID: lmm-dev
       GO111MODULE: 'on'
       GOOGLE_APPLICATION_CREDENTIALS: /gcp/credentials/service_account.json
       GIN_MODE: debug
@@ -27,8 +29,8 @@ services:
       TZ: Asia/Tokyo
     depends_on:
       - datastore
+      - pubsub
     networks:
-      - lmm
       - lmm-api
   datastore:
     image: google/cloud-sdk:247.0.0
@@ -41,10 +43,16 @@ services:
       - lmm-api
     command: |
       gcloud beta emulators datastore start --project=lmm-dev --host-port=0.0.0.0:8081
+  pubsub:
+    image: google/cloud-sdk:247.0.0
+    environment:
+      TZ: Asia/Tokyo
+      PROJECT_ID: lmm-dev
+    networks:
+      - lmm-api
+    command: |
+      gcloud beta emulators pubsub start --project=lmm-dev --host-port=0.0.0.0:8085
 
 networks:
-  lmm:
-    external:
-      name: lmm
   lmm-api:
     name: lmm-api

@@ -15,9 +15,11 @@ import (
 
 	httpUtil "lmm/api/pkg/http"
 	jsonUtil "lmm/api/pkg/json"
+	"lmm/api/pkg/pubsub/pubsubtest"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
+	"lmm/api/service/user/port/adapter/messaging"
 	"lmm/api/service/user/port/adapter/persistence"
 	"lmm/api/service/user/port/adapter/service"
 	"lmm/api/util/uuidutil"
@@ -39,16 +41,20 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
+	pubsubClient := pubsubtest.NewClient()
+
 	router = gin.New()
 
 	userRepo := persistence.NewUserDataStore(dataStore)
-	userAppService := application.NewService(&service.BcryptService{}, &service.CFBTokenService{}, userRepo, userRepo)
+	userPub := messaging.NewUserEventPublisher(pubsubClient)
+	userAppService := application.NewService(&service.BcryptService{}, &service.CFBTokenService{}, userRepo, userRepo, userPub)
 	provider = NewGinRouterProvider(userAppService)
 	provider.Provide(router)
 
 	exitCode := m.Run()
 
 	dataStore.Close()
+	pubsubClient.Close()
 
 	os.Exit(exitCode)
 }
@@ -242,7 +248,6 @@ func TestBasicAuth(t *testing.T) {
 	matched := regexp.MustCompile(`users/(\d+)`).FindStringSubmatch(location)
 	userIDStr := matched[1]
 
-	router := gin.New()
 	router.GET("/", provider.BasicAuth(func(c *gin.Context) {
 		auth, ok := httpUtil.AuthFromGinContext(c)
 		if !ok {

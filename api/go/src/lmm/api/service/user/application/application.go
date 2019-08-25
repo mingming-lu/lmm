@@ -8,7 +8,6 @@ import (
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/application/query"
 	"lmm/api/service/user/domain"
-	"lmm/api/service/user/domain/event"
 	"lmm/api/service/user/domain/model"
 
 	"github.com/pkg/errors"
@@ -21,6 +20,7 @@ type Service struct {
 	tokenService       model.TokenService
 	transactionManager transaction.Manager
 	userRepository     model.UserRepository
+	userEventPublisher model.UserEventPublisher
 }
 
 // NewService creates a new Service pointer
@@ -29,6 +29,7 @@ func NewService(
 	tokenService model.TokenService,
 	txManager transaction.Manager,
 	userRepository model.UserRepository,
+	userEventPublisher model.UserEventPublisher,
 ) *Service {
 	return &Service{
 		encrypter:          encrypter,
@@ -36,6 +37,7 @@ func NewService(
 		tokenService:       tokenService,
 		transactionManager: txManager,
 		userRepository:     userRepository,
+		userEventPublisher: userEventPublisher,
 	}
 }
 
@@ -61,6 +63,10 @@ func (s *Service) RegisterNewUser(c context.Context, cmd command.Register) (int6
 		}
 
 		userID = int64(user.ID())
+
+		if err := s.userEventPublisher.NotifyUserRegistered(c, user.ID()); err != nil {
+			return errors.Wrap(err, "failed to notify user registered")
+		}
 
 		return nil
 	}, nil)
@@ -204,28 +210,10 @@ func (s *Service) UserChangePassword(c context.Context, cmd command.ChangePasswo
 			return errors.Wrap(err, "failed to save user after password and token changed")
 		}
 
+		if err := s.userEventPublisher.NotifyUserPasswordChanged(c, user.ID()); err != nil {
+			return errors.Wrap(err, "failed to notify user password changed")
+		}
+
 		return nil
 	}, nil)
-}
-
-// AssignUserRole allows operator assign targetUser to role
-func AssignUserRole(c context.Context, operator *model.User, targetUser *model.User, role model.Role) error {
-	if operator.Is(targetUser) {
-		return domain.ErrCannotAssignSelfRole
-	}
-
-	perm := model.PermissionAssignToRole(role)
-	if perm == model.NoPermission {
-		return errors.Wrap(domain.ErrNoSuchRole, role.Name())
-	}
-
-	if !operator.Role().HasPermission(perm) {
-		return domain.ErrNoPermission
-	}
-
-	if err := targetUser.ChangeRole(role); err != nil {
-		return err
-	}
-
-	return event.PublishUserRoleChanged(c, operator.Name(), targetUser.Name(), targetUser.Role().Name())
 }

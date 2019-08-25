@@ -1,13 +1,15 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
+
+	"go.uber.org/zap"
+
+	"google.golang.org/appengine"
 
 	"lmm/api/pkg/auth"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/appengine/log"
 )
 
 // BadRequest default response
@@ -44,26 +46,63 @@ func ErrorResponse(c *gin.Context, code int, errMsg string) {
 	})
 }
 
+var logger *zap.Logger
+
+func init() {
+	var err error
+	// TODO
+	logger, err = zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
+}
+
 func AuthFromGinContext(c *gin.Context) (*auth.Auth, bool) {
 	return auth.FromContext(c.Request.Context())
 }
 
-func LogDebugf(c *gin.Context, format string, args ...interface{}) {
-	log.Debugf(c.Request.Context(), format, args...)
+func reqIDFromC(c *gin.Context) string {
+	ctx := appengine.NewContext(c.Request)
+
+	return appengine.RequestID(ctx)
 }
 
-func LogInfo(c *gin.Context, format string, args ...interface{}) {
-	log.Infof(c.Request.Context(), format, args...)
+func LogDebug(c *gin.Context, msg string, err error) {
+	logger.Debug(msg,
+		zap.String("reqID", reqIDFromC(c)),
+		zap.String("handler", c.HandlerName()),
+		zap.Error(err),
+	)
 }
 
-func LogErrorf(c *gin.Context, format string, args ...interface{}) {
-	log.Errorf(c.Request.Context(), format, args...)
+func LogInfo(c *gin.Context, msg string, err error) {
+	logger.Info(msg,
+		zap.String("reqID", reqIDFromC(c)),
+		zap.String("handler", c.HandlerName()),
+		zap.Error(err),
+	)
 }
 
-func LogWarnf(c *gin.Context, format string, args ...interface{}) {
-	log.Warningf(c.Request.Context(), format, args...)
+func LogError(c *gin.Context, msg string, err error) {
+	logger.Error(msg,
+		zap.String("reqID", reqIDFromC(c)),
+		zap.String("handler", c.HandlerName()),
+		zap.Error(err),
+	)
 }
 
-func LogCritf(c *gin.Context, format string, args ...interface{}) {
-	panic(fmt.Sprintf(format, args...))
+func LogWarn(c *gin.Context, msg string, err error) {
+	logger.Warn(msg,
+		zap.String("reqID", reqIDFromC(c)),
+		zap.String("handler", c.HandlerName()),
+		zap.Error(err),
+	)
+}
+
+func LogPanic(c *gin.Context, msg string, err error) {
+	logger.Panic(msg,
+		zap.String("reqID", reqIDFromC(c)),
+		zap.String("handler", c.HandlerName()),
+		zap.Error(err),
+	)
 }
