@@ -337,4 +337,4 @@ workflows:
           name: dev_deploy_on_user_registered_subscriber
           env: PROD
           deploy_command: make deploy/on_user_registered
-          <<: *only_dev_branch
+          <<: *only_master_branch
