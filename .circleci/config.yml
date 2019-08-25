@@ -201,7 +201,7 @@ jobs:
         type: string
       workdir:
         type: string
-        default: gcfunctions
+        default: subscriber/gcfunctions
     steps:
       - checkout
       - *setup_gcloud_cli
