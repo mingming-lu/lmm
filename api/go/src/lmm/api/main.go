@@ -85,7 +85,7 @@ func main() {
 	assetUI := assetUI.NewGinRouterProvider(assetUsecase)
 
 	router := gin.New()
-	router.Use(middleware.WrapAppEngineContext, middleware.CORS(os.Getenv("LMM_DOMAIN")), userUI.BearerAuth)
+	router.Use(middleware.CORS(os.Getenv("LMM_DOMAIN")), userUI.BearerAuth)
 
 	userUI.Provide(router)
 	articleUI.Provide(router)

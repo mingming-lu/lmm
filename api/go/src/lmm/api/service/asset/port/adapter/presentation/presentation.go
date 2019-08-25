@@ -43,7 +43,7 @@ func (p *GinRouterProvider) PostV1Photos(c *gin.Context) {
 			c.String(http.StatusBadRequest, "photo required")
 			return
 		}
-		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.LogWarn(c, "failed to get file from request", err)
 		httpUtil.BadRequest(c)
 		return
 	}
@@ -67,7 +67,7 @@ func (p *GinRouterProvider) PostV1Photos(c *gin.Context) {
 		c.Header("Location", url)
 		httpUtil.Response(c, http.StatusCreated, "Success")
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpected error", err)
 	}
 }
 
@@ -83,14 +83,14 @@ type photo struct {
 func (p *GinRouterProvider) GetV1Photo(c *gin.Context) {
 	var photo photo
 	if err := c.ShouldBindUri(&photo); err != nil {
-		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.LogWarn(c, "bind uri error", err)
 		httpUtil.BadRequest(c)
 		return
 	}
 
 	json, err := p.usecase.GetPhotoInfo(c, photo.ID)
 	if err != nil {
-		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.LogWarn(c, "error on getting photo info", err)
 		httpUtil.NotFound(c)
 		return
 	}
@@ -108,21 +108,21 @@ func (p *GinRouterProvider) PutV1PhotoTags(c *gin.Context) {
 
 	var tags tagList
 	if err := c.ShouldBindJSON(&tags); err != nil {
-		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.LogWarn(c, "bind json error", err)
 		httpUtil.BadRequest(c)
 		return
 	}
 
 	var photo photo
 	if err := c.ShouldBindUri(&photo); err != nil {
-		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.LogWarn(c, "bind uri error", err)
 		httpUtil.BadRequest(c)
 		return
 	}
 
 	err := p.usecase.SetPhotoTags(c, user.ID, photo.ID, tags.Tags)
 	if err != nil {
-		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.LogWarn(c, "error on setting photo tags", err)
 	}
 
 	original := errors.Cause(err)
@@ -135,7 +135,7 @@ func (p *GinRouterProvider) PutV1PhotoTags(c *gin.Context) {
 	case usecase.ErrForbidden:
 		httpUtil.Forbidden(c)
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpected error", err)
 	}
 }
 
@@ -152,7 +152,7 @@ func (p *GinRouterProvider) GetV1Photos(c *gin.Context) {
 	)
 
 	if err != nil {
-		httpUtil.LogWarnf(c, err.Error())
+		httpUtil.LogWarn(c, "error on getting photo list", err)
 		httpUtil.NotFound(c)
 		return
 	}
