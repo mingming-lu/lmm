@@ -8,7 +8,7 @@ from os import path
 from PIL import Image
 
 
-def on_asset_uploaded(event, context):
+def run(event, context):
     """
     event: dict of json: {
       "kind": "storage#object",
