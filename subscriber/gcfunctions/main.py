@@ -7,8 +7,8 @@ from google.cloud import storage
 from os import path
 from PIL import Image
 
-import on_assert_updated
-import on_user_registered
+from on_asset_uploaded import run as run_on_asset_uploaded
+from on_user_registered import run as run_on_user_registered
 
 
 def on_asset_uploaded(event, context):
@@ -42,8 +42,8 @@ def on_asset_uploaded(event, context):
       }
     }
     """
-    on_assert_updated.run(event, context)
+    run_on_asset_uploaded(event, context)
 
 
 def on_user_registered(event, context):
-    on_user_registered.run(event, context)
+    run_on_user_registered(event, context)
