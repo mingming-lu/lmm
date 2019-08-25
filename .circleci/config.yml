@@ -202,6 +202,8 @@ jobs:
       workdir:
         type: string
         default: subscriber/gcfunctions
+      deploy_command:
+        type: string
     steps:
       - checkout
       - *setup_gcloud_cli
@@ -210,7 +212,7 @@ jobs:
           name: deploy
           working_directory: << parameters.workdir >>
           command: |
-            make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${<< parameters.env >>_ASSET_BUCKET_NAME}
+            << parameters.deploy_command >>
 
 workflows:
   version: 2.1
@@ -263,8 +265,14 @@ workflows:
           requires:
             - dev_api_datastore_update_indexes
       - gcfunctions_deploy:
-          name: dev_deploy_google_cloud_functions
+          name: dev_deploy_on_assert_uploaded_subscriber
           env: DEV
+          deploy_command: make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${DEV_ASSET_BUCKET_NAME}
+          <<: *only_dev_branch
+      - gcfunctions_deploy:
+          name: dev_deploy_on_user_registered_subscriber
+          env: DEV
+          deploy_command: make deploy/on_user_registered
           <<: *only_dev_branch
       # ------------- prod -------------
       - gae_node_build_and_deploy_nuxt:
@@ -323,4 +331,10 @@ workflows:
       - gcfunctions_deploy:
           name: prod_deploy_google_cloud_functions
           env: PROD
+          deploy_command: make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${PROD_ASSET_BUCKET_NAME}
           <<: *only_master_branch
+      - gcfunctions_deploy:
+          name: dev_deploy_on_user_registered_subscriber
+          env: PROD
+          deploy_command: make deploy/on_user_registered
+          <<: *only_dev_branch
