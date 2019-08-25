@@ -51,6 +51,9 @@ func (p *GinRouterProvider) SignUp(c *gin.Context) {
 		EmailAddress: reqBody.Email,
 		Password:     reqBody.Password,
 	})
+	if err != nil {
+		httpUtil.LogWarnf(c, err.Error())
+	}
 
 	originalError := errors.Cause(err)
 	switch originalError {
