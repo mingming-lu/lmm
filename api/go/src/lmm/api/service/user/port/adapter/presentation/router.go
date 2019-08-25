@@ -94,12 +94,14 @@ func (p *GinRouterProvider) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
 
 		b, err := base64.URLEncoding.DecodeString(matched[1])
 		if err != nil {
+			httpUtil.LogWarnf(c, "error on encoding base64: %s", err)
 			next(c)
 			return
 		}
 
 		basicauth := basicAuth{}
 		if err := json.NewDecoder(bytes.NewReader(b)).Decode(&basicauth); err != nil {
+			httpUtil.LogWarnf(c, "error on decoding basic auth json: %s", err)
 			next(c)
 			return
 		}
@@ -109,6 +111,7 @@ func (p *GinRouterProvider) BasicAuth(next gin.HandlerFunc) gin.HandlerFunc {
 			Password: basicauth.Password,
 		})
 		if err != nil {
+			httpUtil.LogWarnf(c, "error on calling BasicAuth app service: %s", err)
 			next(c)
 			return
 		}
@@ -132,6 +135,7 @@ func (p *GinRouterProvider) BearerAuth(c *gin.Context) {
 
 	auth, err := p.appService.BearerAuth(c, matched[1])
 	if err != nil {
+		httpUtil.LogWarnf(c, "error on calling BearerAuth app service: %s", err)
 		c.Next()
 		return
 	}

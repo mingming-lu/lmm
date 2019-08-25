@@ -1,13 +1,12 @@
 package http
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"lmm/api/pkg/auth"
 
 	"github.com/gin-gonic/gin"
-	"google.golang.org/appengine/log"
 )
 
 // BadRequest default response
@@ -49,21 +48,21 @@ func AuthFromGinContext(c *gin.Context) (*auth.Auth, bool) {
 }
 
 func LogDebugf(c *gin.Context, format string, args ...interface{}) {
-	log.Debugf(c.Request.Context(), format, args...)
+	log.Printf("[DEBUG]"+format, args...)
 }
 
 func LogInfo(c *gin.Context, format string, args ...interface{}) {
-	log.Infof(c.Request.Context(), format, args...)
+	log.Printf("[INFO]"+format, args...)
 }
 
 func LogErrorf(c *gin.Context, format string, args ...interface{}) {
-	log.Errorf(c.Request.Context(), format, args...)
+	log.Printf("ERROR"+format, args...)
 }
 
 func LogWarnf(c *gin.Context, format string, args ...interface{}) {
-	log.Warningf(c.Request.Context(), format, args...)
+	log.Printf("WARN"+format, args...)
 }
 
 func LogCritf(c *gin.Context, format string, args ...interface{}) {
-	panic(fmt.Sprintf(format, args...))
+	log.Printf("CRITICAL"+format, args...)
 }
