@@ -46,7 +46,16 @@ func ErrorResponse(c *gin.Context, code int, errMsg string) {
 	})
 }
 
-var logger = zap.NewExample()
+var logger *zap.Logger
+
+func init() {
+	var err error
+	// TODO
+	logger, err = zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
+}
 
 func AuthFromGinContext(c *gin.Context) (*auth.Auth, bool) {
 	return auth.FromContext(c.Request.Context())
