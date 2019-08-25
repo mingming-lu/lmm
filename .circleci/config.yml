@@ -329,12 +329,12 @@ workflows:
             - prod_deploy_app
             - prod_deploy_manager
       - gcfunctions_deploy:
-          name: prod_deploy_google_cloud_functions
+          name: prod_deploy_on_assert_uploaded_subscriber
           env: PROD
           deploy_command: make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${PROD_ASSET_BUCKET_NAME}
           <<: *only_master_branch
       - gcfunctions_deploy:
-          name: dev_deploy_on_user_registered_subscriber
+          name: prod_deploy_on_user_registered_subscriber
           env: PROD
           deploy_command: make deploy/on_user_registered
           <<: *only_master_branch
