@@ -21,6 +21,7 @@ services:
       PUBSUB_EMULATOR_HOST: pubsub:8085
       PUBSUB_PROJECT_ID: lmm-dev
       GCLOUD_PROJECT_ID: lmm-dev
+      GCP_PROJECT_ID: lmm-dev
       GO111MODULE: 'on'
       GOOGLE_APPLICATION_CREDENTIALS: /gcp/credentials/service_account.json
       GIN_MODE: debug
