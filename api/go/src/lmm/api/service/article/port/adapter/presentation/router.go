@@ -81,7 +81,7 @@ func (p *GinRouterProvider) PostNewArticle(c *gin.Context) {
 	case domain.ErrNoSuchUser:
 		httpUtil.Unauthorized(c)
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpected error", err)
 	}
 }
 
@@ -135,7 +135,7 @@ func (p *GinRouterProvider) PutV1Articles(c *gin.Context) {
 		httpUtil.ErrorResponse(c, http.StatusForbidden, original.Error())
 
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpected error", err)
 	}
 }
 
@@ -168,7 +168,7 @@ func (p *GinRouterProvider) ListArticles(c *gin.Context) {
 	case application.ErrInvalidCount, application.ErrInvalidPage:
 		c.JSON(http.StatusBadRequest, err.Error())
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpected error", err)
 	}
 }
 
@@ -243,7 +243,7 @@ func (p *GinRouterProvider) GetArticle(c *gin.Context) {
 	case domain.ErrInvalidArticleID, domain.ErrNoSuchArticle:
 		httpUtil.ErrorResponse(c, http.StatusNotFound, domain.ErrNoSuchArticle.Error())
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpected error", err)
 	}
 }
 
@@ -270,7 +270,7 @@ func (p *GinRouterProvider) GetAllArticleTags(c *gin.Context) {
 	case nil:
 		c.JSON(http.StatusOK, p.tagListViewToJSON(tags))
 	default:
-		httpUtil.LogCritf(c, err.Error())
+		httpUtil.LogPanic(c, "unexpected error", err)
 	}
 }
 

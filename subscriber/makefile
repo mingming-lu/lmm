@@ -1,6 +1,5 @@
 deploy/on_asset_uploaded:
-	cd on_asset_uploaded \
-	&& gcloud functions deploy on_asset_uploaded \
+	gcloud functions deploy on_asset_uploaded \
 		--memory=256MB \
 		--region=asia-northeast1 \
 		--retry \

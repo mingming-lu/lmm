@@ -201,7 +201,9 @@ jobs:
         type: string
       workdir:
         type: string
-        default: gcfunctions
+        default: subscriber/gcfunctions
+      deploy_command:
+        type: string
     steps:
       - checkout
       - *setup_gcloud_cli
@@ -210,7 +212,7 @@ jobs:
           name: deploy
           working_directory: << parameters.workdir >>
           command: |
-            make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${<< parameters.env >>_ASSET_BUCKET_NAME}
+            << parameters.deploy_command >>
 
 workflows:
   version: 2.1
@@ -252,16 +254,25 @@ workflows:
           params: >
             --ASSET_BUCKET_NAME ${DEV_ASSET_BUCKET_NAME}
             --DATASTORE_PROJECT_ID ${DEV_DATASTORE_PROJECT_ID}
+            --PUBSUB_PROJECT_ID ${DEV_PUBSUB_PROJECT_ID}
+            --GCP_PROJECT_ID ${DEV_GCP_PROJECT_ID}
             --GIN_MODE debug
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
             --LMM_API_TOKEN_KEY ${DEV_LMM_API_TOKEN_KEY}
+            --LMM_DOMAIN ${DEV_LMM_DOMAIN}
           env: DEV
           <<: *only_dev_branch
           requires:
             - dev_api_datastore_update_indexes
       - gcfunctions_deploy:
-          name: dev_deploy_google_cloud_functions
+          name: dev_deploy_on_assert_uploaded_subscriber
           env: DEV
+          deploy_command: make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${DEV_ASSET_BUCKET_NAME}
+          <<: *only_dev_branch
+      - gcfunctions_deploy:
+          name: dev_deploy_on_user_registered_subscriber
+          env: DEV
+          deploy_command: make deploy/on_user_registered
           <<: *only_dev_branch
       # ------------- prod -------------
       - gae_node_build_and_deploy_nuxt:
@@ -298,6 +309,8 @@ workflows:
           params: >
             --ASSET_BUCKET_NAME ${PROD_ASSET_BUCKET_NAME}
             --DATASTORE_PROJECT_ID ${PROD_DATASTORE_PROJECT_ID}
+            --PUBSUB_PROJECT_ID ${PROD_PUBSUB_PROJECT_ID}
+            --GCP_PROJECT_ID ${PROD_GCP_PROJECT_ID}
             --GIN_MODE release
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
             --LMM_API_TOKEN_KEY ${PROD_LMM_API_TOKEN_KEY}
@@ -316,6 +329,12 @@ workflows:
             - prod_deploy_app
             - prod_deploy_manager
       - gcfunctions_deploy:
-          name: prod_deploy_google_cloud_functions
+          name: prod_deploy_on_assert_uploaded_subscriber
           env: PROD
+          deploy_command: make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${PROD_ASSET_BUCKET_NAME}
+          <<: *only_master_branch
+      - gcfunctions_deploy:
+          name: prod_deploy_on_user_registered_subscriber
+          env: PROD
+          deploy_command: make deploy/on_user_registered
           <<: *only_master_branch
