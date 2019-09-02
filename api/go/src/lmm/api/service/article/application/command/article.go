@@ -17,3 +17,9 @@ type EditArticle struct {
 	Body      string
 	Tags      []string
 }
+
+// PublishArticle command
+type PublishArticle struct {
+	UserID    int64
+	ArticleID string
+}

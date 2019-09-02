@@ -14,8 +14,9 @@ import (
 
 // ArticleCommandService is a command side application
 type ArticleCommandService struct {
-	articleRepository  model.ArticleRepository
-	transactionManager transaction.Manager
+	articleRepository     model.ArticleRepository
+	articleEventPublisher model.ArticleEventPublisher
+	transactionManager    transaction.Manager
 }
 
 // NewArticleCommandService is a constructor of ArticleCommandService
@@ -43,12 +44,29 @@ func (app *ArticleCommandService) PostNewArticle(c context.Context, cmd command.
 
 		author := model.NewAuthor(cmd.AuthorID)
 
-		article := model.NewArticle(id, author, content, now, now)
+		article := model.NewArticle(id, author, content, now, clock.Zero, clock.Zero)
 
 		return app.articleRepository.Save(tx, article)
 	}, nil)
 
 	return
+}
+
+// PublishArticle publishes article by id
+func (app *ArticleCommandService) PublishArticle(c context.Context, cmd *command.PublishArticle) error {
+	return app.transactionManager.RunInTransaction(c, func(tx transaction.Transaction) error {
+		articleID := model.NewArticleID(cmd.ArticleID)
+		article, err := app.articleRepository.FindByID(tx, articleID)
+		if err != nil {
+			return errors.Wrap(err, "article not found")
+		}
+
+		if article.Published() {
+			return errors.Wrap(domain.ErrArticleAlreadyPublished, "app: failed to publish article")
+		}
+
+		return app.articleEventPublisher.NotifyArticlePublished(c, article.ID())
+	}, nil)
 }
 
 // EditArticle command

@@ -371,7 +371,7 @@ func TestGetV1Article(t *testing.T) {
 		assert.Equal(t, body, articleJSON.Body)
 		assert.Equal(t, []articleViewTag{articleViewTag{"aa"}, articleViewTag{"bb"}}, articleJSON.Tags)
 		assert.Equal(t, articleJSON.PostAt, articleJSON.LastEditedAt)
-		assert.InDelta(t, articleJSON.PostAt, time.Now().Unix(), 1.)
+		assert.True(t, time.Unix(articleJSON.PostAt, 0).IsZero())
 
 		t.Run("AfterEdit", func(t *testing.T) {
 			newTitle := uuidutil.NewUUID()
@@ -405,7 +405,7 @@ func TestGetV1Article(t *testing.T) {
 			assert.Equal(t, newBody, newArticleJSON.Body)
 			assert.Equal(t, []articleViewTag{articleViewTag{"bb"}, articleViewTag{"aa"}}, newArticleJSON.Tags)
 			assert.Equal(t, articleJSON.PostAt, newArticleJSON.PostAt)
-			assert.InDelta(t, newArticleJSON.LastEditedAt, time.Now().Unix(), 1.)
+			assert.True(t, time.Unix(articleJSON.PostAt, 0).IsZero())
 		})
 	})
 

@@ -46,6 +46,7 @@ type article struct {
 	Title        string    `datastore:"Title"`
 	Body         string    `datastore:"Body,noindex"`
 	CreatedAt    time.Time `datastore:"CreatedAt"`
+	PublishedAt  time.Time `datastore:"PublishedAt"`
 	LastModified time.Time `datastore:"LastModified,noindex"`
 }
 
@@ -65,6 +66,7 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 		Title:        model.Content().Text().Title(),
 		Body:         model.Content().Text().Body(),
 		CreatedAt:    model.CreatedAt(),
+		PublishedAt:  model.PublishedAt(),
 		LastModified: model.LastModified(),
 	})); err != nil {
 		return errors.Wrap(err, "failed to put article into datastore")
@@ -132,7 +134,7 @@ func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.Articl
 
 	author := model.NewAuthor(articleKey.Parent.ID)
 
-	return model.NewArticle(id, author, content, data.CreatedAt, data.LastModified), nil
+	return model.NewArticle(id, author, content, data.CreatedAt, data.PublishedAt, data.LastModified), nil
 }
 
 func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleID) error {
@@ -140,8 +142,8 @@ func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleI
 }
 
 type articleItem struct {
-	Title     string `datastore:"Title"`
-	CreatedAt int64  `datastore:"CreatedAt"`
+	Title       string `datastore:"Title"`
+	PublishedAt int64  `datastore:"PublishedAt"`
 }
 
 func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, id string) (*model.Article, error) {
@@ -172,7 +174,7 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 	items := make([]*model.ArticleListViewItem, len(entities), len(entities))
 	for i, entity := range entities {
 		id := model.NewArticleID(keys[i].Encode())
-		item, err := model.NewArticleListViewItem(id, entity.Title, time.Unix(entity.CreatedAt/dsUtil.UnixFactor, 0))
+		item, err := model.NewArticleListViewItem(id, entity.Title, time.Unix(entity.PublishedAt/dsUtil.UnixFactor, 0))
 		if err != nil {
 			return nil, errors.Wrap(err, "internal error")
 		}

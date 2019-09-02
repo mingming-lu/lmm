@@ -42,6 +42,7 @@ func NewGinRouterProvider(
 func (p *GinRouterProvider) Provide(router *gin.Engine) {
 	router.POST("/v1/articles", p.PostNewArticle)
 	router.PUT("/v1/articles/:articleID", p.PutV1Articles)
+	router.PUT("/v1/articles/:articleID/publish", p.PutV1ArticlePublish)
 	router.GET("/v1/articles", p.ListArticles)
 	router.GET("/v1/articles/:articleID", p.GetArticle)
 	router.GET("/v1/articleTags", p.GetAllArticleTags)
@@ -134,6 +135,32 @@ func (p *GinRouterProvider) PutV1Articles(c *gin.Context) {
 	case domain.ErrNotArticleAuthor:
 		httpUtil.ErrorResponse(c, http.StatusForbidden, original.Error())
 
+	default:
+		httpUtil.LogPanic(c, "unexpected error", err)
+	}
+}
+
+func (p *GinRouterProvider) PutV1ArticlePublish(c *gin.Context) {
+	user, ok := httpUtil.AuthFromGinContext(c)
+	if !ok {
+		httpUtil.Unauthorized(c)
+		return
+	}
+
+	err := p.appService.Command().PublishArticle(c, &command.PublishArticle{
+		UserID:    user.ID,
+		ArticleID: c.Param("articleID"),
+	})
+
+	if err != nil {
+		httpUtil.LogWarn(c, "handler: error on publishing article", err)
+	}
+	original := errors.Cause(err)
+	switch original {
+	case domain.ErrNoSuchArticle:
+		httpUtil.ErrorResponse(c, http.StatusNotFound, original.Error())
+	case domain.ErrArticleAlreadyPublished:
+		httpUtil.ErrorResponse(c, http.StatusBadRequest, original.Error())
 	default:
 		httpUtil.LogPanic(c, "unexpected error", err)
 	}
@@ -256,7 +283,7 @@ func (p *GinRouterProvider) articleViewToJSON(model *model.Article) *articleView
 		ID:           model.ID().String(),
 		Title:        model.Content().Text().Title(),
 		Body:         model.Content().Text().Body(),
-		PostAt:       model.CreatedAt().Unix(),
+		PostAt:       model.PublishedAt().Unix(),
 		LastEditedAt: model.LastModified().Unix(),
 		Tags:         tags,
 	}
