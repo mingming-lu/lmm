@@ -2,7 +2,10 @@ package clock
 
 import "time"
 
-var DefaultClock Clock
+var (
+	DefaultClock Clock
+	Zero         = time.Time{}
+)
 
 type Clock interface {
 	Now() time.Time
