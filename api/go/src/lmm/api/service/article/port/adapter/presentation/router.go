@@ -154,10 +154,15 @@ func (p *GinRouterProvider) validatePostArticleAdaptor(adaptor *postArticleAdapt
 
 // ListArticles handles GET /v1/articles
 func (p *GinRouterProvider) ListArticles(c *gin.Context) {
-	v, err := p.appService.Query().ListArticlesByPage(
-		c,
-		p.buildListArticleQueryFromContext(c),
-	)
+	q := query.ListArticleQuery{}
+	if err := c.BindQuery(&q); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": q.ValidateErrors(err),
+		})
+		return
+	}
+
+	v, err := p.appService.Query().ListArticlesByPage(c, q)
 	switch errors.Cause(err) {
 	case nil:
 		if c.DefaultQuery("flavor", "") == "true" {
@@ -165,23 +170,8 @@ func (p *GinRouterProvider) ListArticles(c *gin.Context) {
 		} else {
 			c.JSON(http.StatusOK, p.articleListViewToJSON(v))
 		}
-	case application.ErrInvalidCount, application.ErrInvalidPage:
-		c.JSON(http.StatusBadRequest, err.Error())
 	default:
 		httpUtil.LogPanic(c, "unexpected error", err)
-	}
-}
-
-func (p *GinRouterProvider) buildListArticleQueryFromContext(c *gin.Context) query.ListArticleQuery {
-	var tag *string
-	if c.Query("tag") == "" {
-		tmp := c.Query("tag")
-		tag = &tmp
-	}
-	return query.ListArticleQuery{
-		Page:  c.DefaultQuery("page", "1"),
-		Count: c.DefaultQuery("perPage", "5"),
-		Tag:   tag,
 	}
 }
 

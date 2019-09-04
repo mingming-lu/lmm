@@ -8,7 +8,6 @@ import (
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/application/query"
 	"lmm/api/service/article/domain/model"
-	"lmm/api/util/stringutil"
 )
 
 // ArticleQueryService is a query side application
@@ -24,18 +23,8 @@ func NewArticleQueryService(viewer model.ArticleViewer, txManager transaction.Ma
 
 // ListArticlesByPage is used for listing articles on article index page
 func (app *ArticleQueryService) ListArticlesByPage(c context.Context, q query.ListArticleQuery) (articles *model.ArticleListView, err error) {
-	count, err := stringutil.ParseInt(q.Count)
-	if err != nil || count < 1 {
-		return nil, errors.Wrap(ErrInvalidCount, err.Error())
-	}
-
-	page, err := stringutil.ParseInt(q.Page)
-	if err != nil || page < 1 {
-		return nil, errors.Wrap(ErrInvalidPage, err.Error())
-	}
-
 	err = app.txManager.RunInTransaction(c, func(tx transaction.Transaction) error {
-		articles, err = app.viewer.ViewArticles(tx, count, page, nil)
+		articles, err = app.viewer.ViewArticles(tx, q.PerPage, q.Page, nil)
 
 		return err
 	}, &transaction.Option{ReadOnly: true})
