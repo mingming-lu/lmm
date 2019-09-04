@@ -1,12 +1,5 @@
 package application
 
-import "errors"
-
-var (
-	ErrInvalidCount = errors.New("invalid count")
-	ErrInvalidPage  = errors.New("invalid page")
-)
-
 // Service is like a registry for services in article bounded context
 type Service struct {
 	articleCommandService *ArticleCommandService

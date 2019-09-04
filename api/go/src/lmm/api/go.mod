@@ -17,4 +17,5 @@ require (
 	google.golang.org/appengine v1.4.0
 	google.golang.org/genproto v0.0.0-20190530194941-fb225487d101 // indirect
 	google.golang.org/grpc v1.21.0
+	gopkg.in/go-playground/validator.v8 v8.18.2
 )
