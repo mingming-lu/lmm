@@ -51,8 +51,14 @@ type article struct {
 }
 
 type tag struct {
-	Name  string `datastore:"Name"`
-	Order int    `datastore:"Order"`
+	ID    *datastore.Key `datastore:"__key__"`
+	Name  string         `datastore:"Name"`
+	Order int            `datastore:"Order"`
+}
+
+type tagV2 struct {
+	tag
+	CreatedAt time.Time `datastore:"CreatedAt"`
 }
 
 // Save saves article into datastore
@@ -151,6 +157,14 @@ func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, id string) (*
 }
 
 func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page int, filter *model.ArticlesFilter) (*model.ArticleListView, error) {
+	if filter != nil && filter.Tag != "" {
+		return s.viewArticleFilteredByTag(tx, count, page, filter.Tag)
+	}
+
+	return s.viewAllArticles(tx, count, page)
+}
+
+func (s *ArticleDataStore) viewAllArticles(tx transaction.Transaction, count, page int) (*model.ArticleListView, error) {
 	counting := datastore.NewQuery(dsUtil.ArticleKind)
 	paging := datastore.NewQuery(dsUtil.ArticleKind).Project("__key__", "Title", "CreatedAt").Order("-CreatedAt").Limit(count + 1).Offset((page - 1) * count)
 
@@ -182,6 +196,41 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 	}
 
 	return model.NewArticleListView(items, page, count, total, hasNextPage), nil
+}
+
+func (s *ArticleDataStore) viewArticleFilteredByTag(tx transaction.Transaction, count, page int, tag string) (*model.ArticleListView, error) {
+	dstx := dsUtil.MustTransaction(tx)
+
+	counting := datastore.NewQuery(dsUtil.ArticleTagKind).Filter("Name =", tag)
+	paging := datastore.NewQuery(dsUtil.ArticleTagKind).Filter("Name =", tag).KeysOnly().Order("-CreatedAt").Limit(count - 1).Offset((page - 1) * count)
+
+	total, err := s.dataStore.Count(tx, counting)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get total number of articles")
+	}
+
+	view := model.NewArticleListView([]*model.ArticleListViewItem{}, page, count, total, false)
+	if view.Total() == 0 {
+		// fallback V1
+		return view, nil
+	}
+
+	var tags []*tagV2
+	keys, err := s.dataStore.GetAll(tx, paging, &tags)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to count tags")
+	}
+
+	var articles []*articleItem
+	if err := dstx.GetMulti(keys, &articles); err != nil {
+		return nil, errors.Wrap(err, "failed to get articles")
+	}
+
+	// select * from TagV2 where name = ? order by CreatedAt desc
+	// select * from TagV1 if not found
+	// foreach tag in tags select * from Article where id = tag.id.parent
+	// foreach tag in tags insert tag into TagV2
+	return nil, nil
 }
 
 func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.TagView, error) {
