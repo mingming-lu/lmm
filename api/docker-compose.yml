@@ -24,6 +24,7 @@ services:
       GCP_PROJECT_ID: lmm-dev
       GO111MODULE: 'on'
       GOOGLE_APPLICATION_CREDENTIALS: /gcp/credentials/service_account.json
+      GO_VERSION: go111
       GIN_MODE: debug
       HTTP_TIMEOUT_SECOND: 10
       LMM_DOMAIN: lmm.local

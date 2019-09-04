@@ -1,7 +1,13 @@
 service: api
-runtime: go111
+runtime: {GO_VERSION}
 env: standard
 instance_class: F1
+
+handlers:
+- url: /.*
+  script: auto
+  secure: always
+  redirect_http_response_code: 301
 
 env_variables:
   ASSET_BUCKET_NAME: {ASSET_BUCKET_NAME}
