@@ -100,19 +100,19 @@ jobs:
   gae_deploy_gin:
     <<: *google_cloud_sdk
     parameters:
-      template_app_yaml_file:
-        type: string
-        default: template.yaml
       app_yaml_file:
         type: string
         default: app.yaml
+      env:
+        type: string
+      params:
+        type: string
+      template_app_yaml_file:
+        type: string
+        default: template.yaml
       workdir:
         type: string
         default: .
-      params:
-        type: string
-      env:
-        type: string
     steps:
       - checkout
       - setup_remote_docker
@@ -258,6 +258,7 @@ workflows:
             --GCP_PROJECT_ID ${DEV_GCP_PROJECT_ID}
             --GIN_MODE debug
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
+            --GO_VERSION go112
             --LMM_API_TOKEN_KEY ${DEV_LMM_API_TOKEN_KEY}
             --LMM_DOMAIN ${DEV_LMM_DOMAIN}
           env: DEV
@@ -313,6 +314,7 @@ workflows:
             --GCP_PROJECT_ID ${PROD_GCP_PROJECT_ID}
             --GIN_MODE release
             --GOOGLE_APPLICATION_CREDENTIALS ${GCP_SERVICE_KEY_FILE}
+            --GO_VERSION go112
             --LMM_API_TOKEN_KEY ${PROD_LMM_API_TOKEN_KEY}
             --LMM_DOMAIN ${PROD_LMM_DOMAIN}
           env: PROD
