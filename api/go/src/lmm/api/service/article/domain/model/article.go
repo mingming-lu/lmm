@@ -76,8 +76,10 @@ func (a *Article) CreatedAt() time.Time {
 	return a.createdAt
 }
 
+// Published returns true if a is published
+// and the PublishedAt should return a non-zero value
 func (a *Article) Published() bool {
-	return a.publishedAt.IsZero()
+	return !a.publishedAt.IsZero()
 }
 
 // PublishedAt time
