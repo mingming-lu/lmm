@@ -1,7 +1,7 @@
 indexes:
 - kind: "Article"
   properties:
-  - name: "CreatedAt"
+  - name: "PublishedAt"
     direction: desc
   - name: "Title"
 - kind: "Asset"
