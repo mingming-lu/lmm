@@ -42,12 +42,22 @@ func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*
 	return model.NewArticleID(keys[0].Encode()), nil
 }
 
+type Article struct {
+	Key          *datastore.Key `datastore:"__key__"`
+	Title        string         `datastore:"Title"`
+	Body         string         `datastore:"Body,noindex"`
+	CreatedAt    time.Time      `datastore:"CreatedAt"`
+	PublishedAt  time.Time      `datastore:"PublishedAt"`
+	LastModified time.Time      `datastore:"LastModified,noindex"`
+}
+
 type article struct {
-	Title        string    `datastore:"Title"`
-	Body         string    `datastore:"Body,noindex"`
-	CreatedAt    time.Time `datastore:"CreatedAt"`
-	PublishedAt  time.Time `datastore:"PublishedAt"`
-	LastModified time.Time `datastore:"LastModified,noindex"`
+	Key          *datastore.Key `datastore:"__key__"`
+	Title        string         `datastore:"Title"`
+	Body         string         `datastore:"Body,noindex"`
+	CreatedAt    time.Time      `datastore:"CreatedAt"`
+	PublishedAt  time.Time      `datastore:"PublishedAt"`
+	LastModified time.Time      `datastore:"LastModified,noindex"`
 }
 
 type tag struct {
@@ -166,7 +176,11 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 
 func (s *ArticleDataStore) viewAllArticles(tx transaction.Transaction, count, page int) (*model.ArticleListView, error) {
 	counting := datastore.NewQuery(dsUtil.ArticleKind)
-	paging := datastore.NewQuery(dsUtil.ArticleKind).Project("__key__", "Title", "CreatedAt").Order("-CreatedAt").Limit(count + 1).Offset((page - 1) * count)
+	paging := datastore.NewQuery(dsUtil.ArticleKind).
+		Project("__key__", "Title", "PublishedAt").
+		Order("-PublishedAt").
+		Limit(count + 1).
+		Offset((page - 1) * count)
 
 	total, err := s.dataStore.Count(tx, counting)
 	if err != nil {
