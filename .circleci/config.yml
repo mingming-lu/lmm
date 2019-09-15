@@ -1,6 +1,8 @@
 version: 2.1
 
 references:
+  api_wd: &api_wd
+    api/go/src/lmm/api
   only_dev_branch: &only_dev_branch
     filters:
       branches:
@@ -76,6 +78,25 @@ jobs:
             gotestsum -f short-verbose --junitfile /tmp/test-results/api/api-tests.xml
       - store_test_results:
           path: /tmp/test-results
+
+  datastore_migration:
+    docker:
+      - image: circleci/golang:1.12.5
+    parameters:
+      env:
+        type: string
+      datastore_project_id:
+        type: string
+    steps:
+      - checkout
+      - run: echo $<< parameters.env >>_GCP_SERVICE_KEY | base64 --decode > $GCP_SERVICE_KEY_FILE
+      - run:
+          name: run migration cli
+          working_directory: *api_wd
+          command: |
+            export DATASTORE_PROJECT_ID=<< parameters.datastore_project_id >>
+            export GOOGLE_APPLICATION_CREDENTIALS=${GCP_SERVICE_KEY_FILE}
+            go run cmd/migration/main.go
 
   datastore_update_indexes:
     <<: *google_cloud_sdk
@@ -241,13 +262,21 @@ workflows:
           env: DEV
           docker_image: node:10.16.0-alpine
           <<: *only_dev_branch
+      - datastore_migration:
+          name: dev_datastore_migration
+          type: approval
+          env: DEV
+          datastore_project_id: lumingming-development
+          <<: *only_dev_branch
+          requires:
+            - api_test
       - datastore_update_indexes:
           name: dev_api_datastore_update_indexes
           env: DEV
           index_file_dir: api/datastore
           <<: *only_dev_branch
           requires:
-            - api_test
+            - dev_datastore_migration
       - gae_deploy_gin:
           name: dev_deploy_api
           workdir: api/go/src/lmm/api
@@ -297,13 +326,21 @@ workflows:
           env: PROD
           docker_image: node:10.16.0-alpine
           <<: *only_master_branch
+      - datastore_migration:
+          name: prod_datastore_migration
+          type: approval
+          env: PROD
+          datastore_project_id: lumingming-development
+          <<: *only_master_branch
+          requires:
+            - api_test
       - datastore_update_indexes:
           name: prod_api_datastore_update_indexes
           env: PROD
           index_file_dir: api/datastore
           <<: *only_master_branch
           requires:
-            - api_test
+            - prod_datastore_migration
       - gae_deploy_gin:
           name: prod_deploy_api
           workdir: api/go/src/lmm/api

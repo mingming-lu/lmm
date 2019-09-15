@@ -60,7 +60,7 @@ func TestArticleDataStore(t *testing.T) {
 				}
 
 				now := clock.Now()
-				article = model.NewArticle(articleID, model.NewAuthor(authorID), content, now, now)
+				article = model.NewArticle(articleID, model.NewAuthor(authorID), content, now, now, now)
 				if !assert.NoError(t, articleDataStore.Save(tx, article)) || !assert.NotNil(t, article) {
 					t.Fatal("failed to save article")
 				}

@@ -24,16 +24,18 @@ type Article struct {
 	linkName     string
 	content      *Content
 	createdAt    time.Time
+	publishedAt  time.Time
 	lastModified time.Time
 }
 
 // NewArticle is a article constructor
-func NewArticle(articleID *ArticleID, author *Author, content *Content, createdAt, lastModified time.Time) *Article {
+func NewArticle(articleID *ArticleID, author *Author, content *Content, createdAt, publishedAt, lastModified time.Time) *Article {
 	article := &Article{
 		id:           articleID,
 		author:       author,
 		content:      content,
 		createdAt:    createdAt,
+		publishedAt:  publishedAt,
 		lastModified: lastModified,
 	}
 	return article
@@ -72,6 +74,17 @@ func (a *Article) EditContent(content *Content) {
 // CreatedAt time
 func (a *Article) CreatedAt() time.Time {
 	return a.createdAt
+}
+
+// Published returns true if a is published
+// and the PublishedAt should return a non-zero value
+func (a *Article) Published() bool {
+	return !a.publishedAt.IsZero()
+}
+
+// PublishedAt time
+func (a *Article) PublishedAt() time.Time {
+	return a.publishedAt
 }
 
 // LastModified time
