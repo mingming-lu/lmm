@@ -264,6 +264,7 @@ workflows:
           <<: *only_dev_branch
       - datastore_migration:
           name: dev_datastore_migration
+          type: approval
           env: DEV
           datastore_project_id: lumingming-development
           <<: *only_dev_branch
@@ -325,13 +326,21 @@ workflows:
           env: PROD
           docker_image: node:10.16.0-alpine
           <<: *only_master_branch
+      - datastore_migration:
+          name: prod_datastore_migration
+          type: approval
+          env: PROD
+          datastore_project_id: lumingming-development
+          <<: *only_master_branch
+          requires:
+            - api_test
       - datastore_update_indexes:
           name: prod_api_datastore_update_indexes
           env: PROD
           index_file_dir: api/datastore
           <<: *only_master_branch
           requires:
-            - api_test
+            - prod_datastore_migration
       - gae_deploy_gin:
           name: prod_deploy_api
           workdir: api/go/src/lmm/api
