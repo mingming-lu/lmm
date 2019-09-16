@@ -93,7 +93,7 @@
             :to="buildLinkWithTagQuery(tag.name)"
             class="link tag"
           >
-            {{ tag.name }}
+            {{ tag.name }} ({{ tag.count }})
           </nuxt-link>
         </p>
       </div>
