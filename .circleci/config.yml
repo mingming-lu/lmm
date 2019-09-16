@@ -101,7 +101,7 @@ jobs:
           working_directory: << parameters.work_dir >>
           command: |
             export GOOGLE_APPLICATION_CREDENTIALS=$GCP_SERVICE_KEY_FILE
-            export DATASTORE_PROJECT_ID=$<< parameters.env >>_DATASTORE_PROJECT_ID
+            export DATASTORE_PROJECT_ID=$<< parameters.env >>_PROJECT_ID
             go run cmd/migration/main.go
 
   datastore_update_indexes:
