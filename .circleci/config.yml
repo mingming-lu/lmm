@@ -269,13 +269,19 @@ workflows:
           env: DEV
           docker_image: node:10.16.0-alpine
           <<: *only_dev_branch
+      - datastore_migration:
+          name: dev_api_datastore_migration
+          env: DEV
+          work_dir: *api_wd
+          requires:
+            - api_test
       - datastore_update_indexes:
           name: dev_api_datastore_update_indexes
           env: DEV
           index_file_dir: api/datastore
           <<: *only_dev_branch
           requires:
-            - api_test
+            - dev_api_datastore_migration
       - gae_deploy_gin:
           name: dev_deploy_api
           workdir: *api_wd
