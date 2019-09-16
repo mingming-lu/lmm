@@ -42,7 +42,7 @@ jobs:
       work_dir:
         type: string
     docker:
-      - image: circleci/golang:1.12.0
+      - image: circleci/golang:1.12.9
         environment:
           DATASTORE_EMULATOR_HOST: datastore:8081
           DATASTORE_PROJECT_ID: lmm-test
@@ -89,7 +89,7 @@ jobs:
       work_dir:
         type: string
     docker:
-      - image: circleci/golang:1.12.0
+      - image: circleci/golang:1.12.9
     steps:
       - checkout
       - run:
