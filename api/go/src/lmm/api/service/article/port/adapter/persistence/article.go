@@ -75,7 +75,11 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 	tags := make([]*dsEntity.Tag, len(model.Content().Tags()), len(model.Content().Tags()))
 	for i, model := range model.Content().Tags() {
 		tagKeys = append(tagKeys, datastore.IncompleteKey(dsUtil.ArticleTagKind, articleKey))
-		tags[i] = &dsEntity.Tag{Name: model.Name(), Order: int(model.Order())}
+		tags[i] = &dsEntity.Tag{
+			Name:      model.Name(),
+			Order:     int(model.Order()),
+			CreatedAt: time.Now(),
+		}
 	}
 
 	// save all tags
