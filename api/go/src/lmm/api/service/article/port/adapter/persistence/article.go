@@ -175,14 +175,14 @@ func (s *ArticleDataStore) viewAllArticles(tx transaction.Transaction, count, pa
 		items[i] = item
 	}
 
-	return model.NewArticleListView(items, page, count, total, hasNextPage), nil
+	return model.NewArticleListView(items, "", page, count, total, hasNextPage), nil
 }
 
 func (s *ArticleDataStore) viewArticlesFilteredByTag(tx transaction.Transaction, count, page int, tag string) (*model.ArticleListView, error) {
 	dstx := dsUtil.MustTransaction(tx)
 
 	counting := datastore.NewQuery(dsUtil.ArticleTagKind).Filter("Name =", tag)
-	paging := datastore.NewQuery(dsUtil.ArticleTagKind).Filter("Name =", tag).KeysOnly().Order("-CreatedAt").Limit(count - 1).Offset((page - 1) * count)
+	paging := datastore.NewQuery(dsUtil.ArticleTagKind).Filter("Name =", tag).KeysOnly().Order("-CreatedAt").Limit(count + 1).Offset((page - 1) * count)
 
 	total, err := s.dataStore.Count(tx, counting)
 	if err != nil {
@@ -199,14 +199,14 @@ func (s *ArticleDataStore) viewArticlesFilteredByTag(tx transaction.Transaction,
 		articleKeys[i] = keys[i].Parent
 	}
 
-	articles := make([]*dsEntity.Article, len(keys))
+	articles := make([]*dsEntity.Article, len(articleKeys))
 	if err := dstx.GetMulti(articleKeys, articles); err != nil {
 		return nil, errors.Wrap(err, "failed to get articles")
 	}
 
 	items := make([]*model.ArticleListViewItem, len(articles), len(articles))
 	for i := range items {
-		id := model.NewArticleID(keys[i].Encode())
+		id := model.NewArticleID(articleKeys[i].Encode())
 		m, err := model.NewArticleListViewItem(id, articles[i].Title, articles[i].CreatedAt)
 		if err != nil {
 			return nil, errors.Wrap(err, "internal error")
@@ -214,12 +214,13 @@ func (s *ArticleDataStore) viewArticlesFilteredByTag(tx transaction.Transaction,
 		items[i] = m
 	}
 
-	view := model.NewArticleListView(items, page, count, total, false)
-	if view.Total() == 0 {
-		return view, nil
+	hasNextPage := false
+	if len(items) > int(count) {
+		hasNextPage = true
+		items = items[:int(count)]
 	}
 
-	return view, nil
+	return model.NewArticleListView(items, tag, page, count, total, hasNextPage), nil
 }
 
 func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.TagView, error) {

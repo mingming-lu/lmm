@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"net/url"
+	"strconv"
 
 	httpUtil "lmm/api/pkg/http"
 	"lmm/api/pkg/transaction"
@@ -194,6 +196,7 @@ func (p *GinRouterProvider) articleListViewToJSONV2(c *gin.Context, view *model.
 		Articles: adapter.Articles,
 		Page:     view.Page(),
 		PerPage:  view.PerPage(),
+		Tag:      view.TagFilter(),
 		Total:    view.Total(),
 	}
 
@@ -202,24 +205,32 @@ func (p *GinRouterProvider) articleListViewToJSONV2(c *gin.Context, view *model.
 	))
 
 	if adapterV2.Page > 1 && adapterV2.Page <= last+1 {
-		adapterV2.PrevPage = buildURI(c.Request.URL.Path, adapterV2.Page-1, adapterV2.PerPage)
+		adapterV2.PrevPage = buildURI(c.Request.URL.Path, adapterV2.Page-1, adapterV2.PerPage, adapterV2.Tag)
 	}
 
 	if view.HasNextPage() {
-		adapterV2.NextPage = buildURI(c.Request.URL.Path, adapterV2.Page+1, adapterV2.PerPage)
+		adapterV2.NextPage = buildURI(c.Request.URL.Path, adapterV2.Page+1, adapterV2.PerPage, adapterV2.Tag)
 	}
 
 	if adapterV2.Total > 0 {
-		adapterV2.FirstPage = buildURI(c.Request.URL.Path, 1, adapterV2.PerPage)
-		adapterV2.LastPage = buildURI(c.Request.URL.Path, last, adapterV2.PerPage)
+		adapterV2.FirstPage = buildURI(c.Request.URL.Path, 1, adapterV2.PerPage, adapterV2.Tag)
+		adapterV2.LastPage = buildURI(c.Request.URL.Path, last, adapterV2.PerPage, adapterV2.Tag)
 	}
 
 	return adapterV2
 }
 
-func buildURI(path string, page, perPage int) *string {
-	uri := fmt.Sprintf("%s?page=%d&perPage=%d", path, page, perPage)
-	return &uri
+func buildURI(path string, page, perPage int, tag string) string {
+	vs := url.Values{}
+
+	vs.Set("page", strconv.Itoa(page))
+	vs.Set("perPage", strconv.Itoa(perPage))
+
+	if tag != "" {
+		vs.Set("tag", tag)
+	}
+
+	return fmt.Sprintf("%s?%s", path, vs.Encode())
 }
 
 // GetArticle handles GET /v1/articles/:articleID
