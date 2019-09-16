@@ -15,11 +15,12 @@ type articleListAdapterV2 struct {
 	Articles  []articleListItem `json:"articles"`
 	Page      int               `json:"page"`
 	PerPage   int               `json:"perPage"`
+	Tag       string            `json:"tag,omitempty"`
 	Total     int               `json:"total"`
-	PrevPage  *string           `json:"prevPage"`
-	NextPage  *string           `json:"nextPage"`
-	FirstPage *string           `json:"firstPage"`
-	LastPage  *string           `json:"lastPage"`
+	PrevPage  string            `json:"prevPage,omitempty"`
+	NextPage  string            `json:"nextPage,omitempty"`
+	FirstPage string            `json:"firstPage,omitempty"`
+	LastPage  string            `json:"lastPage,omitempty"`
 }
 
 type articleListItem struct {
