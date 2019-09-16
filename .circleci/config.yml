@@ -101,7 +101,7 @@ jobs:
           working_directory: << parameters.work_dir >>
           command: |
             export GOOGLE_APPLICATION_CREDENTIALS=$GCP_SERVICE_KEY_FILE
-            export DATASTORE_PROJECT_ID=$<< parameters.env >>_PROJECT_ID
+            export DATASTORE_PROJECT_ID=$<< parameters.env >>_GCP_PROJECT_ID
             go run cmd/migration/main.go
 
   datastore_update_indexes:
@@ -337,16 +337,18 @@ workflows:
           env: PROD
           work_dir: *api_wd
           <<: *only_master_branch
+          requires:
+            - api_test
       - datastore_update_indexes:
           name: prod_api_datastore_update_indexes
           env: PROD
           index_file_dir: api/datastore
           <<: *only_master_branch
           requires:
-            - api_test
+            - prod_api_datastore_migration
       - gae_deploy_gin:
           name: prod_deploy_api
-          workdir: api/go/src/lmm/api
+          workdir: *api_wd
           params: >
             --ASSET_BUCKET_NAME ${PROD_ASSET_BUCKET_NAME}
             --DATASTORE_PROJECT_ID ${PROD_DATASTORE_PROJECT_ID}
