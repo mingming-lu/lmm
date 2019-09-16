@@ -42,8 +42,9 @@ type articleViewTag struct {
 	Name string `json:"name"`
 }
 
-type articleTagListView = []articleTagListItemView
+type articleTagListView = []*articleTagListItemView
 
 type articleTagListItemView struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	Count int    `json:"count"`
 }

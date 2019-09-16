@@ -276,9 +276,12 @@ func (p *GinRouterProvider) GetAllArticleTags(c *gin.Context) {
 }
 
 func (p *GinRouterProvider) tagListViewToJSON(views []*model.TagView) articleTagListView {
-	tags := make([]articleTagListItemView, len(views), len(views))
-	for i, tag := range views {
-		tags[i].Name = tag.Name()
+	tags := make([]*articleTagListItemView, len(views), len(views))
+	for i := range views {
+		tags[i] = &articleTagListItemView{
+			Name:  views[i].Name(),
+			Count: views[i].Count(),
+		}
 	}
 	return tags
 }
