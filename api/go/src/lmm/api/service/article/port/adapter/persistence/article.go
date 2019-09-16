@@ -224,7 +224,7 @@ func (s *ArticleDataStore) viewArticlesFilteredByTag(tx transaction.Transaction,
 }
 
 func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.TagView, error) {
-	q := datastore.NewQuery(dsUtil.ArticleTagKind).Project("Name").Order("Name").Distinct()
+	q := datastore.NewQuery(dsUtil.ArticleTagKind).Project("Name").DistinctOn("Name").Order("Name")
 
 	var t dsEntity.Tag
 	items := make([]*model.TagView, 0)
@@ -238,7 +238,12 @@ func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.Tag
 		if err != nil {
 			return nil, errors.Wrap(err, "internal error: invalid tag")
 		}
-		items = append(items, model.NewTagView(t.Name))
+		cq := datastore.NewQuery(dsUtil.ArticleTagKind).KeysOnly().Filter("Name =", t.Name)
+		c, err := s.dataStore.Count(tx, cq)
+		if err != nil {
+			return nil, errors.Wrapf(err, "infra: error on counting the number of tag named %s", t.Name)
+		}
+		items = append(items, model.NewTagView(t.Name, c))
 	}
 
 	return items, nil
