@@ -273,6 +273,7 @@ workflows:
           name: dev_api_datastore_migration
           env: DEV
           work_dir: *api_wd
+          <<: *only_dev_branch
           requires:
             - api_test
       - datastore_update_indexes:
@@ -330,6 +331,11 @@ workflows:
             --API_URL_BROWSER ${PROD_API_URL_BROWSER}
           env: PROD
           docker_image: node:10.16.0-alpine
+          <<: *only_master_branch
+      - datastore_migration:
+          name: prod_api_datastore_migration
+          env: PROD
+          work_dir: *api_wd
           <<: *only_master_branch
       - datastore_update_indexes:
           name: prod_api_datastore_update_indexes
