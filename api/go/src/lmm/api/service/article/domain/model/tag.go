@@ -46,15 +46,24 @@ func validateTagName(s string) (string, error) {
 
 // TagView is a model used to view tag
 type TagView struct {
-	name string
+	name  string
+	count int
 }
 
 // NewTagView creates a new TagView
-func NewTagView(name string) *TagView {
-	return &TagView{name: name}
+func NewTagView(name string, count int) *TagView {
+	return &TagView{
+		name:  name,
+		count: count,
+	}
 }
 
 // Name returns tag name
 func (v *TagView) Name() string {
 	return v.name
+}
+
+// Count returns the number of tag which named v.Name
+func (v *TagView) Count() int {
+	return v.count
 }
