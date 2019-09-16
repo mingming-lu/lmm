@@ -8,6 +8,7 @@ import (
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/article/domain"
 	"lmm/api/service/article/domain/model"
+	dsEntity "lmm/api/service/article/port/adapter/persistence/internal/datastore"
 
 	"cloud.google.com/go/datastore"
 	"github.com/pkg/errors"
@@ -42,18 +43,6 @@ func (s *ArticleDataStore) NextID(tx transaction.Transaction, authorID int64) (*
 	return model.NewArticleID(keys[0].Encode()), nil
 }
 
-type article struct {
-	Title        string    `datastore:"Title"`
-	Body         string    `datastore:"Body,noindex"`
-	CreatedAt    time.Time `datastore:"CreatedAt"`
-	LastModified time.Time `datastore:"LastModified,noindex"`
-}
-
-type tag struct {
-	Name  string `datastore:"Name"`
-	Order int    `datastore:"Order"`
-}
-
 // Save saves article into datastore
 func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article) error {
 	articleKey := dsUtil.MustKey(model.ID().String())
@@ -61,7 +50,7 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 	dstx := dsUtil.MustTransaction(tx)
 
 	// save article
-	if _, err := dstx.Mutate(datastore.NewUpsert(articleKey, &article{
+	if _, err := dstx.Mutate(datastore.NewUpsert(articleKey, &dsEntity.Article{
 		Title:        model.Content().Text().Title(),
 		Body:         model.Content().Text().Body(),
 		CreatedAt:    model.CreatedAt(),
@@ -83,10 +72,10 @@ func (s *ArticleDataStore) Save(tx transaction.Transaction, model *model.Article
 	}
 
 	tagKeys = tagKeys[:0]
-	tags := make([]*tag, len(model.Content().Tags()), len(model.Content().Tags()))
+	tags := make([]*dsEntity.Tag, len(model.Content().Tags()), len(model.Content().Tags()))
 	for i, model := range model.Content().Tags() {
 		tagKeys = append(tagKeys, datastore.IncompleteKey(dsUtil.ArticleTagKind, articleKey))
-		tags[i] = &tag{Name: model.Name(), Order: int(model.Order())}
+		tags[i] = &dsEntity.Tag{Name: model.Name(), Order: int(model.Order())}
 	}
 
 	// save all tags
@@ -104,13 +93,13 @@ func (s *ArticleDataStore) FindByID(tx transaction.Transaction, id *model.Articl
 	}
 
 	dsTx := dsUtil.MustTransaction(tx)
-	data := article{}
+	data := dsEntity.Article{}
 	if err := dsTx.Get(articleKey, &data); err != nil {
 		return nil, errors.Wrap(domain.ErrNoSuchArticle, err.Error())
 	}
 
 	fetchTagsQuery := datastore.NewQuery(dsUtil.ArticleTagKind).Ancestor(articleKey).Transaction(dsTx)
-	var tags []*tag
+	var tags []*dsEntity.Tag
 	if _, err := s.dataStore.GetAll(tx, fetchTagsQuery, &tags); err != nil {
 		return nil, errors.Wrap(err, "failed to get article tags")
 	}
@@ -139,16 +128,19 @@ func (s *ArticleDataStore) Remove(tx transaction.Transaction, id *model.ArticleI
 	panic("not implemented")
 }
 
-type articleItem struct {
-	Title     string `datastore:"Title"`
-	CreatedAt int64  `datastore:"CreatedAt"`
-}
-
 func (s *ArticleDataStore) ViewArticle(tx transaction.Transaction, id string) (*model.Article, error) {
 	return s.FindByID(tx, model.NewArticleID(id))
 }
 
 func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page int, filter *model.ArticlesFilter) (*model.ArticleListView, error) {
+	if filter != nil && filter.Tag != "" {
+		return s.viewArticlesFilteredByTag(tx, count, page, filter.Tag)
+	}
+
+	return s.viewAllArticles(tx, count, page)
+}
+
+func (s *ArticleDataStore) viewAllArticles(tx transaction.Transaction, count, page int) (*model.ArticleListView, error) {
 	counting := datastore.NewQuery(dsUtil.ArticleKind)
 	paging := datastore.NewQuery(dsUtil.ArticleKind).Project("__key__", "Title", "CreatedAt").Order("-CreatedAt").Limit(count + 1).Offset((page - 1) * count)
 
@@ -157,7 +149,7 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 		return nil, errors.Wrap(err, "failed to get total number of articles")
 	}
 
-	var entities []*articleItem
+	var entities []*dsEntity.ArticleItem
 	keys, err := s.dataStore.GetAll(tx, paging, &entities)
 	if err != nil {
 		return nil, errors.Wrap(err, "internal error")
@@ -182,10 +174,54 @@ func (s *ArticleDataStore) ViewArticles(tx transaction.Transaction, count, page 
 	return model.NewArticleListView(items, page, count, total, hasNextPage), nil
 }
 
+func (s *ArticleDataStore) viewArticlesFilteredByTag(tx transaction.Transaction, count, page int, tag string) (*model.ArticleListView, error) {
+	dstx := dsUtil.MustTransaction(tx)
+
+	counting := datastore.NewQuery(dsUtil.ArticleTagKind).Filter("Name =", tag)
+	paging := datastore.NewQuery(dsUtil.ArticleTagKind).Filter("Name =", tag).KeysOnly().Order("-CreatedAt").Limit(count - 1).Offset((page - 1) * count)
+
+	total, err := s.dataStore.Count(tx, counting)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get total number of articles")
+	}
+
+	keys, err := s.dataStore.GetAll(tx, paging, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to count tags")
+	}
+
+	articleKeys := make([]*datastore.Key, len(keys))
+	for i := range keys {
+		articleKeys[i] = keys[i].Parent
+	}
+
+	articles := make([]*dsEntity.Article, len(keys))
+	if err := dstx.GetMulti(articleKeys, articles); err != nil {
+		return nil, errors.Wrap(err, "failed to get articles")
+	}
+
+	items := make([]*model.ArticleListViewItem, len(articles), len(articles))
+	for i := range items {
+		id := model.NewArticleID(keys[i].Encode())
+		m, err := model.NewArticleListViewItem(id, articles[i].Title, articles[i].CreatedAt)
+		if err != nil {
+			return nil, errors.Wrap(err, "internal error")
+		}
+		items[i] = m
+	}
+
+	view := model.NewArticleListView(items, page, count, total, false)
+	if view.Total() == 0 {
+		return view, nil
+	}
+
+	return view, nil
+}
+
 func (s *ArticleDataStore) ViewAllTags(tx transaction.Transaction) ([]*model.TagView, error) {
 	q := datastore.NewQuery(dsUtil.ArticleTagKind).Project("Name").Order("Name").Distinct()
 
-	var t tag
+	var t dsEntity.Tag
 	items := make([]*model.TagView, 0)
 
 	iter := s.dataStore.Run(tx, q)
