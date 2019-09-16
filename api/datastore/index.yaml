@@ -4,6 +4,11 @@ indexes:
   - name: "CreatedAt"
     direction: desc
   - name: "Title"
+- kind: "ArticleTag"
+  properties:
+  - name: "Name"
+  - name: "CreatedAt"
+    direction: desc
 - kind: "Asset"
   properties:
   - name: "Type"
