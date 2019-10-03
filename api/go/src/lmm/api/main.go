@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -39,11 +38,10 @@ var (
 	pubsubClient *pubsub.Client
 )
 
-func init() {
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+var assetBucketName = os.Getenv("ASSET_BUCKET_NAME")
 
-	eg, egCtx := errgroup.WithContext(timeoutCtx)
+func initialze(c context.Context) func() {
+	eg, egCtx := errgroup.WithContext(c)
 	eg.Go(func() (err error) {
 		gsClient, err = storage.NewClient(egCtx)
 		return err
@@ -53,20 +51,27 @@ func init() {
 		return err
 	})
 	eg.Go(func() (err error) {
-		pubsubClient, err = pubsub.NewClient(timeoutCtx, os.Getenv("PUBSUB_PROJECT_ID"))
+		pubsubClient, err = pubsub.NewClient(c, os.Getenv("PUBSUB_PROJECT_ID"))
 		return err
 	})
 
 	if err := eg.Wait(); err != nil {
-		fmt.Fprintf(os.Stderr, "%#v", err)
-		os.Exit(1)
+		panic(err)
+	}
+
+	return func() {
+		dsClient.Close()
+		gsClient.Close()
+		pubsubClient.Close()
 	}
 }
 
 func main() {
-	defer dsClient.Close()
-	defer gsClient.Close()
-	defer pubsubClient.Close()
+	initCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	close := initialze(initCtx)
+	defer close()
 
 	// user
 	userRepo := userStorage.NewUserDataStore(dsClient)
@@ -85,8 +90,14 @@ func main() {
 	articleUI := articleUI.NewGinRouterProvider(articleRepo, articleRepo, articleRepo)
 
 	// asset
-	assetRepo := assetStore.NewAssetDataStore(dsClient)
-	assetStorage := assetStore.NewGCSUploader(gsClient)
+	assetRepo, err := assetStore.NewAssetDataStore(initCtx, dsClient, gsClient.Bucket(assetBucketName))
+	if err != nil {
+		panic(err)
+	}
+	assetStorage, err := assetStore.NewGCSUploader(initCtx, gsClient.Bucket(assetBucketName))
+	if err != nil {
+		panic(err)
+	}
 	assetUsecase := assetApp.New(assetRepo, assetStorage, assetRepo)
 	assetUI := assetUI.NewGinRouterProvider(assetUsecase)
 
