@@ -7,11 +7,11 @@ references:
         only:
           - /^develop$/
 
-  only_master_branch: &only_master_branch
+  only_release_branch: &only_release_branch
     filters:
       branches:
         only:
-          - /^master$/
+          - /^release$/
 
   google_cloud_sdk: &google_cloud_sdk
     docker:
@@ -310,10 +310,10 @@ workflows:
           env: DEV
           deploy_command: make deploy/on_user_registered
           <<: *only_dev_branch
-      # ------------- prod -------------
+      # ------------- release -------------
       - hold:
           type: approval
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - api_test
       - gae_node_build_and_deploy_nuxt:
@@ -326,7 +326,7 @@ workflows:
             --API_URL_BROWSER ${PROD_API_URL_BROWSER}
           docker_image: node:10.16.0-alpine
           universal_mode: true
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - hold
       - gae_node_build_and_deploy_nuxt:
@@ -338,21 +338,21 @@ workflows:
             --API_URL_BROWSER ${PROD_API_URL_BROWSER}
           env: PROD
           docker_image: node:10.16.0-alpine
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - hold
       - datastore_migration:
           name: prod_api_datastore_migration
           env: PROD
           work_dir: *api_wd
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - hold
       - datastore_update_indexes:
           name: prod_api_datastore_update_indexes
           env: PROD
           index_file_dir: api/datastore
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - prod_api_datastore_migration
       - gae_deploy_gin:
@@ -369,14 +369,14 @@ workflows:
             --LMM_API_TOKEN_KEY ${PROD_LMM_API_TOKEN_KEY}
             --LMM_DOMAIN ${PROD_LMM_DOMAIN}
           env: PROD
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - prod_api_datastore_update_indexes
       - gae_deploy_dispatch:
           name: prod_update_gae_dispatch
           env: PROD
           workdir: gateway/appengine
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - prod_deploy_api
             - prod_deploy_app
@@ -385,13 +385,13 @@ workflows:
           name: prod_deploy_on_assert_uploaded_subscriber
           env: PROD
           deploy_command: make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${PROD_ASSET_BUCKET_NAME}
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - hold
       - gcfunctions_deploy:
           name: prod_deploy_on_user_registered_subscriber
           env: PROD
           deploy_command: make deploy/on_user_registered
-          <<: *only_master_branch
+          <<: *only_release_branch
           requires:
             - hold
