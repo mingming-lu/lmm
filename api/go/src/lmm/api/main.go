@@ -39,12 +39,13 @@ var (
 )
 
 var config = struct {
-	APITokenKey        string `env:"LMM_API_TOKEN_KEY,required"`
-	AssetBucketName    string `env:"ASSET_BUCKET_NAME,required"`
-	DataStorePorjectID string `env:"DATASTORE_PROJECT_ID,required"`
-	Domain             string `env:"LMM_DOMAIN"`
-	PubsubProjectID    string `env:"PUBSUB_PROJECT_ID,required"`
-	ProjectID          string `env:"GCP_PROJECT_ID"`
+	APITokenKey        string        `env:"LMM_API_TOKEN_KEY,required"`
+	AuthExpire         time.Duration `env:"LMM_API_AUTH_EXPIRE,default=24h"`
+	AssetBucketName    string        `env:"ASSET_BUCKET_NAME,required"`
+	DataStorePorjectID string        `env:"DATASTORE_PROJECT_ID,required"`
+	Domain             string        `env:"LMM_DOMAIN"`
+	PubsubProjectID    string        `env:"PUBSUB_PROJECT_ID,required"`
+	ProjectID          string        `env:"GCP_PROJECT_ID"`
 }{}
 
 func initialze(c context.Context) func() {
@@ -87,7 +88,7 @@ func main() {
 	userPub := userMessaging.NewUserEventPublisher(pubsubClient)
 	userAppService := userApp.NewService(
 		&userUtil.BcryptService{},
-		userUtil.NewCFBTokenService(config.APITokenKey, 24*time.Hour),
+		userUtil.NewCFBTokenService(config.APITokenKey, config.AuthExpire),
 		userRepo,
 		userRepo,
 		userPub,
