@@ -71,7 +71,13 @@ func main() {
 	// user
 	userRepo := userStorage.NewUserDataStore(dsClient)
 	userPub := userMessaging.NewUserEventPublisher(pubsubClient)
-	userAppService := userApp.NewService(&userUtil.BcryptService{}, &userUtil.CFBTokenService{}, userRepo, userRepo, userPub)
+	userAppService := userApp.NewService(
+		&userUtil.BcryptService{},
+		userUtil.NewCFBTokenService(os.Getenv("LMM_API_TOKEN_KEY"), 24*time.Hour),
+		userRepo,
+		userRepo,
+		userPub,
+	)
 	userUI := userUI.NewGinRouterProvider(userAppService)
 
 	// article
