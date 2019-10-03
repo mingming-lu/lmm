@@ -2,8 +2,8 @@ package persistence
 
 import (
 	"context"
+	"fmt"
 	"io"
-	"os"
 
 	"lmm/api/service/asset/usecase"
 
@@ -12,22 +12,22 @@ import (
 )
 
 type GCSUploader struct {
-	gcsClient *storage.Client
-	bucket    *storage.BucketHandle
+	bucketName string
+	bucket     *storage.BucketHandle
 }
 
-var (
-	bucketName    = os.Getenv("ASSET_BUCKET_NAME")
-	publicURLBase = "https://storage.googleapis.com/" + bucketName + "/"
-)
+const templatePublicURL = "https://storage.googleapis.com/%s/%s"
 
-func NewGCSUploader(client *storage.Client) *GCSUploader {
-	bucket := client.Bucket(bucketName)
+func NewGCSUploader(c context.Context, bh *storage.BucketHandle) (*GCSUploader, error) {
+	attr, err := bh.Attrs(c)
+	if err != nil {
+		return nil, err
+	}
 
 	return &GCSUploader{
-		gcsClient: client,
-		bucket:    bucket,
-	}
+		bucketName: attr.Name,
+		bucket:     bh,
+	}, nil
 }
 
 func (uploader *GCSUploader) Upload(c context.Context, asset *usecase.AssetToUpload) (string, error) {
@@ -47,5 +47,5 @@ func (uploader *GCSUploader) Upload(c context.Context, asset *usecase.AssetToUpl
 		return "", errors.Wrap(err, "failed to close file reader")
 	}
 
-	return publicURLBase + asset.Filename, nil
+	return fmt.Sprintf(templatePublicURL, uploader.bucketName, asset.Filename), nil
 }

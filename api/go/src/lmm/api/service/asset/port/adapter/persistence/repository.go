@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"time"
 
@@ -10,22 +11,34 @@ import (
 	"lmm/api/service/asset/usecase"
 
 	"cloud.google.com/go/datastore"
+	"cloud.google.com/go/storage"
 	"github.com/pkg/errors"
 	"google.golang.org/api/iterator"
 )
 
-var testAssetRepository usecase.AssetRepository = &AssetDataStore{}
+var _ usecase.AssetRepository = &AssetDataStore{}
 
 type AssetDataStore struct {
 	dataStore *datastore.Client
 	transaction.Manager
+	gcsBucketName string
 }
 
-func NewAssetDataStore(dsStore *datastore.Client) *AssetDataStore {
-	return &AssetDataStore{
-		dataStore: dsStore,
-		Manager:   dsUtil.NewTransactionManager(dsStore),
+func NewAssetDataStore(
+	c context.Context,
+	dsStore *datastore.Client,
+	gcsBucket *storage.BucketHandle,
+) (*AssetDataStore, error) {
+	attr, err := gcsBucket.Attrs(c)
+	if err != nil {
+		return nil, err
 	}
+
+	return &AssetDataStore{
+		gcsBucketName: attr.Name,
+		dataStore:     dsStore,
+		Manager:       dsUtil.NewTransactionManager(dsStore),
+	}, nil
 }
 
 type asset struct {
@@ -161,7 +174,7 @@ Iteration:
 
 		photos = append(photos, &usecase.Photo{
 			ID:   key.Encode(),
-			URL:  publicURLBase + photo.Filename,
+			URL:  s.GetPublicURL(c, photo.Filename),
 			Tags: tags,
 		})
 	}
@@ -175,7 +188,7 @@ Iteration:
 }
 
 func (s *AssetDataStore) GetPublicURL(c context.Context, filename string) string {
-	return publicURLBase + filename
+	return fmt.Sprintf(templatePublicURL, s.gcsBucketName, filename)
 }
 
 func (s *AssetDataStore) GetTagsByPhotoID(c context.Context, id *usecase.AssetID) ([]string, error) {

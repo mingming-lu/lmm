@@ -3,7 +3,6 @@ package middleware
 import (
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -11,11 +10,9 @@ import (
 )
 
 func TestCORS(t *testing.T) {
-	os.Setenv("GCP_PROJECT_ID", "appengine-id")
-
 	t.Run("GAE", func(t *testing.T) {
 		router := gin.New()
-		router.Use(CORS(""))
+		router.Use(CORS("", "appengine-id"))
 		router.POST("/ping", func(c *gin.Context) {
 			c.String(http.StatusOK, "pong")
 		})
@@ -70,7 +67,7 @@ func TestCORS(t *testing.T) {
 
 	t.Run("CustomDomain", func(t *testing.T) {
 		router := gin.New()
-		router.Use(CORS("example.com"))
+		router.Use(CORS("example.com", ""))
 		router.POST("/ping", func(c *gin.Context) {
 			c.String(http.StatusOK, "pong")
 		})

@@ -9,6 +9,7 @@ import (
 
 	"lmm/api/clock"
 	"lmm/api/pkg/pubsub/pubsubtest"
+	testUtil "lmm/api/pkg/testing"
 	"lmm/api/pkg/transaction"
 	"lmm/api/service/user/application/command"
 	"lmm/api/service/user/domain"
@@ -89,7 +90,10 @@ func TestMain(m *testing.M) {
 	repo := &InmemoryUserRepository{memory: make(map[model.UserID]*model.User)}
 	pubsubClient := pubsubtest.NewClient()
 	pub := messaging.NewUserEventPublisher(pubsubClient)
-	testAppService = NewService(&service.BcryptService{}, &service.CFBTokenService{}, repo, repo, pub)
+	testAppService = NewService(
+		&service.BcryptService{},
+		testUtil.TokenService,
+		repo, repo, pub)
 	code := m.Run()
 	pubsubClient.Close()
 	os.Exit(code)
