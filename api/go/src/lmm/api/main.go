@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net/http"
-	"os"
 	"time"
 
 	"lmm/api/pkg/http/middleware"
@@ -12,6 +11,7 @@ import (
 	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 	"github.com/gin-gonic/gin"
+	"github.com/proproto/goenv"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/appengine"
 
@@ -38,20 +38,29 @@ var (
 	pubsubClient *pubsub.Client
 )
 
-var assetBucketName = os.Getenv("ASSET_BUCKET_NAME")
+var config = struct {
+	APITokenKey        string `env:"LMM_API_TOKEN_KEY,required"`
+	AssetBucketName    string `env:"ASSET_BUCKET_NAME,required"`
+	DataStorePorjectID string `env:"DATASTORE_PROJECT_ID,required"`
+	Domain             string `env:"LMM_DOMAIN"`
+	PubsubProjectID    string `env:"PUBSUB_PROJECT_ID,required"`
+	ProjectID          string `env:"GCP_PROJECT_ID"`
+}{}
 
 func initialze(c context.Context) func() {
+	goenv.MustBind(&config)
+
 	eg, egCtx := errgroup.WithContext(c)
 	eg.Go(func() (err error) {
 		gsClient, err = storage.NewClient(egCtx)
 		return err
 	})
 	eg.Go(func() (err error) {
-		dsClient, err = datastore.NewClient(egCtx, os.Getenv("DATASTORE_PROJECT_ID"))
+		dsClient, err = datastore.NewClient(egCtx, config.DataStorePorjectID)
 		return err
 	})
 	eg.Go(func() (err error) {
-		pubsubClient, err = pubsub.NewClient(c, os.Getenv("PUBSUB_PROJECT_ID"))
+		pubsubClient, err = pubsub.NewClient(c, config.PubsubProjectID)
 		return err
 	})
 
@@ -78,7 +87,7 @@ func main() {
 	userPub := userMessaging.NewUserEventPublisher(pubsubClient)
 	userAppService := userApp.NewService(
 		&userUtil.BcryptService{},
-		userUtil.NewCFBTokenService(os.Getenv("LMM_API_TOKEN_KEY"), 24*time.Hour),
+		userUtil.NewCFBTokenService(config.APITokenKey, 24*time.Hour),
 		userRepo,
 		userRepo,
 		userPub,
@@ -90,11 +99,11 @@ func main() {
 	articleUI := articleUI.NewGinRouterProvider(articleRepo, articleRepo, articleRepo)
 
 	// asset
-	assetRepo, err := assetStore.NewAssetDataStore(initCtx, dsClient, gsClient.Bucket(assetBucketName))
+	assetRepo, err := assetStore.NewAssetDataStore(initCtx, dsClient, gsClient.Bucket(config.AssetBucketName))
 	if err != nil {
 		panic(err)
 	}
-	assetStorage, err := assetStore.NewGCSUploader(initCtx, gsClient.Bucket(assetBucketName))
+	assetStorage, err := assetStore.NewGCSUploader(initCtx, gsClient.Bucket(config.AssetBucketName))
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +111,7 @@ func main() {
 	assetUI := assetUI.NewGinRouterProvider(assetUsecase)
 
 	router := gin.New()
-	router.Use(middleware.CORS(os.Getenv("LMM_DOMAIN")), userUI.BearerAuth)
+	router.Use(middleware.CORS(config.Domain, config.ProjectID), userUI.BearerAuth)
 
 	userUI.Provide(router)
 	articleUI.Provide(router)
