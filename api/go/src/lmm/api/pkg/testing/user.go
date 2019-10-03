@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"regexp"
 	"time"
 
@@ -20,7 +19,7 @@ import (
 
 var (
 	// TokenService uses CFBTokenService as default
-	TokenService = service.NewCFBTokenService(os.Getenv("LMM_API_TOKEN_KEY"), 1*time.Minute)
+	TokenService = service.NewCFBTokenService(uuidutil.NewUUID(), 1*time.Minute)
 
 	// PasswordService uses BscryptService as default
 	PasswordService = &service.BcryptService{}

@@ -2,6 +2,7 @@ package service
 
 import (
 	"testing"
+	"time"
 
 	"lmm/api/util/uuidutil"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func TestCFBTokenService(t *testing.T) {
-	cfb := &CFBTokenService{}
+	cfb := NewCFBTokenService(uuidutil.NewUUID(), time.Minute)
 
 	token := uuidutil.NewUUID()
 
