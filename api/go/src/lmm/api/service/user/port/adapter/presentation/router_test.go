@@ -16,6 +16,7 @@ import (
 	httpUtil "lmm/api/pkg/http"
 	jsonUtil "lmm/api/pkg/json"
 	"lmm/api/pkg/pubsub/pubsubtest"
+	testUtil "lmm/api/pkg/testing"
 	"lmm/api/service/user/application"
 	"lmm/api/service/user/domain"
 	"lmm/api/service/user/domain/model"
@@ -47,7 +48,13 @@ func TestMain(m *testing.M) {
 
 	userRepo := persistence.NewUserDataStore(dataStore)
 	userPub := messaging.NewUserEventPublisher(pubsubClient)
-	userAppService := application.NewService(&service.BcryptService{}, &service.CFBTokenService{}, userRepo, userRepo, userPub)
+	userAppService := application.NewService(
+		&service.BcryptService{},
+		testUtil.TokenService,
+		userRepo,
+		userRepo,
+		userPub,
+	)
 	provider = NewGinRouterProvider(userAppService)
 	provider.Provide(router)
 

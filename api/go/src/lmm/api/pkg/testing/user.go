@@ -19,7 +19,7 @@ import (
 
 var (
 	// TokenService uses CFBTokenService as default
-	TokenService = &service.CFBTokenService{}
+	TokenService = service.NewCFBTokenService(uuidutil.NewUUID(), 1*time.Minute)
 
 	// PasswordService uses BscryptService as default
 	PasswordService = &service.BcryptService{}

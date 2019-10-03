@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"regexp"
 	"time"
 
@@ -12,14 +11,10 @@ import (
 )
 
 // CORS middleware
-func CORS(customDomain string) gin.HandlerFunc {
+func CORS(customDomain, projectID string) gin.HandlerFunc {
 	var re *regexp.Regexp
 	if customDomain == "" {
-		gaeProjectID := os.Getenv("GCP_PROJECT_ID")
-		if gaeProjectID == "" {
-			panic("GCP_PROJECT_ID needed")
-		}
-		pattern := fmt.Sprintf(`^https://(.+-dot-)*%s.appspot\.com$`, gaeProjectID)
+		pattern := fmt.Sprintf(`^https://(.+-dot-)*%s.appspot\.com$`, projectID)
 		re = regexp.MustCompile(pattern)
 	} else {
 		pattern := fmt.Sprintf(`^https://(.+\.)*%s$`, regexp.QuoteMeta(customDomain))

@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"time"
 
@@ -18,33 +17,26 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	tokenSecretKey = []byte(os.Getenv("LMM_API_TOKEN_KEY"))
-	defaultExpire  = int64(86400)
-)
-
-func init() {
-	if len(tokenSecretKey) == 0 {
-		panic("token key not set")
+// NewTokenService returns a default token service implementation
+func NewCFBTokenService(secretKey string, expire time.Duration) model.TokenService {
+	return &cfbTokenService{
+		secretKey: []byte(secretKey),
+		expireSec: int64(expire.Seconds()),
 	}
 }
 
-// NewTokenService returns a default token service implementation
-func NewTokenService() *CFBTokenService {
-	return &CFBTokenService{}
+type cfbTokenService struct {
+	secretKey []byte
+	expireSec int64
 }
 
-type CFBTokenService struct{}
-
-var testTokenService model.TokenService = &CFBTokenService{}
-
-func (s *CFBTokenService) Encrypt(rawToken string) (*model.AccessToken, error) {
-	expire := time.Now().Unix() + defaultExpire
+func (s *cfbTokenService) Encrypt(rawToken string) (*model.AccessToken, error) {
+	expire := time.Now().Unix() + s.expireSec
 
 	token := fmt.Sprintf("%d:%s", expire, rawToken)
 	b := []byte(token)
 
-	block, err := aes.NewCipher(tokenSecretKey)
+	block, err := aes.NewCipher(s.secretKey)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -63,13 +55,13 @@ func (s *CFBTokenService) Encrypt(rawToken string) (*model.AccessToken, error) {
 	return model.NewAccessToken(rawToken, hashed, time.Unix(expire, 0)), nil
 }
 
-func (s *CFBTokenService) Decrypt(hashed string) (*model.AccessToken, error) {
+func (s *cfbTokenService) Decrypt(hashed string) (*model.AccessToken, error) {
 	tokenBytes, err := base64.URLEncoding.DecodeString(hashed)
 	if err != nil {
 		return nil, err
 	}
 
-	block, err := aes.NewCipher(tokenSecretKey)
+	block, err := aes.NewCipher(s.secretKey)
 	if err != nil {
 		panic(err)
 	}
