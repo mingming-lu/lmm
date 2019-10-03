@@ -311,11 +311,6 @@ workflows:
           deploy_command: make deploy/on_user_registered
           <<: *only_dev_branch
       # ------------- release -------------
-      - hold:
-          type: approval
-          <<: *only_release_branch
-          requires:
-            - api_test
       - gae_node_build_and_deploy_nuxt:
           name: prod_deploy_app
           service_name: app
@@ -327,8 +322,6 @@ workflows:
           docker_image: node:10.16.0-alpine
           universal_mode: true
           <<: *only_release_branch
-          requires:
-            - hold
       - gae_node_build_and_deploy_nuxt:
           name: prod_deploy_manager
           service_name: manager
@@ -339,15 +332,13 @@ workflows:
           env: PROD
           docker_image: node:10.16.0-alpine
           <<: *only_release_branch
-          requires:
-            - hold
       - datastore_migration:
           name: prod_api_datastore_migration
           env: PROD
           work_dir: *api_wd
           <<: *only_release_branch
           requires:
-            - hold
+            - api_test
       - datastore_update_indexes:
           name: prod_api_datastore_update_indexes
           env: PROD
@@ -386,12 +377,8 @@ workflows:
           env: PROD
           deploy_command: make deploy/on_asset_uploaded SUBSCRIBE_BUCKET=${PROD_ASSET_BUCKET_NAME}
           <<: *only_release_branch
-          requires:
-            - hold
       - gcfunctions_deploy:
           name: prod_deploy_on_user_registered_subscriber
           env: PROD
           deploy_command: make deploy/on_user_registered
           <<: *only_release_branch
-          requires:
-            - hold
