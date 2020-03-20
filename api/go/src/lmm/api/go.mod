@@ -3,7 +3,7 @@ module lmm/api
 require (
 	cloud.google.com/go v0.39.0
 	github.com/gin-contrib/cors v1.3.0
-	github.com/gin-gonic/gin v1.4.0
+	github.com/gin-gonic/gin v1.5.0
 	github.com/google/uuid v1.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/proproto/goenv v0.1.2
