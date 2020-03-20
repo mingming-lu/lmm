@@ -22,7 +22,7 @@
     "babel-eslint": "^8.2.1",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^3.6.0",
-    "eslint-loader": "^2.2.1",
+    "eslint-loader": "^3.0.3",
     "eslint-plugin-prettier": "2.6.2",
     "eslint-plugin-vue": "^4.0.0",
     "highlight.js": "^9.15.10",
