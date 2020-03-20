@@ -1,7 +1,7 @@
 version: 1
 update_configs:
   - package_manager: "go:modules"
-    directory: "/api"
+    directory: "/api/go/src/lmm/api"
     update_schedule: "daily"
   - package_manager: "javascript"
     directory: "/app"
