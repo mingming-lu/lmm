@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.9.5",
-    "cross-env": "^5.2.0",
+    "cross-env": "^7.0.2",
     "highlight.js": "^9.18.1",
     "markdown-it": "^10.0.0",
     "nuxt": "^2.11.0"
