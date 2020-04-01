@@ -28,7 +28,7 @@
     "highlight.js": "^9.15.10",
     "markdown-it": "^10.0.0",
     "nodemon": "^2.0.2",
-    "prettier": "1.14.3",
+    "prettier": "2.0.2",
     "stylus": "^0.54.7",
     "stylus-loader": "^3.0.2"
   }
