@@ -14,7 +14,7 @@ require (
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
 	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
-	google.golang.org/api v0.5.0
+	google.golang.org/api v0.22.0
 	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20190530194941-fb225487d101 // indirect
 	google.golang.org/grpc v1.21.0
