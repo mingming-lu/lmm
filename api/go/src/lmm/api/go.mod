@@ -1,7 +1,7 @@
 module lmm/api
 
 require (
-	cloud.google.com/go v0.56.0 // indirect
+	cloud.google.com/go v0.57.0
 	cloud.google.com/go/datastore v1.1.0
 	cloud.google.com/go/pubsub v1.2.0
 	cloud.google.com/go/storage v1.6.0
@@ -12,6 +12,11 @@ require (
 	github.com/proproto/goenv v0.2.0
 	github.com/stretchr/testify v1.5.1
 	go.uber.org/zap v1.15.0
+	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550
+	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
+	google.golang.org/api v0.22.0
+	google.golang.org/appengine v1.6.6
+	google.golang.org/grpc v1.29.1
 	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/api v0.5.0
