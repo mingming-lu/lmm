@@ -7,13 +7,10 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/proproto/goenv v0.2.0
-	github.com/stretchr/testify v1.5.1
-	go.uber.org/atomic v1.4.0 // indirect
-	go.uber.org/multierr v1.1.0 // indirect
+	github.com/stretchr/testify v1.6.0
 	go.uber.org/zap v1.15.0
-	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
-	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
-	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
+	golang.org/x/crypto v0.0.0-20190510104115-cbcb75029529
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 	google.golang.org/api v0.5.0
 	google.golang.org/appengine v1.6.5
 	google.golang.org/genproto v0.0.0-20190530194941-fb225487d101 // indirect
