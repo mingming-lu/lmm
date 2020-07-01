@@ -2,7 +2,7 @@ module lmm/api
 
 require (
 	cloud.google.com/go/datastore v1.2.0
-	cloud.google.com/go/pubsub v1.3.1
+	cloud.google.com/go/pubsub v1.4.0
 	cloud.google.com/go/storage v1.10.0
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-gonic/gin v1.6.3
