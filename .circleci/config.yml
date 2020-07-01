@@ -57,9 +57,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - &api_go_mod_cache_key api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "<< parameters.work_dir >>/go.mod" }}-{{ checksum "<< parameters.work_dir >>/go.sum" }}
-            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "<< parameters.work_dir >>/go.mod" }}-
-            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}
+            - &api_go_mod_cache_key api_go_mod-4-{{ checksum "<< parameters.work_dir >>/go.mod" }}-{{ checksum "<< parameters.work_dir >>/go.sum" }}
+            - api_go_mod-4-{{ checksum "<< parameters.work_dir >>/go.mod" }}-
+            - api_go_mod-4-
           paths:
             - &api_go_mod_cache_path /go/pkg/mod
       - run:
