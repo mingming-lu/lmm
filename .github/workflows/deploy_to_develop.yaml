@@ -10,8 +10,6 @@ jobs:
         with:
           ref: master
       - run: |
-          branch="feature/deploy-to-develop-environment-$(date '+%Y%m%d%H%M%S')"
-          git checkout -b $branch
-          hub pull-request --base=develop --head=$branch
+          hub pull-request -m "deploy-to-develop-environment-$(date '+%Y%m%d%H%M%S')" --base=develop --head=master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
