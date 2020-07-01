@@ -57,9 +57,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - &api_go_mod_cache_key api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "<< parameters.work_dir >>/go.mod" }}-{{ checksum "<< parameters.work_dir >>/go.sum" }}
-            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}-{{ checksum "<< parameters.work_dir >>/go.mod" }}-
-            - api_go_mod-{{ .Environment.API_GO_MOD_VERSION }}
+            - &api_go_mod_cache_key api_go_mod-4-{{ checksum "<< parameters.work_dir >>/go.mod" }}-{{ checksum "<< parameters.work_dir >>/go.sum" }}
+            - api_go_mod-4-{{ checksum "<< parameters.work_dir >>/go.mod" }}-
+            - api_go_mod-4-
           paths:
             - &api_go_mod_cache_path /go/pkg/mod
       - run:
@@ -67,10 +67,6 @@ jobs:
           working_directory: << parameters.work_dir >>
           command: |
             go mod download
-      - save_cache:
-          key: *api_go_mod_cache_key
-          paths:
-            - *api_go_mod_cache_path
       - run: dockerize -wait tcp://datastore:8081 -timeout 30s
       - run:
           name: API Go Test
@@ -79,6 +75,10 @@ jobs:
             export LMM_API_TOKEN_KEY=$(cat /proc/sys/kernel/random/uuid | sed 's/-//g')
             mkdir -p /tmp/test-results/api
             gotestsum -f short-verbose --junitfile /tmp/test-results/api/api-tests.xml
+      - save_cache:
+          key: *api_go_mod_cache_key
+          paths:
+            - *api_go_mod_cache_path
       - store_test_results:
           path: /tmp/test-results
 
