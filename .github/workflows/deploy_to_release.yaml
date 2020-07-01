@@ -10,8 +10,6 @@ jobs:
         with:
           ref: develop
       - run: |
-          branch="feature/deploy-to-release-environment-$(date '+%Y%m%d%H%M%S')"
-          git checkout -b $branch
-          hub pull-request --base=release --head=$branch
+          hub pull-request -m "deploy to release environment $(date '+%Y%m%d%H%M%S')" --base=release --head=develop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
