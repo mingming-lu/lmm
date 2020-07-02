@@ -1,0 +1,15 @@
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: develop
+      - run: |
+          hub pull-request -m "deploy to release environment $(date '+%Y%m%d%H%M%S')" --base=release --head=develop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

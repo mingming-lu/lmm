@@ -1,0 +1,15 @@
+on:
+  push:
+    branches:
+      - master
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: master
+      - run: |
+          hub pull-request -m "deploy-to-develop-environment-$(date '+%Y%m%d%H%M%S')" --base=develop --head=master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
