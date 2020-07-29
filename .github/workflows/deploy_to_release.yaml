@@ -10,6 +10,11 @@ jobs:
         with:
           ref: develop
       - run: |
-          hub pull-request -m "deploy to release environment $(date '+%Y%m%d%H%M%S')" --base=release --head=develop
+          hub pr list --base=release --head=develop --format='%U' > /tmp/prs.txt
+          if [[ -z $(cat /tmp/prs.txt) ]]; then
+            hub pull-request -m "deploy to release environment $(date '+%Y%m%d%H%M%S')" --base=release --head=develop
+          else
+            echo "Opening pull request: $(cat /tmp/prs.txt)"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
