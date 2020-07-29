@@ -10,6 +10,11 @@ jobs:
         with:
           ref: master
       - run: |
-          hub pull-request -m "deploy-to-develop-environment-$(date '+%Y%m%d%H%M%S')" --base=develop --head=master
+          hub pr list --base=develop --head=master --format='%U' > /tmp/prs.txt
+          if [[ -z $(cat /tmp/prs.txt) ]]; then
+            hub pull-request -m "deploy-to-develop-environment-$(date '+%Y%m%d%H%M%S')" --base=develop --head=master
+          else
+            echo "Opening pull request: $(cat /tmp/prs.txt)"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
