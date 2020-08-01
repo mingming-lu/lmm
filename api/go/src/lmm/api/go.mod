@@ -15,6 +15,6 @@ require (
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 	google.golang.org/api v0.28.0
 	google.golang.org/appengine v1.6.6
-	google.golang.org/grpc v1.30.0
+	google.golang.org/grpc v1.31.0
 	gopkg.in/go-playground/validator.v8 v8.18.2
 )
