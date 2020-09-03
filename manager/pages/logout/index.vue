@@ -1,5 +1,9 @@
 <template>
-  <p class="text-xs-center"><nuxt-link to="/">Go to home page</nuxt-link></p>
+  <p class="text-xs-center">
+    <nuxt-link to="/">
+      Go to home page
+    </nuxt-link>
+  </p>
 </template>
 
 <script>
