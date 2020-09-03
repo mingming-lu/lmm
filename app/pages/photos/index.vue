@@ -1,10 +1,12 @@
 <template>
   <div
     v-if="isMounted" 
-    class="container">
+    class="container"
+  >
     <div
       v-if="wideMode" 
-      class="content">
+      class="content"
+    >
       <div class="left">
         <div :class="{container: wideMode}">
           <a
@@ -49,25 +51,32 @@
 
     <div
       v-if="!isPageLoaded" 
-      class="center">
+      class="center"
+    >
       <LdsEllipsis class="fade-in" />
     </div>
 
     <div
       v-if="hasNext && isPageLoaded" 
-      class="center">
+      class="center"
+    >
       <br>
       <button
         class="more" 
-        @click.prevent="fetchMorePhotos()">See more&hellip;</button>
+        @click.prevent="fetchMorePhotos()"
+      >
+        See more&hellip;
+      </button>
     </div>
 
     <div
       v-if="!hasNext && isPageLoaded" 
-      class="center">
-      <p class="hint">No more photos.</p>
+      class="center"
+    >
+      <p class="hint">
+        No more photos.
+      </p>
     </div>
-
   </div>
 </template>
 
@@ -102,11 +111,6 @@ export default {
     PhotoItem,
     LdsEllipsis
   },
-  head() {
-    return {
-      title: 'Photos'
-    }
-  },
   asyncData({ $axios, error, query, route }) {
     const cursor = Boolean(query.cursor) ? query.cursor : ''
 
@@ -140,7 +144,6 @@ export default {
       isMounted: false
     }
   },
-  watchQuery: ['page'],
   mounted() {
     window.addEventListener('resize', this.calcIsWideMode)
     this.calcIsWideMode()
@@ -175,7 +178,13 @@ export default {
     calcIsWideMode() {
       this.wideMode = window.innerWidth >= 800
     }
-  }
+  },
+  head() {
+    return {
+      title: 'Photos'
+    }
+  },
+  watchQuery: ['page']
 }
 </script>
 

@@ -1,25 +1,31 @@
 <template>
   <div 
     v-if="isMounted" 
-    class="container">
+    class="container"
+  >
     <!-- Articles -->
     <div
       :class="{ 'desktop': !isMobile, 'mobile': isMobile }"
-      class="posts">
+      class="posts"
+    >
       <div :class="{ 'container': !isMobile }">
         <table v-if="isPageLoaded">
           <tbody>
             <tr
               v-for="article in articles"
-              :key="article.id">
+              :key="article.id"
+            >
               <td>
                 <p class="title">
                   <nuxt-link
                     :to="'/articles/' + article.id"
-                    class="link">{{ article.title }}</nuxt-link>
+                    class="link"
+                  >
+                    {{ article.title }}
+                  </nuxt-link>
                 </p>
                 <p class="post-at">
-                  <i class="far fa-clock"/>
+                  <i class="far fa-clock" />
                   {{ formatted(article.post_at) }}
                 </p>
               </td>
@@ -28,7 +34,8 @@
         </table>
         <div
           v-else
-          class="center">
+          class="center"
+        >
           <LdsEllipsis class="fade-in" />
         </div>
       </div>
@@ -67,7 +74,9 @@
         class="center"
       >
         <div class="center">
-          <p class="hint">No more articles.</p>
+          <p class="hint">
+            No more articles.
+          </p>
         </div>
         <nuxt-link
           v-if="page > 1"
@@ -81,15 +90,16 @@
 
     <div
       v-if="!isMobile"
-      class="nav">
+      class="nav"
+    >
       <!-- Tags -->
       <div class="tags container">
-        <h3><i class="fas fa-hashtag"/>Tags</h3>
+        <h3><i class="fas fa-hashtag" />Tags</h3>
         <p>
           <nuxt-link
             v-for="tag in tags"
-            :class="{active: tag.name === $route.query.tag}"
             :key="tag.name"
+            :class="{active: tag.name === $route.query.tag}"
             :to="buildLinkWithTagQuery(tag.name)"
             class="link tag"
           >
@@ -98,7 +108,6 @@
         </p>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -137,12 +146,6 @@ const buildLinks = (obj, path) => {
 export default {
   components: {
     LdsEllipsis
-  },
-  head() {
-    return {
-      title: 'Articles',
-      link: this.links
-    }
   },
   asyncData({ $axios, error, query, route }) {
     const q = buildURLEncodedString({
@@ -204,7 +207,6 @@ export default {
       isMounted: false
     }
   },
-  watchQuery: ['page', 'perPage', 'tag'],
   mounted() {
     window.addEventListener('resize', this.calcIsMobile)
     this.calcIsMobile()
@@ -233,7 +235,14 @@ export default {
         this.isMobile = newState
       }
     }
-  }
+  },
+  head() {
+    return {
+      title: 'Articles',
+      link: this.links
+    }
+  },
+  watchQuery: ['page', 'perPage', 'tag']
 }
 </script>
 

@@ -3,8 +3,8 @@
     <v-list v-if="articles.length">
       <template v-for="article in articles">
         <v-list-tile
-          :to="`/articles/edit?id=${article.id}`"
           :key="article.id"
+          :to="`/articles/edit?id=${article.id}`"
           nuxt
           exact
         >
@@ -32,11 +32,6 @@
 
 <script>
 export default {
-  head() {
-    return {
-      title: 'Articles list'
-    }
-  },
   asyncData({ $axios }) {
     return $axios.get('/v1/articles?perPage=100').then(res => {
       return {
@@ -44,6 +39,11 @@ export default {
         has_next_page: res.data.has_next_page
       }
     })
+  },
+  head() {
+    return {
+      title: 'Articles list'
+    }
   }
 }
 </script>

@@ -1,9 +1,9 @@
 <template>
   <section class="lds-ellipsis">
-    <section/>
-    <section/>
-    <section/>
-    <section/>
+    <section />
+    <section />
+    <section />
+    <section />
   </section>
 </template>
 

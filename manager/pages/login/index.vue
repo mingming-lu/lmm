@@ -20,7 +20,10 @@
       <v-btn 
         color="accent" 
         type="submit" 
-        @click.prevent="login">Login</v-btn>
+        @click.prevent="login"
+      >
+        Login
+      </v-btn>
     </v-form>
   </v-layout>
 </template>
