@@ -2,18 +2,22 @@
   <footer class="center">
     <a
       href="https://github.com/akinaru-lu"
-      target="_blank">
-      <i class="fab fa-github link"/>
+      target="_blank"
+    >
+      <i class="fab fa-github link" />
     </a>
     <a
       href="https://www.linkedin.com/in/lumingming/"
-      target="_blank">
-      <i class="fab fa-linkedin-in link"/>
+      target="_blank"
+    >
+      <i class="fab fa-linkedin-in link" />
     </a>
-    <p>&copy; 2018-{{ (new Date).getFullYear() }}
+    <p>
+      &copy; 2018-{{ (new Date).getFullYear() }}
       <nuxt-link
         to="/#author"
-        class="link">
+        class="link"
+      >
         <u>Lu Mingming</u>
       </nuxt-link>
     </p>

@@ -19,7 +19,8 @@
     >
       <template 
         slot="selection" 
-        slot-scope="data">
+        slot-scope="data"
+      >
         <v-chip
           close
           @input="removeTag(data.item)"

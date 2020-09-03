@@ -3,8 +3,8 @@
     <v-list>
       <template v-for="item in indices">
         <v-list-tile
-          :to="item.to"
           :key="item.to"
+          :to="item.to"
           nuxt
           exact
         >
@@ -20,11 +20,6 @@
 
 <script>
 export default {
-  head() {
-    return {
-      title: 'Index'
-    }
-  },
   data() {
     return {
       indices: [
@@ -49,6 +44,11 @@ export default {
           description: 'View all users'
         }
       ]
+    }
+  },
+  head() {
+    return {
+      title: 'Index'
     }
   }
 }
