@@ -1,11 +1,11 @@
 <template>
   <div id="app">
-    <Header ref="header"/>
+    <Header ref="header" />
     <nuxt
       id="content"
       :style="{top: `${headerHeight}px`, marginBottom: `${footerHeight}px`}"
     />
-    <Footer ref="footer"/>
+    <Footer ref="footer" />
   </div>
 </template>
 
