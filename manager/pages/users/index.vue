@@ -10,7 +10,8 @@
   >
     <template 
       slot="items" 
-      slot-scope="props">
+      slot-scope="props"
+    >
       <td
         :class="{'primary--text': props.item.name === me}"
         width="40%"
@@ -21,16 +22,19 @@
         <v-flex 
           xs12 
           sm6 
-          d-flex>
+          d-flex
+        >
           <v-select
+            v-model="props.item.role"
             :disabled="props.item.name === me"
             :items="roles"
-            v-model="props.item.role"
             @input="assignUserRole(props.item.name, props.item.role, $event)"
           />
         </v-flex>
       </td>
-      <td width="20%">{{ formattedTime(props.item.registered_date) }}</td>
+      <td width="20%">
+        {{ formattedTime(props.item.registered_date) }}
+      </td>
     </template>
   </v-data-table>
 </template>

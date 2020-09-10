@@ -1,13 +1,15 @@
 <template>
   <v-container grid-list-xl>
-    <v-layout 
-      :row="row" 
-      :column="!row">
+    <v-layout
+      :row="row"
+      :column="!row"
+    >
       <v-flex xs6>
-        <v-text-field 
-          v-model="articleTitle" 
-          label="title" 
-          required/>
+        <v-text-field
+          v-model="articleTitle"
+          label="title"
+          required
+        />
         <v-combobox
           v-model="articleTags"
           :items="tags"
@@ -16,9 +18,10 @@
           clearable
           multiple
         >
-          <template 
-            slot="selection" 
-            slot-scope="data">
+          <template
+            slot="selection"
+            slot-scope="data"
+          >
             <v-chip
               close
               @input="removeTag(data.item)"
@@ -27,18 +30,21 @@
             </v-chip>
           </template>
         </v-combobox>
-        <v-textarea 
-          v-model="articleBody" 
-          label="body" 
-          auto-grow 
-          required/>
+        <v-textarea
+          v-model="articleBody"
+          label="body"
+          auto-grow
+          required
+        />
       </v-flex>
       <v-flex xs6>
         <v-subheader>Article Body Preview</v-subheader>
-        <div 
-          v-hljs 
-          class="mx-3 preview" 
-          v-html="marked(articleBody)"/>
+        <div
+          v-hljs
+          class="mx-3 preview"
+        >
+          {{ marked(articleBody) }}
+        </div>
       </v-flex>
     </v-layout>
     <v-btn
@@ -88,11 +94,6 @@ const marker = new Markdownit({
 })
 
 export default {
-  head() {
-    return {
-      title: 'Edit an article'
-    }
-  },
   asyncData({ $axios, query }) {
     return fetcher($axios).fetch(query.id)
   },
@@ -103,7 +104,6 @@ export default {
   beforeDestroy() {
     window.removeEventListener('resize', this.onResize, { passive: true })
   },
-  watchQuery: ['articleID'],
   methods: {
     marked(text) {
       return marker.render(text)
@@ -140,7 +140,13 @@ export default {
     onResize() {
       this.row = window.innerWidth > 960
     }
-  }
+  },
+  head() {
+    return {
+      title: 'Edit an article'
+    }
+  },
+  watchQuery: ['articleID']
 }
 </script>
 

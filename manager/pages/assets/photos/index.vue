@@ -11,11 +11,13 @@
       <v-card v-if="photos.length">
         <v-container 
           grid-list-sm 
-          fluid>
+          fluid
+        >
           <v-layout 
             row 
             wrap 
-            align-center>
+            align-center
+          >
             <v-flex
               v-for="photo in photos"
               :key="photo.url"
@@ -56,11 +58,6 @@ const fetcher = axios => {
 }
 
 export default {
-  head() {
-    return {
-      title: 'Photos'
-    }
-  },
   asyncData({ $axios }) {
     return fetcher($axios)
       .fetch('TODO: paging')
@@ -101,6 +98,11 @@ export default {
               this.cursor = res.data.next_cursor
             })
         })
+    }
+  },
+  head() {
+    return {
+      title: 'Photos'
     }
   }
 }

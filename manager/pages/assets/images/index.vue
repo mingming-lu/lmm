@@ -11,10 +11,12 @@
       <v-card v-if="images.length">
         <v-container 
           grid-list-sm 
-          fluid>
+          fluid
+        >
           <v-layout 
             row 
-            wrap>
+            wrap
+          >
             <v-flex
               v-for="image in images"
               :key="image.name"
@@ -71,11 +73,6 @@ const fetcher = axios => {
 }
 
 export default {
-  head() {
-    return {
-      title: 'Photos'
-    }
-  },
   asyncData({ $axios }) {
     return fetcher($axios)
       .fetch(1)
@@ -148,6 +145,11 @@ export default {
               this.hasNextPage = res.data.hasNextPage
             })
         })
+    }
+  },
+  head() {
+    return {
+      title: 'Photos'
     }
   }
 }

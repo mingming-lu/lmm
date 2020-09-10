@@ -1,15 +1,18 @@
 <template>
   <header 
     v-if="isMounted" 
-    class="shadow">
+    class="shadow"
+  >
     <nav
       v-if="wideMode"
-      class="top-nav">
+      class="top-nav"
+    >
       <nuxt-link to="/">
         <div class="logo">
           <img
             class="icon"
-            src="/img/logo.png">
+            src="/img/logo.png"
+          >
           明鳴的树洞
         </div>
       </nuxt-link>
@@ -29,24 +32,29 @@
 
     <nav
       v-if="!wideMode"
-      class="drawer-nav">
+      class="drawer-nav"
+    >
       <div ref="drawerNavBar">
         <nuxt-link 
           to=""
           class="toggler container"
-          @click.native="toggleDrawer">
+          @click.native="toggleDrawer"
+        >
           <i
             v-if="!drawerShown"
-            class="fas fa-bars"/>
+            class="fas fa-bars"
+          />
           <i
             v-else
-            class="fas fa-times"/>
+            class="fas fa-times"
+          />
         </nuxt-link><span v-if="!drawerShown">{{ currentRouterName }}</span>
       </div>
       <div
         :class="[drawerShown && !wideMode ? 'drawer-show' : 'drawer-hide']"
         :style="{marginTop: drawerNavBarHeight - 1 + 'px'}"
-        class="drawer">
+        class="drawer"
+      >
         <div class="container">
           <nuxt-link
             v-for="item in items"
@@ -54,8 +62,10 @@
             :to="item.link"
             :class="{'drawer-item-active': currentRouterName === item.name}"
             class="link"
-            @click.native="navigate(item.name)">
-            <p><i :class="item.icon"/>
+            @click.native="navigate(item.name)"
+          >
+            <p>
+              <i :class="item.icon" />
               {{ item.name }}
             </p>
           </nuxt-link>

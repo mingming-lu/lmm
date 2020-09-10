@@ -1,34 +1,44 @@
 <template>
-  <div 
-    v-if="isMounted" 
-    class="container">
+  <div
+    v-if="isMounted"
+    class="container"
+  >
     <!-- Article text -->
-    <div 
-      :class="{ 'left': !isMobile, 'mobile': isMobile }" 
-      class="article">
+    <div
+      :class="{ 'left': !isMobile, 'mobile': isMobile }"
+      class="article"
+    >
       <div :class="{container: !isMobile}">
-        <p class="title">{{ title }}</p>
+        <p class="title">
+          {{ title }}
+        </p>
         <div class="info">
-          <span><i class="far fa-clock"/><span>{{ postAt }}</span></span>
+          <span><i class="far fa-clock" /><span>{{ postAt }}</span></span>
         </div>
-        <div 
-          v-hljs 
-          ref="body" 
-          class="marked text" 
-          v-html="body"/>
-        <p 
-          v-if="postAt !== lastEditedAt" 
-          class="info text-right">Edited at {{ lastEditedAt }}</p>
+        <div
+          ref="body"
+          v-hljs
+          class="marked text"
+        >
+          {{ body }}
+        </div>
+        <p
+          v-if="postAt !== lastEditedAt"
+          class="info text-right"
+        >
+          Edited at {{ lastEditedAt }}
+        </p>
       </div>
     </div>
 
     <div class="nav">
       <!-- Article tags -->
-      <div 
-        v-if="!isMobile" 
-        class="tags">
+      <div
+        v-if="!isMobile"
+        class="tags"
+      >
         <div :class="{container: !isMobile}">
-          <h3><i class="fas fa-hashtag"/>Tags</h3>
+          <h3><i class="fas fa-hashtag" />Tags</h3>
           <p>
             <nuxt-link
               v-for="tag in tags"
@@ -43,22 +53,26 @@
       </div>
 
       <!-- Article chapters -->
-      <div 
-        v-if="!isMobile" 
-        class="chapters">
+      <div
+        v-if="!isMobile"
+        class="chapters"
+      >
         <div :class="{container: !isMobile}">
-          <h3><i class="far fa-bookmark"/>Chapters</h3>
-          <div 
-            ref="progress" 
-            class="progress-bar"/>
-          <p 
-            v-for="subtitle in subtitles" 
-            :key="subtitle.name">
-            <nuxt-link 
-              :to="subtitle.link" 
-              class="link chapter-item" 
-              @click.native="jumpToHash(subtitle.link)">
-              <div v-html="subtitle.name"/>
+          <h3><i class="far fa-bookmark" />Chapters</h3>
+          <div
+            ref="progress"
+            class="progress-bar"
+          />
+          <p
+            v-for="subtitle in subtitles"
+            :key="subtitle.name"
+          >
+            <nuxt-link
+              :to="subtitle.link"
+              class="link chapter-item"
+              @click.native="jumpToHash(subtitle.link)"
+            >
+              <div>{{ subtitle.name }}</div>
             </nuxt-link>
           </p>
         </div>
@@ -74,11 +88,6 @@ import { formattedDateFromTimeStamp } from '~/assets/js/utils'
 export default {
   validate({ params }) {
     return /^[\d\w-]{8,80}$/.test(params.id)
-  },
-  head() {
-    return {
-      title: this.title
-    }
   },
   asyncData({ $axios, error, params }) {
     return $axios
@@ -187,6 +196,11 @@ export default {
           document.getElementById(id).className = 'highlight-dispear-trans'
         }, 500)
       }
+    }
+  },
+  head() {
+    return {
+      title: this.title
     }
   }
 }
