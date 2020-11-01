@@ -13,7 +13,7 @@ require (
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
-	google.golang.org/api v0.29.0
+	google.golang.org/api v0.34.0
 	google.golang.org/appengine v1.6.6
 	google.golang.org/grpc v1.31.1
 	gopkg.in/go-playground/validator.v8 v8.18.2
