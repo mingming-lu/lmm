@@ -16,7 +16,7 @@
     "@nuxtjs/axios": "^5.12.2",
     "cross-env": "^7.0.2",
     "nuxt": "^2.14.4",
-    "vuetify": "^1.5.24"
+    "vuetify": "^2.4.3"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
