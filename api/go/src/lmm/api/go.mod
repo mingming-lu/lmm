@@ -1,7 +1,7 @@
 module lmm/api
 
 require (
-	cloud.google.com/go/datastore v1.2.0
+	cloud.google.com/go/datastore v1.4.0
 	cloud.google.com/go/pubsub v1.6.1
 	cloud.google.com/go/storage v1.10.0
 	github.com/gin-contrib/cors v1.3.0
@@ -12,9 +12,9 @@ require (
 	github.com/stretchr/testify v1.6.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
-	google.golang.org/api v0.29.0
-	google.golang.org/appengine v1.6.6
-	google.golang.org/grpc v1.31.1
+	golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9
+	google.golang.org/api v0.36.0
+	google.golang.org/appengine v1.6.7
+	google.golang.org/grpc v1.34.1
 	gopkg.in/go-playground/validator.v8 v8.18.2
 )
