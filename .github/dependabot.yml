@@ -1,0 +1,74 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/app"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: "@nuxtjs/axios"
+    versions:
+    - 5.12.4
+    - 5.12.5
+  - dependency-name: nuxt
+    versions:
+    - 2.14.12
+  - dependency-name: sass-loader
+    versions:
+    - 10.1.0
+  - dependency-name: nodemon
+    versions:
+    - 2.0.6
+- package-ecosystem: npm
+  directory: "/manager"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: eslint-plugin-vue
+    versions:
+    - 7.4.0
+    - 7.5.0
+  - dependency-name: vuetify
+    versions:
+    - 2.4.0
+    - 2.4.3
+  - dependency-name: "@nuxtjs/axios"
+    versions:
+    - 5.12.4
+    - 5.12.5
+  - dependency-name: nuxt
+    versions:
+    - 2.14.12
+  - dependency-name: stylus-loader
+    versions:
+    - 4.3.1
+  - dependency-name: nodemon
+    versions:
+    - 2.0.6
+- package-ecosystem: gomod
+  directory: "/api/go/src/lmm/api"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: google.golang.org/api
+    versions:
+    - 0.36.0
+    - 0.38.0
+  - dependency-name: google.golang.org/grpc
+    versions:
+    - 1.34.0
+    - 1.35.0
+  - dependency-name: cloud.google.com/go/pubsub
+    versions:
+    - 1.9.1
+  - dependency-name: github.com/google/uuid
+    versions:
+    - 1.1.3
+  - dependency-name: cloud.google.com/go/storage
+    versions:
+    - 1.12.0
+  - dependency-name: cloud.google.com/go/datastore
+    versions:
+    - 1.3.0
