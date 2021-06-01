@@ -24,7 +24,7 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-loader": "^3.0.4",
     "eslint-plugin-prettier": "2.6.2",
-    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-vue": "^7.10.0",
     "highlight.js": "^9.18.3",
     "markdown-it": "^10.0.0",
     "nodemon": "^2.0.4",
