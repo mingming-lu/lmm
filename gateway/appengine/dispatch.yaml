@@ -1,12 +1,12 @@
-dispatch:
-  - url: "lumingming.net/*"
-    service: default
+dispatch: []
+  # - url: "lumingming.net/*"
+  #   service: default
 
-  - url: "www.lumingming.net/*"
-    service: default
+  # - url: "www.lumingming.net/*"
+  #   service: default
 
-  - url: "api.lumingming.net/*"
-    service: api
+  # - url: "api.lumingming.net/*"
+  #   service: api
 
-  - url: "manager.lumingming.net/*"
-    service: manager
+  # - url: "manager.lumingming.net/*"
+  #   service: manager
